@@ -7,6 +7,7 @@
 // @contributor    Xdaast (19.4 FIX)
 // @description    Strategical territory simulator
 // @include        http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
+// @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL      https://openuserjs.org/meta/petui/Tiberium_Alliances_The_Movement.meta.js
 // ==/UserScript==
 'use strict';
