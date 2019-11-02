@@ -9,7 +9,7 @@
 // @description    Strategical territory simulator
 // @include        http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA The Movement.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TheMovement.user.js
 // ==/UserScript==
 'use strict';
 (function () {
