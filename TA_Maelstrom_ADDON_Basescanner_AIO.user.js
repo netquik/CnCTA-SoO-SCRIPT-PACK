@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @description Maelstrom ADDON Basescanner All in One (Infected CAmps + Growth Rate + New Layout Info)
+// @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
 // @version     1.8.10.2
 // @author      BlinDManX + chertosha
 // @contributor AlkalyneD4 Patch 19.3 fix
@@ -11,7 +11,7 @@
 // @grant       none
 // @copyright   2012+, Claus Neumann
 // @license     CC BY-NC-ND 3.0 - http://creativecommons.org/licenses/by-nc-nd/3.0/
-// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_AIO.user.js
+// @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_AIO.user.js
 // ==/UserScript==
 (function () {
     var MaelstromTools_Basescanner = function () {
