@@ -2,16 +2,13 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.05
+// @version         20.02.06
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - included zbluebugz cnctaopt.com code
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
-// @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Tiberium_Alliances_Battle_Simulator_V2.user.js
-
 // ==/UserScript==
-
 (function () {
     var script = document.createElement("script");
     script.innerHTML = "(" +
@@ -2446,12 +2443,13 @@
                         if (PerforceChangelist >= 472117) { // 19.5 patch
                             this.ArmySetupAttackBar.getMainContainer().getChildren()[0].setMarginTop(40);
                             this.ArmySetupAttackBar.getMainContainer().getChildren()[3].setVisibility("hidden");
+                            this.ArmySetupAttackBar.getChildren()[1].setOpacity(0.4);
                             this.ArmySetupAttackBar.getChildren()[1].setVisibility("hidden");
                             qx.core.Init.getApplication().getPlayArea().getChildren()[0].setMarginTop(-30);
                         }
                         // Mirror and Shift Buttons left Side (Rows/Wave)
                         var i, cntWave;
-                        //this.ArmySetupAttackBar.getMainContainer().removeAt(3);
+                        
                         for (i = 0; i < ClientLib.Base.Util.get_ArmyMaxSlotCountY(); i++) {
                             // 19.5 FIX VIEW by Netquik
                             cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[(i + 4)];
