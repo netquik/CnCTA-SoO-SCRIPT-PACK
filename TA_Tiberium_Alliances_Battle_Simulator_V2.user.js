@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.07
+// @version         20.02.08
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - Move Box save position code
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2715,9 +2715,10 @@
                           
                         
                         // Move Box init by Netquik
+                        this.boxMove.xy = TABS.SETTINGS.get("GUI.Window.MoveBox.position", [5, 470]);
                         this.PlayArea.add(this.boxMove, {
-                            left: TABS.SETTINGS.get("GUI.Window.MoveBox.position", [5, 470])[0],
-                            top: TABS.SETTINGS.get("GUI.Window.MoveBox.position", [5, 470])[1]
+                            left: this.boxMove.xy[0],
+                            top: this.boxMove.xy[1]
                         });
                         
                         // Move Box save position by Netquik
