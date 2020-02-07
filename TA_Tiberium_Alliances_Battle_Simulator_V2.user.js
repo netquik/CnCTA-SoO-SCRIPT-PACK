@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.08
+// @version         20.02.09
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - Move Box save position code
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -3115,7 +3115,7 @@
                         });
                         this.addListener("appear", this.onAppear, this);
                         this.addListener("close", this.onClose, this);
-                        this.setWidth(TABS.SETTINGS.get("GUI.Window.Stats.width", 175));
+                        this.setWidth(TABS.SETTINGS.get("GUI.Window.Stats.width", 214));
                         this.getChildControl("close-button").addListener("execute", function () {
                             TABS.SETTINGS.set("GUI.Window.Stats.open", false);
                         }, this);
@@ -3324,7 +3324,10 @@
                         this.add(this.LootHeader);
                         this.add(this.GUI.Loot);
                         this.add(this.GUI.Buttons);
-                        this.add(this.getChildControl("statusbar"));
+                        this.add(this.getChildControl("statusbar").set({
+                            paddingBottom: 6,
+                            paddingTop: 4
+                        }));
                         this.getChildControl("statusbar-text").set({
                             textColor: "#BBBBBB"
                         });
