@@ -2,9 +2,9 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.06
+// @version         20.02.07
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
-// @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - included zbluebugz cnctaopt.com code
+// @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - Move Box save position code
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
@@ -2638,7 +2638,8 @@
                             allowGrowX: false,
                             allowGrowY: false,
                         });
-                        this.boxMove.add(this.newButton(TABS.RES.IMG.Stats, this.tr("Statistic") + " [NUM 7]", this.onClick_btnStats, null, null), {
+                        
+                this.boxMove.add(this.newButton(TABS.RES.IMG.Stats, this.tr("Statistic") + " [NUM 7]", this.onClick_btnStats, null, null), {
                             row: 0,
                             column: 0
                         });
@@ -2711,12 +2712,19 @@
                             row: 5,
                             column: 2
                         });
+                          
+                        
+                        // Move Box init by Netquik
                         this.PlayArea.add(this.boxMove, {
-                            top: 400,
-                            left: 65
-                            //							right : 5,
-                            //							bottom : 188
+                            left: TABS.SETTINGS.get("GUI.Window.MoveBox.position", [5, 470])[0],
+                            top: TABS.SETTINGS.get("GUI.Window.MoveBox.position", [5, 470])[1]
                         });
+                        
+                        // Move Box save position by Netquik
+                        this.boxMove.addListener("move", function () {
+                            TABS.SETTINGS.set("GUI.Window.MoveBox.position", [this.boxMove.getBounds().left, this.boxMove.getBounds().top]);
+                        }, this);
+                                            
                         //DS-MOD-END
                         phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this._onViewChanged);
                         this._onViewChanged(ClientLib.Vis.Mode.CombatSetup, null);
