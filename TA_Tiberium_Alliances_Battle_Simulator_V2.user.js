@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.09
+// @version         20.02.10
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - Move Box save position code
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2416,6 +2416,7 @@
                         this._Application = qx.core.Init.getApplication();
                         this._armyBarContainer = this._Application.getArmySetupAttackBar();
                         this._armyBar = this._Application.getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
+                        this._playArea = this._Application.getPlayArea();
                         if (PerforceChangelist >= 443425) { // 16.1 patch
                             for (var i in this._armyBarContainer) {
                                 if (typeof this._armyBarContainer[i] == "object" && this._armyBarContainer[i] != null) {
@@ -2441,12 +2442,21 @@
                         }
                         this.ArmySetupAttackBar = qx.core.Init.getApplication().getArmySetupAttackBar();
                         // 19.5 FIX VIEW by Netquik
+                        this.ArmySetupAttackBarMainChildren = this.ArmySetupAttackBar.getMainContainer().getChildren();
+                        this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
+                        this._playAreaChildren = this._playArea.getChildren();
                         if (PerforceChangelist >= 472117) { // 19.5 patch
-                            this.ArmySetupAttackBar.getMainContainer().getChildren()[0].setMarginTop(40);
-                            this.ArmySetupAttackBar.getMainContainer().getChildren()[3].setVisibility("hidden");
-                            this.ArmySetupAttackBar.getChildren()[1].setOpacity(0.4);
-                            this.ArmySetupAttackBar.getChildren()[1].setVisibility("hidden");
-                            qx.core.Init.getApplication().getPlayArea().getChildren()[0].setMarginTop(-30);
+                           this.ArmySetupAttackBarMainChildren[0].setMarginTop(40);
+                           this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden");
+                           this.ArmySetupAttackBarChildren[1].setOpacity(0.4);
+                           this.ArmySetupAttackBarChildren[1].setVisibility("hidden");
+                           this._playArea.setMarginTop(-25);
+                           this._playAreaChildren[2].setMarginTop(-25);
+                           for (var i in this._playAreaChildren) {
+                                if (i > 2) {
+                                    this._playAreaChildren[i].setMarginTop(25);
+                                }
+                        }
                         }
                         // Mirror and Shift Buttons left Side (Rows/Wave)
                         var i, cntWave;
