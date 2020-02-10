@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.54b
+// @version        3.54c
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -527,25 +527,22 @@
                                     this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden");
                                     this._armyBarContainer.removeAt(1);
                                     this._PlayArea.setMarginTop(-25);
-                                    this._playAreaChildren[2].setMarginTop(-25);
+                                    this._playAreaChildren[2].setHeight(65); // fix opacity for better view
+                                    this._playAreaChildren[2].setOpacity(0.7);
                                     this.ArmySetupAttackBarMainChildren[2].setVisibility("hidden");
                                     this.ArmySetupAttackBarMainChildren[9].resetDecorator("borderImage");
                                     this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
                                     this.ArmySetupAttackBarMainChildren[9].setMarginRight(10);
                                     for (var i in this._playAreaChildren) {
-                                        if (i > 2) {
+                                        if (i > 1) {
                                             this._playAreaChildren[i].setMarginTop(25);
                                         }
                                     }
                                 }
-                               for (i = 4; i < 9; i++) {
-
-                                cntWave = this.ArmySetupAttackBarMainChildren[i];
-                                cntWave._removeAll();
-                               
-                        }
-                        
-                                
+                                for (i = 4; i < 9; i++) {
+                                    cntWave = this.ArmySetupAttackBarMainChildren[i];
+                                    cntWave._removeAll();
+                                }
                                 // Event Handlers
                                 phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateBattleFinished", ClientLib.API.OnSimulateBattleFinished, this, this.onSimulateBattleFinishedEvent);
                                 phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateCombatReport", ClientLib.API.OnSimulateCombatReport, this, this.OnSimulateCombatReportEvent);
@@ -2116,7 +2113,7 @@
                                 if (this.userInterface) {
                                     this._armyBar.remove(this.userInterface);
                                 }
-                               /* if (this.options.rightSide.getValue()) {
+/* if (this.options.rightSide.getValue()) {
                                     var canvasWidth = 64;
                                     var interfaceBG = rightBG;
                                     var buttonsLeftPosition = 5;
@@ -2125,13 +2122,13 @@
                                     var shiftURightPos = 15;
                                     var shiftDRightPos = 15;
                                 } else {*/
-                                    var canvasWidth = 90;
-                                    var interfaceBG = leftBG;
-                                    var buttonsLeftPosition = 15;
-                                    var shiftRRightPos = 16;
-                                    var shiftLRightPos = 46;
-                                    var shiftURightPos = 30;
-                                    var shiftDRightPos = 30;
+                                var canvasWidth = 90;
+                                var interfaceBG = leftBG;
+                                var buttonsLeftPosition = 15;
+                                var shiftRRightPos = 16;
+                                var shiftLRightPos = 46;
+                                var shiftURightPos = 30;
+                                var shiftDRightPos = 30;
                                 //}
                                 // Interface Canvas
                                 this.userInterface = new qx.ui.container.Composite();
@@ -2143,8 +2140,7 @@
                                         backgroundImage: leftBG
                                     })
                                 });
-                                
-                                /*if (this.options.rightSide.getValue()) {
+/*if (this.options.rightSide.getValue()) {
                                     this._armyBar.add(this.userInterface, {
                                         top: 20,
                                         right: 65
@@ -2155,8 +2151,6 @@
                                         left: 0
                                     });
                                 }*/
-                                
-                                
                                 // Repositionig Buttons by Netquik
                                 this.rightBGbar = new qx.ui.container.Composite();
                                 this.rightBGbar.setLayout(new qx.ui.layout.Canvas());
@@ -2166,30 +2160,24 @@
                                     decorator: new qx.ui.decoration.Decorator().set({
                                         backgroundImage: rightBG
                                     })
-                                    
                                 });
-                                
                                 this._armyBarContainer.getMainContainer().addAt(this.rightBGbar, 8, {
-                                        top: 40,
-                                        right: 0
-                                    }); 
-                                
+                                    top: 40,
+                                    right: 0
+                                });
                                 this._armyBarContainer.getMainContainer().add(this.userInterface, {
-                                        top: 40,
-                                        left: 10
-                                    });
-                                
+                                    top: 40,
+                                    left: 10
+                                });
                                 this._buttonsArmy = this._armyBarContainer.getMainContainer().getChildren()[10];
                                 this._armyBarContainer.getMainContainer().removeAt(10);
-                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy,10);
+                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy, 10);
                                 this._buttonsArmy2 = this._armyBarContainer.getMainContainer().getChildren()[11];
                                 this._armyBarContainer.getMainContainer().removeAt(11);
-                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy2,11);
+                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy2, 11);
                                 this._buttonsArmy3 = this._armyBarContainer.getMainContainer().getChildren()[12];
                                 this._armyBarContainer.getMainContainer().removeAt(12);
-                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy3,12);
-                                
-                                
+                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy3, 12);
                                 // Simulate Button
                                 this.buttons.attack.simulate = new qx.ui.form.Button();
                                 this.buttons.attack.simulate.set({
