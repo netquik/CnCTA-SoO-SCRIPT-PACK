@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.10
+// @version         20.02.11
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - Move Box save position code
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2446,21 +2446,58 @@
                         this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
                         this._playAreaChildren = this._playArea.getChildren();
                         if (PerforceChangelist >= 472117) { // 19.5 patch
-                           this.ArmySetupAttackBarMainChildren[0].setMarginTop(40);
-                           this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden");
-                           this.ArmySetupAttackBarChildren[1].setOpacity(0.4);
-                           this.ArmySetupAttackBarChildren[1].setVisibility("hidden");
-                           this._playArea.setMarginTop(-25);
-                           this._playAreaChildren[2].setMarginTop(-25);
-                           for (var i in this._playAreaChildren) {
-                                if (i > 2) {
+                            this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
+                            this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar
+                            this.ArmySetupAttackBarChildren[1].setOpacity(0.4); // setting opacity to next setup
+                            this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // setting hidden to next setup
+                            this._playArea.setMarginTop(-25); // up playArea
+                            this._playAreaChildren[2].setHeight(65); // fix opacity for better view
+                            this._playAreaChildren[2].setOpacity(0.7);
+                            for (var i in this._playAreaChildren) {
+                                if (i > 1) {
                                     this._playAreaChildren[i].setMarginTop(25);
                                 }
-                        }
+                            } // lowering playArea children
+                            // adjusting and change bars 19.5
+                            this.ArmySetupAttackBarMainChildren[9].resetDecorator();
+                            this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
+                            this.ArmySetupAttackBarMainChildren[9].setMarginRight(10);
+                            var playerFaction = ClientLib.Data.MainData.GetInstance().get_Player().get_Faction();
+                            switch (playerFaction) {
+                            case ClientLib.Base.EFactionType.GDIFaction:
+                                var leftBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAABklBMVEUAAAD///8bfqbc3Nyhop/T09PZ2dnY2Njx8fHy8vLz8/Oen5t2d3XW1tZyc3C5ubnJycnLy8ugoZ6hoZ7X19bX19eKioiXmJTa2tqXmJXg4ODh4eHi4uLr6+ucnZmcnZqdnpr09PTR0dHS0tLV1dV0dXPj4+Pq6uqen52LjIrK09eMjIvOzs3Q0NC3t7e4uLiRko9qa2iWl5NtbmsbfqZ0dHK9vr3b29t2dnTf39/IyMifoJygoZ3CwsLo6Ojp6enDw8Pu7u7w8PCGh4OIiYewsLC0tLR1dnRnoblsbWqpqairq6irrKmsrKutrq2ur6xub22zs7OHiISHiIW4uLZub26Jioi5uri6urq7vLtvb22Ki4dvb27FxcVra2nIz9KNjoqOjouQkY5zc3HOzs7O1djPz8+Sk4+TlJCVlpNpamd0dXJubmyYmJaZmpeam5ibm5l1dnNqpbxubm2enptub2x4eXd6enh8fXuCgoGEhYKEhYOioqHt7e2io6Hv7++jo6OkpaKlpaOlpqOmp6Wnp6Um7BAdAAAAA3RSTlMAAH5Ny5jlAAACu0lEQVR4Xu3b1Y/bQBDA4Wtm1+wgM8MhMzOUmZmZmfH/rtc5K6kq9SGbac/qjnSv38NPymmccbr2oM3vtKC7nPGMdXRaaM/THuAZSZLYX9kBmrRnqwekDkyZQpyacUmyaEe+5MjcNFj0xEdGN2rcAO5p0ABxaz6/ZLQj80+DZjYcfsdoVoPJS+sDg+2Pz+cHp7VJ4X6O0awzkzf8k8npdieZTEERbDoepxRO6Ixu1Fg6EqiuaGq7o2kFJV0CgDLLYR7wzlr0jrwRSH9SeEbVlORNRgPI3a+Ozln0mP1JWfdXmcxlFzIli6YgR18cexRiNLAZmFxReEfLSIw2T05dHso36cGkxk/XGA2bUwkSDJEmPa1y0+qiTY8HCQkRDJoO6yR2W/9LtMI/Ng0VwsY9NGKQ/6a1aC1ai9Z3rSC3cFpfzJPYUB4lSOQQWmuQfxAdJwhA//MYFk37TtVxgrBZw6O9WEEoJl1BC/JHWrQWrfv2YtH9b58gfdDlXiNRR6EjUSOB9P96+14Caw8ZDZJYzG3LAnh1QnS3LWZ0lLirNT8t9mvRWrQWrQ281uH9aK1B/obVmj3dfSFINIQn6nhL8Coe7XXlfl35N0FEa9E6fBCrtdz7eg0niBw9ey6LQoejxhWkPcQwEijLgnMDQ6HFHiJ2PtFatBatRettJBr/BkaIG29gx7O75QYm9mvxLCNau/EGdm3VdTewbvac5LYb2HB+F+0hYucTrUVrzHeC3UNjBnF/a4x33cfJr1/G+TpAqws2vWm5wVALnSpwF1lO2UHMfaGR1pf/Z0DROO0P6YhNg/x15GquSUOxqhQ0jt9wqMtpU4KdG9h3Mhts0lBKZTK1xXantpCKSODQcCY710LDdSrxjMxkOwgUKbzRbbqT4+zXz3IItA0Ezj/GomcePMQKcuH9HSx6fv70T0KzcLgY6GqkAAAAAElFTkSuQmCC";
+                                var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABsFBMVEX09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb3Nzb29va2trZ2dnY2NjY2dnY2NfX19fW1tbX19bV1dXU1dXT09PN1djS0tLJ09fR0dHJ0tfQ0NDPz8/Ozs7Pzs7Ozs3Hz9LMzMzLy8vJycnIyMjFxcXDw8PCwsK9vr27vLu6urq5uri5ubm4uLiQwNS3t7e4uLaPwNO0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmmp6Wnp6WlpqOlpaOkpaKkpKSio6Ghop+ioqGgoZ6goZ2hoZ6foJyen52en5udnpqenpucnZmcnZqam5ibm5mZmpdqpLyXmJWYmJaXmJSWl5OVlpNnoLmTlJCSk4+Rko+QkY6OjouNjoqMjYuNjYyLi4mKi4eKi4mIiYeHiISHiIWGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN2dnR1dnR0dXJ0dXN0dHJyc3Bzc3FvcG5ub25ub2xvb21vb25ubmxubm1tbmscf6ZsbWobfqZqa2hra2lpamf///8wScmyAAAAkHRSTlP//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wADZeeHAAAACXBIWXMAAAsSAAALEgHS3X78AAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAAt5JREFUaIHtm/1P00AYxytLEBnr2MFukzIrDN8ZAupAQXzF1zomnZviUnyZClMUXzOnMN8V8eVf9u7ajRoTf+D6lBy5b9Jk2ZJPms/68r08rfIbLIpE/4Ne9TIrY250h5Md8Xi8g2486bs56kJjjDU9GtV17EFQ7+3RNfTl4aimI+QNGqP9dTZBv7oUZUnYP3Fnp+OEoJ+9t79KeENusAm68AXpWt01SqXTIxyZGKRs5oSgzQ8Rvf43oiRSVbV93elMjVM2803QV2unNCaEbD2hgKIoTetPW//xQccJQU89fjmHbfTucIA3of5xmz1G0NnrTz6WMTn4yE63KAovuy01QR30rVB0rvSg+qiLonHLFu7dDnQeZcfJKkEbJMVqlQrB2zxAh0f+QhvGMkO3NvGj211o845lmD+YEIHQLEu2EH6yX2i3EHHQ0rV/aOnaP7Sgru8SIb9AhORKlpH7Ceb6RBeMENM4F0MwaOvaLoRAhEwf2acDoRfs7gohpAaJ1qGELEGipevN4DoChz67F+xEf/00CXV5KlbmMdBF1SxWyjGoHmK9/QZzA7MswwBCA5YF0zDMmmidT0zXsl8HpOuNQkvX/qGhXVfAXJ/uhnJ9PgbTQ4yLdG0HImR6uBuq8y3ClWDQ6g5WgkGXSdL1ZnAdgXN9EuxEX3gxj4HQ+YefnBkYwPX6fqW8HereWKzA3MDcMzCP0bKH+IeWrv1DS9f+oaVr/9DQrr+LNgMjEXAGlj8m4gxM0H4t1zLS9f/RQs7AFt+JOAOjq6Q54WZg9N6Ykz1Edr6NQEvX/qHFfyZYHLTArpfhnnV/w9BBD/Y6nG6gs7nSbPaMxoSozdxkRXWhC/dmLzgzMBzays1GAw10JpOZdGZgCGuhZo43ONhbHEnUQE/lD6E6muy3Ggy2ckTtQWto83mjBDM2V/Q9yIUufHWjPQtF3/h8gH1OeI+emRmAQt+6chBKyOGhIRD0H2r7n40x6THiAAAAAElFTkSuQmCC";
+                                break;
+                            case ClientLib.Base.EFactionType.NODFaction:
+                                var leftBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAABj1BMVEX///+hop/p6el0dXOXmJSTlJBqa2jY2NihoZ6XmJV2d3XX19egoZ6dnprOzs3X19aIiYeKiojQ0NDr6+vq6uqen51sbWqnp6WRko+cnZl0dHKMjIuur6yLjIro6Oh2dnTIyMh1dnRtbmupqajCwsLu7u6enpuWl5OGh4OgoZ2EhYJ0dXKHiIWHiIR6eniSk49ub2yam5hpameJioiNjoqlpqOkpaK9vr25uritrq18fXtvb22Ki4d1dnOOjou4uLZzc3Fra2mrq6irrKnPz8/t7e2lpaOQkY6mp6W7vLvOzs6CgoFubm1vb26bm5mYmJaZmpfFxcWVlpO6urrc3NzZ2dnT09PV1dXa2trg4ODz8/PW1tbJycnLy8u0tLTi4uLSvbq5ubnDw8OwsLC3t7fb29vw8PDR0dHv7+/f39+uRDqvRTzj4+Px8fGcnZrh4eGsrKv09PSioqHTwL2mGxvW19by8vJyc3Czs7Ojo6KfoJxubmyEhYPOuri4uLjS0tK9vb2en5tub254eXdub21rpm98AAAAAXRSTlMAQObYZgAAAr9JREFUeF7s0MUOwzAURNF+5DxTEIrMzPDhjRtZztqx1E2vNNuzmNZv+rf2Wl0epWgSEelxA9TkYQryEGcQLBBENfkC8kSjpO9L+8YKjatoQJQdXj5loKK1jffZvKHlvGhf3cuyEObrgOE0NT9rOQ47cuCalDP08KWFYAzPh30j30fjrtq6ptRiktwAcH3HZr47WjmOkv6nffPsbRoKozBva+oRO6NJS5OSpIWWTubee+/xxqgOqCBGQaobpUKOxIdW/udwrUgOX/jA7UGxeM8PeBQ90rWOc65DnURBuHZHoZnN+rGjS+oMJifl49tNRdZid8u7v9A+m6UTqycthWaVT5+/hLoJyi2Fbp9unpnyUvTOWqCPrig0zzZtci1K0d8ibXQ0kqBrLpFFCLQ/FpOxP/5H6FA/CZpHSSU7aKCQ/8a1uBbX4vpUTMZxjOubHhlTHkRI7iDMNZsHKMYIYR4/YqDQfv7CBEaIShGH7qGE+Ej0KEzIH9HiWlznD6PQ48tXQQfdnHZszOMpV3Js0PN6csVG9ZBDLhlG1soC92KiGFbMYK4J63r40NKvxbW4FtcOznXhNsw1m2dRrtXb3TkCoblwfgJXghfh1R3fr/FovBBxLa4LF1GuzelLRYwQs3T5ShWCLpSca6Ae4jg2oCykGxgELT1EOp+4FtfiWlxPgtD4DYwoixvY9eqwbGDSr+VdRlxncQO7sZi5Dazu2ERZ28DGvCHqIdL5xLW4Rt4Jzg4aKST7rhF33Wv0+4X0D3uAjhoJetYicq0BdKerbWS+kwhp37IWBi//z3AYaLLvruf6G9i9hftbKZo3NsNuoPENRzS/3m5xfwN7QD/cFM27nXK5MvK3qTQ66jf30fywujSA5kd+SyemIidCeMPnx3GC3tP0+/WTLQCaVd49fYZCzzx/gRLycvsVCj039/onvUF9K+HA7eQAAAAASUVORK5CYII%3D";
+                                var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABqlBMVEX////09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb29vc29va2trZ2dnZ2NjY2NjX19fY2NfW19bW1tbX19bV1dXV1NTT09PS0tLR0dHQ0NDPz8/Ozs7Pzs7Ozs3MzMzLy8vJycnIyMjFxcXDw8PTv7zCwsLSvLm9vr29vb3Oube7vLu6urq5ubm5uri4uLi4uLa3t7e0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmnp6Wmp6WlpqOkpaKlpaOkpKOhop+ioqGgoZ2hoZ6goZ6foJyen5uen52enpudnpqcnZmcnZqam5ibm5mZmpeXmJWXmJSYmJaWl5OVlpOTlJCSk4+Rko+QkY6NjoqOjouNjYyMjYuKi4mLi4mKi4eIiYeHiIWHiISGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN1dnR2dnR0dXN0dXJ0dHJyc3Bzc3FvcG5vb21vb25ub25ub2xtbmtubmxubm1sbWpra2lqa2hpamewRT2vRDumHBymGxsjsLVTAAAAjnRSTlMA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////0TDHVgAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAALNSURBVGiB7ZvpU9NAGIeJdAaR0pQudFu01FBPiki9Kop4gddCazCt0gxqVbCieE61SL3vg//Z7KZpwxc/sHnDLLO/mcx02plnMk9z/HbepK1NxseseZm/69B9jeyOxWJ9dONJ5rcbjTFOaNGopmEPgjJ/XOjpo9GEhpA3aIyOudivrkVZkvZP3DnccvLsvf1V0huym138irSE4xqls9kxjkyMULbjRP8U0Zy/EaWQqqo9G05vepyyHd/X6+d3MSHWNhgKKIrSvvF0D50ZaTmZefJyEdvoveEAb0JD4y127ubjzxVsHXzWTncqCi+7Oz1BHWToeZkzyvdrD/spGndu497tQO9pdpysWWhipVSrUSF4hwfo8Ng6NCGrDN3Vzo/ucaH1OybRfzIhAqFZVmwh/GS/0G4h4qCla//Q0rV/aEFd37WE/AIRYpRNYvwAc322H0aITqbiCAZt3tiDEIiQ2ZMHNCD0kt1dIYTUIdEalJAVSLR0vRVcR+DQk/vBTvTXT1NQl6dSdQEDXVT1UrUSh+oh5tsvMDcw0yQECA1YFnRC9LponU9M17JfB6TrzUJL1/6hoV1XwVxfGIByfTkO00PIFbq2AxEye2QAqvMtw5Vg0OoOVoJBl0nS9VZwHYFzfQ7sRF96sYCB0IVHHxozMIDr9YNqZSfUvbFUhbmBuWdgHqNlD/EPLV37h5au/UNL1/6hoV1/F20GZkXAGVjhlIgzMEH7tVzLSNf/Rws5A1t+J+IMjK6SFoWbgdF7oyF7iOx8m4GWrv1Di/9MsDhogV2vwj3r/oahgx7sdTjbROeM8nzuYoIJUTu4yYrqQhfvzV9tzMBwaDs3Gw030fl8/lJjBoZwItTB8QYHe4sjhZromcJx5KCt/VaDwS6OqIOohdafN0swY3NF24dc6OI3N9qzUPStjwfZ56T36Lm5YSj07elDUEJOjI6CoP8Bxks+VXu6zlMAAAAASUVORK5CYII=";
+                                break;
+                            }
+                            var canvasWidth = 90;
+                            this.rightBGbar = new qx.ui.container.Composite();
+                            this.rightBGbar.setLayout(new qx.ui.layout.Canvas());
+                            this.rightBGbar.setHeight(160);
+                            this.rightBGbar.setWidth(canvasWidth);
+                            this.rightBGbar.set({
+                                decorator: new qx.ui.decoration.Decorator().set({
+                                    backgroundImage: rightBG
+                                })
+                            });
+                            this.ArmySetupAttackBar.getMainContainer().addAt(this.rightBGbar, 8, {
+                                top: 40,
+                                right: 0
+                            });
+                            this._buttonsArmy = this.ArmySetupAttackBarMainChildren[10];
+                            this.ArmySetupAttackBar.getMainContainer().removeAt(10);
+                            this.ArmySetupAttackBar.getMainContainer().addAt(this._buttonsArmy, 10);
+                            this.ArmySetupAttackBarMainChildren[2].setSource(leftBG);
+                            this.ArmySetupAttackBarMainChildren[2].setLayoutProperties({
+                                top: 40,
+                                left: 0
+                            });
                         }
                         // Mirror and Shift Buttons left Side (Rows/Wave)
                         var i, cntWave;
-                        
                         for (i = 0; i < ClientLib.Base.Util.get_ArmyMaxSlotCountY(); i++) {
                             // 19.5 FIX VIEW by Netquik
                             cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[(i + 4)];
@@ -2648,8 +2685,7 @@
                             allowGrowX: false,
                             allowGrowY: false,
                         });
-                        
-                this.boxMove.add(this.newButton(TABS.RES.IMG.Stats, this.tr("Statistic") + " [NUM 7]", this.onClick_btnStats, null, null), {
+                        this.boxMove.add(this.newButton(TABS.RES.IMG.Stats, this.tr("Statistic") + " [NUM 7]", this.onClick_btnStats, null, null), {
                             row: 0,
                             column: 0
                         });
@@ -2722,20 +2758,16 @@
                             row: 5,
                             column: 2
                         });
-                          
-                        
                         // Move Box init by Netquik
                         this.boxMove.xy = TABS.SETTINGS.get("GUI.Window.MoveBox.position", [5, 470]);
                         this.PlayArea.add(this.boxMove, {
                             left: this.boxMove.xy[0],
                             top: this.boxMove.xy[1]
                         });
-                        
                         // Move Box save position by Netquik
                         this.boxMove.addListener("move", function () {
                             TABS.SETTINGS.set("GUI.Window.MoveBox.position", [this.boxMove.getBounds().left, this.boxMove.getBounds().top]);
                         }, this);
-                                            
                         //DS-MOD-END
                         phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this._onViewChanged);
                         this._onViewChanged(ClientLib.Vis.Mode.CombatSetup, null);
