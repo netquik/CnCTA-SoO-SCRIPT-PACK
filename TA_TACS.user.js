@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.56b
+// @version        3.56c
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - FIX OPTIONS
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -540,12 +540,18 @@
                                     });*/
                                     this._playAreaChildren[4].resetDecorator();
                                     // lowering playArea children by Netquik 
-                                    this._playAreaChildren[24].setMarginTop(25);
+                                    if (this._playAreaChildren[24]) {
+                                        this._playAreaChildren[24].setMarginTop(25);
+                                    }
                                     for (var i in this._playAreaChildren) {
                                         if (i > 2 && i < 16) {
-                                            this._playAreaChildren[i].setMarginTop(25);
+                                            if (this._playAreaChildren[i]) {
+                                                this._playAreaChildren[i].setMarginTop(25);
+                                            }
                                         } else if (i > 15 && i < 24) {
-                                            this._playAreaChildren[i].setMarginTop(-25);
+                                            if (this._playAreaChildren[i]) {
+                                                this._playAreaChildren[i].setMarginTop(-25);
+                                            }
                                         }
                                     }
                                     // adjusting bars 19.5 by Netquik 
