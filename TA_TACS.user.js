@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.56a
+// @version        3.56b
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - FIX OPTIONS
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -531,13 +531,13 @@
                                     this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
                                     this._playAreaChildren[2].setHeight(130); // fix opacity for better view
                                     this._playAreaChildren[2].setMarginTop(-25);
-                                    this._playAreaChildren[2].set({
+/*this._playAreaChildren[2].set({
                                         decorator: new qx.ui.decoration.Decorator().set({
                                             widthTop: 50,
                                             styleTop: "solid",
                                             colorTop: "#000"
                                         })
-                                    });
+                                    });*/
                                     this._playAreaChildren[4].resetDecorator();
                                     // lowering playArea children by Netquik 
                                     this._playAreaChildren[24].setMarginTop(25);
