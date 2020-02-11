@@ -3,9 +3,9 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.55c
+// @version        3.56
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
-// @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW
+// @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - FIX OPTIONS
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TACS.user.js
 // @grant none
@@ -553,10 +553,6 @@
                                     this.ArmySetupAttackBarMainChildren[9].resetDecorator();
                                     this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
                                     this.ArmySetupAttackBarMainChildren[9].setMarginRight(10);
-                                }
-                                for (i = 4; i < 9; i++) {
-                                    cntWave = this.ArmySetupAttackBarMainChildren[i];
-                                    cntWave._removeAll();
                                 }
                                 // Event Handlers
                                 phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateBattleFinished", ClientLib.API.OnSimulateBattleFinished, this, this.onSimulateBattleFinishedEvent);
@@ -1310,6 +1306,7 @@
                                 pssVBox.setThemedFont("bold");
                                 pssVBox.setThemedBackgroundColor("#eef");
                                 options.add(pssVBox);
+                                window.TACS_version = (window.TACS_version === undefined) ? "Script Pack Version" : window.TACS_version;
                                 pssVBox.add(new qx.ui.basic.Label(lang("Version: ") + window.TACS_version), {
                                     row: 0,
                                     column: 0,
@@ -2128,23 +2125,23 @@
                                 if (this.userInterface) {
                                     this._armyBar.remove(this.userInterface);
                                 }
-/* if (this.options.rightSide.getValue()) {
-                                    var canvasWidth = 64;
+                                if (this.options.rightSide.getValue()) {
+                                    var canvasWidth = 75;
                                     var interfaceBG = rightBG;
                                     var buttonsLeftPosition = 5;
                                     var shiftRRightPos = 0;
                                     var shiftLRightPos = 30;
                                     var shiftURightPos = 15;
                                     var shiftDRightPos = 15;
-                                } else {*/
-                                var canvasWidth = 90;
-                                var interfaceBG = leftBG;
-                                var buttonsLeftPosition = 15;
-                                var shiftRRightPos = 16;
-                                var shiftLRightPos = 46;
-                                var shiftURightPos = 30;
-                                var shiftDRightPos = 30;
-                                //}
+                                } else {
+                                    var canvasWidth = 90;
+                                    var interfaceBG = leftBG;
+                                    var buttonsLeftPosition = 15;
+                                    var shiftRRightPos = 16;
+                                    var shiftLRightPos = 46;
+                                    var shiftURightPos = 30;
+                                    var shiftDRightPos = 30;
+                                }
                                 // Interface Canvas
                                 this.userInterface = new qx.ui.container.Composite();
                                 this.userInterface.setLayout(new qx.ui.layout.Canvas());
@@ -2152,47 +2149,83 @@
                                 this.userInterface.setWidth(canvasWidth);
                                 this.userInterface.set({
                                     decorator: new qx.ui.decoration.Decorator().set({
-                                        backgroundImage: leftBG
+                                        backgroundImage: interfaceBG
                                     })
                                 });
-/*if (this.options.rightSide.getValue()) {
-                                    this._armyBar.add(this.userInterface, {
-                                        top: 20,
-                                        right: 65
-                                    });
-                                } else {
-                                    this._armyBar.add(this.userInterface, {
-                                        top: 0,
-                                        left: 0
-                                    });
-                                }*/
                                 // Repositionig Buttons by Netquik
+                                if (this.rightBGbar) {
+                                    this._armyBar.remove(this.rightBGbar);
+                                }
                                 this.rightBGbar = new qx.ui.container.Composite();
                                 this.rightBGbar.setLayout(new qx.ui.layout.Canvas());
                                 this.rightBGbar.setHeight(160);
-                                this.rightBGbar.setWidth(canvasWidth);
-                                this.rightBGbar.set({
-                                    decorator: new qx.ui.decoration.Decorator().set({
-                                        backgroundImage: rightBG
-                                    })
-                                });
-                                this._armyBarContainer.getMainContainer().addAt(this.rightBGbar, 8, {
-                                    top: 40,
-                                    right: 0
-                                });
-                                this._armyBarContainer.getMainContainer().add(this.userInterface, {
-                                    top: 40,
-                                    left: 10
-                                });
-                                this._buttonsArmy = this._armyBarContainer.getMainContainer().getChildren()[10];
-                                this._armyBarContainer.getMainContainer().removeAt(10);
-                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy, 10);
-                                this._buttonsArmy2 = this._armyBarContainer.getMainContainer().getChildren()[11];
-                                this._armyBarContainer.getMainContainer().removeAt(11);
-                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy2, 11);
-                                this._buttonsArmy3 = this._armyBarContainer.getMainContainer().getChildren()[12];
-                                this._armyBarContainer.getMainContainer().removeAt(12);
-                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy3, 12);
+                                if (this.options.rightSide.getValue()) {
+                                    this.rightBGbar.setWidth(100);
+                                    this.rightBGbar.set({
+                                        decorator: new qx.ui.decoration.Decorator().set({
+                                            backgroundImage: rightBG,
+                                            backgroundRepeat: "scale"
+                                        })
+                                    });
+                                    this._armyBar.add(this.rightBGbar, {
+                                        top: 40,
+                                        right: 0
+                                    });
+                                    this.userInterface.setPaddingLeft(10);
+                                    this._armyBar.add(this.userInterface, {
+                                        top: 40,
+                                        right: 65
+                                    });
+                                    if (this.leftBGbar) {
+                                        this._armyBar.remove(this.leftBGbar);
+                                    }
+                                    this.leftBGbar = new qx.ui.container.Composite();
+                                    this.leftBGbar.setLayout(new qx.ui.layout.Canvas());
+                                    this.leftBGbar.setHeight(160);
+                                    this.leftBGbar.setWidth(90);
+                                    this.leftBGbar.set({
+                                        decorator: new qx.ui.decoration.Decorator().set({
+                                            backgroundImage: leftBG,
+                                        })
+                                    });
+                                    this._armyBar.add(this.leftBGbar, {
+                                        top: 40,
+                                        left: 5
+                                    });
+                                    for (i = 4; i < 8; i++) {
+                                        this.cntWave = this.ArmySetupAttackBarMainChildren[i];
+                                        this._armyBar.removeAt(i);
+                                        this._armyBar.addAt(this.cntWave, i);
+                                    }
+                                } else {
+                                    this.rightBGbar.setWidth(canvasWidth);
+                                    this.rightBGbar.set({
+                                        decorator: new qx.ui.decoration.Decorator().set({
+                                            backgroundImage: rightBG,
+                                        })
+                                    });
+                                    this._armyBar.add(this.rightBGbar, {
+                                        top: 40,
+                                        right: 0
+                                    });
+                                    this._armyBar.add(this.userInterface, {
+                                        top: 40,
+                                        left: 5
+                                    });
+                                }
+                                this._buttonsArmy = this._armyBarContainer.getMainContainer().getChildren()[9];
+                                this._armyBarContainer.getMainContainer().removeAt(9);
+                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy, 9);
+                                if (this.options.attackLock.getValue()) {
+                                    this._buttonsArmy2 = this._armyBarContainer.getMainContainer().getChildren()[10];
+                                    this._armyBarContainer.getMainContainer().removeAt(10);
+                                    this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy2, 10);
+                                }
+                                if (this.options.repairLock.getValue()) {
+                                    this._buttonsArmy3 = this._armyBarContainer.getMainContainer().getChildren()[11];
+                                    this._armyBarContainer.getMainContainer().removeAt(11);
+                                    this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy3, 11);
+                                }
                                 // Simulate Button
                                 this.buttons.attack.simulate = new qx.ui.form.Button();
                                 this.buttons.attack.simulate.set({
@@ -2318,8 +2351,8 @@
                                 localStorage.ta_sim_attackLock = JSON.stringify(this.options.attackLock.getValue());
                                 if (this.options.attackLock.getValue()) {
                                     this._armyBar.add(this.buttons.attack.unlock, {
-                                        top: 108,
-                                        right: 9
+                                        top: 148,
+                                        right: 10
                                     });
                                 } else {
                                     this._armyBar.remove(this.buttons.attack.unlock);
@@ -2333,8 +2366,8 @@
                                 localStorage.ta_sim_repairLock = JSON.stringify(this.options.repairLock.getValue());
                                 if (this.options.repairLock.getValue()) {
                                     this._armyBar.add(this.buttons.attack.repair, {
-                                        top: 16,
-                                        right: 9
+                                        top: 63,
+                                        right: 10
                                     });
                                 } else {
                                     this._armyBar.remove(this.buttons.attack.repair);
