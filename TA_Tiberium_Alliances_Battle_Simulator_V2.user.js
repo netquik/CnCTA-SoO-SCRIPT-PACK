@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.13
+// @version         20.02.14
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - Move Box save position code
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2472,12 +2472,18 @@
                             });*/
                             this._playAreaChildren[4].resetDecorator();
                             // lowering playArea children by Netquik 
-                            this._playAreaChildren[24].setMarginTop(25);
+                            if (this._playAreaChildren[24]) {
+                                this._playAreaChildren[24].setMarginTop(25);
+                            }
                             for (var i in this._playAreaChildren) {
                                 if (i > 2 && i < 16) {
-                                    this._playAreaChildren[i].setMarginTop(25);
+                                    if (this._playAreaChildren[i]) {
+                                        this._playAreaChildren[i].setMarginTop(25);
+                                    }
                                 } else if (i > 15 && i < 24) {
-                                    this._playAreaChildren[i].setMarginTop(-25);
+                                    if (this._playAreaChildren[i]) {
+                                        this._playAreaChildren[i].setMarginTop(-25);
+                                    }
                                 }
                             }
                             // adjusting and change bars 19.5 by Netquik 
