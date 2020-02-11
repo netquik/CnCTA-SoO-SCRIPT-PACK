@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.11
+// @version         20.02.12
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - Move Box save position code
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2440,25 +2440,40 @@
                                 }
                             }
                         }
-                        this.ArmySetupAttackBar = qx.core.Init.getApplication().getArmySetupAttackBar();
-                        // 19.5 FIX VIEW by Netquik
+                        // just some shortcuts by Netquik 
+                        this.ArmySetupAttackBar = this._Application.getArmySetupAttackBar();
+                        this.MainOverlay = this._Application.getMainOverlay();
                         this.ArmySetupAttackBarMainChildren = this.ArmySetupAttackBar.getMainContainer().getChildren();
                         this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
                         this._playAreaChildren = this._playArea.getChildren();
+                        // 19.5 FIX VIEW by Netquik 
                         if (PerforceChangelist >= 472117) { // 19.5 patch
                             this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
                             this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar
                             this.ArmySetupAttackBarChildren[1].setOpacity(0.4); // setting opacity to next setup
                             this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // setting hidden to next setup
-                            this._playArea.setMarginTop(-25); // up playArea
-                            this._playAreaChildren[2].setHeight(65); // fix opacity for better view
-                            this._playAreaChildren[2].setOpacity(0.7);
+                            //this._playArea.setMarginTop(-5); // up playArea
+                            this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea     
+                            this._playAreaChildren[2].setHeight(130); // fix opacity for better view
+                            this._playAreaChildren[2].setMarginTop(-25);
+                            this._playAreaChildren[2].set({
+                                decorator: new qx.ui.decoration.Decorator().set({
+                                    widthTop: 50,
+                                    styleTop: "solid",
+                                    colorTop: "#000"
+                                })
+                            });
+                            this._playAreaChildren[4].resetDecorator();
+                            // lowering playArea children by Netquik 
+                            this._playAreaChildren[24].setMarginTop(25);
                             for (var i in this._playAreaChildren) {
-                                if (i > 1) {
+                                if (i > 2 && i < 16) {
                                     this._playAreaChildren[i].setMarginTop(25);
+                                } else if (i > 15 && i < 24) {
+                                    this._playAreaChildren[i].setMarginTop(-25);
                                 }
-                            } // lowering playArea children
-                            // adjusting and change bars 19.5
+                            }
+                            // adjusting and change bars 19.5 by Netquik 
                             this.ArmySetupAttackBarMainChildren[9].resetDecorator();
                             this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
                             this.ArmySetupAttackBarMainChildren[9].setMarginRight(10);
