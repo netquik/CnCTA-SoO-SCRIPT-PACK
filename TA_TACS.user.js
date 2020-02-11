@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.56
+// @version        3.56a
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - FIX OPTIONS
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -1742,8 +1742,14 @@
                                     var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABqlBMVEX////09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb29vc29va2trZ2dnZ2NjY2NjX19fY2NfW19bW1tbX19bV1dXV1NTT09PS0tLR0dHQ0NDPz8/Ozs7Pzs7Ozs3MzMzLy8vJycnIyMjFxcXDw8PTv7zCwsLSvLm9vr29vb3Oube7vLu6urq5ubm5uri4uLi4uLa3t7e0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmnp6Wmp6WlpqOkpaKlpaOkpKOhop+ioqGgoZ2hoZ6goZ6foJyen5uen52enpudnpqcnZmcnZqam5ibm5mZmpeXmJWXmJSYmJaWl5OVlpOTlJCSk4+Rko+QkY6NjoqOjouNjYyMjYuKi4mLi4mKi4eIiYeHiIWHiISGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN1dnR2dnR0dXN0dXJ0dHJyc3Bzc3FvcG5vb21vb25ub25ub2xtbmtubmxubm1sbWpra2lqa2hpamewRT2vRDumHBymGxsjsLVTAAAAjnRSTlMA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////0TDHVgAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAALNSURBVGiB7ZvpU9NAGIeJdAaR0pQudFu01FBPiki9Kop4gddCazCt0gxqVbCieE61SL3vg//Z7KZpwxc/sHnDLLO/mcx02plnMk9z/HbepK1NxseseZm/69B9jeyOxWJ9dONJ5rcbjTFOaNGopmEPgjJ/XOjpo9GEhpA3aIyOudivrkVZkvZP3DnccvLsvf1V0huym138irSE4xqls9kxjkyMULbjRP8U0Zy/EaWQqqo9G05vepyyHd/X6+d3MSHWNhgKKIrSvvF0D50ZaTmZefJyEdvoveEAb0JD4y127ubjzxVsHXzWTncqCi+7Oz1BHWToeZkzyvdrD/spGndu497tQO9pdpysWWhipVSrUSF4hwfo8Ng6NCGrDN3Vzo/ucaH1OybRfzIhAqFZVmwh/GS/0G4h4qCla//Q0rV/aEFd37WE/AIRYpRNYvwAc322H0aITqbiCAZt3tiDEIiQ2ZMHNCD0kt1dIYTUIdEalJAVSLR0vRVcR+DQk/vBTvTXT1NQl6dSdQEDXVT1UrUSh+oh5tsvMDcw0yQECA1YFnRC9LponU9M17JfB6TrzUJL1/6hoV1XwVxfGIByfTkO00PIFbq2AxEye2QAqvMtw5Vg0OoOVoJBl0nS9VZwHYFzfQ7sRF96sYCB0IVHHxozMIDr9YNqZSfUvbFUhbmBuWdgHqNlD/EPLV37h5au/UNL1/6hoV1/F20GZkXAGVjhlIgzMEH7tVzLSNf/Rws5A1t+J+IMjK6SFoWbgdF7oyF7iOx8m4GWrv1Di/9MsDhogV2vwj3r/oahgx7sdTjbROeM8nzuYoIJUTu4yYrqQhfvzV9tzMBwaDs3Gw030fl8/lJjBoZwItTB8QYHe4sjhZromcJx5KCt/VaDwS6OqIOohdafN0swY3NF24dc6OI3N9qzUPStjwfZ56T36Lm5YSj07elDUEJOjI6CoP8Bxks+VXu6zlMAAAAASUVORK5CYII=";
                                     break;
                                 }
+                                if (PerforceChangelist >= 441272) { // 15.4 patch
+                                    this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent().getLayoutParent();
+                                } else { //old
+                                    this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent();
+                                }
                                 if (this.toolBar) {
                                     this.toolBarParent.remove(this.toolBar);
+                                    this.toolBarParent.remove(this.toolBarMouse);
                                 }
                                 if (this.repairInfo) {
                                     playArea.remove(this.repairInfo);
@@ -1823,11 +1829,6 @@
                                     }),
                                     visibility: false
                                 });
-                                if (PerforceChangelist >= 441272) { // 15.4 patch
-                                    this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent().getLayoutParent();
-                                } else { //old
-                                    this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent();
-                                }
                                 this.toolBarParent.add(this.toolBar, {
                                     bottom: this.TOOL_BAR_HIGH,
                                     left: (playAreaWidth - this.TOOL_BAR_WIDTH) / 2,
@@ -2212,6 +2213,10 @@
                                         top: 40,
                                         left: 5
                                     });
+                                }
+                                if (this._armyBarContainer.isVisible()) {
+                                    this._armyBarContainer.hide();
+                                    this._armyBarContainer.show();
                                 }
                                 this._buttonsArmy = this._armyBarContainer.getMainContainer().getChildren()[9];
                                 this._armyBarContainer.getMainContainer().removeAt(9);
