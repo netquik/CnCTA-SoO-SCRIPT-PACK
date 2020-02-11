@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.54c
+// @version        3.55c
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -519,25 +519,40 @@
                                         }
                                     }
                                 }
-                                // 19.5 FIX VIEW by Netquik
+                                // Just some shortcuts by Netquik
                                 this.ArmySetupAttackBarMainChildren = this._armyBarContainer.getMainContainer().getChildren();
                                 this._playAreaChildren = this._PlayArea.getChildren();
+                                this.MainOverlay = this._Application.getMainOverlay();
+                                // 19.5 FIX VIEW by Netquik
                                 if (PerforceChangelist >= 472117) { // 19.5 patch
-                                    this.ArmySetupAttackBarMainChildren[0].setMarginTop(40);
-                                    this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden");
-                                    this._armyBarContainer.removeAt(1);
-                                    this._PlayArea.setMarginTop(-25);
-                                    this._playAreaChildren[2].setHeight(65); // fix opacity for better view
-                                    this._playAreaChildren[2].setOpacity(0.7);
-                                    this.ArmySetupAttackBarMainChildren[2].setVisibility("hidden");
-                                    this.ArmySetupAttackBarMainChildren[9].resetDecorator("borderImage");
-                                    this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
-                                    this.ArmySetupAttackBarMainChildren[9].setMarginRight(10);
+                                    this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
+                                    this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar
+                                    this._armyBarContainer.removeAt(1); // removing Next Army Setup msg
+                                    this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
+                                    this._playAreaChildren[2].setHeight(130); // fix opacity for better view
+                                    this._playAreaChildren[2].setMarginTop(-25);
+                                    this._playAreaChildren[2].set({
+                                        decorator: new qx.ui.decoration.Decorator().set({
+                                            widthTop: 50,
+                                            styleTop: "solid",
+                                            colorTop: "#000"
+                                        })
+                                    });
+                                    this._playAreaChildren[4].resetDecorator();
+                                    // lowering playArea children by Netquik 
+                                    this._playAreaChildren[24].setMarginTop(25);
                                     for (var i in this._playAreaChildren) {
-                                        if (i > 1) {
+                                        if (i > 2 && i < 16) {
                                             this._playAreaChildren[i].setMarginTop(25);
+                                        } else if (i > 15 && i < 24) {
+                                            this._playAreaChildren[i].setMarginTop(-25);
                                         }
                                     }
+                                    // adjusting bars 19.5 by Netquik 
+                                    this.ArmySetupAttackBarMainChildren[2].setVisibility("hidden");
+                                    this.ArmySetupAttackBarMainChildren[9].resetDecorator();
+                                    this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
+                                    this.ArmySetupAttackBarMainChildren[9].setMarginRight(10);
                                 }
                                 for (i = 4; i < 9; i++) {
                                     cntWave = this.ArmySetupAttackBarMainChildren[i];
