@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.56d
+// @version        3.56e
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - FIX OPTIONS
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -14,1721 +14,1720 @@
 (function () {
     'use strict';
     var TASuite_mainFunction = function () {
-            console.log("TACS: Simulator loaded");
-/* not used
-		function compare(a, b) {
-		return a - b;
-		}
-		function sort_and_unique(my_array) {
-		my_array.sort(compare);
-		for (var i = 1; i < my_array.length; i++) {
-		if (my_array[i] === my_array[i - 1]) {
-		my_array.splice(i--, 1);
-		}
-		}
-		return my_array;
-		}*/
-            var locale = null;
-            var languages = ["tr_TR", "de_DE", "pt_PT", "it_IT", "nl_NL", "hu_HU", "fr_FR", "fi_FI", "ro_RO", "es_ES"]; //en is default
-            var translations = {
-                "Stats": ["İstatistik", "Statistik", "Estatística", "Statistiche", "Statistieken", "Statisztika", "Statistiques", "Tiedot", "Statistici", "Estadísticas"],
-                "Enemy Base:": ["Düşman Üssü:", "Feindliche Basis:", "Base Inimiga:", "Base Nemica:", "Vijandelijke Basis:", "Ellenséges bázis:", "Base Ennemie:", "Vihollisen tukikohta:", "Baza inamică", "Base enemiga"],
-                "Defences:": ["Savunma Üniteleri:", "Verteidigung:", "Defesas:", "Difesa:", "Verdediging:", "Védelem:", "Défenses:", "Puolustus:", "Apărare", "Defensas"],
-                "Buildings:": ["Binalar:", "Gebäude:", "Edifícios:", "Strutture:", "Gebouwen:", "Épületek:", "Bâtiments:", "Rakennelmat:", "Clădiri", "Edificios"],
-                "Construction Yard:": ["Şantiye:", "Bauhof:", "Estaleiro:", "Cantiere:", "Bouwplaats:", "Központ:", "Chantier De Construction:", "Rakennustukikohta:", "Șantierul de construcții", "Centro de construcciones"],
-                "Defense Facility:": ["Savunma Tesisi:", "Verteidigungseinrichtung:", "Instalações de Defesa:", "Stazione di Difesa:", "Defensiefaciliteit:", "Védelmi Bázis:", "Complexe De Défense:", "Puolustuslaitos:", "Unitate de apărare", "Instalación defensiva"],
-                "Command Center:": ["Komuta Merkezi:", "Kommandozentrale:", "Centro de Comando:", "Centro di Comando:", "Commandocentrum:", "Parancsnoki központ:", "Centre De Commandement:", "Komentokeskus:", "Centrul de comandă", "Centro de mando"],
-                "Available Repair:": ["Mevcut Onarım:", "Verfügbare Reparaturen", "", "", "", "", "", "Korjausaikaa jäljellä:", "Timp de reparare disponibil", "Reparación disponible"],
-                "Available Attacks:": ["Mevcut Saldırılar:", "Verfügbare Angriffe", "", "", "", "", "", "Hyökkäyksiä:", "Atacuri disponibile", "Ataques disponibles"],
-                "Overall:": ["Tüm Birlikler:", "Gesamt:", "Geral:", "Totale:", "Totaal:", "Áttekintés:", "Total:", "Yhteensä:", "Ansamblu", "Total"],
-                "Infantry:": ["Piyadeler:", "Infanterie:", "Infantaria:", "Fanteria:", "Infanterie:", "Gyalogság:", "Infanterie:", "Jalkaväki:", "Infanterie", "Infantería"],
-                "Vehicle:": ["Motorlu Birlikler:", "Fahrzeuge:", "Veículos:", "Veicoli:", "Voertuigen:", "Jármu:", "Véhicules:", "Ajoneuvot:", "Vehicule", "Vehículos"],
-                "Aircraft:": ["Hava Araçları:", "Flugzeuge:", "Aviões:", "Velivoli:", "Vliegtuigen:", "Légiero:", "Avions:", "Lentokoneet:", "Aviație", "Aviación"],
-                "Outcome:": ["Sonuç:", "Ergebnis:", "Resultado:", "Esito:", "Uitkomst:", "Eredmény:", "Résultat:", "Lopputulos:", "Rezultat", "Probable"],
-                "Unknown": ["Bilinmiyor", "Unbekannt", "Desconhecido", "Sconosciuto", "Onbekend", "Ismeretlen", "Inconnu", "Tuntematon", "Necunoscut", "Desconocido"],
-                "Battle Time:": ["Savaş Süresi:", "Kampfdauer:", "Tempo de Batalha:", "Tempo di Battaglia:", "Gevechtsduur:", "Csata ideje:", "Durée Du Combat:", "Taistelun kesto:", "Timp de atac", "Duración batalla"],
-                "Layouts": ["Diziliş", "Layouts", "Formações", "Formazione", "Indelingen", "Elrendezés", "Dispositions", "Asetelmat", "Scheme", "Diseño"],
-                "Load": ["Yükle", "Laden", "Carregar", "Carica", "Laad", "Töltés", "Charger", "Lataa", "Încarcă", "Cargar"],
-                "Load this saved layout.": ["Kayıtlı dizilişi yükle.", "Gespeichertes Layout laden.", "Carregar esta formação guardada.", "Carica questa formazione salvata.", "Laad deze opgeslagen indeling.", "Töltsd be ezt az elmentett elrendezést.", "Charger Cette Disposition.", "Lataa valittu asetelma.", "Încarcă acest formație salvată.", "Carga este diseño grabado."],
-                "Delete": ["Sil", "Löschen", "Apagar", "Cancella", "Verwijder", "Törlés", "Effacer", "Poista", "Șterge", "Borra"],
-                "Name: ": ["İsim: ", "Name: ", "Nome: ", "Nome: ", "Naam: ", "Név: ", "Nom: ", "Nimi: ", "Nume: ", "Nombre: "],
-                "Delete this saved layout.": ["Kayıtlı dizilişi sil.", "Gewähltes Layout löschen.", "Apagar esta formação guardada.", "Cancella questa formazione salvata.", "Verwijder deze opgeslagen indeling.", "Töröld ezt az elmentett elrendezést.", "Effacer Cette Disposition.", "Poista valittu asetelma.", "Șterge acest formație salvat.", "Borra este diseño grabado."],
-                "Save": ["Kaydet", "Speichern", "Guardar", "Salva", "Opslaan", "Mentés", "Sauvegarder", "Tallenna", "Salvează", "Guardar"],
-                "Save this layout.": ["Bu dizilişi kaydet.", "Layout speichern.", "Guardar esta formação.", "Salva questa formazione.", "Deze indeling opslaan.", "Mentsd el ezt az elrendezést.", "Sauvegarder Cette Disposition.", "Tallenna nykyinen asetelma.", "Salvează acest formație ", "Guarda este diseño."],
-                "Info": ["Bilgi", "Info", "Info", "Info", "Info", "Info", "Infos", "Tietoa", "Info", "Información"],
-                "Forums": ["Forum", "Forum", "Fóruns", "Forum", "Forums", "Fórum", "Forums", "Keskustelupalsta", "Forum", "Foros"],
-                "Spoils": ["Ganimetler", "Rohstoffausbeute", "Espólios", "Bottino", "Opbrengst", "Zsákmény", "Butin", "Sotasaalis", "Pradă", "Botín"],
-                "Options": ["Seçenekler", "Optionen", "Opções:", "Opzioni:", "Opties:", "Opciók:", "Options:", "Asetukset", "Opțiuni", "Opciones"],
-                "TACS Options": ["TACS Seçenekleri", "TACS Optionen", "", "", "", "", "", "", "Opțiuni TACS: ", "Opciones TACS"],
-                "Auto display stats": ["İstatistik penceresini otomatik olarak göster", "Dieses Fenster automatisch öffnen", "Mostrar esta caixa automaticamente", "Apri automaticamente la finestra Strumenti", "Dit venster automatisch weergeven", "Ezen ablak autómatikus megjelenítése", "Affich. Auto. de cette Fenêtre", "Näytä simuloinnin tiedot automaattisesti", "Afișează automat statisticile", "Mostrar estadísticas automáticamente"],
-                // need to change translations
-                "Show shift buttons": ["Kaydırma tuşlarını göster", "Bewegungstasten anzeigen", "Mostrar botões de deslocamento", "Mostra i pulsanti di spostamento", "Verschuifknoppen weergeven", "Eltoló gombok megjelenítése", "Affich. Auto. Boutons de Déplacement", "Näytä armeijan siirtopainikkeet", "Afișează butoanele de deplasare", "Mostrar botones de movimiento"],
-                "Warning!": ["Uyarı!", "Warnung!", "Aviso!", "Attenzione!", "Waarschuwing!", "Figyelem!", "Attention!", "Varoitus!", "Atenție!", "¡Aviso!"],
-                "Simulate": ["Simule et", "Simulieren", "Simular", "Simula", "Simuleer", "Szimuláció", "Simuler", "Simuloi", "Simulează", "Simular"],
-                "Start Combat Simulation": ["Savaş Simulasyonunu Başlat", "Kampfsimulation starten", "Começar a simalação de combate", "Avvia simulazione", "Start Gevechtssimulatie", "Csata szimuláció elindítása", "Démarrer La Simulation Du Combat", "Aloita taistelun simulaatio", "Începe simularea luptei", "Comenzar simulación de combate"],
-                "Setup": ["Düzen", "Aufstellung", "Configuração", "Setup", "Opzet", "Elrendezés", "Organisation", "Takaisin", "Pregătire", "Configuración"],
-                "Return to Combat Setup": ["Ordu düzenini göster", "Zurück zur Einheitenaufstellung", "Voltar à configuração de combate", "Ritorna alla configurazione", "Keer terug naar Gevechtsopzet", "Vissza az egységek elrendezéséhez", "Retourner à l'Organisation Des Troupes", "Return to Combat Setup", "Întoarcere la ecranul pentru pregătirea luptei", "Regresar a configuración de ataque"],
-                "Unlock": ["Kilidi aç", "Freigabe", "Desbloquear", "Sblocca", "Ontgrendel", "Felold", "Debloquer", "Avaa", "Descuie", "Desbloquear"],
-                //"Tools" : ["Araçlar", "Extras", "Ferramentas", "Strumenti", "Gereedschap", "Eszközök", "Outils", "Työkalut", "Herramientas"],
-                "Open Simulator Tools": ["Simulatör Araçlarını Göster", "Extras öffnen", "Abrir as ferramentas do simulador", "Apri strumenti", "Open Simulator Gereedschap", "Megnyitja a szimulátor információs ablakát", "Ouvrir Les Réglages Du Simulateur", "Avaa simulaattorin työkalut", "Deschide opțiunile simulatorului", "Abrir estadísticas de simulación"],
-                "Shift units left": ["Birlikleri sola kaydır", "Einheiten nach links bewegen", "Deslocar as unidades para a esquerda", "Spostare le unità a sinistra", "Verschuif eenheden links", "Egységek eltolása balra", "Déplacer Les Unités Vers La Gauche", "Siirtää yksikköjä vasemmalle", "Deplasează unitățile la stânga", "Desplazar unidades a la izquierda"],
-                "Shift units right": ["Birlikleri sağa kaydır", "Einheiten nach rechts bewegen", "Deslocar as unidades para a direita", "Spostare le unità a destra", "Verschuif eenheden rechts", "Egységek eltolása jobbra", "Déplacer Les Unités Vers La Droite", "Siirtää yksikköjä oikealle", "Deplasează unitățile la dreapta", "Desplazar unidades a la derecha"],
-                "Shift units up": ["Birlikleri yukarı kaydır", "Einheiten nach oben bewegen", "Deslocar as unidades para cima", "Spostare le unità in alto", "Verschuif eenheden omhoog", "Egységek eltolása fel", "Déplacer Les Unités Vers Le Haut", "Siirtää yksikköjä ylös", "Deplasează unitățile mai sus", "Desplazar unidades arriba"],
-                "Shift units down": ["Birlikleri aşağı kaydır", "Einheiten nach unten bewegen", "Deslocar as unidades para baixo", "Spostare le unità in basso", "Verschuif eenheden omlaag", "Egységek eltolása le", "Déplacer Les Unités Vers Le Bas", "Siirtää yksikköjä alas", "Deplasează unitățile mai jos", "Desplazar unidades abajo"],
-                //"Battle Simulator" : ["Savaş Simulatörü", "Kampfsimulator", "Simulador de Combate", "Simulatore", "Gevechtssimulator", "Csata szimulátor", "Simulateur De Combat", "Taistelusimulaattori", "Simulador de combate"],
-                "Total Victory": ["Mutlak Zafer", "Gesamtsieg", "Vitória Total", "Vittoria Totale", "Totale Overwinning", "Teljes gyozelem", "Victoire Totale", "Totaalinen Voitto", "Victorie totală", "Victoria total"],
-                "Victory": ["Zafer", "Sieg", "Vitória", "Vittoria", "Overwinning", "Gyozelem", "Victoire", "Voitto", "Victorie", "Victoria"],
-                "Total Defeat": ["Mutlak Yenilgi", "Totale Niederlage", "Derrota total", "Sconfitta Totale", "Totale Nederlaag", "Teljes vereség", "Défaite Totale", "Total Tappio", "Înfrângere totală", "Derrota total"],
-                "Support lvl ": ["Takviye seviyesi ", "Stufe Supportwaffe ", "Nível do Suporte ", "Supporto lvl ", "Ondersteuningsniveau ", '"Support" épület szintje ', "Lvl. Du Support ", "Tukitykistön taso ", "Nivelul suportului ", "Nivel de soporte "],
-                "Refresh": ["Yenile", "Erfrischen", "Actualizar", "Rinfrescare", "Verversen", "Felfrissít", "Actualiser", "Päivitä", "Împrospătează", "Recargar"],
-                //google translate non-PT langs
-                "Refresh Stats": ["İstatistikleri Yenile", "Erfrischen Statistik", "Estatística", "Rinfrescare Statistiche", "Verversen Statistieken", "Frissítés Stats", "Actualiser Les Stats", "Päivitä tiedot", "Împrospătează statisticile", "Recargar estadísticas"],
-                //google translate non-PT langs 'refresh' + statistics label
-                "Side:": ["Taraf:", "Seite", "Lado:", "", "Zijde", "", "Côté", "Sijainti:", "Lateral", "Lado"],
-                "Left": ["Sol", "Links", "Esquerda", "", "Links", "", "Gauche", "Vasen", "Stânga", "Izquierdo"],
-                "Right": ["Sağ", "Rechts", "Direita", "", "Rechts", "", "Droite", "Oikea", "Dreapta", "Derecho"],
-                "Locks:": ["Kilitler:", "Freigabe", "Bloquear:", "", "Vergrendelingen:", "", "Vérouiller:", "Varmistimet:", "Blochează:", "Bloquear:"],
-                "Attack": ["Saldırı", "Angriff", "Atacar", "", "Aanvallen", "", "Attaquer", "Hyökkäys", "Atacă ", "Atacar:"],
-                "Repair": ["Onarım", "Reparatur", "Reparar", "", "Repareren", "", "Réparer", "Korjaus", "Reparare", "Reparar"],
-                "Reset": ["Sıfırla", "Zurücksetzen", "", "", "", "", "", "Palauta", "Resetare", "Reiniciar"],
-                "Simulation will be based on most recently refreshed stats!": ["Simulasyon en son güncellenen istatistiklere göre yapılacaktır!", "Die Simulation basiert auf den zuletzt aktualisierten Stand", "A simulação vai ser baseada na mais recente data!", "", "Simulatie zal gebaseerd worden op meest recentelijke ververste statistieken!", "", "La Simulation sera basée en fonction des dernières stats actualisées !", "Simulaatio suoritetaan viimeisimmän päivityksen tiedoilla!", "Simularea se va baza pe cele mai recente statistici!", "Simulación basada en las últimas estadísticas obtenidas"],
-                "Unlock Attack Button": ["Saldırı Düğmesinin Kilidini Aç", "Angriffsbutton freigeben", "Desbloquear o botão de ataque", "Sblocca pulsante d'attacco", "Ontgrendel Aanvalsknop", "a Támadás gomb feloldása", "Débloquer Le Bouton d'Attaque", "Poista hyökkäusnapin lukitus", "Descuie butonul de atac", "Desbloquear botón de ataque"],
-                "Unlock Repair Button": ["Onarım Düğmesinin Kilidini Aç", "Reparaturbutton freigeben", "Desbloquear botão de reparação", "", "Ontgrendel Repareerknop", "", "Débloquer Le Bouton de Réparation", "Poista korjausnapin lukitus", "Descuie butonul de reparare", "Desbloquear botón de reparación"],
-                "Unlock Reset Button": ["Sıfırlama Düğmesinin Kilidini Aç", "", "", "", "", "", "", "Avaa Tyhjennä nappi", "Descuie butonul de resetare", "Desbloquear botón de reinicio"],
-                "SKIP": ["ATLA", "Überspringen", "", "", "", "", "", "", "", "SALTAR"],
-                "Skip to end": ["Simulasyonu atla", "Zum Ende Vorspringen", "", "", "", "", "", "Mene loppuun", "Sari la final", "Saltar al final"],
-                "Reset Formation": ["Dizilişi Sıfırla", "Formation zurücksetzen", "", "", "", "", "", "Palauta armeijan oletusasetelma", "Resetează formația", "Reiniciar formación"],
-                "Flip Horizontal": ["Yatay Çevir", "Horizontal Spiegeln", "", "", "", "", "", "Käännä vaakasuunnassa", "Întoarce orizontal", "Girar horizontalmente"],
-                "Flip Vertical": ["Dikey Çevir", "Vertikal Spiegeln", "", "", "", "", "", "Käännä pystysuunnassa", "Întoarce vertical", "Girar verticalmente"],
-                "Activate All": ["Hepsini Aktifleştir", "Alle Aktivieren", "", "", "", "", "", "Aktivoi kaikki", "Activează totul", "Activar todo"],
-                "Deactivate All": ["Hepsini Deaktifleştir", "Alle Deaktivieren", "", "", "", "", "", "Poista kaikki käytöstä", "Dezactivează totul", "Desactivar todo"],
-                "Activate Infantry": ["Piyadeleri Aktifleştir", "Infanterie Aktivieren", "", "", "", "", "", "Aktivoi jalkaväki", "Activează infanteria", "Activar infantería"],
-                "Deactivate Infantry": ["Piyadeleri Deaktifleştir", "Infanterie Deaktivieren", "", "", "", "", "", "Poista jalkaväki käytöstä", "Dezactivează infanteria", "Desactivar infantería"],
-                "Activate Vehicles": ["Motorlu Birlikleri Aktifleştir", "Fahrzeuge Aktivieren", "", "", "", "", "", "Aktivoi ajoneuvot", "Activează vehiculele", "Activar vehículos"],
-                "Deactivate Vehicles": ["Motorlu Birlikleri Deaktifleştir", "Fahrzeuge Deaktivieren", "", "", "", "", "", "Poista ajoneuvot käytöstä", "Dezactivează vehiculele", "Desactivar vehículos"],
-                "Activate Air": ["Hava Araçlarını Aktifleştir", "Flugzeuge Aktivieren", "", "", "", "", "", "Aktivoi lentokoneet", "Activează avioanele", "Activar aviación"],
-                "Deactivate Air": ["Hava Araçlarını Deaktifleştir", "Flugzeuge Deaktivieren", "", "", "", "", "", "Poista lentokoneet käytöstä", "Dezactivează avioanele", "Desactivar aviación"],
-                "Activate Repair Mode": ["Onarım Modunu Aç", "Reparatur Modus Aktivieren", "", "", "", "", "", "Aktivoi korjaustila", "Activează modul de reparare", "Activar modo de reparación"],
-                "Deactivate Repair Mode": ["Onarım Modunu Kapat", "Reparatur Modus Deaktivieren", "", "", "", "", "", "Poista korjaustila käytöstä", "Dezactivează modul de reparare", "Desactivar modo de reparación"],
-                "Version: ": ["Sürüm: ", "", "", "", "", "", "", "Versio: ", "Versiunea: ", "Versión: "],
-                "Mark saved targets on region map": ["Kaydedilmiş hedefleri haritada işaretle", "Gespeicherte Ziele auf der Karte Markieren", "", "", "", "", "", "Merkitse tallennetut kohteet alue kartalle", "Marchează țintele salvate pe harta regiunii", "Mostrar en el mapa los objetivos grabados"],
-                // region view
-                "Enable 'Double-click to (De)activate units'": ["Çift-tıklama ile birlikleri (de)aktifleştirmeyi etkinleştir", "Doppel-Klick zum Einheiten (De)-Aktivieren ", "", "", "", "", "", "Tuplaklikkaus aktivoi/deaktivoi yksiköt", "Activează \"Dublu click pentru a (De)activa unitățile\"", "Habilitar doble clic para des/activar unidades"],
-                "Show Loot Summary": ["", "Zeige Beute-Zusammenfassung", "", "", "", "", "", "", "Afișează rezumatul prăzii", "Mostrar resumen de botín"],
-                "Show Resource Layout Window": ["", "", "", "", "", "", "", "", "Afișează fereastra cu schema resurselor", "Mostrar ventana de recursos de diseño"],
-                "Show Stats During Attack": ["İstatistikleri saldırı sırasında göster", "Zeige Statistik während des Angriffs", "", "", "", "", "", "Näytä tiedot -ikkuna hyökkäyksen aikana", "Afișează statisticile în timpul atacului", "Mostrar estadísticas durante el ataque"],
-                "Show Stats During Simulation": ["İstatistikleri simulasyondayken göster", "Zeige Statistik während der Simulation", "", "", "", "", "", "Näytä tiedot -ikkuna simuloinnin aikana", "Afișează statisticile în timpul simulării", "Mostrar estadísticas durante la simulación"],
-                "Skip Victory-Popup After Battle": ["Savaş Bitiminde Zafer Bildirimini Atla", "Siegesbildschirm überspringen", "", "", "", "", "", "Ohita taistelun jälkeinen voittoruutu", "Sari peste popup-ul victoriei după luptă", "Saltar ventana de victoria total tras la batalla"],
-                "Stats Window Opacity": ["İstatistik Penceresi Saydamlığı", "Transparenz des Statistik-Fenster", "", "", "", "", "", "Tiedot -ikkunan läpinäkyvyys", "Opacitatea ferestrei de statistici", "Opacidad de la ventana de estadísticas"],
-                "Disable Unit Tooltips In Army Formation Manager": ["Ordu Dizilişi Yöneticisinde Birlik İpuçlarını Gizle", "", "", "", "", "", "", "Poista käytöstä yksiköiden työkaluvihjeet armeijan muodostamisikkunassa", "Dezactivează tooltip-urile unităților în managerul formației armatei", "Desactivar globo de las unidades en la ventana de  de formación"],
-                "Disable Tooltips In Attack Preparation View": ["Saldırı Hazırlık Görünümünde İpuçlarını Gizle", "", "", "", "", "", "", "Poista työkaluvihjeet käytöstä hyökkäyksen valmisteluikkunassa", "Dezactivează tooltip-urile unităților în ecranul preparării armatei", "Desactivar globo en la ventana de preparación de ataque"],
-                "Undo": ["Geri Al", "", "", "", "", "", "", "Kumoa", "Anulează", "Deshacer"],
-                "Redo": ["İleri Al", "", "", "", "", "", "", "Tee uudelleen", "Refă", "Rehacer"],
-                "Open Stats Window": ["İstatistik Penceresini Aç", "Statistik öffnen", "", "", "", "", "", "Avaa tiedot -ikkuna", "Deschide fereastra de statistici", "Abrir ventana de estadísticas"]
-            };
+        console.log("TACS: Simulator loaded");
+        /* not used
+        		function compare(a, b) {
+        		return a - b;
+        		}
+        		function sort_and_unique(my_array) {
+        		my_array.sort(compare);
+        		for (var i = 1; i < my_array.length; i++) {
+        		if (my_array[i] === my_array[i - 1]) {
+        		my_array.splice(i--, 1);
+        		}
+        		}
+        		return my_array;
+        		}*/
+        var locale = null;
+        var languages = ["tr_TR", "de_DE", "pt_PT", "it_IT", "nl_NL", "hu_HU", "fr_FR", "fi_FI", "ro_RO", "es_ES"]; //en is default
+        var translations = {
+            "Stats": ["İstatistik", "Statistik", "Estatística", "Statistiche", "Statistieken", "Statisztika", "Statistiques", "Tiedot", "Statistici", "Estadísticas"],
+            "Enemy Base:": ["Düşman Üssü:", "Feindliche Basis:", "Base Inimiga:", "Base Nemica:", "Vijandelijke Basis:", "Ellenséges bázis:", "Base Ennemie:", "Vihollisen tukikohta:", "Baza inamică", "Base enemiga"],
+            "Defences:": ["Savunma Üniteleri:", "Verteidigung:", "Defesas:", "Difesa:", "Verdediging:", "Védelem:", "Défenses:", "Puolustus:", "Apărare", "Defensas"],
+            "Buildings:": ["Binalar:", "Gebäude:", "Edifícios:", "Strutture:", "Gebouwen:", "Épületek:", "Bâtiments:", "Rakennelmat:", "Clădiri", "Edificios"],
+            "Construction Yard:": ["Şantiye:", "Bauhof:", "Estaleiro:", "Cantiere:", "Bouwplaats:", "Központ:", "Chantier De Construction:", "Rakennustukikohta:", "Șantierul de construcții", "Centro de construcciones"],
+            "Defense Facility:": ["Savunma Tesisi:", "Verteidigungseinrichtung:", "Instalações de Defesa:", "Stazione di Difesa:", "Defensiefaciliteit:", "Védelmi Bázis:", "Complexe De Défense:", "Puolustuslaitos:", "Unitate de apărare", "Instalación defensiva"],
+            "Command Center:": ["Komuta Merkezi:", "Kommandozentrale:", "Centro de Comando:", "Centro di Comando:", "Commandocentrum:", "Parancsnoki központ:", "Centre De Commandement:", "Komentokeskus:", "Centrul de comandă", "Centro de mando"],
+            "Available Repair:": ["Mevcut Onarım:", "Verfügbare Reparaturen", "", "", "", "", "", "Korjausaikaa jäljellä:", "Timp de reparare disponibil", "Reparación disponible"],
+            "Available Attacks:": ["Mevcut Saldırılar:", "Verfügbare Angriffe", "", "", "", "", "", "Hyökkäyksiä:", "Atacuri disponibile", "Ataques disponibles"],
+            "Overall:": ["Tüm Birlikler:", "Gesamt:", "Geral:", "Totale:", "Totaal:", "Áttekintés:", "Total:", "Yhteensä:", "Ansamblu", "Total"],
+            "Infantry:": ["Piyadeler:", "Infanterie:", "Infantaria:", "Fanteria:", "Infanterie:", "Gyalogság:", "Infanterie:", "Jalkaväki:", "Infanterie", "Infantería"],
+            "Vehicle:": ["Motorlu Birlikler:", "Fahrzeuge:", "Veículos:", "Veicoli:", "Voertuigen:", "Jármu:", "Véhicules:", "Ajoneuvot:", "Vehicule", "Vehículos"],
+            "Aircraft:": ["Hava Araçları:", "Flugzeuge:", "Aviões:", "Velivoli:", "Vliegtuigen:", "Légiero:", "Avions:", "Lentokoneet:", "Aviație", "Aviación"],
+            "Outcome:": ["Sonuç:", "Ergebnis:", "Resultado:", "Esito:", "Uitkomst:", "Eredmény:", "Résultat:", "Lopputulos:", "Rezultat", "Probable"],
+            "Unknown": ["Bilinmiyor", "Unbekannt", "Desconhecido", "Sconosciuto", "Onbekend", "Ismeretlen", "Inconnu", "Tuntematon", "Necunoscut", "Desconocido"],
+            "Battle Time:": ["Savaş Süresi:", "Kampfdauer:", "Tempo de Batalha:", "Tempo di Battaglia:", "Gevechtsduur:", "Csata ideje:", "Durée Du Combat:", "Taistelun kesto:", "Timp de atac", "Duración batalla"],
+            "Layouts": ["Diziliş", "Layouts", "Formações", "Formazione", "Indelingen", "Elrendezés", "Dispositions", "Asetelmat", "Scheme", "Diseño"],
+            "Load": ["Yükle", "Laden", "Carregar", "Carica", "Laad", "Töltés", "Charger", "Lataa", "Încarcă", "Cargar"],
+            "Load this saved layout.": ["Kayıtlı dizilişi yükle.", "Gespeichertes Layout laden.", "Carregar esta formação guardada.", "Carica questa formazione salvata.", "Laad deze opgeslagen indeling.", "Töltsd be ezt az elmentett elrendezést.", "Charger Cette Disposition.", "Lataa valittu asetelma.", "Încarcă acest formație salvată.", "Carga este diseño grabado."],
+            "Delete": ["Sil", "Löschen", "Apagar", "Cancella", "Verwijder", "Törlés", "Effacer", "Poista", "Șterge", "Borra"],
+            "Name: ": ["İsim: ", "Name: ", "Nome: ", "Nome: ", "Naam: ", "Név: ", "Nom: ", "Nimi: ", "Nume: ", "Nombre: "],
+            "Delete this saved layout.": ["Kayıtlı dizilişi sil.", "Gewähltes Layout löschen.", "Apagar esta formação guardada.", "Cancella questa formazione salvata.", "Verwijder deze opgeslagen indeling.", "Töröld ezt az elmentett elrendezést.", "Effacer Cette Disposition.", "Poista valittu asetelma.", "Șterge acest formație salvat.", "Borra este diseño grabado."],
+            "Save": ["Kaydet", "Speichern", "Guardar", "Salva", "Opslaan", "Mentés", "Sauvegarder", "Tallenna", "Salvează", "Guardar"],
+            "Save this layout.": ["Bu dizilişi kaydet.", "Layout speichern.", "Guardar esta formação.", "Salva questa formazione.", "Deze indeling opslaan.", "Mentsd el ezt az elrendezést.", "Sauvegarder Cette Disposition.", "Tallenna nykyinen asetelma.", "Salvează acest formație ", "Guarda este diseño."],
+            "Info": ["Bilgi", "Info", "Info", "Info", "Info", "Info", "Infos", "Tietoa", "Info", "Información"],
+            "Forums": ["Forum", "Forum", "Fóruns", "Forum", "Forums", "Fórum", "Forums", "Keskustelupalsta", "Forum", "Foros"],
+            "Spoils": ["Ganimetler", "Rohstoffausbeute", "Espólios", "Bottino", "Opbrengst", "Zsákmény", "Butin", "Sotasaalis", "Pradă", "Botín"],
+            "Options": ["Seçenekler", "Optionen", "Opções:", "Opzioni:", "Opties:", "Opciók:", "Options:", "Asetukset", "Opțiuni", "Opciones"],
+            "TACS Options": ["TACS Seçenekleri", "TACS Optionen", "", "", "", "", "", "", "Opțiuni TACS: ", "Opciones TACS"],
+            "Auto display stats": ["İstatistik penceresini otomatik olarak göster", "Dieses Fenster automatisch öffnen", "Mostrar esta caixa automaticamente", "Apri automaticamente la finestra Strumenti", "Dit venster automatisch weergeven", "Ezen ablak autómatikus megjelenítése", "Affich. Auto. de cette Fenêtre", "Näytä simuloinnin tiedot automaattisesti", "Afișează automat statisticile", "Mostrar estadísticas automáticamente"],
+            // need to change translations
+            "Show shift buttons": ["Kaydırma tuşlarını göster", "Bewegungstasten anzeigen", "Mostrar botões de deslocamento", "Mostra i pulsanti di spostamento", "Verschuifknoppen weergeven", "Eltoló gombok megjelenítése", "Affich. Auto. Boutons de Déplacement", "Näytä armeijan siirtopainikkeet", "Afișează butoanele de deplasare", "Mostrar botones de movimiento"],
+            "Warning!": ["Uyarı!", "Warnung!", "Aviso!", "Attenzione!", "Waarschuwing!", "Figyelem!", "Attention!", "Varoitus!", "Atenție!", "¡Aviso!"],
+            "Simulate": ["Simule et", "Simulieren", "Simular", "Simula", "Simuleer", "Szimuláció", "Simuler", "Simuloi", "Simulează", "Simular"],
+            "Start Combat Simulation": ["Savaş Simulasyonunu Başlat", "Kampfsimulation starten", "Começar a simalação de combate", "Avvia simulazione", "Start Gevechtssimulatie", "Csata szimuláció elindítása", "Démarrer La Simulation Du Combat", "Aloita taistelun simulaatio", "Începe simularea luptei", "Comenzar simulación de combate"],
+            "Setup": ["Düzen", "Aufstellung", "Configuração", "Setup", "Opzet", "Elrendezés", "Organisation", "Takaisin", "Pregătire", "Configuración"],
+            "Return to Combat Setup": ["Ordu düzenini göster", "Zurück zur Einheitenaufstellung", "Voltar à configuração de combate", "Ritorna alla configurazione", "Keer terug naar Gevechtsopzet", "Vissza az egységek elrendezéséhez", "Retourner à l'Organisation Des Troupes", "Return to Combat Setup", "Întoarcere la ecranul pentru pregătirea luptei", "Regresar a configuración de ataque"],
+            "Unlock": ["Kilidi aç", "Freigabe", "Desbloquear", "Sblocca", "Ontgrendel", "Felold", "Debloquer", "Avaa", "Descuie", "Desbloquear"],
+            //"Tools" : ["Araçlar", "Extras", "Ferramentas", "Strumenti", "Gereedschap", "Eszközök", "Outils", "Työkalut", "Herramientas"],
+            "Open Simulator Tools": ["Simulatör Araçlarını Göster", "Extras öffnen", "Abrir as ferramentas do simulador", "Apri strumenti", "Open Simulator Gereedschap", "Megnyitja a szimulátor információs ablakát", "Ouvrir Les Réglages Du Simulateur", "Avaa simulaattorin työkalut", "Deschide opțiunile simulatorului", "Abrir estadísticas de simulación"],
+            "Shift units left": ["Birlikleri sola kaydır", "Einheiten nach links bewegen", "Deslocar as unidades para a esquerda", "Spostare le unità a sinistra", "Verschuif eenheden links", "Egységek eltolása balra", "Déplacer Les Unités Vers La Gauche", "Siirtää yksikköjä vasemmalle", "Deplasează unitățile la stânga", "Desplazar unidades a la izquierda"],
+            "Shift units right": ["Birlikleri sağa kaydır", "Einheiten nach rechts bewegen", "Deslocar as unidades para a direita", "Spostare le unità a destra", "Verschuif eenheden rechts", "Egységek eltolása jobbra", "Déplacer Les Unités Vers La Droite", "Siirtää yksikköjä oikealle", "Deplasează unitățile la dreapta", "Desplazar unidades a la derecha"],
+            "Shift units up": ["Birlikleri yukarı kaydır", "Einheiten nach oben bewegen", "Deslocar as unidades para cima", "Spostare le unità in alto", "Verschuif eenheden omhoog", "Egységek eltolása fel", "Déplacer Les Unités Vers Le Haut", "Siirtää yksikköjä ylös", "Deplasează unitățile mai sus", "Desplazar unidades arriba"],
+            "Shift units down": ["Birlikleri aşağı kaydır", "Einheiten nach unten bewegen", "Deslocar as unidades para baixo", "Spostare le unità in basso", "Verschuif eenheden omlaag", "Egységek eltolása le", "Déplacer Les Unités Vers Le Bas", "Siirtää yksikköjä alas", "Deplasează unitățile mai jos", "Desplazar unidades abajo"],
+            //"Battle Simulator" : ["Savaş Simulatörü", "Kampfsimulator", "Simulador de Combate", "Simulatore", "Gevechtssimulator", "Csata szimulátor", "Simulateur De Combat", "Taistelusimulaattori", "Simulador de combate"],
+            "Total Victory": ["Mutlak Zafer", "Gesamtsieg", "Vitória Total", "Vittoria Totale", "Totale Overwinning", "Teljes gyozelem", "Victoire Totale", "Totaalinen Voitto", "Victorie totală", "Victoria total"],
+            "Victory": ["Zafer", "Sieg", "Vitória", "Vittoria", "Overwinning", "Gyozelem", "Victoire", "Voitto", "Victorie", "Victoria"],
+            "Total Defeat": ["Mutlak Yenilgi", "Totale Niederlage", "Derrota total", "Sconfitta Totale", "Totale Nederlaag", "Teljes vereség", "Défaite Totale", "Total Tappio", "Înfrângere totală", "Derrota total"],
+            "Support lvl ": ["Takviye seviyesi ", "Stufe Supportwaffe ", "Nível do Suporte ", "Supporto lvl ", "Ondersteuningsniveau ", '"Support" épület szintje ', "Lvl. Du Support ", "Tukitykistön taso ", "Nivelul suportului ", "Nivel de soporte "],
+            "Refresh": ["Yenile", "Erfrischen", "Actualizar", "Rinfrescare", "Verversen", "Felfrissít", "Actualiser", "Päivitä", "Împrospătează", "Recargar"],
+            //google translate non-PT langs
+            "Refresh Stats": ["İstatistikleri Yenile", "Erfrischen Statistik", "Estatística", "Rinfrescare Statistiche", "Verversen Statistieken", "Frissítés Stats", "Actualiser Les Stats", "Päivitä tiedot", "Împrospătează statisticile", "Recargar estadísticas"],
+            //google translate non-PT langs 'refresh' + statistics label
+            "Side:": ["Taraf:", "Seite", "Lado:", "", "Zijde", "", "Côté", "Sijainti:", "Lateral", "Lado"],
+            "Left": ["Sol", "Links", "Esquerda", "", "Links", "", "Gauche", "Vasen", "Stânga", "Izquierdo"],
+            "Right": ["Sağ", "Rechts", "Direita", "", "Rechts", "", "Droite", "Oikea", "Dreapta", "Derecho"],
+            "Locks:": ["Kilitler:", "Freigabe", "Bloquear:", "", "Vergrendelingen:", "", "Vérouiller:", "Varmistimet:", "Blochează:", "Bloquear:"],
+            "Attack": ["Saldırı", "Angriff", "Atacar", "", "Aanvallen", "", "Attaquer", "Hyökkäys", "Atacă ", "Atacar:"],
+            "Repair": ["Onarım", "Reparatur", "Reparar", "", "Repareren", "", "Réparer", "Korjaus", "Reparare", "Reparar"],
+            "Reset": ["Sıfırla", "Zurücksetzen", "", "", "", "", "", "Palauta", "Resetare", "Reiniciar"],
+            "Simulation will be based on most recently refreshed stats!": ["Simulasyon en son güncellenen istatistiklere göre yapılacaktır!", "Die Simulation basiert auf den zuletzt aktualisierten Stand", "A simulação vai ser baseada na mais recente data!", "", "Simulatie zal gebaseerd worden op meest recentelijke ververste statistieken!", "", "La Simulation sera basée en fonction des dernières stats actualisées !", "Simulaatio suoritetaan viimeisimmän päivityksen tiedoilla!", "Simularea se va baza pe cele mai recente statistici!", "Simulación basada en las últimas estadísticas obtenidas"],
+            "Unlock Attack Button": ["Saldırı Düğmesinin Kilidini Aç", "Angriffsbutton freigeben", "Desbloquear o botão de ataque", "Sblocca pulsante d'attacco", "Ontgrendel Aanvalsknop", "a Támadás gomb feloldása", "Débloquer Le Bouton d'Attaque", "Poista hyökkäusnapin lukitus", "Descuie butonul de atac", "Desbloquear botón de ataque"],
+            "Unlock Repair Button": ["Onarım Düğmesinin Kilidini Aç", "Reparaturbutton freigeben", "Desbloquear botão de reparação", "", "Ontgrendel Repareerknop", "", "Débloquer Le Bouton de Réparation", "Poista korjausnapin lukitus", "Descuie butonul de reparare", "Desbloquear botón de reparación"],
+            "Unlock Reset Button": ["Sıfırlama Düğmesinin Kilidini Aç", "", "", "", "", "", "", "Avaa Tyhjennä nappi", "Descuie butonul de resetare", "Desbloquear botón de reinicio"],
+            "SKIP": ["ATLA", "Überspringen", "", "", "", "", "", "", "", "SALTAR"],
+            "Skip to end": ["Simulasyonu atla", "Zum Ende Vorspringen", "", "", "", "", "", "Mene loppuun", "Sari la final", "Saltar al final"],
+            "Reset Formation": ["Dizilişi Sıfırla", "Formation zurücksetzen", "", "", "", "", "", "Palauta armeijan oletusasetelma", "Resetează formația", "Reiniciar formación"],
+            "Flip Horizontal": ["Yatay Çevir", "Horizontal Spiegeln", "", "", "", "", "", "Käännä vaakasuunnassa", "Întoarce orizontal", "Girar horizontalmente"],
+            "Flip Vertical": ["Dikey Çevir", "Vertikal Spiegeln", "", "", "", "", "", "Käännä pystysuunnassa", "Întoarce vertical", "Girar verticalmente"],
+            "Activate All": ["Hepsini Aktifleştir", "Alle Aktivieren", "", "", "", "", "", "Aktivoi kaikki", "Activează totul", "Activar todo"],
+            "Deactivate All": ["Hepsini Deaktifleştir", "Alle Deaktivieren", "", "", "", "", "", "Poista kaikki käytöstä", "Dezactivează totul", "Desactivar todo"],
+            "Activate Infantry": ["Piyadeleri Aktifleştir", "Infanterie Aktivieren", "", "", "", "", "", "Aktivoi jalkaväki", "Activează infanteria", "Activar infantería"],
+            "Deactivate Infantry": ["Piyadeleri Deaktifleştir", "Infanterie Deaktivieren", "", "", "", "", "", "Poista jalkaväki käytöstä", "Dezactivează infanteria", "Desactivar infantería"],
+            "Activate Vehicles": ["Motorlu Birlikleri Aktifleştir", "Fahrzeuge Aktivieren", "", "", "", "", "", "Aktivoi ajoneuvot", "Activează vehiculele", "Activar vehículos"],
+            "Deactivate Vehicles": ["Motorlu Birlikleri Deaktifleştir", "Fahrzeuge Deaktivieren", "", "", "", "", "", "Poista ajoneuvot käytöstä", "Dezactivează vehiculele", "Desactivar vehículos"],
+            "Activate Air": ["Hava Araçlarını Aktifleştir", "Flugzeuge Aktivieren", "", "", "", "", "", "Aktivoi lentokoneet", "Activează avioanele", "Activar aviación"],
+            "Deactivate Air": ["Hava Araçlarını Deaktifleştir", "Flugzeuge Deaktivieren", "", "", "", "", "", "Poista lentokoneet käytöstä", "Dezactivează avioanele", "Desactivar aviación"],
+            "Activate Repair Mode": ["Onarım Modunu Aç", "Reparatur Modus Aktivieren", "", "", "", "", "", "Aktivoi korjaustila", "Activează modul de reparare", "Activar modo de reparación"],
+            "Deactivate Repair Mode": ["Onarım Modunu Kapat", "Reparatur Modus Deaktivieren", "", "", "", "", "", "Poista korjaustila käytöstä", "Dezactivează modul de reparare", "Desactivar modo de reparación"],
+            "Version: ": ["Sürüm: ", "", "", "", "", "", "", "Versio: ", "Versiunea: ", "Versión: "],
+            "Mark saved targets on region map": ["Kaydedilmiş hedefleri haritada işaretle", "Gespeicherte Ziele auf der Karte Markieren", "", "", "", "", "", "Merkitse tallennetut kohteet alue kartalle", "Marchează țintele salvate pe harta regiunii", "Mostrar en el mapa los objetivos grabados"],
+            // region view
+            "Enable 'Double-click to (De)activate units'": ["Çift-tıklama ile birlikleri (de)aktifleştirmeyi etkinleştir", "Doppel-Klick zum Einheiten (De)-Aktivieren ", "", "", "", "", "", "Tuplaklikkaus aktivoi/deaktivoi yksiköt", "Activează \"Dublu click pentru a (De)activa unitățile\"", "Habilitar doble clic para des/activar unidades"],
+            "Show Loot Summary": ["", "Zeige Beute-Zusammenfassung", "", "", "", "", "", "", "Afișează rezumatul prăzii", "Mostrar resumen de botín"],
+            "Show Resource Layout Window": ["", "", "", "", "", "", "", "", "Afișează fereastra cu schema resurselor", "Mostrar ventana de recursos de diseño"],
+            "Show Stats During Attack": ["İstatistikleri saldırı sırasında göster", "Zeige Statistik während des Angriffs", "", "", "", "", "", "Näytä tiedot -ikkuna hyökkäyksen aikana", "Afișează statisticile în timpul atacului", "Mostrar estadísticas durante el ataque"],
+            "Show Stats During Simulation": ["İstatistikleri simulasyondayken göster", "Zeige Statistik während der Simulation", "", "", "", "", "", "Näytä tiedot -ikkuna simuloinnin aikana", "Afișează statisticile în timpul simulării", "Mostrar estadísticas durante la simulación"],
+            "Skip Victory-Popup After Battle": ["Savaş Bitiminde Zafer Bildirimini Atla", "Siegesbildschirm überspringen", "", "", "", "", "", "Ohita taistelun jälkeinen voittoruutu", "Sari peste popup-ul victoriei după luptă", "Saltar ventana de victoria total tras la batalla"],
+            "Stats Window Opacity": ["İstatistik Penceresi Saydamlığı", "Transparenz des Statistik-Fenster", "", "", "", "", "", "Tiedot -ikkunan läpinäkyvyys", "Opacitatea ferestrei de statistici", "Opacidad de la ventana de estadísticas"],
+            "Disable Unit Tooltips In Army Formation Manager": ["Ordu Dizilişi Yöneticisinde Birlik İpuçlarını Gizle", "", "", "", "", "", "", "Poista käytöstä yksiköiden työkaluvihjeet armeijan muodostamisikkunassa", "Dezactivează tooltip-urile unităților în managerul formației armatei", "Desactivar globo de las unidades en la ventana de  de formación"],
+            "Disable Tooltips In Attack Preparation View": ["Saldırı Hazırlık Görünümünde İpuçlarını Gizle", "", "", "", "", "", "", "Poista työkaluvihjeet käytöstä hyökkäyksen valmisteluikkunassa", "Dezactivează tooltip-urile unităților în ecranul preparării armatei", "Desactivar globo en la ventana de preparación de ataque"],
+            "Undo": ["Geri Al", "", "", "", "", "", "", "Kumoa", "Anulează", "Deshacer"],
+            "Redo": ["İleri Al", "", "", "", "", "", "", "Tee uudelleen", "Refă", "Rehacer"],
+            "Open Stats Window": ["İstatistik Penceresini Aç", "Statistik öffnen", "", "", "", "", "", "Avaa tiedot -ikkuna", "Deschide fereastra de statistici", "Abrir ventana de estadísticas"]
+        };
 
-            function lang(text) {
-                try {
-                    if (languages.indexOf(locale) > -1) {
-                        var translated = translations[text][languages.indexOf(locale)];
-                        if (translated !== "") {
-                            return translated;
-                        } else {
-                            return text;
-                        }
+        function lang(text) {
+            try {
+                if (languages.indexOf(locale) > -1) {
+                    var translated = translations[text][languages.indexOf(locale)];
+                    if (translated !== "") {
+                        return translated;
                     } else {
                         return text;
                     }
-                } catch (e) {
-                    console.log(e);
-                    //console.log("Text is undefined: "+text);
+                } else {
                     return text;
                 }
+            } catch (e) {
+                console.log(e);
+                //console.log("Text is undefined: "+text);
+                return text;
             }
+        }
 
-            function CreateTweak() {
-                var TASuite = {};
-                qx.Class.define("TACS", {
-                    type: "singleton",
-                    extend: qx.core.Object,
-                    members: {
-                        // Default settings
-                        saveObj: {
-                            // section.option
-                            section: {
-                                option: "foo"
-                            },
-                            bounds: {
-                                battleResultsBoxLeft: 125,
-                                battleResultsBoxTop: 125,
-                                resourceLayoutWindowLeft: 125,
-                                resourceLayoutWindowTop: 550
-                            },
-                            checkbox: {
-                                showLootSummary: true,
-                                showResourceLayoutWindow: true,
-                                showStatsDuringAttack: true,
-                                showStatsDuringSimulation: true,
-                                skipVictoryPopup: false,
-                                disableArmyFormationManagerTooltips: false,
-                                disableAttackPreparationTooltips: false
-                            },
-                            audio: {
-                                playRepairSound: true
-                            },
-                            slider: {
-                                statsOpacity: 100
-                            }
+        function CreateTweak() {
+            var TASuite = {};
+            qx.Class.define("TACS", {
+                type: "singleton",
+                extend: qx.core.Object,
+                members: {
+                    // Default settings
+                    saveObj: {
+                        // section.option
+                        section: {
+                            option: "foo"
                         },
-                        buttons: {
-                            attack: {
-                                layout: {
-                                    save: null,
-                                    // buttonLayoutSave
-                                    load: null // buttonLayoutLoad
-                                },
-                                simulate: null,
-                                // buttonSimulateCombat
-                                unlock: null,
-                                // buttonUnlockAttack
-                                repair: null,
-                                // buttonUnlockRepair
-                                unlockReset: null,
-                                // buttonUnlockReset
-                                tools: null,
-                                // buttonTools
-                                refreshStats: null,
-                                // buttonRefreshStats
-                                formationReset: null,
-                                // buttonResetFormation
-                                flipVertical: null,
-                                // buttonFlipVertical
-                                flipHorizontal: null,
-                                // buttonFlipHorizontal
-                                activateInfantry: null,
-                                // buttonActivateInfantry
-                                activateVehicles: null,
-                                // buttonActivateVehicles
-                                activateAir: null,
-                                // buttonActivateAir
-                                activateAll: null,
-                                // buttonActivateAll
-                                repairMode: null,
-                                // buttonToggleRepairMode
-                                toolbarRefreshStats: null,
-                                // buttontoolbarRefreshStats
-                                toolbarShowStats: null,
-                                toolbarUndo: null,
-                                toolbarRedo: null,
-                                options: null // buttonOptions
-                            },
-                            simulate: {
-                                back: null,
-                                // buttonReturnSetup
-                                //skip : null // buttonSkipSimulation
-                            },
-                            shiftFormationUp: null,
-                            shiftFormationDown: null,
-                            shiftFormationLeft: null,
-                            shiftFormationRight: null,
-                            optionStats: null
+                        bounds: {
+                            battleResultsBoxLeft: 125,
+                            battleResultsBoxTop: 125,
+                            resourceLayoutWindowLeft: 125,
+                            resourceLayoutWindowTop: 550
                         },
-                        stats: {
-                            spoils: {
-                                tiberium: null,
-                                // tiberiumSpoils
-                                crystal: null,
-                                // crystalSpoils
-                                credit: null,
-                                // creditSpoils
-                                research: null // researchSpoils
-                            },
-                            health: {
-                                infantry: null,
-                                // lastInfantryPercentage
-                                vehicle: null,
-                                // lastVehiclePercentage
-                                aircraft: null,
-                                // lastAirPercentage
-                                overall: null // lastPercentage
-                            },
-                            repair: {
-                                infantry: null,
-                                // lastInfantryRepairTime
-                                vehicle: null,
-                                // lastVehicleRepairTime
-                                aircraft: null,
-                                // lastAircraftRepairTime
-                                overall: null,
-                                // lastRepairTime
-                                available: null,
-                                // storedRepairTime
-                                max: null // maxRepairCharges
-                            },
-                            attacks: {
-                                availableCP: null,
-                                attackCost: null,
-                                availableAttacksCP: null,
-                                availableAttacksAtFullStrength: null,
-                                availableAttacksWithCurrentRepairCharges: null
-                            },
-                            damage: {
-                                units: {
-                                    overall: null // lastEnemyUnitsPercentage
-                                },
-                                structures: {
-                                    construction: null,
-                                    // lastCYPercentage
-                                    defense: null,
-                                    // lastDFPercentage
-                                    command: null,
-                                    // lastCCPercentage
-                                    support: null,
-                                    overall: null // lastEnemyBuildingsPercentage
-                                },
-                                overall: null // lastEnemyPercentage
-                            },
-                            resourcesummary: {
-                                research: null,
-                                credits: null,
-                                crystal: null,
-                                tiberium: null
-                            },
-                            time: null,
-                            supportLevel: null
-                        },
-                        labels: {
-                            health: {
-                                infantry: null,
-                                // infantryTroopStrengthLabel
-                                vehicle: null,
-                                // vehicleTroopStrengthLabel
-                                aircraft: null,
-                                // airTroopStrengthLabel
-                                overall: null // simTroopDamageLabel
-                            },
-                            repair: {
-                                available: null
-                            },
-                            repairinfos: {
-                                infantry: null,
-                                vehicle: null,
-                                aircraft: null,
-                                available: null
-                            },
-                            attacks: {
-                                available: null
-                            },
-                            damage: {
-                                units: {
-                                    overall: null // enemyUnitsStrengthLabel
-                                },
-                                structures: {
-                                    construction: null,
-                                    // CYTroopStrengthLabel
-                                    defense: null,
-                                    // DFTroopStrengthLabel
-                                    command: null,
-                                    // CCTroopStrengthLabel
-                                    support: null,
-                                    // enemySupportStrengthLabel
-                                    overall: null // enemyBuildingsStrengthLabel
-                                },
-                                overall: null,
-                                // enemyTroopStrengthLabel
-                                outcome: null // simVictoryLabel
-                            },
-                            resourcesummary: {
-                                research: null,
-                                credits: null,
-                                crystal: null,
-                                tiberium: null
-                            },
-                            time: null,
-                            // simTimeLabel
-                            supportLevel: null,
-                            // enemySupportLevelLabel
-                            countDown: null // countDownLabel
-                        },
-                        view: {
-                            playerCity: null,
-                            playerCityDefenseBonus: null,
-                            ownCity: null,
-                            ownCityId: null,
-                            targetCityId: null,
-                            lastUnits: null,
-                            lastUnitList: null
-                        },
-                        layouts: {
-                            label: null,
-                            list: null,
-                            all: null,
-                            current: null,
-                            restore: null
-                        },
-                        options: {
-                            autoDisplayStats: null,
-                            showShift: null,
-                            sideLabel: null,
-                            locksLabel: null,
-                            leftSide: null,
-                            rightSide: null,
-                            attackLock: null,
-                            repairLock: null,
-                            markSavedTargets: null,
-                            dblClick2DeActivate: null,
-                            showLootSummary: null,
-                            showResourceLayoutWindow: null,
-                            showStatsDuringAttack: null,
-                            showStatsDuringSimulation: null,
-                            skipVictoryPopup: null,
-                            statsOpacityLabel: null,
-                            statsOpacity: null,
-                            statsOpacityOutput: null,
-                            disableArmyFormationManagerTooltips: null,
-                            disableAttackPreparationTooltips: null
+                        checkbox: {
+                            showLootSummary: true,
+                            showResourceLayoutWindow: true,
+                            showStatsDuringAttack: true,
+                            showStatsDuringSimulation: true,
+                            skipVictoryPopup: false,
+                            disableArmyFormationManagerTooltips: false,
+                            disableAttackPreparationTooltips: false
                         },
                         audio: {
-                            soundRepairImpact: null,
-                            soundRepairReload: null
+                            playRepairSound: true
                         },
-                        _Application: null,
-                        _MainData: null,
-                        _Cities: null,
-                        _VisMain: null,
-                        _ActiveView: null,
-                        _PlayArea: null,
-                        _armyBarContainer: null,
-                        _armyBar: null,
-                        attacker_modules: null,
-                        defender_modules: null,
-                        resourceSummaryVerticalBox: null,
-                        battleResultsBox: null,
-                        optionsWindow: null,
-                        resourceLayoutWindow: null,
-                        statsPage: null,
-                        lastSimulation: null,
-                        count: null,
-                        counter: null,
-                        statsOnly: null,
-                        simulationWarning: null,
-                        warningIcon: null,
-                        userInterface: null,
-                        infantryActivated: null,
-                        vehiclesActivated: null,
-                        airActivated: null,
-                        allActivated: null,
-                        toolBar: null,
-                        toolBarParent: null,
-                        TOOL_BAR_LOW: 113,
-                        // hidden
-                        TOOL_BAR_HIGH: 155,
-                        // popped-up
-                        TOOL_BAR_WIDTH: 740,
-                        resourceLayout: null,
-                        repairInfo: null,
-                        repairButtons: [],
-                        repairButtonsRedrawTimer: null,
-                        armybarClickCount: null,
-                        armybarClearnClickCounter: null,
-                        repairModeTimer: null,
-                        curPAVM: null,
-                        curViewMode: null,
-                        DEFAULTS: null,
-                        undoCache: [],
-                        ts1: null,
-                        //timestamps
-                        ts2: null,
-                        attackUnitsLoaded: null,
-                        loadData: function () {
-                            var str = localStorage.getItem("TACS");
-                            var temp;
-                            // this needs to be thoroughly checked
-                            if (str != null) {
-                                //previous options found
-                                temp = JSON.parse(str);
-                                for (var i in this.saveObj) {
-                                    if (typeof temp[i] == "object") {
-                                        for (var j in this.saveObj[i]) {
-                                            if (typeof temp[i][j] == "object") {
-                                                //recurse deeper?
-                                            } else if (typeof temp[i][j] == "undefined") {
-                                                // create missing option
-                                                console.log("Creating missing save option: " + i + "." + j);
-                                                temp[i][j] = this.saveObj[i][j];
-                                            }
+                        slider: {
+                            statsOpacity: 100
+                        }
+                    },
+                    buttons: {
+                        attack: {
+                            layout: {
+                                save: null,
+                                // buttonLayoutSave
+                                load: null // buttonLayoutLoad
+                            },
+                            simulate: null,
+                            // buttonSimulateCombat
+                            unlock: null,
+                            // buttonUnlockAttack
+                            repair: null,
+                            // buttonUnlockRepair
+                            unlockReset: null,
+                            // buttonUnlockReset
+                            tools: null,
+                            // buttonTools
+                            refreshStats: null,
+                            // buttonRefreshStats
+                            formationReset: null,
+                            // buttonResetFormation
+                            flipVertical: null,
+                            // buttonFlipVertical
+                            flipHorizontal: null,
+                            // buttonFlipHorizontal
+                            activateInfantry: null,
+                            // buttonActivateInfantry
+                            activateVehicles: null,
+                            // buttonActivateVehicles
+                            activateAir: null,
+                            // buttonActivateAir
+                            activateAll: null,
+                            // buttonActivateAll
+                            repairMode: null,
+                            // buttonToggleRepairMode
+                            toolbarRefreshStats: null,
+                            // buttontoolbarRefreshStats
+                            toolbarShowStats: null,
+                            toolbarUndo: null,
+                            toolbarRedo: null,
+                            options: null // buttonOptions
+                        },
+                        simulate: {
+                            back: null,
+                            // buttonReturnSetup
+                            //skip : null // buttonSkipSimulation
+                        },
+                        shiftFormationUp: null,
+                        shiftFormationDown: null,
+                        shiftFormationLeft: null,
+                        shiftFormationRight: null,
+                        optionStats: null
+                    },
+                    stats: {
+                        spoils: {
+                            tiberium: null,
+                            // tiberiumSpoils
+                            crystal: null,
+                            // crystalSpoils
+                            credit: null,
+                            // creditSpoils
+                            research: null // researchSpoils
+                        },
+                        health: {
+                            infantry: null,
+                            // lastInfantryPercentage
+                            vehicle: null,
+                            // lastVehiclePercentage
+                            aircraft: null,
+                            // lastAirPercentage
+                            overall: null // lastPercentage
+                        },
+                        repair: {
+                            infantry: null,
+                            // lastInfantryRepairTime
+                            vehicle: null,
+                            // lastVehicleRepairTime
+                            aircraft: null,
+                            // lastAircraftRepairTime
+                            overall: null,
+                            // lastRepairTime
+                            available: null,
+                            // storedRepairTime
+                            max: null // maxRepairCharges
+                        },
+                        attacks: {
+                            availableCP: null,
+                            attackCost: null,
+                            availableAttacksCP: null,
+                            availableAttacksAtFullStrength: null,
+                            availableAttacksWithCurrentRepairCharges: null
+                        },
+                        damage: {
+                            units: {
+                                overall: null // lastEnemyUnitsPercentage
+                            },
+                            structures: {
+                                construction: null,
+                                // lastCYPercentage
+                                defense: null,
+                                // lastDFPercentage
+                                command: null,
+                                // lastCCPercentage
+                                support: null,
+                                overall: null // lastEnemyBuildingsPercentage
+                            },
+                            overall: null // lastEnemyPercentage
+                        },
+                        resourcesummary: {
+                            research: null,
+                            credits: null,
+                            crystal: null,
+                            tiberium: null
+                        },
+                        time: null,
+                        supportLevel: null
+                    },
+                    labels: {
+                        health: {
+                            infantry: null,
+                            // infantryTroopStrengthLabel
+                            vehicle: null,
+                            // vehicleTroopStrengthLabel
+                            aircraft: null,
+                            // airTroopStrengthLabel
+                            overall: null // simTroopDamageLabel
+                        },
+                        repair: {
+                            available: null
+                        },
+                        repairinfos: {
+                            infantry: null,
+                            vehicle: null,
+                            aircraft: null,
+                            available: null
+                        },
+                        attacks: {
+                            available: null
+                        },
+                        damage: {
+                            units: {
+                                overall: null // enemyUnitsStrengthLabel
+                            },
+                            structures: {
+                                construction: null,
+                                // CYTroopStrengthLabel
+                                defense: null,
+                                // DFTroopStrengthLabel
+                                command: null,
+                                // CCTroopStrengthLabel
+                                support: null,
+                                // enemySupportStrengthLabel
+                                overall: null // enemyBuildingsStrengthLabel
+                            },
+                            overall: null,
+                            // enemyTroopStrengthLabel
+                            outcome: null // simVictoryLabel
+                        },
+                        resourcesummary: {
+                            research: null,
+                            credits: null,
+                            crystal: null,
+                            tiberium: null
+                        },
+                        time: null,
+                        // simTimeLabel
+                        supportLevel: null,
+                        // enemySupportLevelLabel
+                        countDown: null // countDownLabel
+                    },
+                    view: {
+                        playerCity: null,
+                        playerCityDefenseBonus: null,
+                        ownCity: null,
+                        ownCityId: null,
+                        targetCityId: null,
+                        lastUnits: null,
+                        lastUnitList: null
+                    },
+                    layouts: {
+                        label: null,
+                        list: null,
+                        all: null,
+                        current: null,
+                        restore: null
+                    },
+                    options: {
+                        autoDisplayStats: null,
+                        showShift: null,
+                        sideLabel: null,
+                        locksLabel: null,
+                        leftSide: null,
+                        rightSide: null,
+                        attackLock: null,
+                        repairLock: null,
+                        markSavedTargets: null,
+                        dblClick2DeActivate: null,
+                        showLootSummary: null,
+                        showResourceLayoutWindow: null,
+                        showStatsDuringAttack: null,
+                        showStatsDuringSimulation: null,
+                        skipVictoryPopup: null,
+                        statsOpacityLabel: null,
+                        statsOpacity: null,
+                        statsOpacityOutput: null,
+                        disableArmyFormationManagerTooltips: null,
+                        disableAttackPreparationTooltips: null
+                    },
+                    audio: {
+                        soundRepairImpact: null,
+                        soundRepairReload: null
+                    },
+                    _Application: null,
+                    _MainData: null,
+                    _Cities: null,
+                    _VisMain: null,
+                    _ActiveView: null,
+                    _PlayArea: null,
+                    _armyBarContainer: null,
+                    _armyBar: null,
+                    attacker_modules: null,
+                    defender_modules: null,
+                    resourceSummaryVerticalBox: null,
+                    battleResultsBox: null,
+                    optionsWindow: null,
+                    resourceLayoutWindow: null,
+                    statsPage: null,
+                    lastSimulation: null,
+                    count: null,
+                    counter: null,
+                    statsOnly: null,
+                    simulationWarning: null,
+                    warningIcon: null,
+                    userInterface: null,
+                    infantryActivated: null,
+                    vehiclesActivated: null,
+                    airActivated: null,
+                    allActivated: null,
+                    toolBar: null,
+                    toolBarParent: null,
+                    TOOL_BAR_LOW: 113,
+                    // hidden
+                    TOOL_BAR_HIGH: 155,
+                    // popped-up
+                    TOOL_BAR_WIDTH: 740,
+                    resourceLayout: null,
+                    repairInfo: null,
+                    repairButtons: [],
+                    repairButtonsRedrawTimer: null,
+                    armybarClickCount: null,
+                    armybarClearnClickCounter: null,
+                    repairModeTimer: null,
+                    curPAVM: null,
+                    curViewMode: null,
+                    DEFAULTS: null,
+                    undoCache: [],
+                    ts1: null,
+                    //timestamps
+                    ts2: null,
+                    attackUnitsLoaded: null,
+                    loadData: function () {
+                        var str = localStorage.getItem("TACS");
+                        var temp;
+                        // this needs to be thoroughly checked
+                        if (str != null) {
+                            //previous options found
+                            temp = JSON.parse(str);
+                            for (var i in this.saveObj) {
+                                if (typeof temp[i] == "object") {
+                                    for (var j in this.saveObj[i]) {
+                                        if (typeof temp[i][j] == "object") {
+                                            //recurse deeper?
+                                        } else if (typeof temp[i][j] == "undefined") {
+                                            // create missing option
+                                            console.log("Creating missing save option: " + i + "." + j);
+                                            temp[i][j] = this.saveObj[i][j];
                                         }
-                                    } else if (typeof temp[i] == "undefined") {
-                                        // create missing option section
-                                        console.log("Creating missing option section: " + i);
-                                        temp[i] = this.saveObj[i];
                                     }
-                                }
-                                this.saveObj = temp;
-                                this.saveData();
-                            }
-                        },
-                        saveData: function () {
-                            var obj = this.saveObj || window.TACS.getInstance().saveObj;
-                            var str = JSON.stringify(obj);
-                            localStorage.setItem("TACS", str);
-                        },
-                        initialize: function () {
-                            try {
-                                this.loadData();
-                                locale = ClientLib.Config.Main.GetInstance().GetConfig(ClientLib.Config.Main.CONFIG_LANGUAGE);
-                                this.targetCityId = "0";
-                                // Store references
-                                this._Application = qx.core.Init.getApplication();
-                                this._MainData = ClientLib.Data.MainData.GetInstance();
-                                this._VisMain = ClientLib.Vis.VisMain.GetInstance();
-                                this._ActiveView = this._VisMain.GetActiveView();
-                                this._PlayArea = this._Application.getPlayArea();
-                                this._armyBarContainer = this._Application.getArmySetupAttackBar();
-                                this._armyBar = this._Application.getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
-                                if (PerforceChangelist >= 443425) { // 16.1 patch
-                                    for (var i in this._armyBarContainer) {
-                                        if (typeof this._armyBarContainer[i] == "object" && this._armyBarContainer[i] != null) {
-                                            if (this._armyBarContainer[i].objid == "btn_disable") {
-                                                console.log(this._armyBarContainer[i].objid);
-                                                var nativeSimBarDisableButton = this._armyBarContainer[i];
-                                            }
-                                            if (this._armyBarContainer[i].objid == "cnt_controls" || this._armyBarContainer[i].objid == "btn_toggle") {
-                                                this._armyBarContainer[i].setVisibility("excluded");
-                                            }
-                                        }
-                                    }
-                                    var armyBarChildren = this._armyBar.getChildren();
-                                    for (var i in armyBarChildren) {
-                                        if (armyBarChildren[i].$$user_decorator == "pane-armysetup-right") {
-                                            console.log(armyBarChildren[i].$$user_decorator)
-                                            var armySetupRight = armyBarChildren[i];
-                                            armySetupRight.removeAt(1);
-                                            armySetupRight.addAt(nativeSimBarDisableButton, 1);
-                                            break;
-                                        }
-                                    }
-                                }
-                                // Fix Defense Bonus Rounding
-                                for (var key in ClientLib.Data.City.prototype) {
-                                    if (typeof ClientLib.Data.City.prototype[key] === 'function') {
-                                        var strFunction = ClientLib.Data.City.prototype[key].toString();
-                                        if (strFunction.indexOf("Math.floor(a.adb)") > -1) {
-                                            ClientLib.Data.City.prototype[key] = this.fixBonusRounding(ClientLib.Data.City.prototype[key], "a");
-                                            break;
-                                        }
-                                    }
-                                }
-                                // Just some shortcuts by Netquik
-                                this.ArmySetupAttackBarMainChildren = this._armyBarContainer.getMainContainer().getChildren();
-                                this._playAreaChildren = this._PlayArea.getChildren();
-                                this.MainOverlay = this._Application.getMainOverlay();
-                                // 19.5 FIX VIEW by Netquik
-                                if (PerforceChangelist >= 472117) { // 19.5 patch
-                                    this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
-                                    this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar
-                                    this._armyBarContainer.removeAt(1); // removing Next Army Setup msg
-                                    this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
-                                    this._playAreaChildren[2].setHeight(130); // fix opacity for better view
-                                    this._playAreaChildren[2].setMarginTop(-25);
-/*this._playAreaChildren[2].set({
-                                        decorator: new qx.ui.decoration.Decorator().set({
-                                            widthTop: 50,
-                                            styleTop: "solid",
-                                            colorTop: "#000"
-                                        })
-                                    });*/
-                                    this._playAreaChildren[4].resetDecorator();
-                                    // lowering playArea children by Netquik 
-                                    for (var i in this._playAreaChildren) {
-                                        if (this._playAreaChildren[i]) {
-                                            playchild = this._playAreaChildren[i];
-                                            if (playchild.basename === "FormationSaver" || (i > 2 && i < 16)) {
-                                                playchild.setMarginTop(25);
-                                            } else if (i > 15 && i < this._playAreaChildren.length) {
-                                                playchild.setMarginTop(-25);
-                                            }
-                                        }
-                                    }
-                                    // adjusting bars 19.5 by Netquik 
-                                    this.ArmySetupAttackBarMainChildren[2].setVisibility("hidden");
-                                    this.ArmySetupAttackBarMainChildren[9].resetDecorator();
-                                    this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
-                                    this.ArmySetupAttackBarMainChildren[9].setMarginRight(10);
-                                }
-                                // Event Handlers
-                                phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateBattleFinished", ClientLib.API.OnSimulateBattleFinished, this, this.onSimulateBattleFinishedEvent);
-                                phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateCombatReport", ClientLib.API.OnSimulateCombatReport, this, this.OnSimulateCombatReportEvent);
-                                phe.cnc.Util.attachNetEvent(this._VisMain, "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this.viewChangeHandler);
-                                phe.cnc.Util.attachNetEvent(this._MainData.get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.ownCityChangeHandler);
-                                // Setup Button
-                                this.buttons.simulate.back = new qx.ui.form.Button(lang("Setup"));
-                                this.buttons.simulate.back.set({
-                                    width: 80,
-                                    height: 24,
-                                    appearance: "button-addpoints",
-                                    toolTipText: lang("Return to Combat Setup")
-                                });
-                                this.buttons.simulate.back.addListener("click", this.returnSetup, this);
-                                // Skip to end Button
-/*this.buttons.simulate.skip = new qx.ui.form.Button();
-							this.buttons.simulate.skip.set({
-								width : 35,
-								height : 24,
-								appearance : "button-addpoints",
-								icon : "FactionUI/icons/icon_replay_skip.png",
-								toolTipText : lang("Skip to end")
-							});
-							this.buttons.simulate.skip.addListener("click", this.skipSimulation, this);*/
-                                var replayBar = this._Application.getReportReplayOverlay();
-                                replayBar.add(this.buttons.simulate.back, {
-                                    top: 21,
-                                    left: 185
-                                });
-/*if (typeof(CCTAWrapper_IsInstalled) != 'undefined' && CCTAWrapper_IsInstalled) {
-								replayBar.add(this.buttons.simulate.skip, {
-									top : 21,
-									left : 735
-								});
-							}*/
-                                // Unlock Button
-                                this.buttons.attack.unlock = new qx.ui.form.Button(lang("Unlock"));
-                                this.buttons.attack.unlock.set({
-                                    width: 54,
-                                    height: 37,
-                                    padding: 0,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Unlock Attack Button")
-                                });
-                                this.buttons.attack.unlock.addListener("click", this.unlockAttacks, this);
-                                this.buttons.attack.unlock.setOpacity(0.5);
-                                var temp = localStorage.ta_sim_attackLock;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_attackLock);
-                                } else {
-                                    temp = true;
-                                }
-                                if (temp) {
-                                    this._armyBar.add(this.buttons.attack.unlock, {
-                                        top: 148,
-                                        right: 10
-                                    });
-                                }
-                                // Unlock Repair
-                                this.buttons.attack.repair = new qx.ui.form.Button(lang("Unlock"));
-                                this.buttons.attack.repair.set({
-                                    width: 54,
-                                    height: 44,
-                                    padding: 0,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Unlock Repair Button")
-                                });
-                                this.buttons.attack.repair.addListener("click", this.unlockRepairs, this);
-                                this.buttons.attack.repair.setOpacity(0.5);
-                                var temp = localStorage.ta_sim_repairLock;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_repairLock);
-                                } else {
-                                    temp = true;
-                                }
-                                if (temp) {
-                                    this._armyBar.add(this.buttons.attack.repair, {
-                                        top: 63,
-                                        right: 10
-                                    });
-                                }
-                                var battleUnitData = ClientLib.Data.CityPreArmyUnit.prototype;
-                                if (!battleUnitData.set_Enabled_Original) {
-                                    battleUnitData.set_Enabled_Original = battleUnitData.set_Enabled;
-                                }
-                                battleUnitData.set_Enabled = function (a) {
-                                    this.set_Enabled_Original(a);
-                                    window.TACS.getInstance().formationChangeHandler();
-                                };
-                                if (!battleUnitData.MoveBattleUnit_Original) {
-                                    battleUnitData.MoveBattleUnit_Original = battleUnitData.MoveBattleUnit;
-                                }
-                                battleUnitData.MoveBattleUnit = function (a, b) {
-                                    var _this = window.TACS.getInstance();
-                                    if (_this.options.dblClick2DeActivate.getValue()) {
-                                        if (_this.armybarClickCount >= 2) {
-                                            if (this.get_CoordX() === a && this.get_CoordY() === b) {
-                                                var enabledState = this.get_Enabled();
-                                                enabledState ^= true;
-                                                this.set_Enabled_Original(enabledState);
-                                            }
-                                        }
-                                    }
-                                    this.MoveBattleUnit_Original(a, b);
-                                    _this.formationChangeHandler();
-                                    _this.armybarClickCount = 0;
-                                    clearInterval(_this.armybarClearnClickCounter);
-                                };
-                                this.loadLayouts();
-                                // The Options Window
-                                this.optionsWindow = new qx.ui.window.Window(lang("Options"), "FactionUI/icons/icon_forum_properties.png").set({
-                                    contentPaddingTop: 1,
-                                    contentPaddingBottom: 8,
-                                    contentPaddingRight: 8,
-                                    contentPaddingLeft: 8,
-                                    //width : 400,
-                                    height: 400,
-                                    showMaximize: false,
-                                    showMinimize: false,
-                                    allowMaximize: false,
-                                    allowMinimize: false,
-                                    resizable: false
-                                });
-                                this.optionsWindow.getChildControl("icon").set({
-                                    scale: true,
-                                    width: 25,
-                                    height: 25
-                                });
-                                this.optionsWindow.setLayout(new qx.ui.layout.VBox());
-                                var optionsWindowTop = localStorage.ta_sim_options_top;
-                                if (optionsWindowTop) {
-                                    optionsWindowTop = JSON.parse(localStorage.ta_sim_options_top);
-                                    var optionsWindowLeft = JSON.parse(localStorage.ta_sim_options_left);
-                                    this.optionsWindow.moveTo(optionsWindowLeft, optionsWindowTop);
-                                } else {
-                                    this.optionsWindow.center();
-                                }
-                                this.optionsWindow.addListener("close", function () {
-                                    localStorage.ta_sim_options_top = JSON.stringify(this.optionsWindow.getLayoutProperties().top);
-                                    localStorage.ta_sim_options_left = JSON.stringify(this.optionsWindow.getLayoutProperties().left);
-                                    this.saveData();
-                                }, this);
-                                // Resource Layout Window
-                                this.resourceLayoutWindow = new qx.ui.window.Window().set({
-                                    contentPaddingTop: 1,
-                                    contentPaddingBottom: 8,
-                                    contentPaddingRight: 8,
-                                    contentPaddingLeft: 8,
-                                    width: 185,
-                                    showMaximize: false,
-                                    showMinimize: false,
-                                    allowMaximize: false,
-                                    allowMinimize: false,
-                                    resizable: false
-                                });
-/*this.resourceLayoutWindow.getChildControl("icon").set({
-								scale : true,
-								width : 25,
-								height : 25
-							});*/
-                                this.resourceLayoutWindow.setLayout(new qx.ui.layout.HBox());
-                                this.resourceLayoutWindow.moveTo(this.saveObj.bounds.resourceLayoutWindowLeft, this.saveObj.bounds.resourceLayoutWindowTop);
-                                this.resourceLayoutWindow.addListener("move", function () {
-                                    this.saveObj.bounds.resourceLayoutWindowLeft = this.resourceLayoutWindow.getBounds().left;
-                                    this.saveObj.bounds.resourceLayoutWindowTop = this.resourceLayoutWindow.getBounds().top;
-                                    this.saveData();
-                                }, this);
-                                this.resourceLayoutWindow.addListener("close", function () {
-                                    localStorage.ta_sim_layout_top = JSON.stringify(this.resourceLayoutWindow.getLayoutProperties().top);
-                                    localStorage.ta_sim_layout_left = JSON.stringify(this.resourceLayoutWindow.getLayoutProperties().left);
-                                }, this);
-                                // The Battle Simulator box
-                                this.battleResultsBox = new qx.ui.window.Window("TACS", "FactionUI/icons/icon_res_plinfo_command_points.png").set({
-                                    contentPaddingTop: 0,
-                                    contentPaddingBottom: 2,
-                                    contentPaddingRight: 2,
-                                    contentPaddingLeft: 6,
-                                    width: 245,
-                                    showMaximize: false,
-                                    showMinimize: false,
-                                    allowMaximize: false,
-                                    allowMinimize: false,
-                                    resizable: false
-                                });
-                                this.battleResultsBox.getChildControl("icon").set({
-                                    scale: true,
-                                    width: 20,
-                                    height: 20,
-                                    alignY: "middle"
-                                });
-                                this.battleResultsBox.setLayout(new qx.ui.layout.HBox());
-                                this.battleResultsBox.moveTo(this.saveObj.bounds.battleResultsBoxLeft, this.saveObj.bounds.battleResultsBoxTop);
-                                this.battleResultsBox.addListener("move", function () {
-                                    this.saveObj.bounds.battleResultsBoxLeft = this.battleResultsBox.getBounds().left;
-                                    this.saveObj.bounds.battleResultsBoxTop = this.battleResultsBox.getBounds().top;
-                                    this.saveData();
-                                }, this);
-                                this.battleResultsBox.addListener("appear", function () {
-                                    this.battleResultsBox.setOpacity(this.saveObj.slider.statsOpacity / 100);
-                                }, this);
-                                var tabView = new qx.ui.tabview.TabView().set({
-                                    contentPaddingTop: 3,
-                                    width: 255,
-                                    contentPaddingBottom: 6,
-                                    contentPaddingRight: 7,
-                                    contentPaddingLeft: 3
-                                });
-                                this.battleResultsBox.add(tabView);
-                                this.initializeStats(tabView);
-                                this.initializeLayout(tabView);
-                                this.initializeInfo(tabView);
-                                this.initializeOptions();
-                                this.setupInterface();
-                                this.createHasAttackFormationFunction();
-                                this.createBasePlateFunction(ClientLib.Vis.Region.RegionNPCCamp);
-                                this.createBasePlateFunction(ClientLib.Vis.Region.RegionNPCBase);
-                                this.createBasePlateFunction(ClientLib.Vis.Region.RegionCity);
-                                // Fix armyBar container divs, the mouse has a horrible offset in the armybar when this is enabled
-                                // if this worked it would essentially fix a layout bug, shame... using zIndex instead
-                                // Abort, Retry, Fail?
-/*
-							this._armyBar.getLayoutParent().getContentElement().getParent().setStyles({
-							height : "155px"
-							});
-							this._armyBar.getLayoutParent().getContentElement().setStyles({
-							height : "155px"
-							});
-							this._armyBar.getLayoutParent().setLayoutProperties({
-							bottom : 0
-							});
-							this._armyBar.getLayoutParent().setHeight(155);
-							this._armyBar.setLayoutProperties({
-							top : -5
-							});
-							 */
-                                // putting overlays in front so we have 19 layers to work with behind them
-                                // zIndex 5 is reserved for Shiva
-                                this.gameOverlaysToFront();
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        fixBonusRounding: function (bonus, data) {
-                            try {
-                                if (data == null) data = "";
-                                var strFunction = bonus.toString();
-                                strFunction = strFunction.replace("floor", "round");
-                                var functionBody = strFunction.substring(strFunction.indexOf("{") + 1, strFunction.lastIndexOf("}"));
-                                var fn = Function(data, functionBody);
-                                return fn;
-                            } catch (e) {
-                                console.log("fixBonusRounding error: ", e);
-                            }
-                        },
-                        initializeStats: function (tabView) {
-                            try {
-                                ////////////////// Stats ////////////////////
-                                this.statsPage = new qx.ui.tabview.Page(lang("Stats"));
-                                this.statsPage.setLayout(new qx.ui.layout.VBox(1));
-                                tabView.add(this.statsPage);
-                                // Refresh Vertical Box
-                                var container = new qx.ui.container.Composite();
-                                var layout = new qx.ui.layout.Grid();
-                                layout.setColumnAlign(0, "left", "middle");
-                                layout.setColumnAlign(1, "right", "middle");
-                                layout.setColumnFlex(0, 1);
-                                layout.setRowHeight(0, 22);
-                                container.setLayout(layout);
-                                container.setThemedFont("bold");
-                                container.setThemedBackgroundColor("#eef");
-                                this.statsPage.add(container);
-                                // Countdown for next refresh
-                                this.labels.countDown = new qx.ui.basic.Label("");
-                                this.labels.countDown.set({
-                                    width: 0,
-                                    height: 10,
-                                    marginLeft: 5,
-                                    backgroundColor: "#B40404"
-                                });
-                                container.add(this.labels.countDown, {
-                                    row: 0,
-                                    column: 0
-                                });
-                                this.buttons.attack.refreshStats = new qx.ui.form.Button(lang("Refresh"));
-                                this.buttons.attack.refreshStats.set({
-                                    width: 90,
-                                    height: 21,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Refresh Stats")
-                                });
-                                this.buttons.attack.refreshStats.addListener("click", this.refreshStatistics, this);
-                                container.add(this.buttons.attack.refreshStats, {
-                                    row: 0,
-                                    column: 1
-                                });
-                                // The Enemy Vertical Box
-                                var container = new qx.ui.container.Composite();
-                                var layout = new qx.ui.layout.Grid();
-                                layout.setColumnAlign(1, "right", "middle");
-                                layout.setColumnFlex(0, 1);
-                                container.setLayout(layout);
-                                container.setThemedFont("bold");
-                                container.setThemedBackgroundColor("#eef");
-                                this.statsPage.add(container);
-                                // The Enemy Troop Strength Label
-                                container.add(new qx.ui.basic.Label(lang("Enemy Base:")), {
-                                    row: 0,
-                                    column: 0
-                                });
-                                this.labels.damage.overall = new qx.ui.basic.Label("100");
-                                container.add(this.labels.damage.overall, {
-                                    row: 0,
-                                    column: 1
-                                });
-                                // Units
-                                container.add(new qx.ui.basic.Label(lang("Defences:")), {
-                                    row: 1,
-                                    column: 0
-                                });
-                                this.labels.damage.units.overall = new qx.ui.basic.Label("100");
-                                container.add(this.labels.damage.units.overall, {
-                                    row: 1,
-                                    column: 1
-                                });
-                                // Buildings
-                                container.add(new qx.ui.basic.Label(lang("Buildings:")), {
-                                    row: 2,
-                                    column: 0
-                                });
-                                this.labels.damage.structures.overall = new qx.ui.basic.Label("100");
-                                container.add(this.labels.damage.structures.overall, {
-                                    row: 2,
-                                    column: 1
-                                });
-                                // Command Center
-                                container.add(new qx.ui.basic.Label(lang("Construction Yard:")), {
-                                    row: 3,
-                                    column: 0
-                                });
-                                this.labels.damage.structures.construction = new qx.ui.basic.Label("100");
-                                container.add(this.labels.damage.structures.construction, {
-                                    row: 3,
-                                    column: 1
-                                });
-                                // Defense Facility
-                                container.add(new qx.ui.basic.Label(lang("Defense Facility:")), {
-                                    row: 4,
-                                    column: 0
-                                });
-                                this.labels.damage.structures.defense = new qx.ui.basic.Label("100");
-                                container.add(this.labels.damage.structures.defense, {
-                                    row: 4,
-                                    column: 1
-                                });
-                                // Command Center
-                                container.add(new qx.ui.basic.Label(lang("Command Center:")), {
-                                    row: 5,
-                                    column: 0
-                                });
-                                this.labels.damage.structures.command = new qx.ui.basic.Label("100");
-                                container.add(this.labels.damage.structures.command, {
-                                    row: 5,
-                                    column: 1
-                                });
-                                // The Support Horizontal Box
-                                this.labels.supportLevel = new qx.ui.basic.Label("");
-                                container.add(this.labels.supportLevel, {
-                                    row: 6,
-                                    column: 0
-                                });
-                                this.labels.damage.structures.support = new qx.ui.basic.Label("");
-                                container.add(this.labels.damage.structures.support, {
-                                    row: 6,
-                                    column: 1
-                                });
-                                // The Troops Vertical Box
-                                container = new qx.ui.container.Composite();
-                                layout = new qx.ui.layout.Grid();
-                                layout.setColumnAlign(1, "right", "middle");
-                                layout.setColumnFlex(0, 1);
-                                container.setLayout(layout);
-                                container.setThemedFont("bold");
-                                container.setThemedBackgroundColor("#eef");
-                                this.statsPage.add(container);
-                                // The Troop Strength Label
-                                container.add(new qx.ui.basic.Label(lang("Overall:")), {
-                                    row: 0,
-                                    column: 0
-                                });
-                                this.labels.health.overall = new qx.ui.basic.Label("100");
-                                container.add(this.labels.health.overall, {
-                                    row: 0,
-                                    column: 1
-                                });
-                                // The Infantry Troop Strength Label
-                                container.add(new qx.ui.basic.Label(lang("Infantry:")), {
-                                    row: 1,
-                                    column: 0
-                                });
-                                this.labels.health.infantry = new qx.ui.basic.Label("100");
-                                container.add(this.labels.health.infantry, {
-                                    row: 1,
-                                    column: 1
-                                });
-                                // The Vehicle Troop Strength Label
-                                container.add(new qx.ui.basic.Label(lang("Vehicle:")), {
-                                    row: 2,
-                                    column: 0
-                                });
-                                this.labels.health.vehicle = new qx.ui.basic.Label("100");
-                                container.add(this.labels.health.vehicle, {
-                                    row: 2,
-                                    column: 1
-                                });
-                                // The Air Troop Strength Label
-                                container.add(new qx.ui.basic.Label(lang("Aircraft:")), {
-                                    row: 3,
-                                    column: 0
-                                });
-                                this.labels.health.aircraft = new qx.ui.basic.Label("100");
-                                container.add(this.labels.health.aircraft, {
-                                    row: 3,
-                                    column: 1
-                                });
-                                // The inner Vertical Box
-                                container = new qx.ui.container.Composite();
-                                layout = new qx.ui.layout.Grid();
-                                layout.setColumnAlign(1, "right", "middle");
-                                layout.setColumnFlex(0, 1);
-                                container.setLayout(layout);
-                                container.setThemedFont("bold");
-                                container.setThemedBackgroundColor("#eef");
-                                this.statsPage.add(container);
-                                // The Victory Label
-                                container.add(new qx.ui.basic.Label(lang("Outcome:")), {
-                                    row: 0,
-                                    column: 0
-                                });
-                                this.labels.damage.outcome = new qx.ui.basic.Label(lang("Unknown"));
-                                container.add(this.labels.damage.outcome, {
-                                    row: 0,
-                                    column: 1
-                                });
-                                // The Battle Time Label
-                                container.add(new qx.ui.basic.Label(lang("Battle Time:")), {
-                                    row: 1,
-                                    column: 0
-                                });
-                                this.labels.time = new qx.ui.basic.Label("120");
-                                container.add(this.labels.time, {
-                                    row: 1,
-                                    column: 1
-                                });
-                                // Available RT/Attacks Vertical Box
-                                container = new qx.ui.container.Composite();
-                                layout = new qx.ui.layout.Grid();
-                                layout.setColumnAlign(1, "right", "middle");
-                                layout.setColumnFlex(0, 1);
-                                container.setLayout(layout);
-                                container.setThemedFont("bold");
-                                container.setThemedBackgroundColor("#eef");
-                                this.statsPage.add(container);
-                                // Available Repair Time Label
-                                container.add(new qx.ui.basic.Label(lang("Available Repair:")), {
-                                    row: 0,
-                                    column: 0
-                                });
-                                this.labels.repair.available = new qx.ui.basic.Label("00:00:00");
-                                container.add(this.labels.repair.available, {
-                                    row: 0,
-                                    column: 1
-                                });
-                                // Available Attacks Label
-                                container.add(new qx.ui.basic.Label(lang("Available Attacks:")), {
-                                    row: 1,
-                                    column: 0
-                                });
-                                this.labels.attacks.available = new qx.ui.basic.Label("CP:- / FR:- / CFR:-");
-                                container.add(this.labels.attacks.available, {
-                                    row: 1,
-                                    column: 1
-                                });
-                                // Resource Summary Vertical Box
-                                this.resourceSummaryVerticalBox = new qx.ui.container.Composite();
-                                var layout = new qx.ui.layout.Grid();
-                                layout.setColumnAlign(1, "right", "middle");
-                                layout.setColumnWidth(0, 90);
-                                this.resourceSummaryVerticalBox.setLayout(layout);
-                                this.resourceSummaryVerticalBox.setThemedFont("bold");
-                                this.resourceSummaryVerticalBox.setThemedBackgroundColor("#eef");
-                                if (this.saveObj.checkbox.showLootSummary) {
-                                    this.statsPage.add(this.resourceSummaryVerticalBox);
-                                }
-                                // Research Icon/Label
-                                this.labels.resourcesummary.research = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_research_mission.png");
-                                this.resourceSummaryVerticalBox.add(this.labels.resourcesummary.research, {
-                                    row: 0,
-                                    column: 0
-                                });
-                                // Tiberium Icon/Label
-                                this.labels.resourcesummary.tiberium = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_tiberium.png");
-                                this.resourceSummaryVerticalBox.add(this.labels.resourcesummary.tiberium, {
-                                    row: 0,
-                                    column: 1
-                                });
-                                // Credits Icon/Label
-                                this.labels.resourcesummary.credits = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_dollar.png");
-                                this.resourceSummaryVerticalBox.add(this.labels.resourcesummary.credits, {
-                                    row: 1,
-                                    column: 0
-                                });
-                                // Crystal Icon/Label
-                                this.labels.resourcesummary.crystal = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_chrystal.png");
-                                this.resourceSummaryVerticalBox.add(this.labels.resourcesummary.crystal, {
-                                    row: 1,
-                                    column: 1
-                                });
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        initializeLayout: function (tabView) {
-                            try {
-                                ////////////////// Layouts ////////////////////
-                                var layoutPage = new qx.ui.tabview.Page(lang("Layouts"));
-                                layoutPage.setLayout(new qx.ui.layout.VBox());
-                                tabView.add(layoutPage);
-                                this.layouts.list = new qx.ui.form.List();
-                                this.layouts.list.set({
-                                    height: 174,
-                                    selectionMode: "one"
-                                });
-                                layoutPage.add(this.layouts.list);
-                                // Add the two buttons for save and load
-                                var layHBox = new qx.ui.container.Composite();
-                                layHBox.setLayout(new qx.ui.layout.HBox(5));
-                                // Load button
-                                this.buttons.attack.layout.load = new qx.ui.form.Button(lang("Load"));
-                                this.buttons.attack.layout.load.set({
-                                    width: 80,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Load this saved layout.")
-                                });
-                                this.buttons.attack.layout.load.addListener("click", this.loadCityLayout, this);
-                                layHBox.add(this.buttons.attack.layout.load);
-                                // Delete button
-                                this.buttonLayoutDelete = new qx.ui.form.Button(lang("Delete"));
-                                this.buttonLayoutDelete.set({
-                                    width: 80,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Delete this saved layout.")
-                                });
-                                this.buttonLayoutDelete.addListener("click", this.deleteCityLayout, this);
-                                layHBox.add(this.buttonLayoutDelete);
-                                layoutPage.add(layHBox);
-                                var layVBox = new qx.ui.container.Composite();
-                                layVBox.setLayout(new qx.ui.layout.VBox(1));
-                                layVBox.setThemedFont("bold");
-                                layVBox.setThemedPadding(2);
-                                layVBox.setThemedBackgroundColor("#eef");
-                                // The Label Textbox
-                                var layHBox2 = new qx.ui.container.Composite();
-                                layHBox2.setLayout(new qx.ui.layout.HBox(5));
-                                layHBox2.add(new qx.ui.basic.Label(lang("Name: ")));
-                                this.layouts.label = new qx.ui.form.TextField();
-                                this.layouts.label.setValue("");
-                                layHBox2.add(this.layouts.label);
-                                layVBox.add(layHBox2);
-                                // Save Button
-                                this.buttons.attack.layout.save = new qx.ui.form.Button(lang("Save"));
-                                this.buttons.attack.layout.save.set({
-                                    width: 80,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Save this layout.")
-                                });
-                                this.buttons.attack.layout.save.addListener("click", this.saveCityLayout, this);
-                                layVBox.add(this.buttons.attack.layout.save);
-                                layoutPage.add(layVBox);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        initializeInfo: function (tabView) {
-                            try {
-                                ////////////////// Info ////////////////////
-                                var infoPage = new qx.ui.tabview.Page(lang("Info"));
-                                infoPage.setLayout(new qx.ui.layout.VBox(1));
-                                tabView.add(infoPage);
-                                // The Help Vertical Box
-                                var pVBox = new qx.ui.container.Composite();
-                                pVBox.setLayout(new qx.ui.layout.VBox(1));
-                                pVBox.setThemedFont("bold");
-                                pVBox.setThemedPadding(2);
-                                pVBox.setThemedBackgroundColor("#eef");
-                                infoPage.add(pVBox);
-                                var proHelpBar = new qx.ui.basic.Label().set({
-                                    value: "<a target='_blank' href='http://cncscripts.com/'>cncscripts.com</a>",
-                                    rich: true
-                                });
-                                pVBox.add(proHelpBar);
-                                // The Spoils
-                                var psVBox = new qx.ui.container.Composite();
-                                psVBox.setLayout(new qx.ui.layout.VBox(1));
-                                psVBox.setThemedFont("bold");
-                                psVBox.setThemedPadding(2);
-                                psVBox.setThemedBackgroundColor("#eef");
-                                infoPage.add(psVBox);
-                                psVBox.add(new qx.ui.basic.Label(lang("Spoils")));
-                                // Tiberium
-                                this.stats.spoils.tiberium = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_tiberium.png");
-                                psVBox.add(this.stats.spoils.tiberium);
-                                // Crystal
-                                this.stats.spoils.crystal = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_chrystal.png");
-                                psVBox.add(this.stats.spoils.crystal);
-                                // Credits
-                                this.stats.spoils.credit = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_dollar.png");
-                                psVBox.add(this.stats.spoils.credit);
-                                // Research
-                                this.stats.spoils.research = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_research_mission.png");
-                                psVBox.add(this.stats.spoils.research);
-                                // Options Page
-                                var pssVBox = new qx.ui.container.Composite();
-                                var layout = new qx.ui.layout.Grid();
-                                //layout.setColumnFlex(2, 1);
-                                pssVBox.setLayout(layout);
-                                pssVBox.setThemedFont("bold");
-                                pssVBox.setThemedBackgroundColor("#eef");
-                                infoPage.add(pssVBox);
-                                this.buttons.optionStats = new qx.ui.form.Button().set({
-                                    height: 25,
-                                    width: 160,
-                                    margin: 15,
-                                    alignX: "center",
-                                    label: lang("Options"),
-                                    appearance: "button-text-small",
-                                    icon: "FactionUI/icons/icon_forum_properties.png",
-                                    toolTipText: lang("TACS Options")
-                                });
-                                this.buttons.optionStats.addListener("click", this.toggleOptionsWindow, this);
-                                pssVBox.add(this.buttons.optionStats, {
-                                    row: 0,
-                                    column: 0
-                                });
-/*
-							// Popup Checkbox
-							this.options.autoDisplayStats = new qx.ui.form.CheckBox(lang("Auto display this box"));
-							var temp = localStorage.ta_sim_autoDisplayStats;
-							if (temp) {
-							temp = JSON.parse(localStorage.ta_sim_autoDisplayStats);
-							this.options.autoDisplayStats.setValue(temp);
-							} else {
-							this.options.autoDisplayStats.setValue(true);
-							}
-							this.options.autoDisplayStats.addListener("click", this.optionPopup, this);
-							pssVBox.add(this.options.autoDisplayStats, {
-							row: 1,
-							column: 0,
-							colSpan: 3
-							});
-							// showShift Checkbox
-							this.options.showShift = new qx.ui.form.CheckBox(lang("Show shift buttons"));
-							var temp = localStorage.ta_sim_showShift;
-							if (temp) {
-							temp = JSON.parse(localStorage.ta_sim_showShift);
-							this.options.showShift.setValue(temp);
-							} else {
-							this.options.showShift.setValue(true);
-							}
-							this.options.showShift.addListener("click", this.optionShowShift, this);
-							pssVBox.add(this.options.showShift, {
-							row: 3,
-							column: 0,
-							colSpan: 3
-							});
-							// side RadioButtons
-							this.options.sideLabel = new qx.ui.basic.Label(lang("Side:"));
-							this.options.leftSide = new qx.ui.form.RadioButton(lang("Left"));
-							this.options.rightSide = new qx.ui.form.RadioButton(lang("Right"));
-							var sideRadioGroup = new qx.ui.form.RadioGroup();
-							sideRadioGroup.add(this.options.leftSide, this.options.rightSide);
-							var temp = localStorage.ta_sim_side;
-							if (temp) {
-							temp = JSON.parse(localStorage.ta_sim_side);
-							this.options.rightSide.setValue(temp);
-							} else {
-							this.options.rightSide.setValue(true);
-							}
-							sideRadioGroup.addListener("changeSelection", this.setupInterface, this);
-							pssVBox.add(this.options.sideLabel, {
-							row: 4,
-							column: 0
-							});
-							pssVBox.add(this.options.leftSide, {
-							row: 4,
-							column: 1
-							});
-							pssVBox.add(this.options.rightSide, {
-							row: 4,
-							column: 2
-							});
-							// locks Checkboxes
-							this.options.locksLabel = new qx.ui.basic.Label(lang("Locks:"));
-							this.options.attackLock = new qx.ui.form.CheckBox(lang("Attack"));
-							var temp = localStorage.ta_sim_attackLock;
-							if (temp) {
-							temp = JSON.parse(localStorage.ta_sim_attackLock);
-							this.options.attackLock.setValue(temp);
-							} else {
-							this.options.attackLock.setValue(true);
-							}
-							this.options.repairLock = new qx.ui.form.CheckBox(lang("Repair"));
-							var temp = localStorage.ta_sim_repairLock;
-							if (temp) {
-							temp = JSON.parse(localStorage.ta_sim_repairLock);
-							this.options.repairLock.setValue(temp);
-							} else {
-							this.options.repairLock.setValue(true);
-							}
-							this.options.attackLock.addListener("click", this.optionAttackLock, this);
-							this.options.repairLock.addListener("click", this.optionRepairLock, this);
-							pssVBox.add(this.options.locksLabel, {
-							row: 5,
-							column: 0
-							});
-							pssVBox.add(this.options.attackLock, {
-							row: 5,
-							column: 1
-							});
-							pssVBox.add(this.options.repairLock, {
-							row: 5,
-							column: 2
-							});*/
-                                this.battleResultsBox.add(tabView);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        initializeOptions: function () {
-                            try {
-                                var options = new qx.ui.container.Composite(); //hello
-                                options.setLayout(new qx.ui.layout.VBox(1)); //hey
-                                options.setThemedPadding(10);
-                                options.setThemedBackgroundColor("#eef");
-                                this.optionsWindow.add(options);
-                                // Options Page
-                                var pssVBox = new qx.ui.container.Composite();
-                                var layout = new qx.ui.layout.Grid(5, 5);
-                                layout.setColumnFlex(2, 1);
-                                pssVBox.setLayout(layout);
-                                pssVBox.setThemedFont("bold");
-                                pssVBox.setThemedBackgroundColor("#eef");
-                                options.add(pssVBox);
-                                window.TACS_version = (window.TACS_version === undefined) ? "Script Pack Version" : window.TACS_version;
-                                pssVBox.add(new qx.ui.basic.Label(lang("Version: ") + window.TACS_version), {
-                                    row: 0,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // Popup Checkbox
-                                this.options.autoDisplayStats = new qx.ui.form.CheckBox(lang("Auto display stats"));
-                                var temp = localStorage.ta_sim_popup;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_popup);
-                                    this.options.autoDisplayStats.setValue(temp);
-                                } else {
-                                    this.options.autoDisplayStats.setValue(true);
-                                }
-                                this.options.autoDisplayStats.addListener("click", this.optionPopup, this);
-                                pssVBox.add(this.options.autoDisplayStats, {
-                                    row: 1,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // Mark Saved Targets Checkbox
-                                this.options.markSavedTargets = new qx.ui.form.CheckBox(lang("Mark saved targets on region map"));
-                                var temp = localStorage.ta_sim_marksavedtargets;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_marksavedtargets);
-                                    this.options.markSavedTargets.setValue(temp);
-                                } else {
-                                    this.options.markSavedTargets.setValue(true);
-                                }
-                                this.options.markSavedTargets.addListener("click", function () {
-                                    localStorage.ta_sim_marksavedtargets = JSON.stringify(this.options.markSavedTargets.getValue());
-                                }, this);
-                                pssVBox.add(this.options.markSavedTargets, {
-                                    row: 2,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // Double-click to (De)activate Checkbox
-                                this.options.dblClick2DeActivate = new qx.ui.form.CheckBox(lang("Enable 'Double-click to (De)activate units'"));
-                                var temp = localStorage.ta_sim_dblClick2DeActivate;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_dblClick2DeActivate);
-                                    this.options.dblClick2DeActivate.setValue(temp);
-                                } else {
-                                    this.options.dblClick2DeActivate.setValue(true);
-                                }
-                                this.options.dblClick2DeActivate.addListener("click", function () {
-                                    localStorage.ta_sim_dblClick2DeActivate = JSON.stringify(this.options.dblClick2DeActivate.getValue());
-                                }, this);
-                                pssVBox.add(this.options.dblClick2DeActivate, {
-                                    row: 3,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // showShift Checkbox
-                                this.options.showShift = new qx.ui.form.CheckBox(lang("Show shift buttons"));
-                                var temp = localStorage.ta_sim_showShift;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_showShift);
-                                    this.options.showShift.setValue(temp);
-                                } else {
-                                    this.options.showShift.setValue(true);
-                                }
-                                this.options.showShift.addListener("click", this.optionShowShift, this);
-                                pssVBox.add(this.options.showShift, {
-                                    row: 4,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // side RadioButtons
-                                this.options.sideLabel = new qx.ui.basic.Label(lang("Side:"));
-                                this.options.leftSide = new qx.ui.form.RadioButton(lang("Left"));
-                                this.options.rightSide = new qx.ui.form.RadioButton(lang("Right"));
-                                var sideRadioGroup = new qx.ui.form.RadioGroup();
-                                sideRadioGroup.add(this.options.leftSide, this.options.rightSide);
-                                var temp = localStorage.ta_sim_side;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_side);
-                                    this.options.rightSide.setValue(temp);
-                                } else {
-                                    this.options.rightSide.setValue(true);
-                                }
-                                sideRadioGroup.addListener("changeSelection", this.setupInterface, this);
-                                pssVBox.add(this.options.sideLabel, {
-                                    row: 5,
-                                    column: 0
-                                });
-                                pssVBox.add(this.options.leftSide, {
-                                    row: 5,
-                                    column: 1
-                                });
-                                pssVBox.add(this.options.rightSide, {
-                                    row: 5,
-                                    column: 2
-                                });
-                                // locks Checkboxes
-                                this.options.locksLabel = new qx.ui.basic.Label(lang("Locks:"));
-                                this.options.attackLock = new qx.ui.form.CheckBox(lang("Attack"));
-                                var temp = localStorage.ta_sim_attackLock;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_attackLock);
-                                    this.options.attackLock.setValue(temp);
-                                } else {
-                                    this.options.attackLock.setValue(true);
-                                }
-                                this.options.repairLock = new qx.ui.form.CheckBox(lang("Repair"));
-                                var temp = localStorage.ta_sim_repairLock;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_repairLock);
-                                    this.options.repairLock.setValue(temp);
-                                } else {
-                                    this.options.repairLock.setValue(true);
-                                }
-                                this.options.attackLock.addListener("click", this.optionAttackLock, this);
-                                this.options.repairLock.addListener("click", this.optionRepairLock, this);
-                                pssVBox.add(this.options.locksLabel, {
-                                    row: 6,
-                                    column: 0
-                                });
-                                pssVBox.add(this.options.attackLock, {
-                                    row: 6,
-                                    column: 1
-                                });
-                                pssVBox.add(this.options.repairLock, {
-                                    row: 6,
-                                    column: 2
-                                });
-                                // showLootSummary Checkbox
-                                this.options.showLootSummary = new qx.ui.form.CheckBox(lang("Show Loot Summary"));
-                                this.options.showLootSummary.saveLocation = "showLootSummary";
-                                this.options.showLootSummary.setValue(this.saveObj.checkbox.showLootSummary);
-                                this.options.showLootSummary.addListener("click", this.toggleCheckboxOption, this);
-                                pssVBox.add(this.options.showLootSummary, {
-                                    row: 7,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // showResourceLayoutWindow Checkbox
-                                this.options.showResourceLayoutWindow = new qx.ui.form.CheckBox(lang("Show Resource Layout Window"));
-                                this.options.showResourceLayoutWindow.saveLocation = "showResourceLayoutWindow";
-                                this.options.showResourceLayoutWindow.setValue(this.saveObj.checkbox.showResourceLayoutWindow);
-                                this.options.showResourceLayoutWindow.addListener("click", this.toggleCheckboxOption, this);
-                                pssVBox.add(this.options.showResourceLayoutWindow, {
-                                    row: 8,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // showStatsDuringAttack Checkbox
-                                this.options.showStatsDuringAttack = new qx.ui.form.CheckBox(lang("Show Stats During Attack"));
-                                this.options.showStatsDuringAttack.saveLocation = "showStatsDuringAttack";
-                                this.options.showStatsDuringAttack.setValue(this.saveObj.checkbox.showStatsDuringAttack);
-                                this.options.showStatsDuringAttack.addListener("click", this.toggleCheckboxOption, this);
-                                pssVBox.add(this.options.showStatsDuringAttack, {
-                                    row: 9,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // showStatsDuringSimulation Checkbox
-                                this.options.showStatsDuringSimulation = new qx.ui.form.CheckBox(lang("Show Stats During Simulation"));
-                                this.options.showStatsDuringSimulation.saveLocation = "showStatsDuringSimulation";
-                                this.options.showStatsDuringSimulation.setValue(this.saveObj.checkbox.showStatsDuringSimulation);
-                                this.options.showStatsDuringSimulation.addListener("click", this.toggleCheckboxOption, this);
-                                pssVBox.add(this.options.showStatsDuringSimulation, {
-                                    row: 10,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // skipVictoryPopup Checkbox
-                                this.options.skipVictoryPopup = new qx.ui.form.CheckBox(lang("Skip Victory-Popup After Battle"));
-                                this.options.skipVictoryPopup.saveLocation = "skipVictoryPopup";
-                                this.options.skipVictoryPopup.setValue(this.saveObj.checkbox.skipVictoryPopup);
-                                this.options.skipVictoryPopup.addListener("click", this.toggleCheckboxOption, this);
-                                pssVBox.add(this.options.skipVictoryPopup, {
-                                    row: 11,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                webfrontend.gui.reports.CombatVictoryPopup.getInstance().addListener("appear", function () {
-/*if (this.toolBar.isVisible()) {
-									this.toolBar.hide();
-								}
-								if (this.toolBarMouse.isVisible()) {
-									this.toolBarMouse.hide();
-								}*/
-                                    if (this.saveObj.checkbox.skipVictoryPopup) {
-                                        webfrontend.gui.reports.CombatVictoryPopup.getInstance()._onBtnClose();
-                                    }
-                                }, this);
-                                // disableTooltipsInAttackPreparationView Checkbox
-                                this.options.disableAttackPreparationTooltips = new qx.ui.form.CheckBox(lang("Disable Tooltips In Attack Preparation View"));
-                                this.options.disableAttackPreparationTooltips.saveLocation = "disableAttackPreparationTooltips";
-                                this.options.disableAttackPreparationTooltips.setValue(this.saveObj.checkbox.disableAttackPreparationTooltips);
-                                this.options.disableAttackPreparationTooltips.addListener("click", this.toggleCheckboxOption, this);
-                                pssVBox.add(this.options.disableAttackPreparationTooltips, {
-                                    row: 12,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                // disableArmyFormationManagerTooltips Checkbox
-                                this.options.disableArmyFormationManagerTooltips = new qx.ui.form.CheckBox(lang("Disable Unit Tooltips In Army Formation Manager"));
-                                this.options.disableArmyFormationManagerTooltips.saveLocation = "disableArmyFormationManagerTooltips";
-                                this.options.disableArmyFormationManagerTooltips.setValue(this.saveObj.checkbox.disableArmyFormationManagerTooltips);
-                                this.options.disableArmyFormationManagerTooltips.addListener("click", this.toggleCheckboxOption, this);
-                                pssVBox.add(this.options.disableArmyFormationManagerTooltips, {
-                                    row: 13,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                this.options.statsOpacityLabel = new qx.ui.basic.Label(lang("Stats Window Opacity"));
-                                this.options.statsOpacityLabel.setMarginTop(10);
-                                pssVBox.add(this.options.statsOpacityLabel, {
-                                    row: 14,
-                                    column: 0,
-                                    colSpan: 3
-                                });
-                                this.options.statsOpacity = new qx.ui.form.Slider();
-                                pssVBox.add(this.options.statsOpacity, {
-                                    row: 15,
-                                    column: 1,
-                                    colSpan: 2
-                                });
-                                this.options.statsOpacity.setValue(this.saveObj.slider.statsOpacity);
-                                this.options.statsOpacityOutput = new qx.ui.basic.Label(String(this.saveObj.slider.statsOpacity));
-                                pssVBox.add(this.options.statsOpacityOutput, {
-                                    row: 16,
-                                    column: 0
-                                });
-                                this.options.statsOpacity.addListener("changeValue", function () {
-                                    var val = this.options.statsOpacity.getValue();
-                                    this.battleResultsBox.setOpacity(val / 100);
-                                    this.options.statsOpacityOutput.setValue(String(val) + "%");
-                                    this.saveObj.slider.statsOpacity = val;
-                                }, this);
-                                // The Help Vertical Box
-                                var pVBox = new qx.ui.container.Composite();
-                                pVBox.setLayout(new qx.ui.layout.VBox(1));
-                                pVBox.setThemedFont("bold");
-                                pVBox.setThemedPadding(10);
-                                //pVBox.setThemedMargin(3);
-                                pVBox.setThemedBackgroundColor("#eef");
-                                options.add(pVBox);
-                                var proHelpBar = new qx.ui.basic.Label().set({
-                                    value: "<a target='_blank' href='http://cncscripts.com/'>cncscripts.com</a>",
-                                    rich: true
-                                });
-                                pVBox.add(proHelpBar);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        toggleCheckboxOption: function (evt) {
-                            var tgt = evt.getTarget();
-                            var val = tgt.getValue();
-                            this.saveObj.checkbox[tgt.saveLocation] = val;
-                            //console.log("this.saveObj.checkbox[\"" + tgt.saveLocation + "\"] = " + this.saveObj.checkbox[tgt.saveLocation]);
-                            //console.log("val = " + val);
-                            if (tgt == this.options.showLootSummary) {
-                                if (this.saveObj.checkbox.showLootSummary) {
-                                    this.statsPage.add(this.resourceSummaryVerticalBox);
-                                } else {
-                                    this.statsPage.remove(this.resourceSummaryVerticalBox);
+                                } else if (typeof temp[i] == "undefined") {
+                                    // create missing option section
+                                    console.log("Creating missing option section: " + i);
+                                    temp[i] = this.saveObj[i];
                                 }
                             }
-                            if (tgt == this.options.showResourceLayoutWindow) {
-                                if (this.saveObj.checkbox.showResourceLayoutWindow) {
-                                    this.resourceLayoutWindow.open();
-                                } else {
-                                    this.resourceLayoutWindow.close();
-                                }
-                            }
+                            this.saveObj = temp;
                             this.saveData();
-                        },
-                        createHasAttackFormationFunction: function () {
-                            try {
-                                ClientLib.Data.City.prototype.HasAttackFormation = function (targetCity) {
-                                    var $createHelper;
-                                    var ownCity = this.get_Id();
-                                    if (TACS.getInstance().layouts.all.hasOwnProperty(targetCity)) {
-                                        if (TACS.getInstance().layouts.all[targetCity].hasOwnProperty(ownCity)) {
-                                            var count = 0;
-                                            for (var key in TACS.getInstance().layouts.all[targetCity][ownCity]) {
-                                                if (TACS.getInstance().layouts.all[targetCity][ownCity].hasOwnProperty(key)) {
-                                                    count++;
-                                                }
-                                            }
-                                            if (count > 0) return true;
-                                        } else {
-                                            return false;
+                        }
+                    },
+                    saveData: function () {
+                        var obj = this.saveObj || window.TACS.getInstance().saveObj;
+                        var str = JSON.stringify(obj);
+                        localStorage.setItem("TACS", str);
+                    },
+                    initialize: function () {
+                        try {
+                            this.loadData();
+                            locale = ClientLib.Config.Main.GetInstance().GetConfig(ClientLib.Config.Main.CONFIG_LANGUAGE);
+                            this.targetCityId = "0";
+                            // Store references
+                            this._Application = qx.core.Init.getApplication();
+                            this._MainData = ClientLib.Data.MainData.GetInstance();
+                            this._VisMain = ClientLib.Vis.VisMain.GetInstance();
+                            this._ActiveView = this._VisMain.GetActiveView();
+                            this._PlayArea = this._Application.getPlayArea();
+                            this._armyBarContainer = this._Application.getArmySetupAttackBar();
+                            this._armyBar = this._Application.getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
+                            if (PerforceChangelist >= 443425) { // 16.1 patch
+                                for (var i in this._armyBarContainer) {
+                                    if (typeof this._armyBarContainer[i] == "object" && this._armyBarContainer[i] != null) {
+                                        if (this._armyBarContainer[i].objid == "btn_disable") {
+                                            console.log(this._armyBarContainer[i].objid);
+                                            var nativeSimBarDisableButton = this._armyBarContainer[i];
+                                        }
+                                        if (this._armyBarContainer[i].objid == "cnt_controls" || this._armyBarContainer[i].objid == "btn_toggle") {
+                                            this._armyBarContainer[i].setVisibility("excluded");
                                         }
                                     }
                                 }
-                            } catch (e) {
-                                console.log(e);
+                                var armyBarChildren = this._armyBar.getChildren();
+                                for (var i in armyBarChildren) {
+                                    if (armyBarChildren[i].$$user_decorator == "pane-armysetup-right") {
+                                        console.log(armyBarChildren[i].$$user_decorator)
+                                        var armySetupRight = armyBarChildren[i];
+                                        armySetupRight.removeAt(1);
+                                        armySetupRight.addAt(nativeSimBarDisableButton, 1);
+                                        break;
+                                    }
+                                }
                             }
-                        },
-                        createBasePlateFunction: function (r) {
-                            try {
-                                var regionObject = r.prototype;
-                                for (var key in regionObject) {
-                                    if (typeof regionObject[key] === 'function') {
-                                        var strFunction = regionObject[key].toString();
-                                        if (strFunction.indexOf("Blue") > -1 && strFunction.indexOf("Black") > -1) {
-                                            if (r == ClientLib.Vis.Region.RegionNPCCamp || r == ClientLib.Vis.Region.RegionNPCBase) {
-                                                regionObject[key] = function () {
-                                                    var $createHelper;
-                                                    var basePlateColor = ClientLib.Vis.EBackgroundPlateColor.Black;
-                                                    if ((ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity() != null) && ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().HasAttackFormation(this.get_Id())) {
-                                                        var playerFaction = ClientLib.Data.MainData.GetInstance().get_Player().get_Faction();
-                                                        basePlateColor = ((this.get_PlayerFaction() == 1) ? ClientLib.Vis.EBackgroundPlateColor.Orange : ClientLib.Vis.EBackgroundPlateColor.Cyan);
-                                                    }
-                                                    return basePlateColor;
-                                                }
-                                                break;
-                                            } else {
-                                                regionObject[key] = function () {
-                                                    var $createHelper;
-                                                    var basePlateColor = ClientLib.Vis.EBackgroundPlateColor.Black;
-                                                    if (this.get_Type() == ClientLib.Vis.Region.RegionCity.ERegionCityType.Own) {
-                                                        basePlateColor = ((this.get_PlayerFaction() == 1) ? ClientLib.Vis.EBackgroundPlateColor.Cyan : ClientLib.Vis.EBackgroundPlateColor.Orange);
-                                                    } else {
-                                                        basePlateColor = ClientLib.Vis.EBackgroundPlateColor.Black;
-                                                    }
-                                                    if (((this.get_Type() != ClientLib.Vis.Region.RegionCity.ERegionCityType.Own) && (ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity() != null)) && ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().HasAttackFormation(this.get_Id())) {
-                                                        basePlateColor = ((this.get_PlayerFaction() == 1) ? ClientLib.Vis.EBackgroundPlateColor.Orange : ClientLib.Vis.EBackgroundPlateColor.Cyan);
-                                                    }
-                                                    return basePlateColor;
-                                                }
-                                                break;
-                                            }
+                            // Fix Defense Bonus Rounding
+                            for (var key in ClientLib.Data.City.prototype) {
+                                if (typeof ClientLib.Data.City.prototype[key] === 'function') {
+                                    var strFunction = ClientLib.Data.City.prototype[key].toString();
+                                    if (strFunction.indexOf("Math.floor(a.adb)") > -1) {
+                                        ClientLib.Data.City.prototype[key] = this.fixBonusRounding(ClientLib.Data.City.prototype[key], "a");
+                                        break;
+                                    }
+                                }
+                            }
+                            // Just some shortcuts by Netquik
+                            this.ArmySetupAttackBarMainChildren = this._armyBarContainer.getMainContainer().getChildren();
+                            this._playAreaChildren = this._PlayArea.getChildren();
+                            this.MainOverlay = this._Application.getMainOverlay();
+                            this._PlayAreaHeight = this._PlayArea.getLayoutParent().getBounds().height;
+                            this._PlayAreaHeight2 = this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().height;
+
+                            // 19.5 FIX VIEW by Netquik REVIEW  
+                            if (PerforceChangelist >= 472117) { // 19.5 patch
+                                this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
+                                this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar
+                                this._armyBarContainer.removeAt(1); // removing Next Army Setup msg
+                                this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
+                                this._playAreaChildren[2].setHeight(120); // fix opacity for better view
+                                this._playAreaChildren[4].resetDecorator();
+
+
+                                // lowering playArea children by Netquik FIXME 
+                                var fixOverlay;
+                                fixOverlay = this._PlayAreaHeight2 <= 930 && this._PlayAreaHeight <= 800;
+                                for (var i in this._playAreaChildren) {
+                                    if (this._playAreaChildren[i]) {
+                                        playchild = this._playAreaChildren[i];
+                                        if ((playchild.basename === "FormationSaver" || (i > 2 && i < 16)) && fixOverlay) {
+                                            playchild.setMarginTop(25);
+                                        } else if (i > 15 && i < this._playAreaChildren.length) {
+                                            playchild.setMarginTop(-25);
                                         }
                                     }
                                 }
-                            } catch (e) {
-                                console.log(e);
+                                // adjusting bars 19.5 by Netquik 
+                                this.ArmySetupAttackBarMainChildren[2].setVisibility("hidden");
+                                this.ArmySetupAttackBarMainChildren[9].resetDecorator();
+                                this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
+                                this.ArmySetupAttackBarMainChildren[9].setMarginRight(10);
                             }
-                        },
-                        initToolBarListeners: function () {
-                            try {
-                                var playAreaBounds = this._PlayArea.getLayoutParent().getBounds();
-                                var playAreaWidth = this._PlayArea.getLayoutParent().getBounds().width;
-                                this._PlayArea.addListener("mouseover", function () {
-                                    //this.toolBar.setOpacity(0);
-                                    if (this.toolBar.isVisible()) {
-                                        this.toolBarMouse.show();
-                                        this.toolBar.setLayoutProperties({
-                                            bottom: this.TOOL_BAR_LOW
-                                        });
-                                        this.toolBar.setZIndex(1);
+                            // Event Handlers
+                            phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateBattleFinished", ClientLib.API.OnSimulateBattleFinished, this, this.onSimulateBattleFinishedEvent);
+                            phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateCombatReport", ClientLib.API.OnSimulateCombatReport, this, this.OnSimulateCombatReportEvent);
+                            phe.cnc.Util.attachNetEvent(this._VisMain, "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this.viewChangeHandler);
+                            phe.cnc.Util.attachNetEvent(this._MainData.get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.ownCityChangeHandler);
+                            // Setup Button
+                            this.buttons.simulate.back = new qx.ui.form.Button(lang("Setup"));
+                            this.buttons.simulate.back.set({
+                                width: 80,
+                                height: 24,
+                                appearance: "button-addpoints",
+                                toolTipText: lang("Return to Combat Setup")
+                            });
+                            this.buttons.simulate.back.addListener("click", this.returnSetup, this);
+                            // Skip to end Button
+                            /*this.buttons.simulate.skip = new qx.ui.form.Button();
+                            							this.buttons.simulate.skip.set({
+                            								width : 35,
+                            								height : 24,
+                            								appearance : "button-addpoints",
+                            								icon : "FactionUI/icons/icon_replay_skip.png",
+                            								toolTipText : lang("Skip to end")
+                            							});
+                            							this.buttons.simulate.skip.addListener("click", this.skipSimulation, this);*/
+                            var replayBar = this._Application.getReportReplayOverlay();
+                            replayBar.add(this.buttons.simulate.back, {
+                                top: 21,
+                                left: 185
+                            });
+                            /*if (typeof(CCTAWrapper_IsInstalled) != 'undefined' && CCTAWrapper_IsInstalled) {
+                            								replayBar.add(this.buttons.simulate.skip, {
+                            									top : 21,
+                            									left : 735
+                            								});
+                            							}*/
+                            // Unlock Button
+                            this.buttons.attack.unlock = new qx.ui.form.Button(lang("Unlock"));
+                            this.buttons.attack.unlock.set({
+                                width: 54,
+                                height: 37,
+                                padding: 0,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Unlock Attack Button")
+                            });
+                            this.buttons.attack.unlock.addListener("click", this.unlockAttacks, this);
+                            this.buttons.attack.unlock.setOpacity(0.5);
+                            var temp = localStorage.ta_sim_attackLock;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_attackLock);
+                            } else {
+                                temp = true;
+                            }
+                            if (temp) {
+                                this._armyBar.add(this.buttons.attack.unlock, {
+                                    top: 148,
+                                    right: 10
+                                });
+                            }
+                            // Unlock Repair
+                            this.buttons.attack.repair = new qx.ui.form.Button(lang("Unlock"));
+                            this.buttons.attack.repair.set({
+                                width: 54,
+                                height: 44,
+                                padding: 0,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Unlock Repair Button")
+                            });
+                            this.buttons.attack.repair.addListener("click", this.unlockRepairs, this);
+                            this.buttons.attack.repair.setOpacity(0.5);
+                            var temp = localStorage.ta_sim_repairLock;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_repairLock);
+                            } else {
+                                temp = true;
+                            }
+                            if (temp) {
+                                this._armyBar.add(this.buttons.attack.repair, {
+                                    top: 63,
+                                    right: 10
+                                });
+                            }
+                            var battleUnitData = ClientLib.Data.CityPreArmyUnit.prototype;
+                            if (!battleUnitData.set_Enabled_Original) {
+                                battleUnitData.set_Enabled_Original = battleUnitData.set_Enabled;
+                            }
+                            battleUnitData.set_Enabled = function (a) {
+                                this.set_Enabled_Original(a);
+                                window.TACS.getInstance().formationChangeHandler();
+                            };
+                            if (!battleUnitData.MoveBattleUnit_Original) {
+                                battleUnitData.MoveBattleUnit_Original = battleUnitData.MoveBattleUnit;
+                            }
+                            battleUnitData.MoveBattleUnit = function (a, b) {
+                                var _this = window.TACS.getInstance();
+                                if (_this.options.dblClick2DeActivate.getValue()) {
+                                    if (_this.armybarClickCount >= 2) {
+                                        if (this.get_CoordX() === a && this.get_CoordY() === b) {
+                                            var enabledState = this.get_Enabled();
+                                            enabledState ^= true;
+                                            this.set_Enabled_Original(enabledState);
+                                        }
                                     }
-                                }, this);
-                                this._armyBarContainer.addListener("appear", function () {
-                                    //console.log("_armyBarContainer appeared");
-                                    this._armyBarContainer.setZIndex(3);
-                                    this.toolBar.show();
-                                    this.toolBarMouse.show();
-                                }, this);
-                                this._armyBarContainer.addListener("changeVisibility", function () {
-                                    if (!this._armyBarContainer.isVisible()) {
-                                        //console.log("changeVisibility: _armyBarContainer hidden");
-                                        this.toolBar.hide();
-                                        this.toolBarMouse.hide();
+                                }
+                                this.MoveBattleUnit_Original(a, b);
+                                _this.formationChangeHandler();
+                                _this.armybarClickCount = 0;
+                                clearInterval(_this.armybarClearnClickCounter);
+                            };
+                            this.loadLayouts();
+                            // The Options Window
+                            this.optionsWindow = new qx.ui.window.Window(lang("Options"), "FactionUI/icons/icon_forum_properties.png").set({
+                                contentPaddingTop: 1,
+                                contentPaddingBottom: 8,
+                                contentPaddingRight: 8,
+                                contentPaddingLeft: 8,
+                                //width : 400,
+                                height: 400,
+                                showMaximize: false,
+                                showMinimize: false,
+                                allowMaximize: false,
+                                allowMinimize: false,
+                                resizable: false
+                            });
+                            this.optionsWindow.getChildControl("icon").set({
+                                scale: true,
+                                width: 25,
+                                height: 25
+                            });
+                            this.optionsWindow.setLayout(new qx.ui.layout.VBox());
+                            var optionsWindowTop = localStorage.ta_sim_options_top;
+                            if (optionsWindowTop) {
+                                optionsWindowTop = JSON.parse(localStorage.ta_sim_options_top);
+                                var optionsWindowLeft = JSON.parse(localStorage.ta_sim_options_left);
+                                this.optionsWindow.moveTo(optionsWindowLeft, optionsWindowTop);
+                            } else {
+                                this.optionsWindow.center();
+                            }
+                            this.optionsWindow.addListener("close", function () {
+                                localStorage.ta_sim_options_top = JSON.stringify(this.optionsWindow.getLayoutProperties().top);
+                                localStorage.ta_sim_options_left = JSON.stringify(this.optionsWindow.getLayoutProperties().left);
+                                this.saveData();
+                            }, this);
+                            // Resource Layout Window
+                            this.resourceLayoutWindow = new qx.ui.window.Window().set({
+                                contentPaddingTop: 1,
+                                contentPaddingBottom: 8,
+                                contentPaddingRight: 8,
+                                contentPaddingLeft: 8,
+                                width: 185,
+                                showMaximize: false,
+                                showMinimize: false,
+                                allowMaximize: false,
+                                allowMinimize: false,
+                                resizable: false
+                            });
+                            /*this.resourceLayoutWindow.getChildControl("icon").set({
+                            								scale : true,
+                            								width : 25,
+                            								height : 25
+                            							});*/
+                            this.resourceLayoutWindow.setLayout(new qx.ui.layout.HBox());
+                            this.resourceLayoutWindow.moveTo(this.saveObj.bounds.resourceLayoutWindowLeft, this.saveObj.bounds.resourceLayoutWindowTop);
+                            this.resourceLayoutWindow.addListener("move", function () {
+                                this.saveObj.bounds.resourceLayoutWindowLeft = this.resourceLayoutWindow.getBounds().left;
+                                this.saveObj.bounds.resourceLayoutWindowTop = this.resourceLayoutWindow.getBounds().top;
+                                this.saveData();
+                            }, this);
+                            this.resourceLayoutWindow.addListener("close", function () {
+                                localStorage.ta_sim_layout_top = JSON.stringify(this.resourceLayoutWindow.getLayoutProperties().top);
+                                localStorage.ta_sim_layout_left = JSON.stringify(this.resourceLayoutWindow.getLayoutProperties().left);
+                            }, this);
+                            // The Battle Simulator box
+                            this.battleResultsBox = new qx.ui.window.Window("TACS", "FactionUI/icons/icon_res_plinfo_command_points.png").set({
+                                contentPaddingTop: 0,
+                                contentPaddingBottom: 2,
+                                contentPaddingRight: 2,
+                                contentPaddingLeft: 6,
+                                width: 245,
+                                showMaximize: false,
+                                showMinimize: false,
+                                allowMaximize: false,
+                                allowMinimize: false,
+                                resizable: false
+                            });
+                            this.battleResultsBox.getChildControl("icon").set({
+                                scale: true,
+                                width: 20,
+                                height: 20,
+                                alignY: "middle"
+                            });
+                            this.battleResultsBox.setLayout(new qx.ui.layout.HBox());
+                            this.battleResultsBox.moveTo(this.saveObj.bounds.battleResultsBoxLeft, this.saveObj.bounds.battleResultsBoxTop);
+                            this.battleResultsBox.addListener("move", function () {
+                                this.saveObj.bounds.battleResultsBoxLeft = this.battleResultsBox.getBounds().left;
+                                this.saveObj.bounds.battleResultsBoxTop = this.battleResultsBox.getBounds().top;
+                                this.saveData();
+                            }, this);
+                            this.battleResultsBox.addListener("appear", function () {
+                                this.battleResultsBox.setOpacity(this.saveObj.slider.statsOpacity / 100);
+                            }, this);
+                            var tabView = new qx.ui.tabview.TabView().set({
+                                contentPaddingTop: 3,
+                                width: 255,
+                                contentPaddingBottom: 6,
+                                contentPaddingRight: 7,
+                                contentPaddingLeft: 3
+                            });
+                            this.battleResultsBox.add(tabView);
+                            this.initializeStats(tabView);
+                            this.initializeLayout(tabView);
+                            this.initializeInfo(tabView);
+                            this.initializeOptions();
+                            this.setupInterface();
+                            this.createHasAttackFormationFunction();
+                            this.createBasePlateFunction(ClientLib.Vis.Region.RegionNPCCamp);
+                            this.createBasePlateFunction(ClientLib.Vis.Region.RegionNPCBase);
+                            this.createBasePlateFunction(ClientLib.Vis.Region.RegionCity);
+                            // Fix armyBar container divs, the mouse has a horrible offset in the armybar when this is enabled
+                            // if this worked it would essentially fix a layout bug, shame... using zIndex instead
+                            // Abort, Retry, Fail?
+                            /*
+                            							this._armyBar.getLayoutParent().getContentElement().getParent().setStyles({
+                            							height : "155px"
+                            							});
+                            							this._armyBar.getLayoutParent().getContentElement().setStyles({
+                            							height : "155px"
+                            							});
+                            							this._armyBar.getLayoutParent().setLayoutProperties({
+                            							bottom : 0
+                            							});
+                            							this._armyBar.getLayoutParent().setHeight(155);
+                            							this._armyBar.setLayoutProperties({
+                            							top : -5
+                            							});
+                            							 */
+                            // putting overlays in front so we have 19 layers to work with behind them
+                            // zIndex 5 is reserved for Shiva
+                            this.gameOverlaysToFront();
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    fixBonusRounding: function (bonus, data) {
+                        try {
+                            if (data == null) data = "";
+                            var strFunction = bonus.toString();
+                            strFunction = strFunction.replace("floor", "round");
+                            var functionBody = strFunction.substring(strFunction.indexOf("{") + 1, strFunction.lastIndexOf("}"));
+                            var fn = Function(data, functionBody);
+                            return fn;
+                        } catch (e) {
+                            console.log("fixBonusRounding error: ", e);
+                        }
+                    },
+                    initializeStats: function (tabView) {
+                        try {
+                            ////////////////// Stats ////////////////////
+                            this.statsPage = new qx.ui.tabview.Page(lang("Stats"));
+                            this.statsPage.setLayout(new qx.ui.layout.VBox(1));
+                            tabView.add(this.statsPage);
+                            // Refresh Vertical Box
+                            var container = new qx.ui.container.Composite();
+                            var layout = new qx.ui.layout.Grid();
+                            layout.setColumnAlign(0, "left", "middle");
+                            layout.setColumnAlign(1, "right", "middle");
+                            layout.setColumnFlex(0, 1);
+                            layout.setRowHeight(0, 22);
+                            container.setLayout(layout);
+                            container.setThemedFont("bold");
+                            container.setThemedBackgroundColor("#eef");
+                            this.statsPage.add(container);
+                            // Countdown for next refresh
+                            this.labels.countDown = new qx.ui.basic.Label("");
+                            this.labels.countDown.set({
+                                width: 0,
+                                height: 10,
+                                marginLeft: 5,
+                                backgroundColor: "#B40404"
+                            });
+                            container.add(this.labels.countDown, {
+                                row: 0,
+                                column: 0
+                            });
+                            this.buttons.attack.refreshStats = new qx.ui.form.Button(lang("Refresh"));
+                            this.buttons.attack.refreshStats.set({
+                                width: 90,
+                                height: 21,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Refresh Stats")
+                            });
+                            this.buttons.attack.refreshStats.addListener("click", this.refreshStatistics, this);
+                            container.add(this.buttons.attack.refreshStats, {
+                                row: 0,
+                                column: 1
+                            });
+                            // The Enemy Vertical Box
+                            var container = new qx.ui.container.Composite();
+                            var layout = new qx.ui.layout.Grid();
+                            layout.setColumnAlign(1, "right", "middle");
+                            layout.setColumnFlex(0, 1);
+                            container.setLayout(layout);
+                            container.setThemedFont("bold");
+                            container.setThemedBackgroundColor("#eef");
+                            this.statsPage.add(container);
+                            // The Enemy Troop Strength Label
+                            container.add(new qx.ui.basic.Label(lang("Enemy Base:")), {
+                                row: 0,
+                                column: 0
+                            });
+                            this.labels.damage.overall = new qx.ui.basic.Label("100");
+                            container.add(this.labels.damage.overall, {
+                                row: 0,
+                                column: 1
+                            });
+                            // Units
+                            container.add(new qx.ui.basic.Label(lang("Defences:")), {
+                                row: 1,
+                                column: 0
+                            });
+                            this.labels.damage.units.overall = new qx.ui.basic.Label("100");
+                            container.add(this.labels.damage.units.overall, {
+                                row: 1,
+                                column: 1
+                            });
+                            // Buildings
+                            container.add(new qx.ui.basic.Label(lang("Buildings:")), {
+                                row: 2,
+                                column: 0
+                            });
+                            this.labels.damage.structures.overall = new qx.ui.basic.Label("100");
+                            container.add(this.labels.damage.structures.overall, {
+                                row: 2,
+                                column: 1
+                            });
+                            // Command Center
+                            container.add(new qx.ui.basic.Label(lang("Construction Yard:")), {
+                                row: 3,
+                                column: 0
+                            });
+                            this.labels.damage.structures.construction = new qx.ui.basic.Label("100");
+                            container.add(this.labels.damage.structures.construction, {
+                                row: 3,
+                                column: 1
+                            });
+                            // Defense Facility
+                            container.add(new qx.ui.basic.Label(lang("Defense Facility:")), {
+                                row: 4,
+                                column: 0
+                            });
+                            this.labels.damage.structures.defense = new qx.ui.basic.Label("100");
+                            container.add(this.labels.damage.structures.defense, {
+                                row: 4,
+                                column: 1
+                            });
+                            // Command Center
+                            container.add(new qx.ui.basic.Label(lang("Command Center:")), {
+                                row: 5,
+                                column: 0
+                            });
+                            this.labels.damage.structures.command = new qx.ui.basic.Label("100");
+                            container.add(this.labels.damage.structures.command, {
+                                row: 5,
+                                column: 1
+                            });
+                            // The Support Horizontal Box
+                            this.labels.supportLevel = new qx.ui.basic.Label("");
+                            container.add(this.labels.supportLevel, {
+                                row: 6,
+                                column: 0
+                            });
+                            this.labels.damage.structures.support = new qx.ui.basic.Label("");
+                            container.add(this.labels.damage.structures.support, {
+                                row: 6,
+                                column: 1
+                            });
+                            // The Troops Vertical Box
+                            container = new qx.ui.container.Composite();
+                            layout = new qx.ui.layout.Grid();
+                            layout.setColumnAlign(1, "right", "middle");
+                            layout.setColumnFlex(0, 1);
+                            container.setLayout(layout);
+                            container.setThemedFont("bold");
+                            container.setThemedBackgroundColor("#eef");
+                            this.statsPage.add(container);
+                            // The Troop Strength Label
+                            container.add(new qx.ui.basic.Label(lang("Overall:")), {
+                                row: 0,
+                                column: 0
+                            });
+                            this.labels.health.overall = new qx.ui.basic.Label("100");
+                            container.add(this.labels.health.overall, {
+                                row: 0,
+                                column: 1
+                            });
+                            // The Infantry Troop Strength Label
+                            container.add(new qx.ui.basic.Label(lang("Infantry:")), {
+                                row: 1,
+                                column: 0
+                            });
+                            this.labels.health.infantry = new qx.ui.basic.Label("100");
+                            container.add(this.labels.health.infantry, {
+                                row: 1,
+                                column: 1
+                            });
+                            // The Vehicle Troop Strength Label
+                            container.add(new qx.ui.basic.Label(lang("Vehicle:")), {
+                                row: 2,
+                                column: 0
+                            });
+                            this.labels.health.vehicle = new qx.ui.basic.Label("100");
+                            container.add(this.labels.health.vehicle, {
+                                row: 2,
+                                column: 1
+                            });
+                            // The Air Troop Strength Label
+                            container.add(new qx.ui.basic.Label(lang("Aircraft:")), {
+                                row: 3,
+                                column: 0
+                            });
+                            this.labels.health.aircraft = new qx.ui.basic.Label("100");
+                            container.add(this.labels.health.aircraft, {
+                                row: 3,
+                                column: 1
+                            });
+                            // The inner Vertical Box
+                            container = new qx.ui.container.Composite();
+                            layout = new qx.ui.layout.Grid();
+                            layout.setColumnAlign(1, "right", "middle");
+                            layout.setColumnFlex(0, 1);
+                            container.setLayout(layout);
+                            container.setThemedFont("bold");
+                            container.setThemedBackgroundColor("#eef");
+                            this.statsPage.add(container);
+                            // The Victory Label
+                            container.add(new qx.ui.basic.Label(lang("Outcome:")), {
+                                row: 0,
+                                column: 0
+                            });
+                            this.labels.damage.outcome = new qx.ui.basic.Label(lang("Unknown"));
+                            container.add(this.labels.damage.outcome, {
+                                row: 0,
+                                column: 1
+                            });
+                            // The Battle Time Label
+                            container.add(new qx.ui.basic.Label(lang("Battle Time:")), {
+                                row: 1,
+                                column: 0
+                            });
+                            this.labels.time = new qx.ui.basic.Label("120");
+                            container.add(this.labels.time, {
+                                row: 1,
+                                column: 1
+                            });
+                            // Available RT/Attacks Vertical Box
+                            container = new qx.ui.container.Composite();
+                            layout = new qx.ui.layout.Grid();
+                            layout.setColumnAlign(1, "right", "middle");
+                            layout.setColumnFlex(0, 1);
+                            container.setLayout(layout);
+                            container.setThemedFont("bold");
+                            container.setThemedBackgroundColor("#eef");
+                            this.statsPage.add(container);
+                            // Available Repair Time Label
+                            container.add(new qx.ui.basic.Label(lang("Available Repair:")), {
+                                row: 0,
+                                column: 0
+                            });
+                            this.labels.repair.available = new qx.ui.basic.Label("00:00:00");
+                            container.add(this.labels.repair.available, {
+                                row: 0,
+                                column: 1
+                            });
+                            // Available Attacks Label
+                            container.add(new qx.ui.basic.Label(lang("Available Attacks:")), {
+                                row: 1,
+                                column: 0
+                            });
+                            this.labels.attacks.available = new qx.ui.basic.Label("CP:- / FR:- / CFR:-");
+                            container.add(this.labels.attacks.available, {
+                                row: 1,
+                                column: 1
+                            });
+                            // Resource Summary Vertical Box
+                            this.resourceSummaryVerticalBox = new qx.ui.container.Composite();
+                            var layout = new qx.ui.layout.Grid();
+                            layout.setColumnAlign(1, "right", "middle");
+                            layout.setColumnWidth(0, 90);
+                            this.resourceSummaryVerticalBox.setLayout(layout);
+                            this.resourceSummaryVerticalBox.setThemedFont("bold");
+                            this.resourceSummaryVerticalBox.setThemedBackgroundColor("#eef");
+                            if (this.saveObj.checkbox.showLootSummary) {
+                                this.statsPage.add(this.resourceSummaryVerticalBox);
+                            }
+                            // Research Icon/Label
+                            this.labels.resourcesummary.research = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_research_mission.png");
+                            this.resourceSummaryVerticalBox.add(this.labels.resourcesummary.research, {
+                                row: 0,
+                                column: 0
+                            });
+                            // Tiberium Icon/Label
+                            this.labels.resourcesummary.tiberium = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_tiberium.png");
+                            this.resourceSummaryVerticalBox.add(this.labels.resourcesummary.tiberium, {
+                                row: 0,
+                                column: 1
+                            });
+                            // Credits Icon/Label
+                            this.labels.resourcesummary.credits = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_dollar.png");
+                            this.resourceSummaryVerticalBox.add(this.labels.resourcesummary.credits, {
+                                row: 1,
+                                column: 0
+                            });
+                            // Crystal Icon/Label
+                            this.labels.resourcesummary.crystal = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_chrystal.png");
+                            this.resourceSummaryVerticalBox.add(this.labels.resourcesummary.crystal, {
+                                row: 1,
+                                column: 1
+                            });
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    initializeLayout: function (tabView) {
+                        try {
+                            ////////////////// Layouts ////////////////////
+                            var layoutPage = new qx.ui.tabview.Page(lang("Layouts"));
+                            layoutPage.setLayout(new qx.ui.layout.VBox());
+                            tabView.add(layoutPage);
+                            this.layouts.list = new qx.ui.form.List();
+                            this.layouts.list.set({
+                                height: 174,
+                                selectionMode: "one"
+                            });
+                            layoutPage.add(this.layouts.list);
+                            // Add the two buttons for save and load
+                            var layHBox = new qx.ui.container.Composite();
+                            layHBox.setLayout(new qx.ui.layout.HBox(5));
+                            // Load button
+                            this.buttons.attack.layout.load = new qx.ui.form.Button(lang("Load"));
+                            this.buttons.attack.layout.load.set({
+                                width: 80,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Load this saved layout.")
+                            });
+                            this.buttons.attack.layout.load.addListener("click", this.loadCityLayout, this);
+                            layHBox.add(this.buttons.attack.layout.load);
+                            // Delete button
+                            this.buttonLayoutDelete = new qx.ui.form.Button(lang("Delete"));
+                            this.buttonLayoutDelete.set({
+                                width: 80,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Delete this saved layout.")
+                            });
+                            this.buttonLayoutDelete.addListener("click", this.deleteCityLayout, this);
+                            layHBox.add(this.buttonLayoutDelete);
+                            layoutPage.add(layHBox);
+                            var layVBox = new qx.ui.container.Composite();
+                            layVBox.setLayout(new qx.ui.layout.VBox(1));
+                            layVBox.setThemedFont("bold");
+                            layVBox.setThemedPadding(2);
+                            layVBox.setThemedBackgroundColor("#eef");
+                            // The Label Textbox
+                            var layHBox2 = new qx.ui.container.Composite();
+                            layHBox2.setLayout(new qx.ui.layout.HBox(5));
+                            layHBox2.add(new qx.ui.basic.Label(lang("Name: ")));
+                            this.layouts.label = new qx.ui.form.TextField();
+                            this.layouts.label.setValue("");
+                            layHBox2.add(this.layouts.label);
+                            layVBox.add(layHBox2);
+                            // Save Button
+                            this.buttons.attack.layout.save = new qx.ui.form.Button(lang("Save"));
+                            this.buttons.attack.layout.save.set({
+                                width: 80,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Save this layout.")
+                            });
+                            this.buttons.attack.layout.save.addListener("click", this.saveCityLayout, this);
+                            layVBox.add(this.buttons.attack.layout.save);
+                            layoutPage.add(layVBox);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    initializeInfo: function (tabView) {
+                        try {
+                            ////////////////// Info ////////////////////
+                            var infoPage = new qx.ui.tabview.Page(lang("Info"));
+                            infoPage.setLayout(new qx.ui.layout.VBox(1));
+                            tabView.add(infoPage);
+                            // The Help Vertical Box
+                            var pVBox = new qx.ui.container.Composite();
+                            pVBox.setLayout(new qx.ui.layout.VBox(1));
+                            pVBox.setThemedFont("bold");
+                            pVBox.setThemedPadding(2);
+                            pVBox.setThemedBackgroundColor("#eef");
+                            infoPage.add(pVBox);
+                            var proHelpBar = new qx.ui.basic.Label().set({
+                                value: "<a target='_blank' href='http://cncscripts.com/'>cncscripts.com</a>",
+                                rich: true
+                            });
+                            pVBox.add(proHelpBar);
+                            // The Spoils
+                            var psVBox = new qx.ui.container.Composite();
+                            psVBox.setLayout(new qx.ui.layout.VBox(1));
+                            psVBox.setThemedFont("bold");
+                            psVBox.setThemedPadding(2);
+                            psVBox.setThemedBackgroundColor("#eef");
+                            infoPage.add(psVBox);
+                            psVBox.add(new qx.ui.basic.Label(lang("Spoils")));
+                            // Tiberium
+                            this.stats.spoils.tiberium = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_tiberium.png");
+                            psVBox.add(this.stats.spoils.tiberium);
+                            // Crystal
+                            this.stats.spoils.crystal = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_chrystal.png");
+                            psVBox.add(this.stats.spoils.crystal);
+                            // Credits
+                            this.stats.spoils.credit = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_dollar.png");
+                            psVBox.add(this.stats.spoils.credit);
+                            // Research
+                            this.stats.spoils.research = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_research_mission.png");
+                            psVBox.add(this.stats.spoils.research);
+                            // Options Page
+                            var pssVBox = new qx.ui.container.Composite();
+                            var layout = new qx.ui.layout.Grid();
+                            //layout.setColumnFlex(2, 1);
+                            pssVBox.setLayout(layout);
+                            pssVBox.setThemedFont("bold");
+                            pssVBox.setThemedBackgroundColor("#eef");
+                            infoPage.add(pssVBox);
+                            this.buttons.optionStats = new qx.ui.form.Button().set({
+                                height: 25,
+                                width: 160,
+                                margin: 15,
+                                alignX: "center",
+                                label: lang("Options"),
+                                appearance: "button-text-small",
+                                icon: "FactionUI/icons/icon_forum_properties.png",
+                                toolTipText: lang("TACS Options")
+                            });
+                            this.buttons.optionStats.addListener("click", this.toggleOptionsWindow, this);
+                            pssVBox.add(this.buttons.optionStats, {
+                                row: 0,
+                                column: 0
+                            });
+                            /*
+                            							// Popup Checkbox
+                            							this.options.autoDisplayStats = new qx.ui.form.CheckBox(lang("Auto display this box"));
+                            							var temp = localStorage.ta_sim_autoDisplayStats;
+                            							if (temp) {
+                            							temp = JSON.parse(localStorage.ta_sim_autoDisplayStats);
+                            							this.options.autoDisplayStats.setValue(temp);
+                            							} else {
+                            							this.options.autoDisplayStats.setValue(true);
+                            							}
+                            							this.options.autoDisplayStats.addListener("click", this.optionPopup, this);
+                            							pssVBox.add(this.options.autoDisplayStats, {
+                            							row: 1,
+                            							column: 0,
+                            							colSpan: 3
+                            							});
+                            							// showShift Checkbox
+                            							this.options.showShift = new qx.ui.form.CheckBox(lang("Show shift buttons"));
+                            							var temp = localStorage.ta_sim_showShift;
+                            							if (temp) {
+                            							temp = JSON.parse(localStorage.ta_sim_showShift);
+                            							this.options.showShift.setValue(temp);
+                            							} else {
+                            							this.options.showShift.setValue(true);
+                            							}
+                            							this.options.showShift.addListener("click", this.optionShowShift, this);
+                            							pssVBox.add(this.options.showShift, {
+                            							row: 3,
+                            							column: 0,
+                            							colSpan: 3
+                            							});
+                            							// side RadioButtons
+                            							this.options.sideLabel = new qx.ui.basic.Label(lang("Side:"));
+                            							this.options.leftSide = new qx.ui.form.RadioButton(lang("Left"));
+                            							this.options.rightSide = new qx.ui.form.RadioButton(lang("Right"));
+                            							var sideRadioGroup = new qx.ui.form.RadioGroup();
+                            							sideRadioGroup.add(this.options.leftSide, this.options.rightSide);
+                            							var temp = localStorage.ta_sim_side;
+                            							if (temp) {
+                            							temp = JSON.parse(localStorage.ta_sim_side);
+                            							this.options.rightSide.setValue(temp);
+                            							} else {
+                            							this.options.rightSide.setValue(true);
+                            							}
+                            							sideRadioGroup.addListener("changeSelection", this.setupInterface, this);
+                            							pssVBox.add(this.options.sideLabel, {
+                            							row: 4,
+                            							column: 0
+                            							});
+                            							pssVBox.add(this.options.leftSide, {
+                            							row: 4,
+                            							column: 1
+                            							});
+                            							pssVBox.add(this.options.rightSide, {
+                            							row: 4,
+                            							column: 2
+                            							});
+                            							// locks Checkboxes
+                            							this.options.locksLabel = new qx.ui.basic.Label(lang("Locks:"));
+                            							this.options.attackLock = new qx.ui.form.CheckBox(lang("Attack"));
+                            							var temp = localStorage.ta_sim_attackLock;
+                            							if (temp) {
+                            							temp = JSON.parse(localStorage.ta_sim_attackLock);
+                            							this.options.attackLock.setValue(temp);
+                            							} else {
+                            							this.options.attackLock.setValue(true);
+                            							}
+                            							this.options.repairLock = new qx.ui.form.CheckBox(lang("Repair"));
+                            							var temp = localStorage.ta_sim_repairLock;
+                            							if (temp) {
+                            							temp = JSON.parse(localStorage.ta_sim_repairLock);
+                            							this.options.repairLock.setValue(temp);
+                            							} else {
+                            							this.options.repairLock.setValue(true);
+                            							}
+                            							this.options.attackLock.addListener("click", this.optionAttackLock, this);
+                            							this.options.repairLock.addListener("click", this.optionRepairLock, this);
+                            							pssVBox.add(this.options.locksLabel, {
+                            							row: 5,
+                            							column: 0
+                            							});
+                            							pssVBox.add(this.options.attackLock, {
+                            							row: 5,
+                            							column: 1
+                            							});
+                            							pssVBox.add(this.options.repairLock, {
+                            							row: 5,
+                            							column: 2
+                            							});*/
+                            this.battleResultsBox.add(tabView);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    initializeOptions: function () {
+                        try {
+                            var options = new qx.ui.container.Composite(); //hello
+                            options.setLayout(new qx.ui.layout.VBox(1)); //hey
+                            options.setThemedPadding(10);
+                            options.setThemedBackgroundColor("#eef");
+                            this.optionsWindow.add(options);
+                            // Options Page
+                            var pssVBox = new qx.ui.container.Composite();
+                            var layout = new qx.ui.layout.Grid(5, 5);
+                            layout.setColumnFlex(2, 1);
+                            pssVBox.setLayout(layout);
+                            pssVBox.setThemedFont("bold");
+                            pssVBox.setThemedBackgroundColor("#eef");
+                            options.add(pssVBox);
+                            window.TACS_version = (window.TACS_version === undefined) ? "Script Pack Version" : window.TACS_version;
+                            pssVBox.add(new qx.ui.basic.Label(lang("Version: ") + window.TACS_version), {
+                                row: 0,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // Popup Checkbox
+                            this.options.autoDisplayStats = new qx.ui.form.CheckBox(lang("Auto display stats"));
+                            var temp = localStorage.ta_sim_popup;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_popup);
+                                this.options.autoDisplayStats.setValue(temp);
+                            } else {
+                                this.options.autoDisplayStats.setValue(true);
+                            }
+                            this.options.autoDisplayStats.addListener("click", this.optionPopup, this);
+                            pssVBox.add(this.options.autoDisplayStats, {
+                                row: 1,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // Mark Saved Targets Checkbox
+                            this.options.markSavedTargets = new qx.ui.form.CheckBox(lang("Mark saved targets on region map"));
+                            var temp = localStorage.ta_sim_marksavedtargets;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_marksavedtargets);
+                                this.options.markSavedTargets.setValue(temp);
+                            } else {
+                                this.options.markSavedTargets.setValue(true);
+                            }
+                            this.options.markSavedTargets.addListener("click", function () {
+                                localStorage.ta_sim_marksavedtargets = JSON.stringify(this.options.markSavedTargets.getValue());
+                            }, this);
+                            pssVBox.add(this.options.markSavedTargets, {
+                                row: 2,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // Double-click to (De)activate Checkbox
+                            this.options.dblClick2DeActivate = new qx.ui.form.CheckBox(lang("Enable 'Double-click to (De)activate units'"));
+                            var temp = localStorage.ta_sim_dblClick2DeActivate;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_dblClick2DeActivate);
+                                this.options.dblClick2DeActivate.setValue(temp);
+                            } else {
+                                this.options.dblClick2DeActivate.setValue(true);
+                            }
+                            this.options.dblClick2DeActivate.addListener("click", function () {
+                                localStorage.ta_sim_dblClick2DeActivate = JSON.stringify(this.options.dblClick2DeActivate.getValue());
+                            }, this);
+                            pssVBox.add(this.options.dblClick2DeActivate, {
+                                row: 3,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // showShift Checkbox
+                            this.options.showShift = new qx.ui.form.CheckBox(lang("Show shift buttons"));
+                            var temp = localStorage.ta_sim_showShift;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_showShift);
+                                this.options.showShift.setValue(temp);
+                            } else {
+                                this.options.showShift.setValue(true);
+                            }
+                            this.options.showShift.addListener("click", this.optionShowShift, this);
+                            pssVBox.add(this.options.showShift, {
+                                row: 4,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // side RadioButtons
+                            this.options.sideLabel = new qx.ui.basic.Label(lang("Side:"));
+                            this.options.leftSide = new qx.ui.form.RadioButton(lang("Left"));
+                            this.options.rightSide = new qx.ui.form.RadioButton(lang("Right"));
+                            var sideRadioGroup = new qx.ui.form.RadioGroup();
+                            sideRadioGroup.add(this.options.leftSide, this.options.rightSide);
+                            var temp = localStorage.ta_sim_side;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_side);
+                                this.options.rightSide.setValue(temp);
+                            } else {
+                                this.options.rightSide.setValue(true);
+                            }
+                            sideRadioGroup.addListener("changeSelection", this.setupInterface, this);
+                            pssVBox.add(this.options.sideLabel, {
+                                row: 5,
+                                column: 0
+                            });
+                            pssVBox.add(this.options.leftSide, {
+                                row: 5,
+                                column: 1
+                            });
+                            pssVBox.add(this.options.rightSide, {
+                                row: 5,
+                                column: 2
+                            });
+                            // locks Checkboxes
+                            this.options.locksLabel = new qx.ui.basic.Label(lang("Locks:"));
+                            this.options.attackLock = new qx.ui.form.CheckBox(lang("Attack"));
+                            var temp = localStorage.ta_sim_attackLock;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_attackLock);
+                                this.options.attackLock.setValue(temp);
+                            } else {
+                                this.options.attackLock.setValue(true);
+                            }
+                            this.options.repairLock = new qx.ui.form.CheckBox(lang("Repair"));
+                            var temp = localStorage.ta_sim_repairLock;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_repairLock);
+                                this.options.repairLock.setValue(temp);
+                            } else {
+                                this.options.repairLock.setValue(true);
+                            }
+                            this.options.attackLock.addListener("click", this.optionAttackLock, this);
+                            this.options.repairLock.addListener("click", this.optionRepairLock, this);
+                            pssVBox.add(this.options.locksLabel, {
+                                row: 6,
+                                column: 0
+                            });
+                            pssVBox.add(this.options.attackLock, {
+                                row: 6,
+                                column: 1
+                            });
+                            pssVBox.add(this.options.repairLock, {
+                                row: 6,
+                                column: 2
+                            });
+                            // showLootSummary Checkbox
+                            this.options.showLootSummary = new qx.ui.form.CheckBox(lang("Show Loot Summary"));
+                            this.options.showLootSummary.saveLocation = "showLootSummary";
+                            this.options.showLootSummary.setValue(this.saveObj.checkbox.showLootSummary);
+                            this.options.showLootSummary.addListener("click", this.toggleCheckboxOption, this);
+                            pssVBox.add(this.options.showLootSummary, {
+                                row: 7,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // showResourceLayoutWindow Checkbox
+                            this.options.showResourceLayoutWindow = new qx.ui.form.CheckBox(lang("Show Resource Layout Window"));
+                            this.options.showResourceLayoutWindow.saveLocation = "showResourceLayoutWindow";
+                            this.options.showResourceLayoutWindow.setValue(this.saveObj.checkbox.showResourceLayoutWindow);
+                            this.options.showResourceLayoutWindow.addListener("click", this.toggleCheckboxOption, this);
+                            pssVBox.add(this.options.showResourceLayoutWindow, {
+                                row: 8,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // showStatsDuringAttack Checkbox
+                            this.options.showStatsDuringAttack = new qx.ui.form.CheckBox(lang("Show Stats During Attack"));
+                            this.options.showStatsDuringAttack.saveLocation = "showStatsDuringAttack";
+                            this.options.showStatsDuringAttack.setValue(this.saveObj.checkbox.showStatsDuringAttack);
+                            this.options.showStatsDuringAttack.addListener("click", this.toggleCheckboxOption, this);
+                            pssVBox.add(this.options.showStatsDuringAttack, {
+                                row: 9,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // showStatsDuringSimulation Checkbox
+                            this.options.showStatsDuringSimulation = new qx.ui.form.CheckBox(lang("Show Stats During Simulation"));
+                            this.options.showStatsDuringSimulation.saveLocation = "showStatsDuringSimulation";
+                            this.options.showStatsDuringSimulation.setValue(this.saveObj.checkbox.showStatsDuringSimulation);
+                            this.options.showStatsDuringSimulation.addListener("click", this.toggleCheckboxOption, this);
+                            pssVBox.add(this.options.showStatsDuringSimulation, {
+                                row: 10,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // skipVictoryPopup Checkbox
+                            this.options.skipVictoryPopup = new qx.ui.form.CheckBox(lang("Skip Victory-Popup After Battle"));
+                            this.options.skipVictoryPopup.saveLocation = "skipVictoryPopup";
+                            this.options.skipVictoryPopup.setValue(this.saveObj.checkbox.skipVictoryPopup);
+                            this.options.skipVictoryPopup.addListener("click", this.toggleCheckboxOption, this);
+                            pssVBox.add(this.options.skipVictoryPopup, {
+                                row: 11,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            webfrontend.gui.reports.CombatVictoryPopup.getInstance().addListener("appear", function () {
+                                /*if (this.toolBar.isVisible()) {
+                                									this.toolBar.hide();
+                                								}
+                                								if (this.toolBarMouse.isVisible()) {
+                                									this.toolBarMouse.hide();
+                                								}*/
+                                if (this.saveObj.checkbox.skipVictoryPopup) {
+                                    webfrontend.gui.reports.CombatVictoryPopup.getInstance()._onBtnClose();
+                                }
+                            }, this);
+                            // disableTooltipsInAttackPreparationView Checkbox
+                            this.options.disableAttackPreparationTooltips = new qx.ui.form.CheckBox(lang("Disable Tooltips In Attack Preparation View"));
+                            this.options.disableAttackPreparationTooltips.saveLocation = "disableAttackPreparationTooltips";
+                            this.options.disableAttackPreparationTooltips.setValue(this.saveObj.checkbox.disableAttackPreparationTooltips);
+                            this.options.disableAttackPreparationTooltips.addListener("click", this.toggleCheckboxOption, this);
+                            pssVBox.add(this.options.disableAttackPreparationTooltips, {
+                                row: 12,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            // disableArmyFormationManagerTooltips Checkbox
+                            this.options.disableArmyFormationManagerTooltips = new qx.ui.form.CheckBox(lang("Disable Unit Tooltips In Army Formation Manager"));
+                            this.options.disableArmyFormationManagerTooltips.saveLocation = "disableArmyFormationManagerTooltips";
+                            this.options.disableArmyFormationManagerTooltips.setValue(this.saveObj.checkbox.disableArmyFormationManagerTooltips);
+                            this.options.disableArmyFormationManagerTooltips.addListener("click", this.toggleCheckboxOption, this);
+                            pssVBox.add(this.options.disableArmyFormationManagerTooltips, {
+                                row: 13,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            this.options.statsOpacityLabel = new qx.ui.basic.Label(lang("Stats Window Opacity"));
+                            this.options.statsOpacityLabel.setMarginTop(10);
+                            pssVBox.add(this.options.statsOpacityLabel, {
+                                row: 14,
+                                column: 0,
+                                colSpan: 3
+                            });
+                            this.options.statsOpacity = new qx.ui.form.Slider();
+                            pssVBox.add(this.options.statsOpacity, {
+                                row: 15,
+                                column: 1,
+                                colSpan: 2
+                            });
+                            this.options.statsOpacity.setValue(this.saveObj.slider.statsOpacity);
+                            this.options.statsOpacityOutput = new qx.ui.basic.Label(String(this.saveObj.slider.statsOpacity));
+                            pssVBox.add(this.options.statsOpacityOutput, {
+                                row: 16,
+                                column: 0
+                            });
+                            this.options.statsOpacity.addListener("changeValue", function () {
+                                var val = this.options.statsOpacity.getValue();
+                                this.battleResultsBox.setOpacity(val / 100);
+                                this.options.statsOpacityOutput.setValue(String(val) + "%");
+                                this.saveObj.slider.statsOpacity = val;
+                            }, this);
+                            // The Help Vertical Box
+                            var pVBox = new qx.ui.container.Composite();
+                            pVBox.setLayout(new qx.ui.layout.VBox(1));
+                            pVBox.setThemedFont("bold");
+                            pVBox.setThemedPadding(10);
+                            //pVBox.setThemedMargin(3);
+                            pVBox.setThemedBackgroundColor("#eef");
+                            options.add(pVBox);
+                            var proHelpBar = new qx.ui.basic.Label().set({
+                                value: "<a target='_blank' href='http://cncscripts.com/'>cncscripts.com</a>",
+                                rich: true
+                            });
+                            pVBox.add(proHelpBar);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    toggleCheckboxOption: function (evt) {
+                        var tgt = evt.getTarget();
+                        var val = tgt.getValue();
+                        this.saveObj.checkbox[tgt.saveLocation] = val;
+                        //console.log("this.saveObj.checkbox[\"" + tgt.saveLocation + "\"] = " + this.saveObj.checkbox[tgt.saveLocation]);
+                        //console.log("val = " + val);
+                        if (tgt == this.options.showLootSummary) {
+                            if (this.saveObj.checkbox.showLootSummary) {
+                                this.statsPage.add(this.resourceSummaryVerticalBox);
+                            } else {
+                                this.statsPage.remove(this.resourceSummaryVerticalBox);
+                            }
+                        }
+                        if (tgt == this.options.showResourceLayoutWindow) {
+                            if (this.saveObj.checkbox.showResourceLayoutWindow) {
+                                this.resourceLayoutWindow.open();
+                            } else {
+                                this.resourceLayoutWindow.close();
+                            }
+                        }
+                        this.saveData();
+                    },
+                    createHasAttackFormationFunction: function () {
+                        try {
+                            ClientLib.Data.City.prototype.HasAttackFormation = function (targetCity) {
+                                var $createHelper;
+                                var ownCity = this.get_Id();
+                                if (TACS.getInstance().layouts.all.hasOwnProperty(targetCity)) {
+                                    if (TACS.getInstance().layouts.all[targetCity].hasOwnProperty(ownCity)) {
+                                        var count = 0;
+                                        for (var key in TACS.getInstance().layouts.all[targetCity][ownCity]) {
+                                            if (TACS.getInstance().layouts.all[targetCity][ownCity].hasOwnProperty(key)) {
+                                                count++;
+                                            }
+                                        }
+                                        if (count > 0) return true;
                                     } else {
-                                        //console.log("changeVisibility: armybar is visible");
-                                        this.toolBar.show();
-                                        this.toolBarMouse.show();
+                                        return false;
                                     }
-                                }, this);
-                                this.toolBarMouse.addListener("mouseover", function () {
-                                    var paw = playAreaBounds.width;
-                                    if (playAreaWidth !== paw) {
-                                        playAreaWidth = paw;
-                                        //need to do this on maximize as well
-                                        var armyBarBounds = this._armyBarContainer.getBounds();
-                                        if (armyBarBounds) {
-                                            this.toolBar.setDomLeft(armyBarBounds.left + ((armyBarBounds.width - this.TOOL_BAR_WIDTH) / 2));
-                                            this.toolBarMouse.setDomLeft(armyBarBounds.left + ((armyBarBounds.width - this.TOOL_BAR_WIDTH) / 2));
+                                }
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    createBasePlateFunction: function (r) {
+                        try {
+                            var regionObject = r.prototype;
+                            for (var key in regionObject) {
+                                if (typeof regionObject[key] === 'function') {
+                                    var strFunction = regionObject[key].toString();
+                                    if (strFunction.indexOf("Blue") > -1 && strFunction.indexOf("Black") > -1) {
+                                        if (r == ClientLib.Vis.Region.RegionNPCCamp || r == ClientLib.Vis.Region.RegionNPCBase) {
+                                            regionObject[key] = function () {
+                                                var $createHelper;
+                                                var basePlateColor = ClientLib.Vis.EBackgroundPlateColor.Black;
+                                                if ((ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity() != null) && ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().HasAttackFormation(this.get_Id())) {
+                                                    var playerFaction = ClientLib.Data.MainData.GetInstance().get_Player().get_Faction();
+                                                    basePlateColor = ((this.get_PlayerFaction() == 1) ? ClientLib.Vis.EBackgroundPlateColor.Orange : ClientLib.Vis.EBackgroundPlateColor.Cyan);
+                                                }
+                                                return basePlateColor;
+                                            }
+                                            break;
+                                        } else {
+                                            regionObject[key] = function () {
+                                                var $createHelper;
+                                                var basePlateColor = ClientLib.Vis.EBackgroundPlateColor.Black;
+                                                if (this.get_Type() == ClientLib.Vis.Region.RegionCity.ERegionCityType.Own) {
+                                                    basePlateColor = ((this.get_PlayerFaction() == 1) ? ClientLib.Vis.EBackgroundPlateColor.Cyan : ClientLib.Vis.EBackgroundPlateColor.Orange);
+                                                } else {
+                                                    basePlateColor = ClientLib.Vis.EBackgroundPlateColor.Black;
+                                                }
+                                                if (((this.get_Type() != ClientLib.Vis.Region.RegionCity.ERegionCityType.Own) && (ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity() != null)) && ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().HasAttackFormation(this.get_Id())) {
+                                                    basePlateColor = ((this.get_PlayerFaction() == 1) ? ClientLib.Vis.EBackgroundPlateColor.Orange : ClientLib.Vis.EBackgroundPlateColor.Cyan);
+                                                }
+                                                return basePlateColor;
+                                            }
+                                            break;
                                         }
                                     }
-                                    this.toolBarMouse.hide();
-                                    this.toolBar.setZIndex(11);
-                                    this.toolBar.setLayoutProperties({
-                                        bottom: this.TOOL_BAR_HIGH
-                                    });
-                                }, this);
-                                this.toolBar.addListener("appear", function () {
-                                    this.toolBar.setZIndex(1);
-                                }, this);
-                                this._armyBar.addListener("mouseover", function () {
-                                    //this.toolBar.setOpacity(0);
+                                }
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    initToolBarListeners: function () {
+                        try {
+                            var playAreaBounds = this._PlayArea.getLayoutParent().getBounds();
+                            var playAreaWidth = this._PlayArea.getLayoutParent().getBounds().width;
+                            this._PlayArea.addListener("mouseover", function () {
+                                //this.toolBar.setOpacity(0);
+                                if (this.toolBar.isVisible()) {
                                     this.toolBarMouse.show();
-                                    this.toolBar.setZIndex(1);
                                     this.toolBar.setLayoutProperties({
                                         bottom: this.TOOL_BAR_LOW
                                     });
-                                }, this);
-                                this._armyBar.addListener("click", function () {
-                                    this.armybarClickCount += 1;
-                                    if (this.armybarClickCount == 1) {
-                                        this.armybarClearnClickCounter = setInterval(this.resetDblClick, 500);
+                                    this.toolBar.setZIndex(1);
+                                }
+                            }, this);
+                            this._armyBarContainer.addListener("appear", function () {
+                                //console.log("_armyBarContainer appeared");
+                                this._armyBarContainer.setZIndex(3);
+                                this.toolBar.show();
+                                this.toolBarMouse.show();
+                            }, this);
+                            this._armyBarContainer.addListener("changeVisibility", function () {
+                                if (!this._armyBarContainer.isVisible()) {
+                                    //console.log("changeVisibility: _armyBarContainer hidden");
+                                    this.toolBar.hide();
+                                    this.toolBarMouse.hide();
+                                } else {
+                                    //console.log("changeVisibility: armybar is visible");
+                                    this.toolBar.show();
+                                    this.toolBarMouse.show();
+                                }
+                            }, this);
+                            this.toolBarMouse.addListener("mouseover", function () {
+                                var paw = playAreaBounds.width;
+                                if (playAreaWidth !== paw) {
+                                    playAreaWidth = paw;
+                                    //need to do this on maximize as well
+                                    var armyBarBounds = this._armyBarContainer.getBounds();
+                                    if (armyBarBounds) {
+                                        this.toolBar.setDomLeft(armyBarBounds.left + ((armyBarBounds.width - this.TOOL_BAR_WIDTH) / 2));
+                                        this.toolBarMouse.setDomLeft(armyBarBounds.left + ((armyBarBounds.width - this.TOOL_BAR_WIDTH) / 2));
                                     }
-                                }, this);
-                            } catch (err) {
-                                console.log(err);
-                            }
-                        },
-                        setupInterface: function () {
-                            try {
-                                ////////////////// Interface Side ////////////////////
-                                localStorage.ta_sim_side = JSON.stringify(this.options.rightSide.getValue());
-                                // qx.core.Init.getApplication().getPlayArea()
-                                // might need to use this instead, mouseovers are not being registered during attacks
-                                var playArea = this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA);
-                                var playAreaWidth = this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().width;
-                                this.armybarClickCount = 0;
-                                var playerFaction = this._MainData.get_Player().get_Faction();
-                                var statsIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH3QMQFzoqkrYqRAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAGrUlEQVRYw52WyY9c1RXGf+fe+4aqrqG7qgd6wm2MjYnBKFFIskAifwASipRlttlHkSJlkb8iUnYRy6yyyzKgDEgBJYRJcUAYhGkPZWx6qK7pDffek0W1CSB6Uf2WT+/q/t53zvedI5zx/Oa3v/tT3d1+yQhqtCZUHkTEGBAiUQURQVVI04zJbIogIIIxQFQ9GM30sIpmOdU7r/zy57vfdo87CyB0t176xcsv++PhF3Z5fJebH30kNarOOVnrdrh3OKTbTCnqSPCe1b01eivr5I0EQH0x4/dvfiRIL9TlbOese84EODkZ6r/++YYdBqXPiMFwqtPpROrZhG6rxXA0QSTiAyTOYW9Bv7+BNaogItHr7TsPdCDHZk18XBhgf3+fQVpx+fr3qIrAlWvX+ezuPf7x19eYjE7I0hQABRLrOB4OmU1HNFsdEUStEeoQpDg85NiqLAzgg6fbacnOek8//uSIVNpy5cpVfXg8ltHREaPjQ1QEVUjTlOYGfLp/i6efuc5sfEJZVXRXepJ88J7e/uDfiwOIIFHRNGvI8soKeSPXaEQ67Q4mCs4YQowYa3HWIVmOtykbq6vqux2ZFgXLvb5WdSWDT/7LwgDLvT6XrzwneWOFrc0GIiI+Rp576hl88KBz+QUQBDHwYDTm9ZufyaeDQ3JrGN+/Ixvbe2w88yN49W+LAeR5g53HtsnSDCMZcipie6mLflMtIHVCee8h77z1MeMKUivkS132NaXf6S2ugI+Rg6MDGlHwdYVqnP+rCMZarDFf+14Vdpcyfv3Cs9w6OMIIjGZTru3t8tqfP14cIIaazwcD0mkAjYSqIIrBWWG5t8HO5hrhW8z1w16HH6cwrUr2R/fwjTEF1eIARiydTgfTzIkhYJs51lmSJKXT7lD7uSLGyP9LospoBqOZUIVIWVg6zT6ZSc8EMGeXQIhRcdahGKxzCEKr1SHLskc3oqqIKqgiIlgrWAtGFCXiYySoLq4AMVBWFVQFo/GUdiPBpQ3EGKJGjDUQ5z7QRyByqoZy+v6RmsI5csCQ5znd7jLOOjJnUQzGCM4ZxqMReaMF6gFzOph0HiCn6lgMSI3IORQQI5RlyeDuHUbTgmaWkmeOW7dv0+0uY7Xm8GRKb7nNxb0ncM59zZdBA6N6xGQ2owzleZpQeOyxTda2tyhKT+KE6aTg8XnlSdMmT5nArAzIqSXlVGpVJXNNLrQvsLXR4tX03cUB6qrivbffonh/CWMgz3N6nRbT6YyD4ZjhwV12n7zOD777LNaYufynEEaEUXHEjcMP+cvwU+6N7y8OkGQZ33n2Ou3+GrPZDFXFWkdRlVxOHNY+T1lWaFRUFPMViKhKK+vx/fXn2Vx7gf3WK+dIwhA4PDpiVBRMixJjLWVZ0e32OCom+DCX3sfI2uraly74ZpbUKFHDOZIwKjFGfFCQZJ4HydxuW5s71CHQWlrCWIM1BplvY6jO+2dazxiM73PPjhj7yfmaUGPEe49GwVpLmrYQMYgREpPgnKOqCibjMc4IdVQSY0AMtZaU0xnWpUi05wgiZB4lNsVRMZmM2bv4JK1mTohxPoYFJuMRDwYDqnpGHR0mVNisgcRARFgJGyTnATBG6PdXSVoroJ6g0GzkgOBsAsxrniQpS60l2qZJ4SHRGnUNEiucnAzJckfgHEHkfc3b77xLo9Oh9DVBLZcuXuLypSe+HM3GwnQ65s03Xmdra4OTaQRfkjc7EEtqhAd3b/PFwdHiAHne4MUXX6S50sfXnuADxlpUIyIGRIlRWFlZ5yc//RkhKkYUBOo6Yq3B1zW72x1ufP5gcYAQPDf+8z5Zd5XaRxILFy89SavZJEYFnU+9w4P73PzwBuvbewzu3MJZQ9Lo4AxUVcHNGykPvjg8RxOKsLq6Tqu/rr4upQ4RNKqqytzzc8u12m12LlwAjWzuPk7mBHE5BqUoC/a2d/n7BzcWB9CoTKZTTdqVxLrSMih1VUmdJIQwbyprDUVRUhY1vi6YemFlKcdXM4xGQlRGowne+8UXEmtFG3mGiqhJUvLUMRrPqOpIkiQ4ZxExrPTWuHrtOls7j+PEE22CL2ZUviTNLVkmjxaEBUugqoqKsVY1ICFUgoimaSpiDBrt6T6sxAhZo0O328e4jCxJKUtDVQnHRw5/nhzwQU3HutBMU6N1Qae/rdPJidRHD9m4uIlNvrqUA7S5uPv0l+cPB/Dwc1hpgymTcywkxfDDX/3hj1e77VaMihhrJMRA9IEkTbDOgJ6OX4SoEdVTHAHvoa4hM8JnD88ex/8DigFIoHwdTR8AAAAASUVORK5CYII=";
-                                var undoIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAzdJREFUeNq8ll2ITGEYx+edj901i2UNaaiVyFdK3PgohUJSyo3ykVsXeyFy7+NOElfkjpBy5Yoil5S4EclolfK5YwfL7JwzX8f/af5Hj9eZs2P3nD3165yZc877/N//857nfUwi5PA8T05GLo0xiTiO5DjBe8BaMIDfZsoEMHg32Akug00gNZUOSLD14CQYAu9BMw4B6YDZi9WrwGnQC56A161bf9Lg6Xcmsz7SAcHz4BTIge+gClaA5QxcBqO8Fn7hvTGcXVAXp/5HkLHyPhucAdvAGAV2B6RHjmGKk+c+gLfgKd0qiiAI8ToSwOAzwVFwGPxgzvUAnvXbv29IimI/g0fgNiiAWpgjvgB5eR+tL9PKoOA2TXXWgqZxnEvgrrjUTkRSnXO03Jtg8AaFO2CEv0+AI6CPLrcVUANXwXUwS+XZn1FSYRSJABH+ucy1sB8MyrhBIuxF2AeOgUOgRCEVDtYMcKeXC1dm/ZPP1pUbDcYQd2+BG/KMTkdaf8sQIYvvPBfTHg58H9zkqrfFT6eIzWALWMxZV5UI4RPYC16Bx7qope2CQhEXafdusJIDD+F+3aobJV6+AXfALnCA/5WUAIfjyb0C3iv6LvxTinlDPqULnL0UoNWg386hPEvqfEecOsfUZRi8Rke+ggUsaiZ0L2ABEdvOsrAsA9nQgtISLjN9CK6BebS6RiEVitwIutruBVoEDhFxnIvoy3gllimUkvwAbOf4dTpQowuLWPSKof0AB5QZvAPPcF3pqLa3REqge3StpigzPTk/nclOBpzAbifCn6sU+OvAUXtMZwImcVSt4FXumA47LRO6BiJqdhpW8Cq38mzcDhh+OQ4Du0pIimlIxOlAF+vHNxXcVRWy4pf0yB3g6s6z4Iyo4C7XQ4bOxJYCcXUDv/+yCu6oDW20bSmOYPZSbreym66o4C5TM0ZhsTggu+gOBhu2gksq5qr/oxWA2SfZzq8DLzlLx7J/DrfkRqQCaP18cBB8ZDvvWg7MkBaeW7cXtQOG3ZTMrB+sAUs5Y/9TXwJe6AX4V0sWUQqy7CnlMxwAC/lfhuKu2LuqiakO+I1sD3vGPHvGAoI39PO/BRgAhgJgQiBnZrUAAAAASUVORK5CYII=";
-                                var redoIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAx9JREFUeNq8l8uPDFEUxvtWV8/o7hmPTCeeC4bJYIhHIhZYiNjZ2CEidlYWHrEwEyxn7x+wtbSxFqyJiEeEeGS0kU4YY3qobt3lO/HdOK6q6mrd5Sa/VLoe93zn3HPuPZ3LZTTCMDSg43teRsZ9XDaD1SLkvwvAKIFT4DqoJEUiKwFN8A5sB+fB0jgRXo+hdjEMeQM8BE/BCXAWlKNE+N0mFi55UABLwDAY4GO5N8LnOT6vglFwEnwBNzDHgjG/08Kk8ZKREmMbwU4wAVaBNfKKhBgsA21i5/0BAjoqeXEJ3JZ7VoRJ4bFMvgMcB7s5mUzccpbSOE7puQ0jJblxDtyHgHaiABiXUG4CZ8B+ehIog54ybK9RaBFFUAPHwKxEwU8wLnV8lWGuMdR5tcba+3ZCQmsRErUyGIxNQhiXibayfIbAR06Sj5nYJEQiR+F2Cb6CKUlOmwN+xJqvBRcZrk807DtrOcTnkvnv6ZlxRA3QW8OKmGc5PoLxVlwEilyfYRr3nVAv57274A54xYkbEdHZA06DbUy+C67xPwTQ+w1gnyQIQxcq4yvAGzANXjMhf2WyqmuWrZTkGPNInLoCHrjG3QjIi0fo0aIT9gpFXZaQY6Kww/myBexisk2y9htRL/tK9Up+NMM6t6PMj6eZPJ3OWBGwHoyDa+CW3njiIuDxAzG0oDLecN1vgud28+gwWsyRl+BJknEtwOem8wF8V/v7IH/fiwvhX0Vv5DwKq7rUkoavDo5KREbLDJ/lfprJlIjU71oBeWZ0nSWTU5tILa33/zJ8Z+0CJwHrjE4hKwGe8jSkp4G6LvI0LKZpMHsR0KTnniOizjIcS9M79CKgwUOnwKy3R+837vUHuFFlJqBFASUVgYBiZtgJjXZqsXvNgSrXu+VEYZ4cUvtDJgJmmQcF5b1dhhc81db1Oxk9tXHMsZevOEsQ8JnkwlFZpn6K8Jw/E4/ZgrWdZQjUH42D3bbzqQTwlHvGtmmEZVeioAl2xHW24/l+CTAR/eBecFhtvxL+t2xGava86Ga/70aA/WM5TsNz3A2bUd1PP8ZPAQYA6tkaX3nBq4MAAAAASUVORK5CYII=";
-                                var resetIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAACF9JREFUeNqEV2tMXGUannPmxjADTGGGYZlpyx2hpZbey1ba9LLAguhWE29N6yU2aaLxhz/7Q/rDGKMxxsSoGK1Lq7GkabW2W7CpKZVLbVpBoVwKwi7Qcr8zM8zlnNnnPfse9nQW3ZM8c+Y7t/f53svzfp+g0xyRSETASQ8Y+JLE0PE1I2AGTAx6NgKEgSAQ4HOYEREEQfdHhxBlnAwkAIl8bx7wsiH1uh2IB2KZhMyGF/n5GWAWmAP8/4+IEGV8FfAQkAOIwD1gCogB3EAqPTPR0eGc6euz6wRBFJTXI5J7585xq8s1zc+PAP/k92eYoLQSCSHKOBn+83Bz886Omhp36ccfN2FMHzXdPX8+p7O2Nutec7MruLAgyJIksfuVOYhGo96WkhJYXVw8vuWVVzod+fnduN4J/MaEyJNhkIhEEzCwW2nmO2B894Xnntu6NDMj5z7xhLfw6NHBa8ePrx29fdsakWVZa1RzVqHc15tMhsyysrG977zTBK+0M5EBDk1QS4IIkHvXAsXDTU3lFw4d2uGfnlYST6BDr9fL4XB4BaMrGuezAhg3Hvjgg/bM0tKbGN9iIhNMQvmAqMkFoePUKQ/NXJOYkZWMEy+43KCCZhxtnOAdG/N9d/hwbtunn+7GeBOQCcRp7CoeoPg7gS3A/ksvvljac+6cjYxrK5R+YMiY8/jjC2n79t3Lf/rpO5z5Ot/4ePzAlStr2mtq1ozcumUC6RCXLxEJG2JiDJWnT/elHzjwA8bXOS+WKBREQOQSKwD+0l9Xt+vbZ599iJPsgZlnV1bqK0+d6sV/SrA2YBggYzaehOe3y5fXtbz1VvbYL7+EuAQVLYlfvdpyqKGhyZKU9D3GP3G1hEV2v5Hr2vxjVVXaSsbpp+/iRekfR4+m8kcpq4cASrIWoIGA5Pvh4LlzzX/askWvEbLw/NDQzI8nTqznMDhZQwSRjVMVeG6+/37BVHe3SWtUU7sRqoLu2lrTd0eOFGGcDazh92e57skrzbEOx09/O3PmBkgYNKoYuvvNNwL0I4s1xUq5ILLIpACrey9cyODYK8YtDoch76mnQkwiwnkp4bn4iy+88CjGu4CNgIPvk+jcBW7g3dai48cHkTcChykcmJub6Th9Oo1s8aQNKoFEZKxzor3drnV7weHDM2WffHI39+DBBSYhsyckzMZ66aWX9mO8GcgHkrlfkPzeB3rT9u7tXbtnj6B6gMpv8No1HROOVwlYiM29GzdcUjAYXFY2g0GPTO/C/zvln39el1VRMaEhIYNEGNUSAxIlGG/VkDAyCVK/sYLnn59VjdN5fng4gFK3czkaRe5u1qHr15O1sbempASTcnOpXH6mrEUZXUQVTAtK1B4kgcQs05BwcvNaIBn3FBWNx6xaZVZJ+CYmxqe6upI46Q3icov9z/SW3W9NTl7kjjbImd76aE1Nfc5jj82AREStc5AIdp89a6g7dqwkigR9zwfjfjz/QLsW4F22qxe1LTlKXtWZLgHjQAdwu+KLLy5DjOaYhFLnEUkKdZ45E/n+1VcPYLydNcXJRmhuIc1aIQB5X+7EhuX4ILW02g5XWTg/LDzbETboqzh5MnBJFP8K95spIek6SITvfPWVrDeb9+17910bNx8SuFgYDGo8sMQeIbuygS96kx9+eF7bWFAVJkisIzY5WY3XIntCOco/+0wn6vWlXWfPimScPkh949eTJ/0Gs3nr7jffpEw3DTc2upZmZ3tU43Eej8XmcpEtn6qElLHzKZs3jyHzRbXUUBFL+DiplkejXEEmQdXxc1l1dd26Z54JgYislhpI+Furq0db3n47j7rscEtLWAoEvBzKgD0jw2RLTZ3iJA0a+Ma0c9260cScnKXJzk6VhNxWXZ2W9+ST2fDCfRaZUQ0J5Sj58EPqhnvQiFATYaXUqJxvvvdeB8K6vuPLL++rxmmymSUlJu4D5IWwvqqqShUjJ+LugcviVAJwnRRcXExCP/eyy7yqqvFH6ZqQUVqqQ22noQF5kRNkKAAyS0ONjf1Qv2nVOGZuhDo6INW3Me6nsBKBCPdnKzxg7fz667yQzxdiEhI8YkEHs6ds2iSr6wZNP1d7vyV9//4YORTKRDueRE6oM16eOf3f/vrrBdkVFeSRVk7qgEpAWd+ZbDYzjCUM1Nc7SGSUOpek4GBDQ5x/ctKTUlgYZ4yNdXJOOFlSk/i/e01xcYLeaExG3Ifxnk9rPHXbtqRH3nijADb6OYcoDCEioM6ESAjJGzbEoGNlQK30iKGysKDYYmbywNWra5HhrniPJ9Fgsbh5KZdOibo4MuJCu46FHgzNDw6OaY3TOez3z7q3b89EEoa4jU8pJalZlptYy7cBj0DZdpG4kMhoWyqdY+x2c0JamoyY+kVRlHyTk5Hpvr45eGkq2u18Jvji3G4ZalqJNn2V2jaFwcBKRW02yKzIPbbSjz6SIRhFXbW1ArI6rEm+EJLTu9TWFhpra9Puhv4n5o68POvi6KgXCUrh8BUcOZK/KisromqAsr7ULEDVRaqNXUuavr7n/PkNjSdOpMwODExqu1rUVuwB46b4eLnw5Zfz0AnTpnt65q+89trf0dozNh07ts2ckEB7jUZWSq8QtTfUcSeL5cTKAHL9U1NZ/fX1GQiJday1dZEWFisZd23c6MgqL7dgcxLr3rFDzQM79hQxNHMY/5UWK7xoWVQ2Kivt1zS7Jaua4ewVNzzhmu7tTcLMJCinDpBo1eMqLAzb09MnTHFx4yxYwxyKRIaPl23/YhWUqQH/7tZV4w2ViJ3LTl1MWNRup9mczrFizrDSSSxyFo75AhNZ3if+8d75v94QuHOqW3Oz2s9/Z3uu7gtUkRO1GxftJvXfAgwA2h5U++q5JEgAAAAASUVORK5CYII=";
-                                switch (playerFaction) {
+                                }
+                                this.toolBarMouse.hide();
+                                this.toolBar.setZIndex(11);
+                                this.toolBar.setLayoutProperties({
+                                    bottom: this.TOOL_BAR_HIGH
+                                });
+                            }, this);
+                            this.toolBar.addListener("appear", function () {
+                                this.toolBar.setZIndex(1);
+                            }, this);
+                            this._armyBar.addListener("mouseover", function () {
+                                //this.toolBar.setOpacity(0);
+                                this.toolBarMouse.show();
+                                this.toolBar.setZIndex(1);
+                                this.toolBar.setLayoutProperties({
+                                    bottom: this.TOOL_BAR_LOW
+                                });
+                            }, this);
+                            this._armyBar.addListener("click", function () {
+                                this.armybarClickCount += 1;
+                                if (this.armybarClickCount == 1) {
+                                    this.armybarClearnClickCounter = setInterval(this.resetDblClick, 500);
+                                }
+                            }, this);
+                        } catch (err) {
+                            console.log(err);
+                        }
+                    },
+                    setupInterface: function () {
+                        try {
+                            ////////////////// Interface Side ////////////////////
+                            localStorage.ta_sim_side = JSON.stringify(this.options.rightSide.getValue());
+                            // qx.core.Init.getApplication().getPlayArea()
+                            // might need to use this instead, mouseovers are not being registered during attacks
+                            var playArea = this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA);
+                            var playAreaWidth = this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().width;
+                            this.armybarClickCount = 0;
+                            var playerFaction = this._MainData.get_Player().get_Faction();
+                            var statsIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH3QMQFzoqkrYqRAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAGrUlEQVRYw52WyY9c1RXGf+fe+4aqrqG7qgd6wm2MjYnBKFFIskAifwASipRlttlHkSJlkb8iUnYRy6yyyzKgDEgBJYRJcUAYhGkPZWx6qK7pDffek0W1CSB6Uf2WT+/q/t53zvedI5zx/Oa3v/tT3d1+yQhqtCZUHkTEGBAiUQURQVVI04zJbIogIIIxQFQ9GM30sIpmOdU7r/zy57vfdo87CyB0t176xcsv++PhF3Z5fJebH30kNarOOVnrdrh3OKTbTCnqSPCe1b01eivr5I0EQH0x4/dvfiRIL9TlbOese84EODkZ6r/++YYdBqXPiMFwqtPpROrZhG6rxXA0QSTiAyTOYW9Bv7+BNaogItHr7TsPdCDHZk18XBhgf3+fQVpx+fr3qIrAlWvX+ezuPf7x19eYjE7I0hQABRLrOB4OmU1HNFsdEUStEeoQpDg85NiqLAzgg6fbacnOek8//uSIVNpy5cpVfXg8ltHREaPjQ1QEVUjTlOYGfLp/i6efuc5sfEJZVXRXepJ88J7e/uDfiwOIIFHRNGvI8soKeSPXaEQ67Q4mCs4YQowYa3HWIVmOtykbq6vqux2ZFgXLvb5WdSWDT/7LwgDLvT6XrzwneWOFrc0GIiI+Rp576hl88KBz+QUQBDHwYDTm9ZufyaeDQ3JrGN+/Ixvbe2w88yN49W+LAeR5g53HtsnSDCMZcipie6mLflMtIHVCee8h77z1MeMKUivkS132NaXf6S2ugI+Rg6MDGlHwdYVqnP+rCMZarDFf+14Vdpcyfv3Cs9w6OMIIjGZTru3t8tqfP14cIIaazwcD0mkAjYSqIIrBWWG5t8HO5hrhW8z1w16HH6cwrUr2R/fwjTEF1eIARiydTgfTzIkhYJs51lmSJKXT7lD7uSLGyP9LospoBqOZUIVIWVg6zT6ZSc8EMGeXQIhRcdahGKxzCEKr1SHLskc3oqqIKqgiIlgrWAtGFCXiYySoLq4AMVBWFVQFo/GUdiPBpQ3EGKJGjDUQ5z7QRyByqoZy+v6RmsI5csCQ5znd7jLOOjJnUQzGCM4ZxqMReaMF6gFzOph0HiCn6lgMSI3IORQQI5RlyeDuHUbTgmaWkmeOW7dv0+0uY7Xm8GRKb7nNxb0ncM59zZdBA6N6xGQ2owzleZpQeOyxTda2tyhKT+KE6aTg8XnlSdMmT5nArAzIqSXlVGpVJXNNLrQvsLXR4tX03cUB6qrivbffonh/CWMgz3N6nRbT6YyD4ZjhwV12n7zOD777LNaYufynEEaEUXHEjcMP+cvwU+6N7y8OkGQZ33n2Ou3+GrPZDFXFWkdRlVxOHNY+T1lWaFRUFPMViKhKK+vx/fXn2Vx7gf3WK+dIwhA4PDpiVBRMixJjLWVZ0e32OCom+DCX3sfI2uraly74ZpbUKFHDOZIwKjFGfFCQZJ4HydxuW5s71CHQWlrCWIM1BplvY6jO+2dazxiM73PPjhj7yfmaUGPEe49GwVpLmrYQMYgREpPgnKOqCibjMc4IdVQSY0AMtZaU0xnWpUi05wgiZB4lNsVRMZmM2bv4JK1mTohxPoYFJuMRDwYDqnpGHR0mVNisgcRARFgJGyTnATBG6PdXSVoroJ6g0GzkgOBsAsxrniQpS60l2qZJ4SHRGnUNEiucnAzJckfgHEHkfc3b77xLo9Oh9DVBLZcuXuLypSe+HM3GwnQ65s03Xmdra4OTaQRfkjc7EEtqhAd3b/PFwdHiAHne4MUXX6S50sfXnuADxlpUIyIGRIlRWFlZ5yc//RkhKkYUBOo6Yq3B1zW72x1ufP5gcYAQPDf+8z5Zd5XaRxILFy89SavZJEYFnU+9w4P73PzwBuvbewzu3MJZQ9Lo4AxUVcHNGykPvjg8RxOKsLq6Tqu/rr4upQ4RNKqqytzzc8u12m12LlwAjWzuPk7mBHE5BqUoC/a2d/n7BzcWB9CoTKZTTdqVxLrSMih1VUmdJIQwbyprDUVRUhY1vi6YemFlKcdXM4xGQlRGowne+8UXEmtFG3mGiqhJUvLUMRrPqOpIkiQ4ZxExrPTWuHrtOls7j+PEE22CL2ZUviTNLVkmjxaEBUugqoqKsVY1ICFUgoimaSpiDBrt6T6sxAhZo0O328e4jCxJKUtDVQnHRw5/nhzwQU3HutBMU6N1Qae/rdPJidRHD9m4uIlNvrqUA7S5uPv0l+cPB/Dwc1hpgymTcywkxfDDX/3hj1e77VaMihhrJMRA9IEkTbDOgJ6OX4SoEdVTHAHvoa4hM8JnD88ex/8DigFIoHwdTR8AAAAASUVORK5CYII=";
+                            var undoIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAzdJREFUeNq8ll2ITGEYx+edj901i2UNaaiVyFdK3PgohUJSyo3ykVsXeyFy7+NOElfkjpBy5Yoil5S4EclolfK5YwfL7JwzX8f/af5Hj9eZs2P3nD3165yZc877/N//857nfUwi5PA8T05GLo0xiTiO5DjBe8BaMIDfZsoEMHg32Akug00gNZUOSLD14CQYAu9BMw4B6YDZi9WrwGnQC56A161bf9Lg6Xcmsz7SAcHz4BTIge+gClaA5QxcBqO8Fn7hvTGcXVAXp/5HkLHyPhucAdvAGAV2B6RHjmGKk+c+gLfgKd0qiiAI8ToSwOAzwVFwGPxgzvUAnvXbv29IimI/g0fgNiiAWpgjvgB5eR+tL9PKoOA2TXXWgqZxnEvgrrjUTkRSnXO03Jtg8AaFO2CEv0+AI6CPLrcVUANXwXUwS+XZn1FSYRSJABH+ucy1sB8MyrhBIuxF2AeOgUOgRCEVDtYMcKeXC1dm/ZPP1pUbDcYQd2+BG/KMTkdaf8sQIYvvPBfTHg58H9zkqrfFT6eIzWALWMxZV5UI4RPYC16Bx7qope2CQhEXafdusJIDD+F+3aobJV6+AXfALnCA/5WUAIfjyb0C3iv6LvxTinlDPqULnL0UoNWg386hPEvqfEecOsfUZRi8Rke+ggUsaiZ0L2ABEdvOsrAsA9nQgtISLjN9CK6BebS6RiEVitwIutruBVoEDhFxnIvoy3gllimUkvwAbOf4dTpQowuLWPSKof0AB5QZvAPPcF3pqLa3REqge3StpigzPTk/nclOBpzAbifCn6sU+OvAUXtMZwImcVSt4FXumA47LRO6BiJqdhpW8Cq38mzcDhh+OQ4Du0pIimlIxOlAF+vHNxXcVRWy4pf0yB3g6s6z4Iyo4C7XQ4bOxJYCcXUDv/+yCu6oDW20bSmOYPZSbreym66o4C5TM0ZhsTggu+gOBhu2gksq5qr/oxWA2SfZzq8DLzlLx7J/DrfkRqQCaP18cBB8ZDvvWg7MkBaeW7cXtQOG3ZTMrB+sAUs5Y/9TXwJe6AX4V0sWUQqy7CnlMxwAC/lfhuKu2LuqiakO+I1sD3vGPHvGAoI39PO/BRgAhgJgQiBnZrUAAAAASUVORK5CYII=";
+                            var redoIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAx9JREFUeNq8l8uPDFEUxvtWV8/o7hmPTCeeC4bJYIhHIhZYiNjZ2CEidlYWHrEwEyxn7x+wtbSxFqyJiEeEeGS0kU4YY3qobt3lO/HdOK6q6mrd5Sa/VLoe93zn3HPuPZ3LZTTCMDSg43teRsZ9XDaD1SLkvwvAKIFT4DqoJEUiKwFN8A5sB+fB0jgRXo+hdjEMeQM8BE/BCXAWlKNE+N0mFi55UABLwDAY4GO5N8LnOT6vglFwEnwBNzDHgjG/08Kk8ZKREmMbwU4wAVaBNfKKhBgsA21i5/0BAjoqeXEJ3JZ7VoRJ4bFMvgMcB7s5mUzccpbSOE7puQ0jJblxDtyHgHaiABiXUG4CZ8B+ehIog54ybK9RaBFFUAPHwKxEwU8wLnV8lWGuMdR5tcba+3ZCQmsRErUyGIxNQhiXibayfIbAR06Sj5nYJEQiR+F2Cb6CKUlOmwN+xJqvBRcZrk807DtrOcTnkvnv6ZlxRA3QW8OKmGc5PoLxVlwEilyfYRr3nVAv57274A54xYkbEdHZA06DbUy+C67xPwTQ+w1gnyQIQxcq4yvAGzANXjMhf2WyqmuWrZTkGPNInLoCHrjG3QjIi0fo0aIT9gpFXZaQY6Kww/myBexisk2y9htRL/tK9Up+NMM6t6PMj6eZPJ3OWBGwHoyDa+CW3njiIuDxAzG0oDLecN1vgud28+gwWsyRl+BJknEtwOem8wF8V/v7IH/fiwvhX0Vv5DwKq7rUkoavDo5KREbLDJ/lfprJlIjU71oBeWZ0nSWTU5tILa33/zJ8Z+0CJwHrjE4hKwGe8jSkp4G6LvI0LKZpMHsR0KTnniOizjIcS9M79CKgwUOnwKy3R+837vUHuFFlJqBFASUVgYBiZtgJjXZqsXvNgSrXu+VEYZ4cUvtDJgJmmQcF5b1dhhc81db1Oxk9tXHMsZevOEsQ8JnkwlFZpn6K8Jw/E4/ZgrWdZQjUH42D3bbzqQTwlHvGtmmEZVeioAl2xHW24/l+CTAR/eBecFhtvxL+t2xGava86Ga/70aA/WM5TsNz3A2bUd1PP8ZPAQYA6tkaX3nBq4MAAAAASUVORK5CYII=";
+                            var resetIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAACF9JREFUeNqEV2tMXGUannPmxjADTGGGYZlpyx2hpZbey1ba9LLAguhWE29N6yU2aaLxhz/7Q/rDGKMxxsSoGK1Lq7GkabW2W7CpKZVLbVpBoVwKwi7Qcr8zM8zlnNnnPfse9nQW3ZM8c+Y7t/f53svzfp+g0xyRSETASQ8Y+JLE0PE1I2AGTAx6NgKEgSAQ4HOYEREEQfdHhxBlnAwkAIl8bx7wsiH1uh2IB2KZhMyGF/n5GWAWmAP8/4+IEGV8FfAQkAOIwD1gCogB3EAqPTPR0eGc6euz6wRBFJTXI5J7585xq8s1zc+PAP/k92eYoLQSCSHKOBn+83Bz886Omhp36ccfN2FMHzXdPX8+p7O2Nutec7MruLAgyJIksfuVOYhGo96WkhJYXVw8vuWVVzod+fnduN4J/MaEyJNhkIhEEzCwW2nmO2B894Xnntu6NDMj5z7xhLfw6NHBa8ePrx29fdsakWVZa1RzVqHc15tMhsyysrG977zTBK+0M5EBDk1QS4IIkHvXAsXDTU3lFw4d2uGfnlYST6BDr9fL4XB4BaMrGuezAhg3Hvjgg/bM0tKbGN9iIhNMQvmAqMkFoePUKQ/NXJOYkZWMEy+43KCCZhxtnOAdG/N9d/hwbtunn+7GeBOQCcRp7CoeoPg7gS3A/ksvvljac+6cjYxrK5R+YMiY8/jjC2n79t3Lf/rpO5z5Ot/4ePzAlStr2mtq1ozcumUC6RCXLxEJG2JiDJWnT/elHzjwA8bXOS+WKBREQOQSKwD+0l9Xt+vbZ599iJPsgZlnV1bqK0+d6sV/SrA2YBggYzaehOe3y5fXtbz1VvbYL7+EuAQVLYlfvdpyqKGhyZKU9D3GP3G1hEV2v5Hr2vxjVVXaSsbpp+/iRekfR4+m8kcpq4cASrIWoIGA5Pvh4LlzzX/askWvEbLw/NDQzI8nTqznMDhZQwSRjVMVeG6+/37BVHe3SWtUU7sRqoLu2lrTd0eOFGGcDazh92e57skrzbEOx09/O3PmBkgYNKoYuvvNNwL0I4s1xUq5ILLIpACrey9cyODYK8YtDoch76mnQkwiwnkp4bn4iy+88CjGu4CNgIPvk+jcBW7g3dai48cHkTcChykcmJub6Th9Oo1s8aQNKoFEZKxzor3drnV7weHDM2WffHI39+DBBSYhsyckzMZ66aWX9mO8GcgHkrlfkPzeB3rT9u7tXbtnj6B6gMpv8No1HROOVwlYiM29GzdcUjAYXFY2g0GPTO/C/zvln39el1VRMaEhIYNEGNUSAxIlGG/VkDAyCVK/sYLnn59VjdN5fng4gFK3czkaRe5u1qHr15O1sbempASTcnOpXH6mrEUZXUQVTAtK1B4kgcQs05BwcvNaIBn3FBWNx6xaZVZJ+CYmxqe6upI46Q3icov9z/SW3W9NTl7kjjbImd76aE1Nfc5jj82AREStc5AIdp89a6g7dqwkigR9zwfjfjz/QLsW4F22qxe1LTlKXtWZLgHjQAdwu+KLLy5DjOaYhFLnEUkKdZ45E/n+1VcPYLydNcXJRmhuIc1aIQB5X+7EhuX4ILW02g5XWTg/LDzbETboqzh5MnBJFP8K95spIek6SITvfPWVrDeb9+17910bNx8SuFgYDGo8sMQeIbuygS96kx9+eF7bWFAVJkisIzY5WY3XIntCOco/+0wn6vWlXWfPimScPkh949eTJ/0Gs3nr7jffpEw3DTc2upZmZ3tU43Eej8XmcpEtn6qElLHzKZs3jyHzRbXUUBFL+DiplkejXEEmQdXxc1l1dd26Z54JgYislhpI+Furq0db3n47j7rscEtLWAoEvBzKgD0jw2RLTZ3iJA0a+Ma0c9260cScnKXJzk6VhNxWXZ2W9+ST2fDCfRaZUQ0J5Sj58EPqhnvQiFATYaXUqJxvvvdeB8K6vuPLL++rxmmymSUlJu4D5IWwvqqqShUjJ+LugcviVAJwnRRcXExCP/eyy7yqqvFH6ZqQUVqqQ22noQF5kRNkKAAyS0ONjf1Qv2nVOGZuhDo6INW3Me6nsBKBCPdnKzxg7fz667yQzxdiEhI8YkEHs6ds2iSr6wZNP1d7vyV9//4YORTKRDueRE6oM16eOf3f/vrrBdkVFeSRVk7qgEpAWd+ZbDYzjCUM1Nc7SGSUOpek4GBDQ5x/ctKTUlgYZ4yNdXJOOFlSk/i/e01xcYLeaExG3Ifxnk9rPHXbtqRH3nijADb6OYcoDCEioM6ESAjJGzbEoGNlQK30iKGysKDYYmbywNWra5HhrniPJ9Fgsbh5KZdOibo4MuJCu46FHgzNDw6OaY3TOez3z7q3b89EEoa4jU8pJalZlptYy7cBj0DZdpG4kMhoWyqdY+x2c0JamoyY+kVRlHyTk5Hpvr45eGkq2u18Jvji3G4ZalqJNn2V2jaFwcBKRW02yKzIPbbSjz6SIRhFXbW1ArI6rEm+EJLTu9TWFhpra9Puhv4n5o68POvi6KgXCUrh8BUcOZK/KisromqAsr7ULEDVRaqNXUuavr7n/PkNjSdOpMwODExqu1rUVuwB46b4eLnw5Zfz0AnTpnt65q+89trf0dozNh07ts2ckEB7jUZWSq8QtTfUcSeL5cTKAHL9U1NZ/fX1GQiJday1dZEWFisZd23c6MgqL7dgcxLr3rFDzQM79hQxNHMY/5UWK7xoWVQ2Kivt1zS7Jaua4ewVNzzhmu7tTcLMJCinDpBo1eMqLAzb09MnTHFx4yxYwxyKRIaPl23/YhWUqQH/7tZV4w2ViJ3LTl1MWNRup9mczrFizrDSSSxyFo75AhNZ3if+8d75v94QuHOqW3Oz2s9/Z3uu7gtUkRO1GxftJvXfAgwA2h5U++q5JEgAAAAASUVORK5CYII=";
+                            switch (playerFaction) {
                                 case ClientLib.Base.EFactionType.GDIFaction:
                                     var iconFlipHorizontal = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFTElEQVR4XtWVW28bRRTHz5nZ9Xrt2IlzKUlanJReiEhLpUpFPAQJBIUH4K1IXEQf+AZIfIE+9oXPgAChPlb0DVGFXlBBlFJoaakobVVCkxbiJI7ttdfeOfwnySo18UXIlRBnd+X1zP/8/mfO7tj0v4lvStKDtseYfVAiGxeCBt8Q8a5Hkj67JGkRYVyEe/2LwSWioNnMeZRx4so1vhLK0Km7xbdO3Fw6fnYpOvr+ye9e/uDzi4NnlqIdGJvC3PjVUNzPfrr66IzP/ylk47pI4tTc6psnbi3/cPmvslxalZPvfjz74dFPZnfj/hDGXsPcc9CMQ8txbrdQ3QQzI0xn7ghXyjRKrJ59aiA5dWAoRa6mEWau4zKOogTGGHN90OTKZUoix+b2XoCNTJ7U/EppplKrHx7w9BpViEwsEHsiMEfQDC+slHLZCbK63gs4VxGqBpR3tDs9PZDMu0p7QSTEQg34xhCxY5jT0PjQZoMK+cjtvQAlolbLwcFSJTjiOUosUta5EW2GyEYboCFox5CTVdJDAefLGy5GdpLwwcmsNzzqu5mFqgi3aK4ds3PQuNC6yBlAbipm/esCZtJMXwfiSGSmqtXakX7PcSuRkOKmZysPf7Nz0Ai0jJwx5PaBwWC1L6DT6o0x+XK5drg/6aZ3pt3MPaxQNbOEpKkAshpoE8jRyB0Bw+/UBdVu9ecC8VzhPVFkXnoy6w0CTA63fLObyFYDrezFY0DuMBhpsFS7Lqh2q1ck4w8Kq28orf3RpPYLoV09dzS3YTVWO5bUWuEEY1yxeO26oNqs3nci3stKP/3CY37+Rqnl6hmXMG2tymptDnJTYGScBveBqVt1QbVavato273F4juseMDX7IRGhLllC0Vo616zWpuDXAbDAWs7mIlWXVAPm9sKz1clFVWjfVrrna+O+buvFI1YDrWLNjM2x+aCkQbLMjNg2y5Yr60FxO3xFA09WCkf6XPV9lq0JmhvTiw4AGj7hrNlgJUEcxRsN/ZqKiCu6EJd/GKx9oyQmnx+JDnxa5m4w+LbGDc/CssAywczBXYOHk2eKq5oVoQSQsOlIHwxn3KmCnWK93wnfxZEpyZZBlgEZh/YQ/BIfIWUuAsqriRDlLi/WJlBy/ZP9bu5Qkga7G5L7NYiEgRYDGaiZigLj0F4cdwFZSs5EwhTSKPG0MHpfndfsaHcxrp15/6LqG41ItiywOTprJuBR7/UKAlPst6KEP1JUvOLpZnVavhKznPcSEgZibdepxCbz93eA8sCk8FmeIzMF0o5eK7Blf3PrlQo7ypnen8u+YSjdHqlLtQdvEZXpKxF12DLBNuBRwpeGXj61lu5ZHi5WDqwVCy/5zqarLVsPr8tV/xzO7e6QMaIE0WRvbdjHXNiLjwYXnl4ZuBNjkTAsdufz8jg4/gXu1sWSur2azIb7/z2vlGl+LpmxHhm1Nqzp7jjzlkKiSbSrrOYSVCRXRfeKEAMaUUVY/Q1T1FmV4al1QYXEaqbBtrowFL05T/uBJGIz4T7udvRrt0TtR0+SWjqktAuKVbUIthhotW6UZETrRXrOKwkCMKb399d+PTcbxpANoKTpPnXFmAuBMs84GVVKHWZm1vZI0LfGkO10xfnwt+Xq/MeJ6hQXZbh1CAldOIf6+D1A67LK8X05LahYHIkRSygHPvicvbSrfn9IiYkhDAsTfMLp5hZ44hMxICwh4epFF+AYAgML6xHYsDSrMTeIVr8d8oGT6m940P3j79+qM7UY7z90WlX4i2LE9a0vrvtZ1wEPuNvwsQs9OPte42fjx3t2bzH/C/pP4+/ARzr/zZI4lPKAAAAAElFTkSuQmCC";
                                     var iconFlipVertical = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEz0lEQVR4XsWX3W8U5RfHz3lmd2Z2drftdinQjRhKE02MV7SIhZYLSUyIMcZ45wVeatQ/4BfwlxiF+A8Yb8WXC68QiBFjIEYwigQiYFEoFVBCX3ZL931nd555zvFkQnphu11Td/VMJvMkm8l8crLn+/0ehDXqXIkxbhECKgBFPOFZDD2qNQHOl2hbzff3C4BWSHOZAe8axqG4SyH9OwBF8xo16h8YpsZik34eSLnHLQsvZwfcKy2G6h4bdW8Blun/kxl850HAXPB1I+8HQSHg722Fl/tT7lkvFZtuGqhNuRj0qAN0eKIfjtyoAmx1EUKikNno6VKwXCe4CGRubR3sO6kcmBGQ8j4XdVcBzhXDQ3v71dHpKgMCsKsQXQsgabG2kfmbRf8uI94Ephu5bPp4GIM7oYLCVAypSx3Qh/f0W0euC4CFCMwMDMC2gCAAbEtAyMz01YJ/ywKetxRcHMqkvtAIdycTON8FgFAA1ArAw4pApFg4UMnh8TTwckD++ULzLhhT8pz4l17K/pZR3Z5KqrnuAayula4kY4gjHsLtmi7PVIOlZissD6QTn7IFP9m2fXMyifPdAmgLEjLwsIu42UG4WgqWykHYKjSCxcE+7xNN5peBVOJqTEFhzEH6WwBf52uH929KCgCtAHQqYgbNwKOewoQFcL3SetDShv+o6dk+zzkFQFeGB7xLTR2UdqcdvS7Ah7dnDx3cPnp0NUDnMsxADDySVMhyXvB1pdQM+Z5vrsYVXEi59ulMyrk05mGtLcDpxcpbzw6l371WEQCEDZVhAAWRjsgZmMjo36pBuFAPvsumvbf7U/aFXR7ymgCn8oX/PT+06T3fMKBcLNdGixkgrkBuBJLzmXvlkOLuwcG089nudBuA1z+/8NFLUzseybpZKDZLvNkbjF6W6tQPbjNpFiPEhAPqmu+0CD4GwDP7Mm0AXj529jlLwQEEDAkgVIgEzAaiJ0YDiIgMUa10EVfuiAPVWgNHRM7EEzvef2PX9lmQagfwmGUBICtiBFaoonlDRGCIvg+IEXvEg5FiI0a/yTGCih6re0GG1eSTo3Ov7ny00RbgzZM/7nxx74iddbKw3CzBluQgELfrdscpiXjlRkvOtZD9gODevoxaagtwYiE//sKWoZxvmHvwJzQUd64cyCXm1hvDcRnDYRlD7uIYsowhyRgWN6W9mf2bneJ6QjT2yshobloAuiBEWoQIRIgq0oViyo3nRYjKIkRmPSkeFykeFiXkDUoxihS3RIpBpLguUrwIQGWR4rJIsRYp5k5mNC55YDVAZzNCMaOWmBGJGbXEjO5rMhUxo+ruBLZWUW8IoL0da7HjQOw4FDu+zxaUxI7rYscrH94YQOdAQhJIGmBMKIEkL4FkiVH5Ekia/ySSCUAsAmgTyYiZQSJZ3QJuWgpKEsnyGqExKa3uRigdk1Cak1DKfwmlZCODhNIGI9aBqSahdCGMQX3CxqCbsVw6AMO/VoEfxnJiNiyxPKgTlIFMTWL5onKhLhOmJZZzV2P5D2Uee7oPcrKYUMHXRhYTKgRcikurJV4tJdOxqh+CmXKRerKYHLs+/8xoJulqIpLVrCqr2bxlYVlWs0qLIZTVjHu6mp34vbLFcWLxyA+RmrKcVp5yUPdmO/6P609VRf8/TUkZ4wAAAABJRU5ErkJggg%3D%3D";
@@ -1743,1326 +1742,1320 @@
                                     var leftBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAABj1BMVEX///+hop/p6el0dXOXmJSTlJBqa2jY2NihoZ6XmJV2d3XX19egoZ6dnprOzs3X19aIiYeKiojQ0NDr6+vq6uqen51sbWqnp6WRko+cnZl0dHKMjIuur6yLjIro6Oh2dnTIyMh1dnRtbmupqajCwsLu7u6enpuWl5OGh4OgoZ2EhYJ0dXKHiIWHiIR6eniSk49ub2yam5hpameJioiNjoqlpqOkpaK9vr25uritrq18fXtvb22Ki4d1dnOOjou4uLZzc3Fra2mrq6irrKnPz8/t7e2lpaOQkY6mp6W7vLvOzs6CgoFubm1vb26bm5mYmJaZmpfFxcWVlpO6urrc3NzZ2dnT09PV1dXa2trg4ODz8/PW1tbJycnLy8u0tLTi4uLSvbq5ubnDw8OwsLC3t7fb29vw8PDR0dHv7+/f39+uRDqvRTzj4+Px8fGcnZrh4eGsrKv09PSioqHTwL2mGxvW19by8vJyc3Czs7Ojo6KfoJxubmyEhYPOuri4uLjS0tK9vb2en5tub254eXdub21rpm98AAAAAXRSTlMAQObYZgAAAr9JREFUeF7s0MUOwzAURNF+5DxTEIrMzPDhjRtZztqx1E2vNNuzmNZv+rf2Wl0epWgSEelxA9TkYQryEGcQLBBENfkC8kSjpO9L+8YKjatoQJQdXj5loKK1jffZvKHlvGhf3cuyEObrgOE0NT9rOQ47cuCalDP08KWFYAzPh30j30fjrtq6ptRiktwAcH3HZr47WjmOkv6nffPsbRoKozBva+oRO6NJS5OSpIWWTubee+/xxqgOqCBGQaobpUKOxIdW/udwrUgOX/jA7UGxeM8PeBQ90rWOc65DnURBuHZHoZnN+rGjS+oMJifl49tNRdZid8u7v9A+m6UTqycthWaVT5+/hLoJyi2Fbp9unpnyUvTOWqCPrig0zzZtci1K0d8ibXQ0kqBrLpFFCLQ/FpOxP/5H6FA/CZpHSSU7aKCQ/8a1uBbX4vpUTMZxjOubHhlTHkRI7iDMNZsHKMYIYR4/YqDQfv7CBEaIShGH7qGE+Ej0KEzIH9HiWlznD6PQ48tXQQfdnHZszOMpV3Js0PN6csVG9ZBDLhlG1soC92KiGFbMYK4J63r40NKvxbW4FtcOznXhNsw1m2dRrtXb3TkCoblwfgJXghfh1R3fr/FovBBxLa4LF1GuzelLRYwQs3T5ShWCLpSca6Ae4jg2oCykGxgELT1EOp+4FtfiWlxPgtD4DYwoixvY9eqwbGDSr+VdRlxncQO7sZi5Dazu2ERZ28DGvCHqIdL5xLW4Rt4Jzg4aKST7rhF33Wv0+4X0D3uAjhoJetYicq0BdKerbWS+kwhp37IWBi//z3AYaLLvruf6G9i9hftbKZo3NsNuoPENRzS/3m5xfwN7QD/cFM27nXK5MvK3qTQ66jf30fywujSA5kd+SyemIidCeMPnx3GC3tP0+/WTLQCaVd49fYZCzzx/gRLycvsVCj039/onvUF9K+HA7eQAAAAASUVORK5CYII%3D";
                                     var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABqlBMVEX////09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb29vc29va2trZ2dnZ2NjY2NjX19fY2NfW19bW1tbX19bV1dXV1NTT09PS0tLR0dHQ0NDPz8/Ozs7Pzs7Ozs3MzMzLy8vJycnIyMjFxcXDw8PTv7zCwsLSvLm9vr29vb3Oube7vLu6urq5ubm5uri4uLi4uLa3t7e0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmnp6Wmp6WlpqOkpaKlpaOkpKOhop+ioqGgoZ2hoZ6goZ6foJyen5uen52enpudnpqcnZmcnZqam5ibm5mZmpeXmJWXmJSYmJaWl5OVlpOTlJCSk4+Rko+QkY6NjoqOjouNjYyMjYuKi4mLi4mKi4eIiYeHiIWHiISGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN1dnR2dnR0dXN0dXJ0dHJyc3Bzc3FvcG5vb21vb25ub25ub2xtbmtubmxubm1sbWpra2lqa2hpamewRT2vRDumHBymGxsjsLVTAAAAjnRSTlMA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////0TDHVgAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAALNSURBVGiB7ZvpU9NAGIeJdAaR0pQudFu01FBPiki9Kop4gddCazCt0gxqVbCieE61SL3vg//Z7KZpwxc/sHnDLLO/mcx02plnMk9z/HbepK1NxseseZm/69B9jeyOxWJ9dONJ5rcbjTFOaNGopmEPgjJ/XOjpo9GEhpA3aIyOudivrkVZkvZP3DnccvLsvf1V0huym138irSE4xqls9kxjkyMULbjRP8U0Zy/EaWQqqo9G05vepyyHd/X6+d3MSHWNhgKKIrSvvF0D50ZaTmZefJyEdvoveEAb0JD4y127ubjzxVsHXzWTncqCi+7Oz1BHWToeZkzyvdrD/spGndu497tQO9pdpysWWhipVSrUSF4hwfo8Ng6NCGrDN3Vzo/ucaH1OybRfzIhAqFZVmwh/GS/0G4h4qCla//Q0rV/aEFd37WE/AIRYpRNYvwAc322H0aITqbiCAZt3tiDEIiQ2ZMHNCD0kt1dIYTUIdEalJAVSLR0vRVcR+DQk/vBTvTXT1NQl6dSdQEDXVT1UrUSh+oh5tsvMDcw0yQECA1YFnRC9LponU9M17JfB6TrzUJL1/6hoV1XwVxfGIByfTkO00PIFbq2AxEye2QAqvMtw5Vg0OoOVoJBl0nS9VZwHYFzfQ7sRF96sYCB0IVHHxozMIDr9YNqZSfUvbFUhbmBuWdgHqNlD/EPLV37h5au/UNL1/6hoV1/F20GZkXAGVjhlIgzMEH7tVzLSNf/Rws5A1t+J+IMjK6SFoWbgdF7oyF7iOx8m4GWrv1Di/9MsDhogV2vwj3r/oahgx7sdTjbROeM8nzuYoIJUTu4yYrqQhfvzV9tzMBwaDs3Gw030fl8/lJjBoZwItTB8QYHe4sjhZromcJx5KCt/VaDwS6OqIOohdafN0swY3NF24dc6OI3N9qzUPStjwfZ56T36Lm5YSj07elDUEJOjI6CoP8Bxks+VXu6zlMAAAAASUVORK5CYII=";
                                     break;
-                                }
-                                if (PerforceChangelist >= 441272) { // 15.4 patch
-                                    this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent().getLayoutParent();
-                                } else { //old
-                                    this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent();
-                                }
-                                if (this.toolBar) {
-                                    this.toolBarParent.remove(this.toolBar);
-                                    this.toolBarParent.remove(this.toolBarMouse);
-                                }
-                                if (this.repairInfo) {
-                                    playArea.remove(this.repairInfo);
-                                }
-                                // Repair Time Infobox
-                                this.repairInfo = new qx.ui.container.Composite();
-                                var layout = new qx.ui.layout.Grid();
-                                layout.setColumnAlign(0, "right", "middle");
-                                //layout.setColumnFlex(0, 1);
-                                //layout.setColumnWidth(1, 70);
-                                this.repairInfo.setLayout(layout);
-                                this.repairInfo.setThemedFont("bold");
-                                this.repairInfo.set({
-                                    visibility: false
-                                });
-                                //this.repairInfo.setThemedBackgroundColor("#eef");
-                                // Available Repair Label
-                                this.repairInfo.add(new qx.ui.basic.Image("webfrontend/ui/icons/icn_repair_off_points.png"), {
-                                    row: 0,
-                                    column: 1
-                                });
-                                this.labels.repairinfos.available = new qx.ui.basic.Label("100").set({
-                                    textColor: "white"
-                                });
-                                this.repairInfo.add(this.labels.repairinfos.available, {
-                                    row: 0,
-                                    column: 0
-                                });
-                                // Max Infantry Repaircharge Label
-                                this.repairInfo.add(new qx.ui.basic.Image("webfrontend/ui/icons/icon_res_repair_inf.png"), {
-                                    row: 1,
-                                    column: 1
-                                });
-                                this.labels.repairinfos.infantry = new qx.ui.basic.Label("100").set({
-                                    textColor: "white"
-                                });
-                                this.repairInfo.add(this.labels.repairinfos.infantry, {
-                                    row: 1,
-                                    column: 0
-                                });
-                                // Max Vehicle Repaircharge Label
-                                this.repairInfo.add(new qx.ui.basic.Image("webfrontend/ui/icons/icon_res_repair_tnk.png"), {
-                                    row: 2,
-                                    column: 1
-                                });
-                                this.labels.repairinfos.vehicle = new qx.ui.basic.Label("100").set({
-                                    textColor: "white"
-                                });
-                                this.repairInfo.add(this.labels.repairinfos.vehicle, {
-                                    row: 2,
-                                    column: 0
-                                });
-                                // Max Air Repaircharge Label
-                                this.repairInfo.add(new qx.ui.basic.Image("webfrontend/ui/icons/icon_res_repair_air.png"), {
-                                    row: 3,
-                                    column: 1
-                                });
-                                this.labels.repairinfos.aircraft = new qx.ui.basic.Label("100").set({
-                                    textColor: "white"
-                                });
-                                this.repairInfo.add(this.labels.repairinfos.aircraft, {
-                                    row: 3,
-                                    column: 0
-                                });
-                                playArea.add(this.repairInfo, {
-                                    bottom: 130,
-                                    right: 3
-                                });
-                                // Toolbar
-                                this.toolBar = new qx.ui.container.Composite();
-                                this.toolBar.setLayout(new qx.ui.layout.Canvas());
-                                this.toolBar.setHeight(53);
-                                this.toolBar.setWidth(this.TOOL_BAR_WIDTH);
-                                this.toolBar.set({
-                                    decorator: new qx.ui.decoration.Decorator().set({
-                                        backgroundImage: "FactionUI/menues/victory_screen/bgr_victscr_header.png"
-                                    }),
-                                    visibility: false
-                                });
-                                this.toolBarParent.add(this.toolBar, {
-                                    bottom: this.TOOL_BAR_HIGH,
-                                    left: (playAreaWidth - this.TOOL_BAR_WIDTH) / 2,
-                                    visibility: false
-                                });
-                                // Toolbar Mouse Region
-                                this.toolBarMouse = new qx.ui.container.Composite();
-                                this.toolBarMouse.setLayout(new qx.ui.layout.Canvas());
-                                this.toolBarMouse.setHeight(25);
-                                this.toolBarMouse.setWidth(740);
-                                this.toolBarParent.add(this.toolBarMouse, {
-                                    bottom: 155,
-                                    left: (playAreaWidth - this.TOOL_BAR_WIDTH) / 2
-                                });
-                                this.toolBarMouse.hide();
-                                this.toolBarMouse.setBackgroundColor("#FF0000");
-                                this.toolBarMouse.setOpacity(0);
-                                this.toolBarMouse.setZIndex(10);
-                                this.initToolBarListeners();
-/*
-							// does the game init in combat mode?
-							if (this._VisMain.get_Mode() === ClientLib.Vis.Mode.CombatSetup) {
-							this.toolBar.show();
-							this.toolBarMouse.show();
-							//this.toolBar.setOpacity(0);
-							this.toolBar.setLayoutProperties({
-							bottom : this.TOOL_BAR_LOW
-							});
-							}
-							 */
-                                // (De)activate All Button
-                                this.buttons.attack.activateAll = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_disable_unit_active.png");
-                                this.buttons.attack.activateAll.set({
-                                    width: 44,
-                                    height: 40,
-                                    padding: 0,
-                                    show: "icon",
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Deactivate All") + "</strong>"
-                                });
-                                this.buttons.attack.activateAll.addListener("changeValue", function () {
-                                    var btnActivateAll = this.buttons.attack.activateAll;
-                                    if (!btnActivateAll.getValue()) {
-                                        btnActivateAll.setOpacity(1);
-                                        btnActivateAll.setToolTipText("<strong>" + lang("Deactivate All") + "</strong>");
-                                    } else {
-                                        btnActivateAll.setOpacity(0.75);
-                                        btnActivateAll.setToolTipText("<strong>" + lang("Activate All") + "</strong>");
-                                    }
-                                }, this);
-                                this.buttons.attack.activateAll.addListener("execute", function () {
-                                    var btnActivateAll = this.buttons.attack.activateAll;
-                                    if (this.buttons.attack.activateInfantry.getValue() !== btnActivateAll.getValue()) {
-                                        this.buttons.attack.activateInfantry.setValue(btnActivateAll.getValue());
-                                    }
-                                    if (this.buttons.attack.activateVehicles.getValue() !== btnActivateAll.getValue()) {
-                                        this.buttons.attack.activateVehicles.setValue(btnActivateAll.getValue());
-                                    }
-                                    if (this.buttons.attack.activateAir.getValue() !== btnActivateAll.getValue()) {
-                                        this.buttons.attack.activateAir.setValue(btnActivateAll.getValue());
-                                    }
-                                }, this);
-                                // (De)activate Infantry Button
-                                this.buttons.attack.activateInfantry = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_alliance_bonus_inf.png");
-                                this.buttons.attack.activateInfantry.set({
-                                    width: 44,
-                                    height: 40,
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Deactivate Infantry") + "</strong>"
-                                });
-                                this.buttons.attack.activateInfantry.addListener("changeValue", function () {
-                                    var btnActivateInfantry = this.buttons.attack.activateInfantry;
-                                    if (btnActivateInfantry.getValue() === this.buttons.attack.activateVehicles.getValue() && btnActivateInfantry.getValue() === this.buttons.attack.activateAir.getValue()) {
-                                        this.buttons.attack.activateAll.setValue(btnActivateInfantry.getValue());
-                                    }
-                                    this.activateUnits('infantry', !btnActivateInfantry.getValue());
-                                    if (!btnActivateInfantry.getValue()) {
-                                        btnActivateInfantry.setOpacity(1);
-                                        btnActivateInfantry.setToolTipText("<strong>" + lang("Deactivate Infantry") + "</strong>");
-                                    } else {
-                                        btnActivateInfantry.setOpacity(0.75);
-                                        btnActivateInfantry.setToolTipText("<strong>" + lang("Activate Infantry") + "</strong>");
-                                    }
-                                }, this);
-                                // (De)activate Vehicles Button
-                                this.buttons.attack.activateVehicles = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_alliance_bonus_tnk.png");
-                                this.buttons.attack.activateVehicles.set({
-                                    width: 44,
-                                    height: 40,
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Deactivate Vehicles") + "</strong>"
-                                });
-                                this.buttons.attack.activateVehicles.addListener("changeValue", function () {
-                                    var btnActivateVehicles = this.buttons.attack.activateVehicles;
-                                    if (btnActivateVehicles.getValue() === this.buttons.attack.activateInfantry.getValue() && btnActivateVehicles.getValue() === this.buttons.attack.activateAir.getValue()) {
-                                        this.buttons.attack.activateAll.setValue(btnActivateVehicles.getValue());
-                                    }
-                                    this.activateUnits('vehicles', !btnActivateVehicles.getValue());
-                                    if (!btnActivateVehicles.getValue()) {
-                                        btnActivateVehicles.setOpacity(1);
-                                        btnActivateVehicles.setToolTipText("<strong>" + lang("Deactivate Vehicles") + "</strong>");
-                                    } else {
-                                        btnActivateVehicles.setOpacity(0.75);
-                                        btnActivateVehicles.setToolTipText("<strong>" + lang("Activate Vehicles") + "</strong>");
-                                    }
-                                }, this);
-                                // (De)activate Air Button
-                                this.buttons.attack.activateAir = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_alliance_bonus_air.png");
-                                this.buttons.attack.activateAir.set({
-                                    width: 44,
-                                    height: 40,
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Deactivate Air") + "</strong>"
-                                });
-                                this.buttons.attack.activateAir.addListener("changeValue", function () {
-                                    var btnActivateAir = this.buttons.attack.activateAir;
-                                    if (btnActivateAir.getValue() === this.buttons.attack.activateInfantry.getValue() && btnActivateAir.getValue() === this.buttons.attack.activateVehicles.getValue()) {
-                                        this.buttons.attack.activateAll.setValue(btnActivateAir.getValue());
-                                    }
-                                    this.activateUnits('air', !btnActivateAir.getValue());
-                                    if (!btnActivateAir.getValue()) {
-                                        btnActivateAir.setOpacity(1);
-                                        btnActivateAir.setToolTipText("<strong>" + lang("Deactivate Air") + "</strong>");
-                                    } else {
-                                        btnActivateAir.setOpacity(0.75);
-                                        btnActivateAir.setToolTipText("<strong>" + lang("Activate Air") + "</strong>");
-                                    }
-                                }, this);
-                                // Reset Formation Button
-                                this.buttons.attack.formationReset = new qx.ui.form.Button("", resetIcon);
-                                this.buttons.attack.formationReset.set({
-                                    width: 44,
-                                    height: 40,
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Reset Formation") + "</strong>"
-                                });
-                                this.buttons.attack.formationReset.addListener("click", this.resetFormation, this);
-                                // Flip Horizontal Button
-                                this.buttons.attack.flipHorizontal = new qx.ui.form.Button("", iconFlipHorizontal);
-                                this.buttons.attack.flipHorizontal.set({
-                                    width: 44,
-                                    height: 40,
-                                    padding: 0,
-                                    show: "icon",
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Flip Horizontal") + "</strong>"
-                                });
-                                this.buttons.attack.flipHorizontal.addListener("click", function () {
-                                    this.flipFormation('horizontal');
-                                }, this);
-                                // Flip Vertical Button
-                                this.buttons.attack.flipVertical = new qx.ui.form.Button("", iconFlipVertical);
-                                this.buttons.attack.flipVertical.set({
-                                    width: 44,
-                                    height: 40,
-                                    padding: 0,
-                                    show: "icon",
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Flip Vertical") + "</strong>"
-                                });
-                                this.buttons.attack.flipVertical.addListener("click", function () {
-                                    this.flipFormation('vertical');
-                                }, this);
-                                // Repair Mode Button
-                                this.buttons.attack.repairMode = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_mode_repair_active.png");
-                                this.buttons.attack.repairMode.set({
-                                    width: 44,
-                                    height: 40,
-                                    padding: 0,
-                                    show: "icon",
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Activate Repair Mode") + "</strong>"
-                                });
-                                this.buttons.attack.repairMode.addListener("execute", this.toggleRepairMode, this);
-                                this.buttons.attack.repairMode.addListener("changeValue", function () {
-                                    var btnRepairMode = this.buttons.attack.repairMode;
-                                    if (!btnRepairMode.getValue()) {
-                                        btnRepairMode.setToolTipText("<strong>" + lang("Deactivate Repair Mode") + "</strong>");
-                                    } else {
-                                        btnRepairMode.setToolTipText("<strong>" + lang("Activate Repair Mode") + "</strong>");
-                                    }
-                                }, this);
-                                // The new refresh button
-                                this.buttons.attack.toolbarRefreshStats = new qx.ui.form.Button("", iconRefresh);
-                                this.buttons.attack.toolbarRefreshStats.addListener("click", this.refreshStatistics, this);
-                                this.buttons.attack.toolbarRefreshStats.set({
-                                    width: 44,
-                                    height: 40,
-                                    padding: 0,
-                                    show: "icon",
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Refresh Stats") + "</strong>"
-                                });
-                                // The new stats window button
-                                this.buttons.attack.toolbarShowStats = new qx.ui.form.Button("", statsIcon);
-                                this.buttons.attack.toolbarShowStats.addListener("click", this.toggleTools, this);
-                                this.buttons.attack.toolbarShowStats.set({
-                                    width: 44,
-                                    height: 40,
-                                    padding: 0,
-                                    show: "icon",
-                                    appearance: "button-text-small",
-                                    toolTipText: "<strong>" + lang("Open Stats Window") + "</strong>"
-                                });
-                                // Undo
-                                this.buttons.attack.toolbarUndo = new qx.ui.form.Button("", undoIcon);
-                                this.buttons.attack.toolbarUndo.addListener("click", function () {
-                                    console.log("Undo");
-                                }, this);
-                                this.buttons.attack.toolbarUndo.set({
-                                    width: 44,
-                                    height: 40,
-                                    padding: 0,
-                                    show: "icon",
-                                    appearance: "button-text-small",
-                                    enabled: false,
-                                    toolTipText: "<strong>" + lang("Undo") + "</strong>"
-                                });
-                                // Redo (if possible)
-                                this.buttons.attack.toolbarRedo = new qx.ui.form.Button("", redoIcon);
-                                this.buttons.attack.toolbarRedo.addListener("click", function () {
-                                    console.log("Redo");
-                                }, this);
-                                this.buttons.attack.toolbarRedo.set({
-                                    width: 44,
-                                    height: 40,
-                                    padding: 0,
-                                    show: "icon",
-                                    appearance: "button-text-small",
-                                    enabled: false,
-                                    toolTipText: "<strong>" + lang("Redo") + "</strong>"
-                                });
-                                // Options Button
-                                this.buttons.attack.options = new qx.ui.form.Button().set({
-                                    width: 44,
-                                    height: 40,
-                                    appearance: "button-text-small",
-                                    icon: "FactionUI/icons/icon_forum_properties.png",
-                                    toolTipText: "<strong>" + lang("Options") + "</strong>"
-                                });
-                                this.buttons.attack.options.addListener("click", this.toggleOptionsWindow, this);
-                                this.toolBar.add(this.buttons.attack.flipVertical, {
-                                    top: 10,
-                                    left: 10
-                                });
-                                this.toolBar.add(this.buttons.attack.flipHorizontal, {
-                                    top: 10,
-                                    left: 60
-                                });
-                                this.toolBar.add(this.buttons.attack.activateAll, {
-                                    top: 10,
-                                    left: 130
-                                });
-                                this.toolBar.add(this.buttons.attack.activateInfantry, {
-                                    top: 10,
-                                    left: 180
-                                });
-                                this.toolBar.add(this.buttons.attack.activateVehicles, {
-                                    top: 10,
-                                    left: 230
-                                });
-                                this.toolBar.add(this.buttons.attack.activateAir, {
-                                    top: 10,
-                                    left: 280
-                                });
-                                this.toolBar.add(this.buttons.attack.toolbarRefreshStats, {
-                                    top: 10,
-                                    left: 349
-                                });
-                                // right bound buttons
-                                this.toolBar.add(this.buttons.attack.options, {
-                                    top: 10,
-                                    right: 10
-                                });
-                                this.toolBar.add(this.buttons.attack.repairMode, {
-                                    top: 10,
-                                    right: 60
-                                });
-                                this.toolBar.add(this.buttons.attack.toolbarShowStats, {
-                                    top: 10,
-                                    right: 110
-                                });
-                                this.toolBar.add(this.buttons.attack.toolbarRedo, {
-                                    top: 10,
-                                    right: 175
-                                });
-                                this.toolBar.add(this.buttons.attack.toolbarUndo, {
-                                    top: 10,
-                                    right: 225
-                                });
-                                this.toolBar.add(this.buttons.attack.formationReset, {
-                                    top: 10,
-                                    right: 275
-                                });
-                                if (this.userInterface) {
-                                    this._armyBar.remove(this.userInterface);
-                                }
-                                if (this.options.rightSide.getValue()) {
-                                    var canvasWidth = 75;
-                                    var interfaceBG = rightBG;
-                                    var buttonsLeftPosition = 5;
-                                    var shiftRRightPos = 0;
-                                    var shiftLRightPos = 30;
-                                    var shiftURightPos = 15;
-                                    var shiftDRightPos = 15;
+                            }
+                            if (PerforceChangelist >= 441272) { // 15.4 patch
+                                this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent().getLayoutParent();
+                            } else { //old
+                                this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent();
+                            }
+                            if (this.toolBar) {
+                                this.toolBarParent.remove(this.toolBar);
+                                this.toolBarParent.remove(this.toolBarMouse);
+                            }
+                            if (this.repairInfo) {
+                                playArea.remove(this.repairInfo);
+                            }
+                            // Repair Time Infobox
+                            this.repairInfo = new qx.ui.container.Composite();
+                            var layout = new qx.ui.layout.Grid();
+                            layout.setColumnAlign(0, "right", "middle");
+                            //layout.setColumnFlex(0, 1);
+                            //layout.setColumnWidth(1, 70);
+                            this.repairInfo.setLayout(layout);
+                            this.repairInfo.setThemedFont("bold");
+                            this.repairInfo.set({
+                                visibility: false
+                            });
+                            //this.repairInfo.setThemedBackgroundColor("#eef");
+                            // Available Repair Label
+                            this.repairInfo.add(new qx.ui.basic.Image("webfrontend/ui/icons/icn_repair_off_points.png"), {
+                                row: 0,
+                                column: 1
+                            });
+                            this.labels.repairinfos.available = new qx.ui.basic.Label("100").set({
+                                textColor: "white"
+                            });
+                            this.repairInfo.add(this.labels.repairinfos.available, {
+                                row: 0,
+                                column: 0
+                            });
+                            // Max Infantry Repaircharge Label
+                            this.repairInfo.add(new qx.ui.basic.Image("webfrontend/ui/icons/icon_res_repair_inf.png"), {
+                                row: 1,
+                                column: 1
+                            });
+                            this.labels.repairinfos.infantry = new qx.ui.basic.Label("100").set({
+                                textColor: "white"
+                            });
+                            this.repairInfo.add(this.labels.repairinfos.infantry, {
+                                row: 1,
+                                column: 0
+                            });
+                            // Max Vehicle Repaircharge Label
+                            this.repairInfo.add(new qx.ui.basic.Image("webfrontend/ui/icons/icon_res_repair_tnk.png"), {
+                                row: 2,
+                                column: 1
+                            });
+                            this.labels.repairinfos.vehicle = new qx.ui.basic.Label("100").set({
+                                textColor: "white"
+                            });
+                            this.repairInfo.add(this.labels.repairinfos.vehicle, {
+                                row: 2,
+                                column: 0
+                            });
+                            // Max Air Repaircharge Label
+                            this.repairInfo.add(new qx.ui.basic.Image("webfrontend/ui/icons/icon_res_repair_air.png"), {
+                                row: 3,
+                                column: 1
+                            });
+                            this.labels.repairinfos.aircraft = new qx.ui.basic.Label("100").set({
+                                textColor: "white"
+                            });
+                            this.repairInfo.add(this.labels.repairinfos.aircraft, {
+                                row: 3,
+                                column: 0
+                            });
+                            playArea.add(this.repairInfo, {
+                                bottom: 130,
+                                right: 3
+                            });
+                            // Toolbar
+                            this.toolBar = new qx.ui.container.Composite();
+                            this.toolBar.setLayout(new qx.ui.layout.Canvas());
+                            this.toolBar.setHeight(53);
+                            this.toolBar.setWidth(this.TOOL_BAR_WIDTH);
+                            this.toolBar.set({
+                                decorator: new qx.ui.decoration.Decorator().set({
+                                    backgroundImage: "FactionUI/menues/victory_screen/bgr_victscr_header.png"
+                                }),
+                                visibility: false
+                            });
+                            this.toolBarParent.add(this.toolBar, {
+                                bottom: this.TOOL_BAR_HIGH,
+                                left: (playAreaWidth - this.TOOL_BAR_WIDTH) / 2,
+                                visibility: false
+                            });
+                            // Toolbar Mouse Region
+                            this.toolBarMouse = new qx.ui.container.Composite();
+                            this.toolBarMouse.setLayout(new qx.ui.layout.Canvas());
+                            this.toolBarMouse.setHeight(25);
+                            this.toolBarMouse.setWidth(740);
+                            this.toolBarParent.add(this.toolBarMouse, {
+                                bottom: 155,
+                                left: (playAreaWidth - this.TOOL_BAR_WIDTH) / 2
+                            });
+                            this.toolBarMouse.hide();
+                            this.toolBarMouse.setBackgroundColor("#FF0000");
+                            this.toolBarMouse.setOpacity(0);
+                            this.toolBarMouse.setZIndex(10);
+                            this.initToolBarListeners();
+                            /*
+                            							// does the game init in combat mode?
+                            							if (this._VisMain.get_Mode() === ClientLib.Vis.Mode.CombatSetup) {
+                            							this.toolBar.show();
+                            							this.toolBarMouse.show();
+                            							//this.toolBar.setOpacity(0);
+                            							this.toolBar.setLayoutProperties({
+                            							bottom : this.TOOL_BAR_LOW
+                            							});
+                            							}
+                            							 */
+                            // (De)activate All Button
+                            this.buttons.attack.activateAll = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_disable_unit_active.png");
+                            this.buttons.attack.activateAll.set({
+                                width: 44,
+                                height: 40,
+                                padding: 0,
+                                show: "icon",
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Deactivate All") + "</strong>"
+                            });
+                            this.buttons.attack.activateAll.addListener("changeValue", function () {
+                                var btnActivateAll = this.buttons.attack.activateAll;
+                                if (!btnActivateAll.getValue()) {
+                                    btnActivateAll.setOpacity(1);
+                                    btnActivateAll.setToolTipText("<strong>" + lang("Deactivate All") + "</strong>");
                                 } else {
-                                    var canvasWidth = 90;
-                                    var interfaceBG = leftBG;
-                                    var buttonsLeftPosition = 15;
-                                    var shiftRRightPos = 16;
-                                    var shiftLRightPos = 46;
-                                    var shiftURightPos = 30;
-                                    var shiftDRightPos = 30;
+                                    btnActivateAll.setOpacity(0.75);
+                                    btnActivateAll.setToolTipText("<strong>" + lang("Activate All") + "</strong>");
                                 }
-                                // Interface Canvas
-                                this.userInterface = new qx.ui.container.Composite();
-                                this.userInterface.setLayout(new qx.ui.layout.Canvas());
-                                this.userInterface.setHeight(160);
-                                this.userInterface.setWidth(canvasWidth);
-                                this.userInterface.set({
+                            }, this);
+                            this.buttons.attack.activateAll.addListener("execute", function () {
+                                var btnActivateAll = this.buttons.attack.activateAll;
+                                if (this.buttons.attack.activateInfantry.getValue() !== btnActivateAll.getValue()) {
+                                    this.buttons.attack.activateInfantry.setValue(btnActivateAll.getValue());
+                                }
+                                if (this.buttons.attack.activateVehicles.getValue() !== btnActivateAll.getValue()) {
+                                    this.buttons.attack.activateVehicles.setValue(btnActivateAll.getValue());
+                                }
+                                if (this.buttons.attack.activateAir.getValue() !== btnActivateAll.getValue()) {
+                                    this.buttons.attack.activateAir.setValue(btnActivateAll.getValue());
+                                }
+                            }, this);
+                            // (De)activate Infantry Button
+                            this.buttons.attack.activateInfantry = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_alliance_bonus_inf.png");
+                            this.buttons.attack.activateInfantry.set({
+                                width: 44,
+                                height: 40,
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Deactivate Infantry") + "</strong>"
+                            });
+                            this.buttons.attack.activateInfantry.addListener("changeValue", function () {
+                                var btnActivateInfantry = this.buttons.attack.activateInfantry;
+                                if (btnActivateInfantry.getValue() === this.buttons.attack.activateVehicles.getValue() && btnActivateInfantry.getValue() === this.buttons.attack.activateAir.getValue()) {
+                                    this.buttons.attack.activateAll.setValue(btnActivateInfantry.getValue());
+                                }
+                                this.activateUnits('infantry', !btnActivateInfantry.getValue());
+                                if (!btnActivateInfantry.getValue()) {
+                                    btnActivateInfantry.setOpacity(1);
+                                    btnActivateInfantry.setToolTipText("<strong>" + lang("Deactivate Infantry") + "</strong>");
+                                } else {
+                                    btnActivateInfantry.setOpacity(0.75);
+                                    btnActivateInfantry.setToolTipText("<strong>" + lang("Activate Infantry") + "</strong>");
+                                }
+                            }, this);
+                            // (De)activate Vehicles Button
+                            this.buttons.attack.activateVehicles = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_alliance_bonus_tnk.png");
+                            this.buttons.attack.activateVehicles.set({
+                                width: 44,
+                                height: 40,
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Deactivate Vehicles") + "</strong>"
+                            });
+                            this.buttons.attack.activateVehicles.addListener("changeValue", function () {
+                                var btnActivateVehicles = this.buttons.attack.activateVehicles;
+                                if (btnActivateVehicles.getValue() === this.buttons.attack.activateInfantry.getValue() && btnActivateVehicles.getValue() === this.buttons.attack.activateAir.getValue()) {
+                                    this.buttons.attack.activateAll.setValue(btnActivateVehicles.getValue());
+                                }
+                                this.activateUnits('vehicles', !btnActivateVehicles.getValue());
+                                if (!btnActivateVehicles.getValue()) {
+                                    btnActivateVehicles.setOpacity(1);
+                                    btnActivateVehicles.setToolTipText("<strong>" + lang("Deactivate Vehicles") + "</strong>");
+                                } else {
+                                    btnActivateVehicles.setOpacity(0.75);
+                                    btnActivateVehicles.setToolTipText("<strong>" + lang("Activate Vehicles") + "</strong>");
+                                }
+                            }, this);
+                            // (De)activate Air Button
+                            this.buttons.attack.activateAir = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_alliance_bonus_air.png");
+                            this.buttons.attack.activateAir.set({
+                                width: 44,
+                                height: 40,
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Deactivate Air") + "</strong>"
+                            });
+                            this.buttons.attack.activateAir.addListener("changeValue", function () {
+                                var btnActivateAir = this.buttons.attack.activateAir;
+                                if (btnActivateAir.getValue() === this.buttons.attack.activateInfantry.getValue() && btnActivateAir.getValue() === this.buttons.attack.activateVehicles.getValue()) {
+                                    this.buttons.attack.activateAll.setValue(btnActivateAir.getValue());
+                                }
+                                this.activateUnits('air', !btnActivateAir.getValue());
+                                if (!btnActivateAir.getValue()) {
+                                    btnActivateAir.setOpacity(1);
+                                    btnActivateAir.setToolTipText("<strong>" + lang("Deactivate Air") + "</strong>");
+                                } else {
+                                    btnActivateAir.setOpacity(0.75);
+                                    btnActivateAir.setToolTipText("<strong>" + lang("Activate Air") + "</strong>");
+                                }
+                            }, this);
+                            // Reset Formation Button
+                            this.buttons.attack.formationReset = new qx.ui.form.Button("", resetIcon);
+                            this.buttons.attack.formationReset.set({
+                                width: 44,
+                                height: 40,
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Reset Formation") + "</strong>"
+                            });
+                            this.buttons.attack.formationReset.addListener("click", this.resetFormation, this);
+                            // Flip Horizontal Button
+                            this.buttons.attack.flipHorizontal = new qx.ui.form.Button("", iconFlipHorizontal);
+                            this.buttons.attack.flipHorizontal.set({
+                                width: 44,
+                                height: 40,
+                                padding: 0,
+                                show: "icon",
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Flip Horizontal") + "</strong>"
+                            });
+                            this.buttons.attack.flipHorizontal.addListener("click", function () {
+                                this.flipFormation('horizontal');
+                            }, this);
+                            // Flip Vertical Button
+                            this.buttons.attack.flipVertical = new qx.ui.form.Button("", iconFlipVertical);
+                            this.buttons.attack.flipVertical.set({
+                                width: 44,
+                                height: 40,
+                                padding: 0,
+                                show: "icon",
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Flip Vertical") + "</strong>"
+                            });
+                            this.buttons.attack.flipVertical.addListener("click", function () {
+                                this.flipFormation('vertical');
+                            }, this);
+                            // Repair Mode Button
+                            this.buttons.attack.repairMode = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_mode_repair_active.png");
+                            this.buttons.attack.repairMode.set({
+                                width: 44,
+                                height: 40,
+                                padding: 0,
+                                show: "icon",
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Activate Repair Mode") + "</strong>"
+                            });
+                            this.buttons.attack.repairMode.addListener("execute", this.toggleRepairMode, this);
+                            this.buttons.attack.repairMode.addListener("changeValue", function () {
+                                var btnRepairMode = this.buttons.attack.repairMode;
+                                if (!btnRepairMode.getValue()) {
+                                    btnRepairMode.setToolTipText("<strong>" + lang("Deactivate Repair Mode") + "</strong>");
+                                } else {
+                                    btnRepairMode.setToolTipText("<strong>" + lang("Activate Repair Mode") + "</strong>");
+                                }
+                            }, this);
+                            // The new refresh button
+                            this.buttons.attack.toolbarRefreshStats = new qx.ui.form.Button("", iconRefresh);
+                            this.buttons.attack.toolbarRefreshStats.addListener("click", this.refreshStatistics, this);
+                            this.buttons.attack.toolbarRefreshStats.set({
+                                width: 44,
+                                height: 40,
+                                padding: 0,
+                                show: "icon",
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Refresh Stats") + "</strong>"
+                            });
+                            // The new stats window button
+                            this.buttons.attack.toolbarShowStats = new qx.ui.form.Button("", statsIcon);
+                            this.buttons.attack.toolbarShowStats.addListener("click", this.toggleTools, this);
+                            this.buttons.attack.toolbarShowStats.set({
+                                width: 44,
+                                height: 40,
+                                padding: 0,
+                                show: "icon",
+                                appearance: "button-text-small",
+                                toolTipText: "<strong>" + lang("Open Stats Window") + "</strong>"
+                            });
+                            // Undo
+                            this.buttons.attack.toolbarUndo = new qx.ui.form.Button("", undoIcon);
+                            this.buttons.attack.toolbarUndo.addListener("click", function () {
+                                console.log("Undo");
+                            }, this);
+                            this.buttons.attack.toolbarUndo.set({
+                                width: 44,
+                                height: 40,
+                                padding: 0,
+                                show: "icon",
+                                appearance: "button-text-small",
+                                enabled: false,
+                                toolTipText: "<strong>" + lang("Undo") + "</strong>"
+                            });
+                            // Redo (if possible)
+                            this.buttons.attack.toolbarRedo = new qx.ui.form.Button("", redoIcon);
+                            this.buttons.attack.toolbarRedo.addListener("click", function () {
+                                console.log("Redo");
+                            }, this);
+                            this.buttons.attack.toolbarRedo.set({
+                                width: 44,
+                                height: 40,
+                                padding: 0,
+                                show: "icon",
+                                appearance: "button-text-small",
+                                enabled: false,
+                                toolTipText: "<strong>" + lang("Redo") + "</strong>"
+                            });
+                            // Options Button
+                            this.buttons.attack.options = new qx.ui.form.Button().set({
+                                width: 44,
+                                height: 40,
+                                appearance: "button-text-small",
+                                icon: "FactionUI/icons/icon_forum_properties.png",
+                                toolTipText: "<strong>" + lang("Options") + "</strong>"
+                            });
+                            this.buttons.attack.options.addListener("click", this.toggleOptionsWindow, this);
+                            this.toolBar.add(this.buttons.attack.flipVertical, {
+                                top: 10,
+                                left: 10
+                            });
+                            this.toolBar.add(this.buttons.attack.flipHorizontal, {
+                                top: 10,
+                                left: 60
+                            });
+                            this.toolBar.add(this.buttons.attack.activateAll, {
+                                top: 10,
+                                left: 130
+                            });
+                            this.toolBar.add(this.buttons.attack.activateInfantry, {
+                                top: 10,
+                                left: 180
+                            });
+                            this.toolBar.add(this.buttons.attack.activateVehicles, {
+                                top: 10,
+                                left: 230
+                            });
+                            this.toolBar.add(this.buttons.attack.activateAir, {
+                                top: 10,
+                                left: 280
+                            });
+                            this.toolBar.add(this.buttons.attack.toolbarRefreshStats, {
+                                top: 10,
+                                left: 349
+                            });
+                            // right bound buttons
+                            this.toolBar.add(this.buttons.attack.options, {
+                                top: 10,
+                                right: 10
+                            });
+                            this.toolBar.add(this.buttons.attack.repairMode, {
+                                top: 10,
+                                right: 60
+                            });
+                            this.toolBar.add(this.buttons.attack.toolbarShowStats, {
+                                top: 10,
+                                right: 110
+                            });
+                            this.toolBar.add(this.buttons.attack.toolbarRedo, {
+                                top: 10,
+                                right: 175
+                            });
+                            this.toolBar.add(this.buttons.attack.toolbarUndo, {
+                                top: 10,
+                                right: 225
+                            });
+                            this.toolBar.add(this.buttons.attack.formationReset, {
+                                top: 10,
+                                right: 275
+                            });
+                            if (this.userInterface) {
+                                this._armyBar.remove(this.userInterface);
+                            }
+                            if (this.options.rightSide.getValue()) {
+                                var canvasWidth = 75;
+                                var interfaceBG = rightBG;
+                                var buttonsLeftPosition = 5;
+                                var shiftRRightPos = 0;
+                                var shiftLRightPos = 30;
+                                var shiftURightPos = 15;
+                                var shiftDRightPos = 15;
+                            } else {
+                                var canvasWidth = 90;
+                                var interfaceBG = leftBG;
+                                var buttonsLeftPosition = 15;
+                                var shiftRRightPos = 16;
+                                var shiftLRightPos = 46;
+                                var shiftURightPos = 30;
+                                var shiftDRightPos = 30;
+                            }
+                            // Interface Canvas
+                            this.userInterface = new qx.ui.container.Composite();
+                            this.userInterface.setLayout(new qx.ui.layout.Canvas());
+                            this.userInterface.setHeight(160);
+                            this.userInterface.setWidth(canvasWidth);
+                            this.userInterface.set({
+                                decorator: new qx.ui.decoration.Decorator().set({
+                                    backgroundImage: interfaceBG
+                                })
+                            });
+                            // Repositionig Buttons by Netquik
+                            if (this.rightBGbar) {
+                                this._armyBar.remove(this.rightBGbar);
+                            }
+                            this.rightBGbar = new qx.ui.container.Composite();
+                            this.rightBGbar.setLayout(new qx.ui.layout.Canvas());
+                            this.rightBGbar.setHeight(160);
+                            if (this.options.rightSide.getValue()) {
+                                this.rightBGbar.setWidth(100);
+                                this.rightBGbar.set({
                                     decorator: new qx.ui.decoration.Decorator().set({
-                                        backgroundImage: interfaceBG
+                                        backgroundImage: rightBG,
+                                        backgroundRepeat: "scale"
                                     })
                                 });
-                                // Repositionig Buttons by Netquik
-                                if (this.rightBGbar) {
-                                    this._armyBar.remove(this.rightBGbar);
-                                }
-                                this.rightBGbar = new qx.ui.container.Composite();
-                                this.rightBGbar.setLayout(new qx.ui.layout.Canvas());
-                                this.rightBGbar.setHeight(160);
-                                if (this.options.rightSide.getValue()) {
-                                    this.rightBGbar.setWidth(100);
-                                    this.rightBGbar.set({
-                                        decorator: new qx.ui.decoration.Decorator().set({
-                                            backgroundImage: rightBG,
-                                            backgroundRepeat: "scale"
-                                        })
-                                    });
-                                    this._armyBar.add(this.rightBGbar, {
-                                        top: 40,
-                                        right: 0
-                                    });
-                                    this.userInterface.setPaddingLeft(10);
-                                    this._armyBar.add(this.userInterface, {
-                                        top: 40,
-                                        right: 65
-                                    });
-                                    if (this.leftBGbar) {
-                                        this._armyBar.remove(this.leftBGbar);
-                                    }
-                                    this.leftBGbar = new qx.ui.container.Composite();
-                                    this.leftBGbar.setLayout(new qx.ui.layout.Canvas());
-                                    this.leftBGbar.setHeight(160);
-                                    this.leftBGbar.setWidth(90);
-                                    this.leftBGbar.set({
-                                        decorator: new qx.ui.decoration.Decorator().set({
-                                            backgroundImage: leftBG,
-                                        })
-                                    });
-                                    this._armyBar.add(this.leftBGbar, {
-                                        top: 40,
-                                        left: 5
-                                    });
-                                    for (i = 4; i < 8; i++) {
-                                        this.cntWave = this.ArmySetupAttackBarMainChildren[i];
-                                        this._armyBar.removeAt(i);
-                                        this._armyBar.addAt(this.cntWave, i);
-                                    }
-                                } else {
-                                    this.rightBGbar.setWidth(canvasWidth);
-                                    this.rightBGbar.set({
-                                        decorator: new qx.ui.decoration.Decorator().set({
-                                            backgroundImage: rightBG,
-                                        })
-                                    });
-                                    this._armyBar.add(this.rightBGbar, {
-                                        top: 40,
-                                        right: 0
-                                    });
-                                    this._armyBar.add(this.userInterface, {
-                                        top: 40,
-                                        left: 5
-                                    });
-                                }
-                                if (this._armyBarContainer.isVisible()) {
-                                    this._armyBarContainer.hide();
-                                    this._armyBarContainer.show();
-                                }
-                                this._buttonsArmy = this._armyBarContainer.getMainContainer().getChildren()[9];
-                                this._armyBarContainer.getMainContainer().removeAt(9);
-                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy, 9);
-                                if (this.options.attackLock.getValue()) {
-                                    this._buttonsArmy2 = this._armyBarContainer.getMainContainer().getChildren()[10];
-                                    this._armyBarContainer.getMainContainer().removeAt(10);
-                                    this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy2, 10);
-                                }
-                                if (this.options.repairLock.getValue()) {
-                                    this._buttonsArmy3 = this._armyBarContainer.getMainContainer().getChildren()[11];
-                                    this._armyBarContainer.getMainContainer().removeAt(11);
-                                    this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy3, 11);
-                                }
-                                // Simulate Button
-                                this.buttons.attack.simulate = new qx.ui.form.Button();
-                                this.buttons.attack.simulate.set({
-                                    width: 58,
-                                    height: 37,
-                                    appearance: "button-baseviews",
-                                    icon: "FactionUI/icons/icon_play.png",
-                                    toolTipText: lang("Start Combat Simulation")
+                                this._armyBar.add(this.rightBGbar, {
+                                    top: 40,
+                                    right: 0
                                 });
-                                this.buttons.attack.simulate.addListener("click", this.startSimulation, this);
-                                // Tools Button
-                                this.buttons.attack.tools = new qx.ui.form.Button(lang("Stats"));
-                                this.buttons.attack.tools.set({
-                                    width: 58,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Open Simulator Tools")
+                                this.userInterface.setPaddingLeft(10);
+                                this._armyBar.add(this.userInterface, {
+                                    top: 40,
+                                    right: 65
                                 });
-                                this.buttons.attack.tools.addListener("click", this.toggleTools, this);
-                                //Shift Buttons
-                                this.buttons.shiftFormationLeft = new qx.ui.form.Button("<");
-                                this.buttons.shiftFormationLeft.set({
-                                    width: 30,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Shift units left")
-                                });
-                                this.buttons.shiftFormationLeft.addListener("click", function () {
-                                    this.shiftFormation('l');
-                                }, this);
-                                this.buttons.shiftFormationRight = new qx.ui.form.Button(">");
-                                this.buttons.shiftFormationRight.set({
-                                    width: 30,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Shift units right")
-                                });
-                                this.buttons.shiftFormationRight.addListener("click", function () {
-                                    this.shiftFormation('r');
-                                }, this);
-                                this.buttons.shiftFormationUp = new qx.ui.form.Button("^");
-                                this.buttons.shiftFormationUp.set({
-                                    width: 30,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Shift units up")
-                                });
-                                this.buttons.shiftFormationUp.addListener("click", function () {
-                                    this.shiftFormation('u');
-                                }, this);
-                                this.buttons.shiftFormationDown = new qx.ui.form.Button("v");
-                                this.buttons.shiftFormationDown.set({
-                                    width: 30,
-                                    appearance: "button-text-small",
-                                    toolTipText: lang("Shift units down")
-                                });
-                                this.buttons.shiftFormationDown.addListener("click", function () {
-                                    this.shiftFormation('d');
-                                }, this);
-                                var temp = localStorage.ta_sim_showShift;
-                                if (temp) {
-                                    temp = JSON.parse(localStorage.ta_sim_showShift);
-                                } else {
-                                    temp = true;
+                                if (this.leftBGbar) {
+                                    this._armyBar.remove(this.leftBGbar);
                                 }
-                                if (temp) {
-                                    this.userInterface.add(this.buttons.shiftFormationUp, {
-                                        top: 16,
-                                        right: shiftURightPos
-                                    });
-                                    this.userInterface.add(this.buttons.shiftFormationLeft, {
-                                        top: 35,
-                                        right: shiftLRightPos
-                                    });
-                                    this.userInterface.add(this.buttons.shiftFormationRight, {
-                                        top: 35,
-                                        right: shiftRRightPos
-                                    });
-                                    this.userInterface.add(this.buttons.shiftFormationDown, {
-                                        top: 54,
-                                        right: shiftDRightPos
-                                    });
-                                }
-                                this.userInterface.add(this.buttons.attack.tools, {
-                                    top: 82,
-                                    left: buttonsLeftPosition
+                                this.leftBGbar = new qx.ui.container.Composite();
+                                this.leftBGbar.setLayout(new qx.ui.layout.Canvas());
+                                this.leftBGbar.setHeight(160);
+                                this.leftBGbar.setWidth(90);
+                                this.leftBGbar.set({
+                                    decorator: new qx.ui.decoration.Decorator().set({
+                                        backgroundImage: leftBG,
+                                    })
                                 });
-                                this.userInterface.add(this.buttons.attack.simulate, {
-                                    top: 108,
-                                    left: buttonsLeftPosition
+                                this._armyBar.add(this.leftBGbar, {
+                                    top: 40,
+                                    left: 5
                                 });
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        getAttackUnits: function () {
-                            try {
-                                var base_city = this._MainData.get_Cities().get_CurrentOwnCity();
-                                var target_city = this._MainData.get_Cities().get_CurrentCity();
-                                if (target_city != null) {
-                                    var target_city_id = target_city.get_Id();
-                                    var units = base_city.get_CityArmyFormationsManager().GetFormationByTargetBaseId(target_city_id);
-                                    this.view.lastUnits = units;
-                                    this.view.lastUnitList = units.get_ArmyUnits().l;
+                                for (i = 4; i < 8; i++) {
+                                    this.cntWave = this.ArmySetupAttackBarMainChildren[i];
+                                    this._armyBar.removeAt(i);
+                                    this._armyBar.addAt(this.cntWave, i);
                                 }
-                                this.attackUnitsLoaded = true;
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        optionPopup: function () {
-                            localStorage.ta_sim_popup = JSON.stringify(this.options.autoDisplayStats.getValue());
-                        },
-                        optionShowShift: function () {
-                            localStorage.ta_sim_showShift = JSON.stringify(this.options.showShift.getValue());
-                            if (this.options.showShift.getValue()) {
-                                this.setupInterface();
                             } else {
-                                this.userInterface.remove(this.buttons.shiftFormationUp);
-                                this.userInterface.remove(this.buttons.shiftFormationLeft);
-                                this.userInterface.remove(this.buttons.shiftFormationRight);
-                                this.userInterface.remove(this.buttons.shiftFormationDown);
+                                this.rightBGbar.setWidth(canvasWidth);
+                                this.rightBGbar.set({
+                                    decorator: new qx.ui.decoration.Decorator().set({
+                                        backgroundImage: rightBG,
+                                    })
+                                });
+                                this._armyBar.add(this.rightBGbar, {
+                                    top: 40,
+                                    right: 0
+                                });
+                                this._armyBar.add(this.userInterface, {
+                                    top: 40,
+                                    left: 5
+                                });
                             }
-                        },
-                        optionAttackLock: function () {
-                            try {
-                                localStorage.ta_sim_attackLock = JSON.stringify(this.options.attackLock.getValue());
-                                if (this.options.attackLock.getValue()) {
-                                    this._armyBar.add(this.buttons.attack.unlock, {
-                                        top: 148,
-                                        right: 10
-                                    });
-                                } else {
-                                    this._armyBar.remove(this.buttons.attack.unlock);
-                                }
-                            } catch (e) {
-                                console.log(e);
+                            if (this._armyBarContainer.isVisible()) {
+                                this._armyBarContainer.hide();
+                                this._armyBarContainer.show();
                             }
-                        },
-                        optionRepairLock: function () {
-                            try {
-                                localStorage.ta_sim_repairLock = JSON.stringify(this.options.repairLock.getValue());
-                                if (this.options.repairLock.getValue()) {
-                                    this._armyBar.add(this.buttons.attack.repair, {
-                                        top: 63,
-                                        right: 10
-                                    });
-                                } else {
-                                    this._armyBar.remove(this.buttons.attack.repair);
-                                }
-                            } catch (e) {
-                                console.log(e);
+                            this._buttonsArmy = this._armyBarContainer.getMainContainer().getChildren()[9];
+                            this._armyBarContainer.getMainContainer().removeAt(9);
+                            this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy, 9);
+                            if (this.options.attackLock.getValue()) {
+                                this._buttonsArmy2 = this._armyBarContainer.getMainContainer().getChildren()[10];
+                                this._armyBarContainer.getMainContainer().removeAt(10);
+                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy2, 10);
                             }
-                        },
-                        toggleTools: function () {
-                            this.battleResultsBox.isVisible() ? this.battleResultsBox.close() : this.battleResultsBox.open();
-                        },
-                        toggleOptionsWindow: function () {
-                            this.optionsWindow.isVisible() ? this.optionsWindow.close() : this.optionsWindow.open();
-                        },
-                        getAllUnitsDeactivated: function () {
-                            var f = this.getFormation();
-                            var unitEnabled = false;
-                            for (var i = 0; i < f.length; i++) {
-                                if (f[i].e) {
-                                    unitEnabled = true;
-                                    break;
-                                }
+                            if (this.options.repairLock.getValue()) {
+                                this._buttonsArmy3 = this._armyBarContainer.getMainContainer().getChildren()[11];
+                                this._armyBarContainer.getMainContainer().removeAt(11);
+                                this._armyBarContainer.getMainContainer().addAt(this._buttonsArmy3, 11);
                             }
-                            //console.log(unitEnabled);
-                            if (unitEnabled) {
-                                return false;
+                            // Simulate Button
+                            this.buttons.attack.simulate = new qx.ui.form.Button();
+                            this.buttons.attack.simulate.set({
+                                width: 58,
+                                height: 37,
+                                appearance: "button-baseviews",
+                                icon: "FactionUI/icons/icon_play.png",
+                                toolTipText: lang("Start Combat Simulation")
+                            });
+                            this.buttons.attack.simulate.addListener("click", this.startSimulation, this);
+                            // Tools Button
+                            this.buttons.attack.tools = new qx.ui.form.Button(lang("Stats"));
+                            this.buttons.attack.tools.set({
+                                width: 58,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Open Simulator Tools")
+                            });
+                            this.buttons.attack.tools.addListener("click", this.toggleTools, this);
+                            //Shift Buttons
+                            this.buttons.shiftFormationLeft = new qx.ui.form.Button("<");
+                            this.buttons.shiftFormationLeft.set({
+                                width: 30,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Shift units left")
+                            });
+                            this.buttons.shiftFormationLeft.addListener("click", function () {
+                                this.shiftFormation('l');
+                            }, this);
+                            this.buttons.shiftFormationRight = new qx.ui.form.Button(">");
+                            this.buttons.shiftFormationRight.set({
+                                width: 30,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Shift units right")
+                            });
+                            this.buttons.shiftFormationRight.addListener("click", function () {
+                                this.shiftFormation('r');
+                            }, this);
+                            this.buttons.shiftFormationUp = new qx.ui.form.Button("^");
+                            this.buttons.shiftFormationUp.set({
+                                width: 30,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Shift units up")
+                            });
+                            this.buttons.shiftFormationUp.addListener("click", function () {
+                                this.shiftFormation('u');
+                            }, this);
+                            this.buttons.shiftFormationDown = new qx.ui.form.Button("v");
+                            this.buttons.shiftFormationDown.set({
+                                width: 30,
+                                appearance: "button-text-small",
+                                toolTipText: lang("Shift units down")
+                            });
+                            this.buttons.shiftFormationDown.addListener("click", function () {
+                                this.shiftFormation('d');
+                            }, this);
+                            var temp = localStorage.ta_sim_showShift;
+                            if (temp) {
+                                temp = JSON.parse(localStorage.ta_sim_showShift);
                             } else {
-                                return true;
+                                temp = true;
                             }
-                        },
-                        refreshStatistics: function () {
-                            try {
-                                var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
-                                if (!this.getAllUnitsDeactivated() && ownCity.GetOffenseConditionInPercent() > 0) {
-                                    this.timerStart();
-                                    ClientLib.API.Battleground.GetInstance().SimulateBattle();
-                                    this.buttons.attack.refreshStats.setEnabled(false);
-                                    this.buttons.attack.toolbarRefreshStats.setEnabled(false);
-                                    this.buttons.attack.simulate.setEnabled(false);
-                                    this.labels.countDown.setWidth(110);
-                                    this.count = 10;
-                                    this.statsOnly = true;
+                            if (temp) {
+                                this.userInterface.add(this.buttons.shiftFormationUp, {
+                                    top: 16,
+                                    right: shiftURightPos
+                                });
+                                this.userInterface.add(this.buttons.shiftFormationLeft, {
+                                    top: 35,
+                                    right: shiftLRightPos
+                                });
+                                this.userInterface.add(this.buttons.shiftFormationRight, {
+                                    top: 35,
+                                    right: shiftRRightPos
+                                });
+                                this.userInterface.add(this.buttons.shiftFormationDown, {
+                                    top: 54,
+                                    right: shiftDRightPos
+                                });
+                            }
+                            this.userInterface.add(this.buttons.attack.tools, {
+                                top: 82,
+                                left: buttonsLeftPosition
+                            });
+                            this.userInterface.add(this.buttons.attack.simulate, {
+                                top: 108,
+                                left: buttonsLeftPosition
+                            });
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    getAttackUnits: function () {
+                        try {
+                            var base_city = this._MainData.get_Cities().get_CurrentOwnCity();
+                            var target_city = this._MainData.get_Cities().get_CurrentCity();
+                            if (target_city != null) {
+                                var target_city_id = target_city.get_Id();
+                                var units = base_city.get_CityArmyFormationsManager().GetFormationByTargetBaseId(target_city_id);
+                                this.view.lastUnits = units;
+                                this.view.lastUnitList = units.get_ArmyUnits().l;
+                            }
+                            this.attackUnitsLoaded = true;
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    optionPopup: function () {
+                        localStorage.ta_sim_popup = JSON.stringify(this.options.autoDisplayStats.getValue());
+                    },
+                    optionShowShift: function () {
+                        localStorage.ta_sim_showShift = JSON.stringify(this.options.showShift.getValue());
+                        if (this.options.showShift.getValue()) {
+                            this.setupInterface();
+                        } else {
+                            this.userInterface.remove(this.buttons.shiftFormationUp);
+                            this.userInterface.remove(this.buttons.shiftFormationLeft);
+                            this.userInterface.remove(this.buttons.shiftFormationRight);
+                            this.userInterface.remove(this.buttons.shiftFormationDown);
+                        }
+                    },
+                    optionAttackLock: function () {
+                        try {
+                            localStorage.ta_sim_attackLock = JSON.stringify(this.options.attackLock.getValue());
+                            if (this.options.attackLock.getValue()) {
+                                this._armyBar.add(this.buttons.attack.unlock, {
+                                    top: 148,
+                                    right: 10
+                                });
+                            } else {
+                                this._armyBar.remove(this.buttons.attack.unlock);
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    optionRepairLock: function () {
+                        try {
+                            localStorage.ta_sim_repairLock = JSON.stringify(this.options.repairLock.getValue());
+                            if (this.options.repairLock.getValue()) {
+                                this._armyBar.add(this.buttons.attack.repair, {
+                                    top: 63,
+                                    right: 10
+                                });
+                            } else {
+                                this._armyBar.remove(this.buttons.attack.repair);
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    toggleTools: function () {
+                        this.battleResultsBox.isVisible() ? this.battleResultsBox.close() : this.battleResultsBox.open();
+                    },
+                    toggleOptionsWindow: function () {
+                        this.optionsWindow.isVisible() ? this.optionsWindow.close() : this.optionsWindow.open();
+                    },
+                    getAllUnitsDeactivated: function () {
+                        var f = this.getFormation();
+                        var unitEnabled = false;
+                        for (var i = 0; i < f.length; i++) {
+                            if (f[i].e) {
+                                unitEnabled = true;
+                                break;
+                            }
+                        }
+                        //console.log(unitEnabled);
+                        if (unitEnabled) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    },
+                    refreshStatistics: function () {
+                        try {
+                            var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
+                            if (!this.getAllUnitsDeactivated() && ownCity.GetOffenseConditionInPercent() > 0) {
+                                this.timerStart();
+                                ClientLib.API.Battleground.GetInstance().SimulateBattle();
+                                this.buttons.attack.refreshStats.setEnabled(false);
+                                this.buttons.attack.toolbarRefreshStats.setEnabled(false);
+                                this.buttons.attack.simulate.setEnabled(false);
+                                this.labels.countDown.setWidth(110);
+                                this.count = 10;
+                                this.statsOnly = true;
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    countDownToNextSimulation: function () {
+                        try {
+                            var _this = window.TACS.getInstance();
+                            _this.count = _this.count - 1;
+                            _this.labels.countDown.setWidth(_this.labels.countDown.getWidth() - 11);
+                            if (_this.count <= 0) {
+                                clearInterval(_this.counter);
+                                _this.buttons.attack.refreshStats.setEnabled(true);
+                                _this.buttons.attack.toolbarRefreshStats.setEnabled(true);
+                                if (_this.warningIcon) {
+                                    _this._armyBar.remove(_this.simulationWarning);
+                                    _this.warningIcon = false;
                                 }
-                            } catch (e) {
-                                console.log(e);
                             }
-                        },
-                        countDownToNextSimulation: function () {
-                            try {
-                                var _this = window.TACS.getInstance();
-                                _this.count = _this.count - 1;
-                                _this.labels.countDown.setWidth(_this.labels.countDown.getWidth() - 11);
-                                if (_this.count <= 0) {
-                                    clearInterval(_this.counter);
-                                    _this.buttons.attack.refreshStats.setEnabled(true);
-                                    _this.buttons.attack.toolbarRefreshStats.setEnabled(true);
-                                    if (_this.warningIcon) {
-                                        _this._armyBar.remove(_this.simulationWarning);
-                                        _this.warningIcon = false;
-                                    }
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        formationChangeHandler: function () {
-                            try {
-                                var _this = this;
-                                if (this.labels.countDown.getWidth() != 0) {
-                                    if (!_this.warningIcon) {
-                                        // Simulation Warning
-                                        _this.simulationWarning = new qx.ui.basic.Image("https://eaassets-a.akamaihd.net/cncalliancesgame/cdn/data/d75cf9c68c248256dfb416d8b7a86037.png");
-                                        _this.simulationWarning.set({
-                                            toolTipText: lang("Simulation will be based on most recently refreshed stats!")
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    formationChangeHandler: function () {
+                        try {
+                            var _this = this;
+                            if (this.labels.countDown.getWidth() != 0) {
+                                if (!_this.warningIcon) {
+                                    // Simulation Warning
+                                    _this.simulationWarning = new qx.ui.basic.Image("https://eaassets-a.akamaihd.net/cncalliancesgame/cdn/data/d75cf9c68c248256dfb416d8b7a86037.png");
+                                    _this.simulationWarning.set({
+                                        toolTipText: lang("Simulation will be based on most recently refreshed stats!")
+                                    });
+                                    if (this.options.rightSide.getValue()) {
+                                        this._armyBar.add(_this.simulationWarning, {
+                                            top: 122,
+                                            right: 67
                                         });
-                                        if (this.options.rightSide.getValue()) {
-                                            this._armyBar.add(_this.simulationWarning, {
-                                                top: 122,
-                                                right: 67
-                                            });
-                                        } else {
-                                            this._armyBar.add(_this.simulationWarning, {
-                                                top: 122,
-                                                left: 27
-                                            });
-                                        }
-                                        _this.warningIcon = true;
+                                    } else {
+                                        this._armyBar.add(_this.simulationWarning, {
+                                            top: 122,
+                                            left: 27
+                                        });
                                     }
+                                    _this.warningIcon = true;
                                 }
-                            } catch (e) {
-                                console.log(e);
                             }
-                        },
-                        calculateLoot: function () {
-                            try {
-                                // Adapted from the CNC Loot script:
-                                // http://userscripts.org/scripts/show/135953
-                                //var city = this._MainData.get_Cities().get_CurrentCity(); // not used
-                                var mod;
-                                var spoils = {
-                                    1: 0,
-                                    2: 0,
-                                    3: 0,
-                                    6: 0,
-                                    7: 0
-                                };
-                                var loot = ClientLib.API.Battleground.GetInstance().GetLootFromCurrentCity();
-                                for (var i in loot) {
-                                    spoils[loot[i].Type] += loot[i].Count;
-                                }
-                                this.stats.spoils.tiberium.setLabel(this.formatNumberWithCommas(spoils[1]));
-                                this.stats.spoils.crystal.setLabel(this.formatNumberWithCommas(spoils[2]));
-                                this.stats.spoils.credit.setLabel(this.formatNumberWithCommas(spoils[3]));
-                                this.stats.spoils.research.setLabel(this.formatNumberWithCommas(spoils[6]));
-                            } catch (e) {
-                                console.log(e);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    calculateLoot: function () {
+                        try {
+                            // Adapted from the CNC Loot script:
+                            // http://userscripts.org/scripts/show/135953
+                            //var city = this._MainData.get_Cities().get_CurrentCity(); // not used
+                            var mod;
+                            var spoils = {
+                                1: 0,
+                                2: 0,
+                                3: 0,
+                                6: 0,
+                                7: 0
+                            };
+                            var loot = ClientLib.API.Battleground.GetInstance().GetLootFromCurrentCity();
+                            for (var i in loot) {
+                                spoils[loot[i].Type] += loot[i].Count;
                             }
-                        },
-                        getRepairCost: function (unitStartHealth, unitEndHealth, unitMaxHealth, unitLevel, unitMDBID) {
-                            if (unitStartHealth != unitEndHealth) {
-                                if (unitEndHealth > 0) {
-                                    var damageRatio = ((unitStartHealth - unitEndHealth) / 16) / unitMaxHealth;
-                                } else {
-                                    var damageRatio = ((unitStartHealth / 16) / unitMaxHealth);
-                                }
-                                var repairCosts = ClientLib.API.Util.GetUnitRepairCosts(unitLevel, unitMDBID, damageRatio);
-                                // var crystal = 0;  // crystal didn't use, only RT
-                                var repairTime = 0;
-                                for (var j = 0; j < repairCosts.length; j++) {
-                                    var c = repairCosts[j];
-                                    var type = parseInt(c.Type);
-                                    switch (type) {
-/*case ClientLib.Base.EResourceType.Crystal: // crystal ddidn't use, only RT
-									crystal += c.Count;
-									break;*/
+                            this.stats.spoils.tiberium.setLabel(this.formatNumberWithCommas(spoils[1]));
+                            this.stats.spoils.crystal.setLabel(this.formatNumberWithCommas(spoils[2]));
+                            this.stats.spoils.credit.setLabel(this.formatNumberWithCommas(spoils[3]));
+                            this.stats.spoils.research.setLabel(this.formatNumberWithCommas(spoils[6]));
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    getRepairCost: function (unitStartHealth, unitEndHealth, unitMaxHealth, unitLevel, unitMDBID) {
+                        if (unitStartHealth != unitEndHealth) {
+                            if (unitEndHealth > 0) {
+                                var damageRatio = ((unitStartHealth - unitEndHealth) / 16) / unitMaxHealth;
+                            } else {
+                                var damageRatio = ((unitStartHealth / 16) / unitMaxHealth);
+                            }
+                            var repairCosts = ClientLib.API.Util.GetUnitRepairCosts(unitLevel, unitMDBID, damageRatio);
+                            // var crystal = 0;  // crystal didn't use, only RT
+                            var repairTime = 0;
+                            for (var j = 0; j < repairCosts.length; j++) {
+                                var c = repairCosts[j];
+                                var type = parseInt(c.Type);
+                                switch (type) {
+                                    /*case ClientLib.Base.EResourceType.Crystal: // crystal ddidn't use, only RT
+                                    									crystal += c.Count;
+                                    									break;*/
                                     case ClientLib.Base.EResourceType.RepairChargeBase:
                                     case ClientLib.Base.EResourceType.RepairChargeInf:
                                     case ClientLib.Base.EResourceType.RepairChargeVeh:
                                     case ClientLib.Base.EResourceType.RepairChargeAir:
                                         repairTime += c.Count;
                                         break;
-                                    }
                                 }
-                                return repairTime;
                             }
-                            return 0;
-                        },
-                        setLabelColor: function (obj, val, dir) {
-                            var colors = ['green', 'blue', 'black', 'red'];
-                            var color = colors[0];
-                            var v = val;
-                            if (dir >= 0) v = 100.0 - v;
-                            if (v > 99.99) color = colors[3];
-                            else if (v > 50) color = colors[2];
-                            else if (v > 0) color = colors[1];
-                            obj.setTextColor(color);
-                        },
-                        updateLabel100: function (obj, val, dir) {
-                            this.setLabelColor(obj, val, dir);
-                            val = Math.ceil(val * 100) / 100;
-                            obj.setValue(val.toFixed(2).toString());
-                        },
-                        updateLabel100time: function (obj, val, dir, time) {
-                            var s = val.toFixed(2).toString() + " @ " + phe.cnc.Util.getTimespanString(time);
-                            this.setLabelColor(obj, val, dir);
-                            obj.setValue(s);
-                        },
-                        updateStatsWindow: function () {
-                            var _this = this;
-                            var colors = ['black', 'blue', 'green', 'red'];
-                            var s = "";
-                            var n = 0;
-                            if (this.stats.damage.structures.construction === 0) {
-                                s = lang("Total Victory");
-                                n = 0;
-                            } else if (this.stats.damage.structures.overall < 100) {
-                                s = lang("Victory");
-                                n = 1;
-                            } else {
-                                s = lang("Total Defeat");
-                                n = 3;
-                            }
-                            this.labels.damage.outcome.setValue(s);
-                            this.labels.damage.outcome.setTextColor(colors[n]);
-                            this.updateLabel100(this.labels.damage.overall, this.stats.damage.overall, -1);
-                            this.updateLabel100(this.labels.damage.units.overall, this.stats.damage.units.overall, -1);
-                            this.updateLabel100(this.labels.damage.structures.overall, this.stats.damage.structures.overall, -1);
-                            this.updateLabel100(this.labels.damage.structures.construction, this.stats.damage.structures.construction, -1);
-                            this.updateLabel100(this.labels.damage.structures.defense, this.stats.damage.structures.defense, -1);
-                            // Command Center
-                            if (this.view.playerCity) this.updateLabel100(this.labels.damage.structures.command, this.stats.damage.structures.command, -1);
-                            else {
-                                this.labels.damage.structures.command.setValue("--");
-                                this.labels.damage.structures.command.setTextColor("green");
-                            }
-                            // SUPPORT
-                            var SLabel = (this.stats.supportLevel > 0) ? this.stats.supportLevel.toString() : '--';
-                            this.labels.supportLevel.setValue(lang('Support lvl ') + SLabel + ': ');
-                            this.updateLabel100(this.labels.damage.structures.support, this.stats.damage.structures.support, -1);
-                            // AVAILABLE RT
-                            this.labels.repair.available.setValue(phe.cnc.Util.getTimespanString(this.stats.repair.available));
-                            // AVAILABLE ATTACKS
-                            this.labels.attacks.available.setValue('CP:' + this.stats.attacks.availableAttacksCP + ' / F:' + this.stats.attacks.availableAttacksAtFullStrength + '/ C:' + this.stats.attacks.availableAttacksWithCurrentRepairCharges);
-                            // OVERALL
-                            this.updateLabel100time(this.labels.health.overall, this.stats.health.overall, 1, this.stats.repair.overall);
-                            // INF
-                            this.updateLabel100time(this.labels.health.infantry, this.stats.health.infantry, 1, this.stats.repair.infantry);
-                            // VEH
-                            this.updateLabel100time(this.labels.health.vehicle, this.stats.health.vehicle, 1, this.stats.repair.vehicle);
-                            // AIR
-                            this.updateLabel100time(this.labels.health.aircraft, this.stats.health.aircraft, 1, this.stats.repair.aircraft);
-                            // BATTLE TIME
-                            setTimeout(function () {
-                                _this.stats.time = _this._VisMain.get_Battleground().get_BattleDuration() / 1000;
-                                _this.setLabelColor(_this.labels.time, _this.stats.time / 120.0, -1); // max is 120s
-                                _this.labels.time.setValue(_this.stats.time.toFixed(2).toString());
-                            }, 1);
-                            //this.saveUndoState();
-                        },
-                        formatNumberWithCommas: function (x) {
-                            return Math.floor(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                        },
-/* Not used:
-					formatSecondsAsTime: function (secs, format) {
-					var hr = Math.floor(secs / 3600);
-					var min = Math.floor((secs - (hr * 3600)) / 60);
-					var sec = Math.floor(secs - (hr * 3600) - (min * 60));
-					if (hr < 10) hr = "0" + hr;
-					if (min < 10) min = "0" + min;
-					if (sec < 10) sec = "0" + sec;
-					if (format !== null) {
-					var formatted_time = format.replace('hh', hr);
-					formatted_time = formatted_time.replace('h', hr * 1 + "");
-					formatted_time = formatted_time.replace('mm', min);
-					formatted_time = formatted_time.replace('m', min * 1 + "");
-					formatted_time = formatted_time.replace('ss', sec);
-					formatted_time = formatted_time.replace('s', sec * 1 + "");
-					return formatted_time;
-					} else {
-					return hr + ':' + min + ':' + sec;
-					}
-					},
-					 */
-                        unlockAttacks: function () {
-                            this._armyBar.remove(this.buttons.attack.unlock);
-                            var _this = this;
-                            setTimeout(function () {
-                                _this._armyBar.add(_this.buttons.attack.unlock);
-                            }, 2000);
-                        },
-                        unlockRepairs: function () {
-                            this._armyBar.remove(this.buttons.attack.repair);
-                            var _this = this;
-                            setTimeout(function () {
-                                _this._armyBar.add(_this.buttons.attack.repair);
-                            }, 5000);
-                        },
-/*calculateDefenseBonus : function (context, data) {
-						try {
-							var score = data.rpois[6].s;
-							var rank = data.rpois[6].r;
-							this.view.playerCityDefenseBonus = Math.round(ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(ClientLib.Base.EPOIType.DefenseBonus, rank, score));
-						} catch (e) {
-							console.log(e);
-						}
-					},*/
-                        hideAll: function () {
-                            if (this.buttons.attack.repairMode.getValue()) this.buttons.attack.repairMode.execute();
-                            if (this.battleResultsBox.isVisible()) this.battleResultsBox.close();
-                            if (this.resourceLayoutWindow.isVisible()) this.resourceLayoutWindow.close();
-                            if (this.optionsWindow.isVisible()) this.optionsWindow.close();
-/*if (this.toolBar.isVisible())
-							this.toolBar.hide();
-						if (this.toolBarMouse.isVisible())
-							this.toolBarMouse.hide();*/
-                        },
-                        gameOverlaysToFront: function () {
-                            webfrontend.gui.reports.ReportsOverlay.getInstance().setZIndex(20);
-                            webfrontend.gui.mail.MailOverlay.getInstance().setZIndex(20);
-                            //webfrontend.gui.mail.MailMessageOverlay.getInstance().setZIndex(20);
-                            webfrontend.gui.alliance.AllianceOverlay.getInstance().setZIndex(20);
-                            webfrontend.gui.forum.ForumOverlay.getInstance().setZIndex(20);
-                            webfrontend.gui.research.ResearchOverlay.getInstance().setZIndex(20);
-                            webfrontend.gui.monetization.ShopOverlay.getInstance().setZIndex(20);
-                            webfrontend.gui.ranking.RankingOverlay.getInstance().setZIndex(20);
-                        },
-                        ownCityChangeHandler: function (oldId, newId) {
-                            console.log("CurrentOwnChange event");
-                            if (this._armyBarContainer.isVisible()) {
-                                this.buttons.attack.refreshStats.setEnabled(false);
-                                this.buttons.attack.toolbarRefreshStats.setEnabled(false);
-                                this.buttons.attack.simulate.setEnabled(false);
-                                this.onCityLoadComplete();
-                                this.resetDisableButtons();
-                            }
-                        },
-                        //onViewChange
-                        viewChangeHandler: function (oldMode, newMode) {
-                            //console.log("ViewModeChange event");
-                            this.curViewMode = newMode;
-                            this.buttons.attack.simulate.setEnabled(false);
+                            return repairTime;
+                        }
+                        return 0;
+                    },
+                    setLabelColor: function (obj, val, dir) {
+                        var colors = ['green', 'blue', 'black', 'red'];
+                        var color = colors[0];
+                        var v = val;
+                        if (dir >= 0) v = 100.0 - v;
+                        if (v > 99.99) color = colors[3];
+                        else if (v > 50) color = colors[2];
+                        else if (v > 0) color = colors[1];
+                        obj.setTextColor(color);
+                    },
+                    updateLabel100: function (obj, val, dir) {
+                        this.setLabelColor(obj, val, dir);
+                        val = Math.ceil(val * 100) / 100;
+                        obj.setValue(val.toFixed(2).toString());
+                    },
+                    updateLabel100time: function (obj, val, dir, time) {
+                        var s = val.toFixed(2).toString() + " @ " + phe.cnc.Util.getTimespanString(time);
+                        this.setLabelColor(obj, val, dir);
+                        obj.setValue(s);
+                    },
+                    updateStatsWindow: function () {
+                        var _this = this;
+                        var colors = ['black', 'blue', 'green', 'red'];
+                        var s = "";
+                        var n = 0;
+                        if (this.stats.damage.structures.construction === 0) {
+                            s = lang("Total Victory");
+                            n = 0;
+                        } else if (this.stats.damage.structures.overall < 100) {
+                            s = lang("Victory");
+                            n = 1;
+                        } else {
+                            s = lang("Total Defeat");
+                            n = 3;
+                        }
+                        this.labels.damage.outcome.setValue(s);
+                        this.labels.damage.outcome.setTextColor(colors[n]);
+                        this.updateLabel100(this.labels.damage.overall, this.stats.damage.overall, -1);
+                        this.updateLabel100(this.labels.damage.units.overall, this.stats.damage.units.overall, -1);
+                        this.updateLabel100(this.labels.damage.structures.overall, this.stats.damage.structures.overall, -1);
+                        this.updateLabel100(this.labels.damage.structures.construction, this.stats.damage.structures.construction, -1);
+                        this.updateLabel100(this.labels.damage.structures.defense, this.stats.damage.structures.defense, -1);
+                        // Command Center
+                        if (this.view.playerCity) this.updateLabel100(this.labels.damage.structures.command, this.stats.damage.structures.command, -1);
+                        else {
+                            this.labels.damage.structures.command.setValue("--");
+                            this.labels.damage.structures.command.setTextColor("green");
+                        }
+                        // SUPPORT
+                        var SLabel = (this.stats.supportLevel > 0) ? this.stats.supportLevel.toString() : '--';
+                        this.labels.supportLevel.setValue(lang('Support lvl ') + SLabel + ': ');
+                        this.updateLabel100(this.labels.damage.structures.support, this.stats.damage.structures.support, -1);
+                        // AVAILABLE RT
+                        this.labels.repair.available.setValue(phe.cnc.Util.getTimespanString(this.stats.repair.available));
+                        // AVAILABLE ATTACKS
+                        this.labels.attacks.available.setValue('CP:' + this.stats.attacks.availableAttacksCP + ' / F:' + this.stats.attacks.availableAttacksAtFullStrength + '/ C:' + this.stats.attacks.availableAttacksWithCurrentRepairCharges);
+                        // OVERALL
+                        this.updateLabel100time(this.labels.health.overall, this.stats.health.overall, 1, this.stats.repair.overall);
+                        // INF
+                        this.updateLabel100time(this.labels.health.infantry, this.stats.health.infantry, 1, this.stats.repair.infantry);
+                        // VEH
+                        this.updateLabel100time(this.labels.health.vehicle, this.stats.health.vehicle, 1, this.stats.repair.vehicle);
+                        // AIR
+                        this.updateLabel100time(this.labels.health.aircraft, this.stats.health.aircraft, 1, this.stats.repair.aircraft);
+                        // BATTLE TIME
+                        setTimeout(function () {
+                            _this.stats.time = _this._VisMain.get_Battleground().get_BattleDuration() / 1000;
+                            _this.setLabelColor(_this.labels.time, _this.stats.time / 120.0, -1); // max is 120s
+                            _this.labels.time.setValue(_this.stats.time.toFixed(2).toString());
+                        }, 1);
+                        //this.saveUndoState();
+                    },
+                    formatNumberWithCommas: function (x) {
+                        return Math.floor(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    },
+                    /* Not used:
+                    					formatSecondsAsTime: function (secs, format) {
+                    					var hr = Math.floor(secs / 3600);
+                    					var min = Math.floor((secs - (hr * 3600)) / 60);
+                    					var sec = Math.floor(secs - (hr * 3600) - (min * 60));
+                    					if (hr < 10) hr = "0" + hr;
+                    					if (min < 10) min = "0" + min;
+                    					if (sec < 10) sec = "0" + sec;
+                    					if (format !== null) {
+                    					var formatted_time = format.replace('hh', hr);
+                    					formatted_time = formatted_time.replace('h', hr * 1 + "");
+                    					formatted_time = formatted_time.replace('mm', min);
+                    					formatted_time = formatted_time.replace('m', min * 1 + "");
+                    					formatted_time = formatted_time.replace('ss', sec);
+                    					formatted_time = formatted_time.replace('s', sec * 1 + "");
+                    					return formatted_time;
+                    					} else {
+                    					return hr + ':' + min + ':' + sec;
+                    					}
+                    					},
+                    					 */
+                    unlockAttacks: function () {
+                        this._armyBar.remove(this.buttons.attack.unlock);
+                        var _this = this;
+                        setTimeout(function () {
+                            _this._armyBar.add(_this.buttons.attack.unlock);
+                        }, 2000);
+                    },
+                    unlockRepairs: function () {
+                        this._armyBar.remove(this.buttons.attack.repair);
+                        var _this = this;
+                        setTimeout(function () {
+                            _this._armyBar.add(_this.buttons.attack.repair);
+                        }, 5000);
+                    },
+                    /*calculateDefenseBonus : function (context, data) {
+                    						try {
+                    							var score = data.rpois[6].s;
+                    							var rank = data.rpois[6].r;
+                    							this.view.playerCityDefenseBonus = Math.round(ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(ClientLib.Base.EPOIType.DefenseBonus, rank, score));
+                    						} catch (e) {
+                    							console.log(e);
+                    						}
+                    					},*/
+                    hideAll: function () {
+                        if (this.buttons.attack.repairMode.getValue()) this.buttons.attack.repairMode.execute();
+                        if (this.battleResultsBox.isVisible()) this.battleResultsBox.close();
+                        if (this.resourceLayoutWindow.isVisible()) this.resourceLayoutWindow.close();
+                        if (this.optionsWindow.isVisible()) this.optionsWindow.close();
+                        /*if (this.toolBar.isVisible())
+                        							this.toolBar.hide();
+                        						if (this.toolBarMouse.isVisible())
+                        							this.toolBarMouse.hide();*/
+                    },
+                    gameOverlaysToFront: function () {
+                        webfrontend.gui.reports.ReportsOverlay.getInstance().setZIndex(20);
+                        webfrontend.gui.mail.MailOverlay.getInstance().setZIndex(20);
+                        //webfrontend.gui.mail.MailMessageOverlay.getInstance().setZIndex(20);
+                        webfrontend.gui.alliance.AllianceOverlay.getInstance().setZIndex(20);
+                        webfrontend.gui.forum.ForumOverlay.getInstance().setZIndex(20);
+                        webfrontend.gui.research.ResearchOverlay.getInstance().setZIndex(20);
+                        webfrontend.gui.monetization.ShopOverlay.getInstance().setZIndex(20);
+                        webfrontend.gui.ranking.RankingOverlay.getInstance().setZIndex(20);
+                    },
+                    ownCityChangeHandler: function (oldId, newId) {
+                        console.log("CurrentOwnChange event");
+                        if (this._armyBarContainer.isVisible()) {
                             this.buttons.attack.refreshStats.setEnabled(false);
                             this.buttons.attack.toolbarRefreshStats.setEnabled(false);
-                            try {
-                                this.hideAll();
-                                //this.getAvailableRepairAndCP();
-                                switch (newMode) {
-/*
-								case ClientLib.Vis.Mode.None:
-								break;
-								case ClientLib.Vis.Mode.City: //own base
-								break;
-								case ClientLib.Vis.Mode.Region: //the map
-								break;
-								 */
+                            this.buttons.attack.simulate.setEnabled(false);
+                            this.onCityLoadComplete();
+                            this.resetDisableButtons();
+                        }
+                    },
+                    //onViewChange
+                    viewChangeHandler: function (oldMode, newMode) {
+                        //console.log("ViewModeChange event");
+                        this.curViewMode = newMode;
+                        this.buttons.attack.simulate.setEnabled(false);
+                        this.buttons.attack.refreshStats.setEnabled(false);
+                        this.buttons.attack.toolbarRefreshStats.setEnabled(false);
+                        try {
+                            this.hideAll();
+                            //this.getAvailableRepairAndCP();
+                            switch (newMode) {
+                                /*
+                                								case ClientLib.Vis.Mode.None:
+                                								break;
+                                								case ClientLib.Vis.Mode.City: //own base
+                                								break;
+                                								case ClientLib.Vis.Mode.Region: //the map
+                                								break;
+                                								 */
                                 case ClientLib.Vis.Mode.Battleground:
                                     // 3: while attacking or simming
                                     this.curPAVM = qx.core.Init.getApplication().getPlayArea().getViewMode();
                                     this.onCityLoadComplete();
                                     break;
-/*
-								case ClientLib.Vis.Mode.ArmySetup: //in own base / add upgrade units
-								break;
-								case ClientLib.Vis.Mode.DefenseSetup:
-								break;
-								case ClientLib.Vis.Mode.World: //world button
-								break;
-								 */
+                                    /*
+                                    								case ClientLib.Vis.Mode.ArmySetup: //in own base / add upgrade units
+                                    								break;
+                                    								case ClientLib.Vis.Mode.DefenseSetup:
+                                    								break;
+                                    								case ClientLib.Vis.Mode.World: //world button
+                                    								break;
+                                    								 */
                                 case ClientLib.Vis.Mode.CombatSetup:
                                     // 7: formation setup
                                     this.curPAVM = qx.core.Init.getApplication().getPlayArea().getViewMode();
                                     this.onCityLoadComplete();
                                     break;
-                                }
-                                //console.log("\nViewMode: " + ClientLib.Vis.VisMain.GetInstance().get_Mode() + "\n");
-                                //console.log("curPAVM: " + this.curPAVM);
-                            } catch (e) {
-                                console.log(e);
                             }
-                        },
-                        resetDisableButtons: function () {
-                            try {
-                                if (this.buttons.attack.activateInfantry.getValue(true)) this.buttons.attack.activateInfantry.setValue(false);
-                                if (this.buttons.attack.activateVehicles.getValue(true)) this.buttons.attack.activateVehicles.setValue(false);
-                                if (this.buttons.attack.activateAir.getValue(true)) this.buttons.attack.activateAir.setValue(false);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        onCityLoadComplete: function () {
-                            try {
-                                var _this = this;
-                                //console.log("Running onCityLoadComplete...");
-                                if (this._VisMain.GetActiveView().get_VisAreaComplete()) {
-/*setTimeout(function () {
-									var cbtSetup = ClientLib.Vis.VisMain.GetInstance().get_CombatSetup(); // No longer needed. They've fixed the issue in-game. Leaving here just in case.
-									cbtSetup.SetPosition(0, cbtSetup.get_MinYPosition() + cbtSetup.get_DefenseOffsetY() * cbtSetup.get_GridHeight());
-									//qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().setZIndex(1);
-								}, 500);*/
-                                    this.checkAttackRange();
-                                    if (this.curPAVM > 3) {
-                                        this.showCombatTools();
-                                        var currentcity = this._MainData.get_Cities().get_CurrentCity();
-                                        if (currentcity != null) {
-                                            var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
-                                            var cityFaction = currentcity.get_CityFaction();
-                                            this.stats.attacks.attackCost = ownCity.CalculateAttackCommandPointCostToCoord(currentcity.get_PosX(), currentcity.get_PosY());
-                                            this.getAvailableRepairAndCP();
-                                            this.calculateLoot();
-                                            this.updateLayoutsList();
-                                            this.getAttackUnits();
-                                            //if opened new city then reset disable buttons and calculate defense bonus
-                                            if (this.targetCityId != null && this.targetCityId !== currentcity.get_Id()) {
-                                                this.labels.repair.available.setValue(phe.cnc.Util.getTimespanString(this.stats.repair.available));
-                                                //this.labels.attacks.available.setValue('CP:' + Math.floor(this.stats.attacks.availableCP / this.stats.attacks.attackCost) + ' / F:' + Math.floor(this.stats.repair.available / this.stats.repair.max) + '/ C:-');
-                                                this.labels.attacks.available.setValue('CP:' + this.stats.attacks.availableAttacksCP + ' / F:' + this.stats.attacks.availableAttacksAtFullStrength + '/ C:-');
-                                                this.resetDisableButtons();
-                                                this.view.playerCity = cityFaction === ClientLib.Base.EFactionType.GDIFaction || cityFaction === ClientLib.Base.EFactionType.NODFaction;
-                                                if (this.view.playerCity) {
-                                                    this.view.playerCityDefenseBonus = currentcity.get_AllianceDefenseBonus();
-/*var cityAllianceId = currentcity.get_OwnerAllianceId();
-												ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand("GetPublicAllianceInfo", {
-													id : cityAllianceId
-												}, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.calculateDefenseBonus), null);*/
-                                                }
+                            //console.log("\nViewMode: " + ClientLib.Vis.VisMain.GetInstance().get_Mode() + "\n");
+                            //console.log("curPAVM: " + this.curPAVM);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    resetDisableButtons: function () {
+                        try {
+                            if (this.buttons.attack.activateInfantry.getValue(true)) this.buttons.attack.activateInfantry.setValue(false);
+                            if (this.buttons.attack.activateVehicles.getValue(true)) this.buttons.attack.activateVehicles.setValue(false);
+                            if (this.buttons.attack.activateAir.getValue(true)) this.buttons.attack.activateAir.setValue(false);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    onCityLoadComplete: function () {
+                        try {
+                            var _this = this;
+                            //console.log("Running onCityLoadComplete...");
+                            if (this._VisMain.GetActiveView().get_VisAreaComplete()) {
+                                /*setTimeout(function () {
+                                									var cbtSetup = ClientLib.Vis.VisMain.GetInstance().get_CombatSetup(); // No longer needed. They've fixed the issue in-game. Leaving here just in case.
+                                									cbtSetup.SetPosition(0, cbtSetup.get_MinYPosition() + cbtSetup.get_DefenseOffsetY() * cbtSetup.get_GridHeight());
+                                									//qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().setZIndex(1);
+                                								}, 500);*/
+                                this.checkAttackRange();
+                                if (this.curPAVM > 3) {
+                                    this.showCombatTools();
+                                    var currentcity = this._MainData.get_Cities().get_CurrentCity();
+                                    if (currentcity != null) {
+                                        var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
+                                        var cityFaction = currentcity.get_CityFaction();
+                                        this.stats.attacks.attackCost = ownCity.CalculateAttackCommandPointCostToCoord(currentcity.get_PosX(), currentcity.get_PosY());
+                                        this.getAvailableRepairAndCP();
+                                        this.calculateLoot();
+                                        this.updateLayoutsList();
+                                        this.getAttackUnits();
+                                        //if opened new city then reset disable buttons and calculate defense bonus
+                                        if (this.targetCityId != null && this.targetCityId !== currentcity.get_Id()) {
+                                            this.labels.repair.available.setValue(phe.cnc.Util.getTimespanString(this.stats.repair.available));
+                                            //this.labels.attacks.available.setValue('CP:' + Math.floor(this.stats.attacks.availableCP / this.stats.attacks.attackCost) + ' / F:' + Math.floor(this.stats.repair.available / this.stats.repair.max) + '/ C:-');
+                                            this.labels.attacks.available.setValue('CP:' + this.stats.attacks.availableAttacksCP + ' / F:' + this.stats.attacks.availableAttacksAtFullStrength + '/ C:-');
+                                            this.resetDisableButtons();
+                                            this.view.playerCity = cityFaction === ClientLib.Base.EFactionType.GDIFaction || cityFaction === ClientLib.Base.EFactionType.NODFaction;
+                                            if (this.view.playerCity) {
+                                                this.view.playerCityDefenseBonus = currentcity.get_AllianceDefenseBonus();
+                                                /*var cityAllianceId = currentcity.get_OwnerAllianceId();
+                                                												ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand("GetPublicAllianceInfo", {
+                                                													id : cityAllianceId
+                                                												}, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.calculateDefenseBonus), null);*/
                                             }
-                                            if (cityFaction >= 4 && cityFaction <= 6) this.createLayoutPreview();
-                                            this.targetCityId = currentcity.get_Id();
                                         }
+                                        if (cityFaction >= 4 && cityFaction <= 6) this.createLayoutPreview();
+                                        this.targetCityId = currentcity.get_Id();
                                     }
-                                    return;
                                 }
-                                setTimeout(function () {
-                                    _this.onCityLoadComplete();
-                                }, 200);
-                            } catch (e) {
-                                console.log(e);
+                                return;
                             }
-                        },
-                        createLayoutPreview: function () {
-                            try {
-                                var fileManager = ClientLib.File.FileManager.GetInstance();
-                                var images = {
-                                    0: fileManager.GetPhysicalPath('ui/menues/main_menu/misc_empty_pixel.png'),
-                                    1: fileManager.GetPhysicalPath('ui/common/icn_res_chrystal.png'),
-                                    2: fileManager.GetPhysicalPath('ui/common/icn_res_tiberium.png')
-                                }
-                                var currenLayout = this.getLayout();
-                                var tibCount = currenLayout.match(/2/g).length;
-                                switch (this._MainData.get_Player().get_Faction()) {
+                            setTimeout(function () {
+                                _this.onCityLoadComplete();
+                            }, 200);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    createLayoutPreview: function () {
+                        try {
+                            var fileManager = ClientLib.File.FileManager.GetInstance();
+                            var images = {
+                                0: fileManager.GetPhysicalPath('ui/menues/main_menu/misc_empty_pixel.png'),
+                                1: fileManager.GetPhysicalPath('ui/common/icn_res_chrystal.png'),
+                                2: fileManager.GetPhysicalPath('ui/common/icn_res_tiberium.png')
+                            }
+                            var currenLayout = this.getLayout();
+                            var tibCount = currenLayout.match(/2/g).length;
+                            switch (this._MainData.get_Player().get_Faction()) {
                                 case ClientLib.Base.EFactionType.GDIFaction:
                                     var playerFaction = "G";
                                     break;
                                 case ClientLib.Base.EFactionType.NODFaction:
                                     var playerFaction = "N";
                                     break;
-                                }
-                                var cncOptURL = "http://cnctaopt.com/?map=2~" + playerFaction + "~" + playerFaction + "~~" + this.encodeToCNCOpt(currenLayout) + "....................................~newEconomy";
-                                var html = '<table border="2" cellspacing="0" cellpadding="0">';
-                                for (var i = 0; i < 72; i++) {
-                                    var row = Math.floor(i / 9);
-                                    var column = i - Math.floor(i / 9) * 9;
-                                    if (column == 0) html += '<tr>';
-                                    html += '<td><img width="14" height="14" src="' + images[currenLayout.charAt(i)] + '"></td>';
-                                    if (column == 8) html += '</tr>';
-                                }
-                                html += '</table><a href="' + cncOptURL + '" target="_blank" style="color:#FFFFFF;">CNCTAOpt';
-                                this.resourceLayout = new qx.ui.basic.Label().set({
-                                    backgroundColor: "#303030",
-                                    value: html,
-                                    padding: 10,
-                                    rich: true
-                                });
-                                if (tibCount == 7) {
-                                    this.resourceLayout.setBackgroundColor("#202820");
-                                } else if (tibCount == 5) {
-                                    this.resourceLayout.setBackgroundColor("#202028");
-                                }
-                                this.resourceLayoutWindow.removeAll();
-                                this.resourceLayoutWindow.add(this.resourceLayout);
-                            } catch (e) {
-                                console.log(e);
                             }
-                        },
-                        getLayout: function () {
-                            try {
-                                var resourceLayout = "";
-                                for (var y = 0; y < 16; y++) {
-                                    for (var x = 0; x < 9; x++) {
-                                        resourceLayout += this._MainData.get_Cities().get_CurrentCity().GetResourceType(x, y);
-                                    }
-                                }
-                                return resourceLayout;
-                            } catch (e) {
-                                console.log(e);
+                            var cncOptURL = "http://cnctaopt.com/?map=2~" + playerFaction + "~" + playerFaction + "~~" + this.encodeToCNCOpt(currenLayout) + "....................................~newEconomy";
+                            var html = '<table border="2" cellspacing="0" cellpadding="0">';
+                            for (var i = 0; i < 72; i++) {
+                                var row = Math.floor(i / 9);
+                                var column = i - Math.floor(i / 9) * 9;
+                                if (column == 0) html += '<tr>';
+                                html += '<td><img width="14" height="14" src="' + images[currenLayout.charAt(i)] + '"></td>';
+                                if (column == 8) html += '</tr>';
                             }
-                        },
-                        encodeToCNCOpt: function (data) {
-                            try {
-                                var str = ".ct-jhlk";
-                                for (var i = 0; i < 8; i++) {
-                                    var re = new RegExp(i, 'g');
-                                    var char = str.charAt(i);
-                                    data = data.replace(re, char);
-                                }
-                                return data;
-                            } catch (e) {
-                                console.log(e);
+                            html += '</table><a href="' + cncOptURL + '" target="_blank" style="color:#FFFFFF;">CNCTAOpt';
+                            this.resourceLayout = new qx.ui.basic.Label().set({
+                                backgroundColor: "#303030",
+                                value: html,
+                                padding: 10,
+                                rich: true
+                            });
+                            if (tibCount == 7) {
+                                this.resourceLayout.setBackgroundColor("#202820");
+                            } else if (tibCount == 5) {
+                                this.resourceLayout.setBackgroundColor("#202028");
                             }
-                        },
-                        showCombatTools: function () {
-                            this.curPAVM = qx.core.Init.getApplication().getPlayArea().getViewMode();
-                            //console.log("showCombatTools PAVM: " + this.curPAVM);
-                            switch (this.curPAVM) {
-                                //4 Scrolled up (when more than ~50% of the top is in view) this should never be the case
-                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupBase:
-                                {
-                                    console.log("!!!\n TACS Warning\n!!!\n onCityLoadComplete, unexpected case pavmCombatSetupBase");
-                                    break;
-                                }
-                                //5 Scrolled down -- normal combat setup
-                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense:
-                                {
-                                    if (this.options.autoDisplayStats.getValue()) {
-                                        this.battleResultsBox.open();
-                                    }
-                                    if (this.options.showResourceLayoutWindow.getValue()) {
-                                        this.resourceLayoutWindow.open();
-                                    }
-                                    break;
-                                }
-                                //6 While attacking a target
-                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatAttacker:
-                                {
-                                    if (this.options.autoDisplayStats.getValue() && this.saveObj.checkbox.showStatsDuringAttack) {
-                                        this.battleResultsBox.open();
-/*if(this._armyBarContainer.isVisible()){
-										this.toolBar.show();
-									}*/
-                                    }
-                                    break;
-                                }
-                                //8
-                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatViewerAttacker:
-                                {
-                                    console.log("pavmCombatViewerAttacker");
-                                    break;
-                                }
-                                //9
-                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatViewerDefender:
-                                {
-                                    console.log("pavmCombatViewerDefender");
-                                    break;
-                                }
-                                //10 Watching a "sim" OR replay
-                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay:
-                                {
-                                    if (this.saveObj.checkbox.showStatsDuringSimulation) {
-                                        console.log("simulation case 10");
-                                        this.battleResultsBox.open();
-                                    }
-                                    break;
+                            this.resourceLayoutWindow.removeAll();
+                            this.resourceLayoutWindow.add(this.resourceLayout);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    getLayout: function () {
+                        try {
+                            var resourceLayout = "";
+                            for (var y = 0; y < 16; y++) {
+                                for (var x = 0; x < 9; x++) {
+                                    resourceLayout += this._MainData.get_Cities().get_CurrentCity().GetResourceType(x, y);
                                 }
                             }
-                        },
-                        getAvailableRepairAndCP: function () {
-                            try {
+                            return resourceLayout;
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    encodeToCNCOpt: function (data) {
+                        try {
+                            var str = ".ct-jhlk";
+                            for (var i = 0; i < 8; i++) {
+                                var re = new RegExp(i, 'g');
+                                var char = str.charAt(i);
+                                data = data.replace(re, char);
+                            }
+                            return data;
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    showCombatTools: function () {
+                        this.curPAVM = qx.core.Init.getApplication().getPlayArea().getViewMode();
+                        //console.log("showCombatTools PAVM: " + this.curPAVM);
+                        switch (this.curPAVM) {
+                            //4 Scrolled up (when more than ~50% of the top is in view) this should never be the case
+                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupBase: {
+                                console.log("!!!\n TACS Warning\n!!!\n onCityLoadComplete, unexpected case pavmCombatSetupBase");
+                                break;
+                            }
+                            //5 Scrolled down -- normal combat setup
+                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense: {
+                                if (this.options.autoDisplayStats.getValue()) {
+                                    this.battleResultsBox.open();
+                                }
+                                if (this.options.showResourceLayoutWindow.getValue()) {
+                                    this.resourceLayoutWindow.open();
+                                }
+                                break;
+                            }
+                            //6 While attacking a target
+                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatAttacker: {
+                                if (this.options.autoDisplayStats.getValue() && this.saveObj.checkbox.showStatsDuringAttack) {
+                                    this.battleResultsBox.open();
+                                    /*if(this._armyBarContainer.isVisible()){
+                                    										this.toolBar.show();
+                                    									}*/
+                                }
+                                break;
+                            }
+                            //8
+                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatViewerAttacker: {
+                                console.log("pavmCombatViewerAttacker");
+                                break;
+                            }
+                            //9
+                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatViewerDefender: {
+                                console.log("pavmCombatViewerDefender");
+                                break;
+                            }
+                            //10 Watching a "sim" OR replay
+                            case ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay: {
+                                if (this.saveObj.checkbox.showStatsDuringSimulation) {
+                                    console.log("simulation case 10");
+                                    this.battleResultsBox.open();
+                                }
+                                break;
+                            }
+                        }
+                    },
+                    getAvailableRepairAndCP: function () {
+                        try {
+                            var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
+                            var offHealth = ownCity.GetOffenseConditionInPercent();
+                            var unitData = ownCity.get_CityUnitsData();
+                            //var availableInfRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf);
+                            //var availableVehRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh);
+                            //var availableAirRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeAir);
+                            var maxInfRepairCharge = unitData.GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Infantry, false);
+                            var maxVehRepairCharge = unitData.GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Vehicle, false);
+                            var maxAirRepairCharge = unitData.GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false);
+                            //this.stats.repair.available = this._MainData.get_Time().GetTimeSpan(Math.min(availableInfRT, availableAirRT, availableVehRT));
+                            this.stats.repair.available = ClientLib.Base.Resource.GetResourceCount(ownCity.get_RepairOffenseResources().get_RepairChargeOffense());
+                            this.stats.repair.max = this._MainData.get_Time().GetTimeSpan(Math.max(maxInfRepairCharge, maxAirRepairCharge, maxVehRepairCharge));
+                            this.stats.attacks.availableCP = this._MainData.get_Player().GetCommandPointCount();
+                            this.stats.attacks.availableAttacksCP = Math.floor(this.stats.attacks.availableCP / this.stats.attacks.attackCost);
+                            this.stats.attacks.availableAttacksAtFullStrength = Math.floor(this.stats.repair.available / this.stats.repair.max) + 1;
+                            this.stats.attacks.availableAttacksWithCurrentRepairCharges = Math.floor(this.stats.repair.available / this.stats.repair.overall) + 1;
+                            if (offHealth !== 100) {
+                                this.stats.attacks.availableAttacksAtFullStrength--;
+                                this.stats.attacks.availableAttacksAtFullStrength += '*';
+                            } // Decrease number of attacks by 1 when unit unhealthy. Borrowed from Maelstrom Tools - by krisan
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    returnSetup: function () {
+                        // Set the scene again, just in case it didn't work the first time
+                        try {
+                            this._Application.getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, localStorage.ta_sim_last_city, 0, 0);
+                        } catch (e) {
+                            this._Application.getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, localStorage.ta_sim_last_city, 0, 0);
+                            console.log(e);
+                        }
+                    },
+                    checkAttackRange: function () {
+                        try {
+                            var cities = this._MainData.get_Cities();
+                            var target_city = cities.get_CurrentCity();
+                            if (target_city != null) {
+                                var base_city = cities.get_CurrentOwnCity();
+                                var attackDistance = ClientLib.Base.Util.CalculateDistance(target_city.get_PosX(), target_city.get_PosY(), base_city.get_PosX(), base_city.get_PosY());
+                                if (attackDistance <= 10) {
+                                    //console.log("Target in range");
+                                    this.buttons.attack.simulate.setEnabled(true);
+                                    if (this.count <= 0) {
+                                        this.buttons.attack.refreshStats.setEnabled(true);
+                                        this.buttons.attack.toolbarRefreshStats.setEnabled(true);
+                                    }
+                                } else {
+                                    //console.log("Target Out of range");
+                                }
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    skipSimulation: function () {
+                        try {
+                            while (this._VisMain.get_Battleground().get_Simulation().DoStep(false)) {}
+                            this._VisMain.get_Battleground().set_ReplaySpeed(1);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    startSimulation: function () {
+                        try {
+                            if (PerforceChangelist >= 448942) {
+                                var simTimeLimit = 3000;
+                            } else {
+                                var simTimeLimit = 10000;
+                            }
+                            if (Date.now() - this.lastSimulation > simTimeLimit) {
                                 var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
-                                var offHealth = ownCity.GetOffenseConditionInPercent();
-                                var unitData = ownCity.get_CityUnitsData();
-                                //var availableInfRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf);
-                                //var availableVehRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh);
-                                //var availableAirRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeAir);
-                                var maxInfRepairCharge = unitData.GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Infantry, false);
-                                var maxVehRepairCharge = unitData.GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Vehicle, false);
-                                var maxAirRepairCharge = unitData.GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false);
-                                //this.stats.repair.available = this._MainData.get_Time().GetTimeSpan(Math.min(availableInfRT, availableAirRT, availableVehRT));
-                                this.stats.repair.available = ClientLib.Base.Resource.GetResourceCount(ownCity.get_RepairOffenseResources().get_RepairChargeOffense());
-                                this.stats.repair.max = this._MainData.get_Time().GetTimeSpan(Math.max(maxInfRepairCharge, maxAirRepairCharge, maxVehRepairCharge));
-                                this.stats.attacks.availableCP = this._MainData.get_Player().GetCommandPointCount();
-                                this.stats.attacks.availableAttacksCP = Math.floor(this.stats.attacks.availableCP / this.stats.attacks.attackCost);
-                                this.stats.attacks.availableAttacksAtFullStrength = Math.floor(this.stats.repair.available / this.stats.repair.max) + 1;
-                                this.stats.attacks.availableAttacksWithCurrentRepairCharges = Math.floor(this.stats.repair.available / this.stats.repair.overall) + 1;
-                                if (offHealth !== 100) {
-                                    this.stats.attacks.availableAttacksAtFullStrength--;
-                                    this.stats.attacks.availableAttacksAtFullStrength += '*';
-                                } // Decrease number of attacks by 1 when unit unhealthy. Borrowed from Maelstrom Tools - by krisan
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        returnSetup: function () {
-                            // Set the scene again, just in case it didn't work the first time
-                            try {
-                                this._Application.getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, localStorage.ta_sim_last_city, 0, 0);
-                            } catch (e) {
-                                this._Application.getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, localStorage.ta_sim_last_city, 0, 0);
-                                console.log(e);
-                            }
-                        },
-                        checkAttackRange: function () {
-                            try {
-                                var cities = this._MainData.get_Cities();
-                                var target_city = cities.get_CurrentCity();
-                                if (target_city != null) {
-                                    var base_city = cities.get_CurrentOwnCity();
-                                    var attackDistance = ClientLib.Base.Util.CalculateDistance(target_city.get_PosX(), target_city.get_PosY(), base_city.get_PosX(), base_city.get_PosY());
-                                    if (attackDistance <= 10) {
-                                        //console.log("Target in range");
-                                        this.buttons.attack.simulate.setEnabled(true);
-                                        if (this.count <= 0) {
-                                            this.buttons.attack.refreshStats.setEnabled(true);
-                                            this.buttons.attack.toolbarRefreshStats.setEnabled(true);
-                                        }
-                                    } else {
-                                        //console.log("Target Out of range");
-                                    }
+                                if (!this.getAllUnitsDeactivated() && ownCity.GetOffenseConditionInPercent() > 0) {
+                                    ClientLib.API.Battleground.GetInstance().SimulateBattle();
+                                    this.buttons.attack.refreshStats.setEnabled(false);
+                                    this.buttons.attack.toolbarRefreshStats.setEnabled(false);
+                                    this.buttons.attack.simulate.setEnabled(false);
+                                    this.labels.countDown.setWidth(110);
+                                    this.count = 10;
+                                    this.statsOnly = false;
                                 }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        skipSimulation: function () {
-                            try {
-                                while (this._VisMain.get_Battleground().get_Simulation().DoStep(false)) {}
+                            } else {
+                                this.enterSimulationView();
+                                this._VisMain.get_Battleground().RestartReplay();
                                 this._VisMain.get_Battleground().set_ReplaySpeed(1);
-                            } catch (e) {
-                                console.log(e);
                             }
-                        },
-                        startSimulation: function () {
-                            try {
-                                if (PerforceChangelist >= 448942) {
-                                    var simTimeLimit = 3000;
-                                } else {
-                                    var simTimeLimit = 10000;
-                                }
-                                if (Date.now() - this.lastSimulation > simTimeLimit) {
-                                    var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
-                                    if (!this.getAllUnitsDeactivated() && ownCity.GetOffenseConditionInPercent() > 0) {
-                                        ClientLib.API.Battleground.GetInstance().SimulateBattle();
-                                        this.buttons.attack.refreshStats.setEnabled(false);
-                                        this.buttons.attack.toolbarRefreshStats.setEnabled(false);
-                                        this.buttons.attack.simulate.setEnabled(false);
-                                        this.labels.countDown.setWidth(110);
-                                        this.count = 10;
-                                        this.statsOnly = false;
-                                    }
-                                } else {
-                                    this.enterSimulationView();
-                                    this._VisMain.get_Battleground().RestartReplay();
-                                    this._VisMain.get_Battleground().set_ReplaySpeed(1);
-                                }
-                            } catch (e) {
-                                console.log(e);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    OnSimulateCombatReportEvent: function (data) {
+                        // console.log(data);
+                        this.timerEnd("OnSimulateCombatReportEvent");
+                        try {
+                            // Resource Summary
+                            this.stats.resourcesummary.research = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.ResearchPoints);
+                            this.stats.resourcesummary.credits = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.Gold);
+                            this.stats.resourcesummary.crystal = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.Crystal);
+                            this.stats.resourcesummary.tiberium = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.Tiberium);
+                            this.labels.resourcesummary.research.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.research));
+                            this.labels.resourcesummary.credits.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.credits));
+                            this.labels.resourcesummary.crystal.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.crystal));
+                            this.labels.resourcesummary.tiberium.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.tiberium));
+                        } catch (e) {
+                            console.log('OnSimulateCombatReportEvent()', e);
+                        }
+                    },
+                    onSimulateBattleFinishedEvent: function (data) {
+                        //console.log("data:");
+                        //console.log(data);
+                        this.timerEnd("onSimulateBattleFinishedEvent");
+                        try {
+                            if (!this.statsOnly) {
+                                this.enterSimulationView();
+                                setTimeout(function () {
+                                    ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
+                                }, 1);
                             }
-                        },
-                        OnSimulateCombatReportEvent: function (data) {
-                            // console.log(data);
-                            this.timerEnd("OnSimulateCombatReportEvent");
-                            try {
-                                // Resource Summary
-                                this.stats.resourcesummary.research = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.ResearchPoints);
-                                this.stats.resourcesummary.credits = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.Gold);
-                                this.stats.resourcesummary.crystal = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.Crystal);
-                                this.stats.resourcesummary.tiberium = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.Tiberium);
-                                this.labels.resourcesummary.research.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.research));
-                                this.labels.resourcesummary.credits.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.credits));
-                                this.labels.resourcesummary.crystal.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.crystal));
-                                this.labels.resourcesummary.tiberium.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.tiberium));
-                            } catch (e) {
-                                console.log('OnSimulateCombatReportEvent()', e);
+                            var total_hp = 0;
+                            var end_hp = 0;
+                            var e_total_hp = 0;
+                            var e_end_hp = 0;
+                            var eb_total_hp = 0;
+                            var eb_end_hp = 0;
+                            var eu_total_hp = 0;
+                            var eu_end_hp = 0;
+                            var i_end_hp = 0;
+                            var v_end_hp = 0;
+                            var a_end_hp = 0;
+                            var v_total_hp = 0;
+                            var a_total_hp = 0;
+                            var i_total_hp = 0;
+                            var costInf = 0;
+                            var costAir = 0;
+                            var costVeh = 0;
+                            this.stats.damage.structures.defense = 0;
+                            this.stats.damage.structures.construction = 0;
+                            this.stats.damage.structures.command = 0;
+                            this.stats.supportLevel = 0;
+                            this.stats.damage.structures.support = 0;
+                            this.stats.repair.infantry = 0;
+                            this.stats.repair.vehicle = 0;
+                            this.stats.repair.aircraft = 0;
+                            this.lastSimulation = Date.now();
+                            if (PerforceChangelist >= 448942) {
+                                var countDownInterval = 300;
+                            } else {
+                                var countDownInterval = 1000;
                             }
-                        },
-                        onSimulateBattleFinishedEvent: function (data) {
-                            //console.log("data:");
-                            //console.log(data);
-                            this.timerEnd("onSimulateBattleFinishedEvent");
-                            try {
-                                if (!this.statsOnly) {
-                                    this.enterSimulationView();
-                                    setTimeout(function () {
-                                        ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
-                                    }, 1);
-                                }
-                                var total_hp = 0;
-                                var end_hp = 0;
-                                var e_total_hp = 0;
-                                var e_end_hp = 0;
-                                var eb_total_hp = 0;
-                                var eb_end_hp = 0;
-                                var eu_total_hp = 0;
-                                var eu_end_hp = 0;
-                                var i_end_hp = 0;
-                                var v_end_hp = 0;
-                                var a_end_hp = 0;
-                                var v_total_hp = 0;
-                                var a_total_hp = 0;
-                                var i_total_hp = 0;
-                                var costInf = 0;
-                                var costAir = 0;
-                                var costVeh = 0;
-                                this.stats.damage.structures.defense = 0;
-                                this.stats.damage.structures.construction = 0;
-                                this.stats.damage.structures.command = 0;
-                                this.stats.supportLevel = 0;
-                                this.stats.damage.structures.support = 0;
-                                this.stats.repair.infantry = 0;
-                                this.stats.repair.vehicle = 0;
-                                this.stats.repair.aircraft = 0;
-                                this.lastSimulation = Date.now();
-                                if (PerforceChangelist >= 448942) {
-                                    var countDownInterval = 300;
-                                } else {
-                                    var countDownInterval = 1000;
-                                }
-                                if (this.count == 10) this.counter = setInterval(this.countDownToNextSimulation, countDownInterval);
-                                for (var i = 0; i < data.length; i++) {
-                                    var unitData = data[i].Value;
-                                    var unitMDBID = unitData.t;
-                                    var unit = ClientLib.Res.ResMain.GetInstance().GetUnit_Obj(unitMDBID);
-                                    var placementType = unit.pt;
-                                    var movementType = unit.mt;
-                                    var unitLevel = unitData.l;
-                                    var unitStartHealth = unitData.sh;
-                                    var unitEndHealth = unitData.h;
-                                    var unitMaxHealth = ClientLib.API.Util.GetUnitMaxHealthByLevel(unitLevel, unit, false);
-                                    switch (placementType) {
+                            if (this.count == 10) this.counter = setInterval(this.countDownToNextSimulation, countDownInterval);
+                            for (var i = 0; i < data.length; i++) {
+                                var unitData = data[i].Value;
+                                var unitMDBID = unitData.t;
+                                var unit = ClientLib.Res.ResMain.GetInstance().GetUnit_Obj(unitMDBID);
+                                var placementType = unit.pt;
+                                var movementType = unit.mt;
+                                var unitLevel = unitData.l;
+                                var unitStartHealth = unitData.sh;
+                                var unitEndHealth = unitData.h;
+                                var unitMaxHealth = ClientLib.API.Util.GetUnitMaxHealthByLevel(unitLevel, unit, false);
+                                switch (placementType) {
                                     case ClientLib.Base.EPlacementType.Defense:
                                         if (this.view.playerCity) {
                                             var defenseBonus = this.view.playerCityDefenseBonus;
@@ -3078,23 +3071,23 @@
                                         total_hp += unitMaxHealth;
                                         end_hp += unitEndHealth;
                                         switch (movementType) {
-                                        case ClientLib.Base.EUnitMovementType.Feet:
-                                            i_total_hp += unitMaxHealth;
-                                            i_end_hp += unitEndHealth;
-                                            costInf += this.getRepairCost(unitStartHealth, unitEndHealth, unitMaxHealth, unitLevel, unitMDBID);
-                                            break;
-                                        case ClientLib.Base.EUnitMovementType.Wheel:
-                                        case ClientLib.Base.EUnitMovementType.Track:
-                                            v_total_hp += unitMaxHealth;
-                                            v_end_hp += unitEndHealth;
-                                            costVeh += this.getRepairCost(unitStartHealth, unitEndHealth, unitMaxHealth, unitLevel, unitMDBID);
-                                            break;
-                                        case ClientLib.Base.EUnitMovementType.Air:
-                                        case ClientLib.Base.EUnitMovementType.Air2:
-                                            a_total_hp += unitMaxHealth;
-                                            a_end_hp += unitEndHealth;
-                                            costAir += this.getRepairCost(unitStartHealth, unitEndHealth, unitMaxHealth, unitLevel, unitMDBID);
-                                            break;
+                                            case ClientLib.Base.EUnitMovementType.Feet:
+                                                i_total_hp += unitMaxHealth;
+                                                i_end_hp += unitEndHealth;
+                                                costInf += this.getRepairCost(unitStartHealth, unitEndHealth, unitMaxHealth, unitLevel, unitMDBID);
+                                                break;
+                                            case ClientLib.Base.EUnitMovementType.Wheel:
+                                            case ClientLib.Base.EUnitMovementType.Track:
+                                                v_total_hp += unitMaxHealth;
+                                                v_end_hp += unitEndHealth;
+                                                costVeh += this.getRepairCost(unitStartHealth, unitEndHealth, unitMaxHealth, unitLevel, unitMDBID);
+                                                break;
+                                            case ClientLib.Base.EUnitMovementType.Air:
+                                            case ClientLib.Base.EUnitMovementType.Air2:
+                                                a_total_hp += unitMaxHealth;
+                                                a_end_hp += unitEndHealth;
+                                                costAir += this.getRepairCost(unitStartHealth, unitEndHealth, unitMaxHealth, unitLevel, unitMDBID);
+                                                break;
                                         }
                                         break;
                                     case ClientLib.Base.EPlacementType.Structure:
@@ -3108,12 +3101,12 @@
                                         e_total_hp += unitMaxHealth;
                                         e_end_hp += unitEndHealth;
                                         break;
-                                    }
-                                    if (unitMDBID >= 200 && unitMDBID <= 205) {
-                                        this.stats.supportLevel = unitLevel;
-                                        this.stats.damage.structures.support = (unitEndHealth / 16 / unitMaxHealth) * 100;
-                                    } else {
-                                        switch (unitMDBID) {
+                                }
+                                if (unitMDBID >= 200 && unitMDBID <= 205) {
+                                    this.stats.supportLevel = unitLevel;
+                                    this.stats.damage.structures.support = (unitEndHealth / 16 / unitMaxHealth) * 100;
+                                } else {
+                                    switch (unitMDBID) {
                                         case 131:
                                             // GDI DF
                                         case 158:
@@ -3138,248 +3131,269 @@
                                             // NOD CC
                                             this.stats.damage.structures.command = (unitEndHealth / 16 / unitMaxHealth) * 100;
                                             break;
-                                        }
                                     }
                                 }
-                                // Calculate Percentages
-                                this.stats.health.infantry = i_total_hp ? (i_end_hp / 16 / i_total_hp) * 100 : 100;
-                                this.stats.health.vehicle = v_total_hp ? (v_end_hp / 16 / v_total_hp) * 100 : 100;
-                                this.stats.health.aircraft = a_total_hp ? (a_end_hp / 16 / a_total_hp) * 100 : 100;
-                                this.stats.damage.units.overall = eu_total_hp ? (eu_end_hp / 16 / eu_total_hp) * 100 : 0;
-                                this.stats.damage.structures.overall = (eb_end_hp / 16 / eb_total_hp) * 100;
-                                this.stats.damage.overall = (e_end_hp / 16 / e_total_hp) * 100;
-                                this.stats.health.overall = end_hp ? (end_hp / 16 / total_hp) * 100 : 0;
-                                // Calculate the repair time
-                                var _this = this;
-                                this.stats.repair.infantry = _this._MainData.get_Time().GetTimeSpan(costInf);
-                                this.stats.repair.aircraft = _this._MainData.get_Time().GetTimeSpan(costAir);
-                                this.stats.repair.vehicle = _this._MainData.get_Time().GetTimeSpan(costVeh);
-                                this.stats.repair.overall = _this._MainData.get_Time().GetTimeSpan(Math.max(costInf, costAir, costVeh));
-                                this.getAvailableRepairAndCP();
-                                this.updateStatsWindow();
-                                this.buttons.attack.simulate.setEnabled(true);
-                            } catch (e) {
-                                console.log('onSimulateBattleFinishedEvent()\n check getRepairCost()', e);
                             }
-                        },
-                        enterSimulationView: function () {
-                            try {
-                                var city = this._MainData.get_Cities().get_CurrentCity();
-                                var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
-                                ownCity.get_CityArmyFormationsManager().set_CurrentTargetBaseId(city.get_Id());
-                                localStorage.ta_sim_last_city = city.get_Id();
-                                this._Application.getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay, city.get_Id(), 0, 0);
-                            } catch (e) {
-                                console.log(e);
+                            // Calculate Percentages
+                            this.stats.health.infantry = i_total_hp ? (i_end_hp / 16 / i_total_hp) * 100 : 100;
+                            this.stats.health.vehicle = v_total_hp ? (v_end_hp / 16 / v_total_hp) * 100 : 100;
+                            this.stats.health.aircraft = a_total_hp ? (a_end_hp / 16 / a_total_hp) * 100 : 100;
+                            this.stats.damage.units.overall = eu_total_hp ? (eu_end_hp / 16 / eu_total_hp) * 100 : 0;
+                            this.stats.damage.structures.overall = (eb_end_hp / 16 / eb_total_hp) * 100;
+                            this.stats.damage.overall = (e_end_hp / 16 / e_total_hp) * 100;
+                            this.stats.health.overall = end_hp ? (end_hp / 16 / total_hp) * 100 : 0;
+                            // Calculate the repair time
+                            var _this = this;
+                            this.stats.repair.infantry = _this._MainData.get_Time().GetTimeSpan(costInf);
+                            this.stats.repair.aircraft = _this._MainData.get_Time().GetTimeSpan(costAir);
+                            this.stats.repair.vehicle = _this._MainData.get_Time().GetTimeSpan(costVeh);
+                            this.stats.repair.overall = _this._MainData.get_Time().GetTimeSpan(Math.max(costInf, costAir, costVeh));
+                            this.getAvailableRepairAndCP();
+                            this.updateStatsWindow();
+                            this.buttons.attack.simulate.setEnabled(true);
+                        } catch (e) {
+                            console.log('onSimulateBattleFinishedEvent()\n check getRepairCost()', e);
+                        }
+                    },
+                    enterSimulationView: function () {
+                        try {
+                            var city = this._MainData.get_Cities().get_CurrentCity();
+                            var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
+                            ownCity.get_CityArmyFormationsManager().set_CurrentTargetBaseId(city.get_Id());
+                            localStorage.ta_sim_last_city = city.get_Id();
+                            this._Application.getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay, city.get_Id(), 0, 0);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    //Undo / Redo
+                    saveUndoState: function () {
+                        var formation = this.getFormation();
+                        var ts = this.getTimestamp();
+                        var stats = this.badClone(this.stats);
+                        this.undoCache[0] = {
+                            f: formation,
+                            t: ts,
+                            s: stats
+                        };
+                        console.log(this.undoCache[0]);
+                        /*
+                        						f.d = {
+                        							eb : 0,
+                        							de : 0,
+                        							bu : 0,
+                        							cy : 0,
+                        							df : 0,
+                        							cc : 0,
+                        							sl : 0,
+                        							ovr : this.stats.health.overall,
+                        							inf : this.stats.health.infantry,
+                        							veh : this.stats.health.vehicle,
+                        							air : this.stats.health.aircraft,
+                        							ou : 0,
+                        							bt : 0
+                        						};
+                        						*/
+                    },
+                    wipeUndoStateAfter: function (timestamp) {
+                        var i;
+                        for (i = 0; i < this.undoCache.length; i++) {
+                            if (this.undoCache[i].t > timestamp) {
+                                break;
                             }
-                        },
-                        //Undo / Redo
-                        saveUndoState: function () {
-                            var formation = this.getFormation();
-                            var ts = this.getTimestamp();
-                            var stats = this.badClone(this.stats);
-                            this.undoCache[0] = {
-                                f: formation,
-                                t: ts,
-                                s: stats
+                        }
+                        this.undoCache = this.undoCache.slice(0, i);
+                    },
+                    //Layouts
+                    updateLayoutsList: function () {
+                        try {
+                            this.layouts.list.removeAll();
+                            // Load the saved layouts for this city
+                            this.loadCityLayouts();
+                            if (this.layouts.current) {
+                                for (var i in this.layouts.current) {
+                                    var layout = this.layouts.current[i];
+                                    var item = new qx.ui.form.ListItem(layout.label, null, layout.id);
+                                    //item.addListener("cellDblclick", function (){},this)
+                                    this.layouts.list.add(item);
+                                }
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    deleteCityLayout: function () {
+                        try {
+                            var list = this.layouts.list.getSelection();
+                            if (list != null && list.length > 0) {
+                                var lid = list[0].getModel();
+                                if (this.layouts.current && typeof this.layouts.current[lid] !== 'undefined') {
+                                    delete this.layouts.current[lid];
+                                    this.saveLayouts();
+                                    this.updateLayoutsList();
+                                }
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    loadCityLayout: function (lid) {
+                        try {
+                            var list = this.layouts.list.getSelection();
+                            if (list != null && list.length > 0) {
+                                var layout = typeof lid === 'object' ? list[0].getModel() : lid;
+                                if (this.layouts.current && typeof this.layouts.current[layout] !== 'undefined') {
+                                    //console.log("layout: ");
+                                    //console.log(layout);
+                                    //console.log(this.layouts.current[layout].layout);
+                                    this.loadFormation(this.layouts.current[layout].layout);
+                                }
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    saveCityLayout: function () {
+                        var formation = [],
+                            lid, title;
+                        try {
+                            formation = this.getFormation();
+                            lid = new Date().getTime().toString();
+                            if (this.stats.damage.structures.construction !== null) {
+                                title = this.layouts.label.getValue() + " (" + this.stats.damage.structures.construction.toFixed(0).toString() + ":" + this.stats.damage.structures.defense.toFixed(0).toString() + ":" + this.stats.damage.units.overall.toFixed(0).toString() + ")";
+                            } else {
+                                title = this.layouts.label.getValue() + " (??:??:??)";
+                            }
+                            this.layouts.current[lid] = {
+                                id: lid,
+                                label: title,
+                                layout: formation
                             };
-                            console.log(this.undoCache[0]);
-/*
-						f.d = {
-							eb : 0,
-							de : 0,
-							bu : 0,
-							cy : 0,
-							df : 0,
-							cc : 0,
-							sl : 0,
-							ovr : this.stats.health.overall,
-							inf : this.stats.health.infantry,
-							veh : this.stats.health.vehicle,
-							air : this.stats.health.aircraft,
-							ou : 0,
-							bt : 0
-						};
-						*/
-                        },
-                        wipeUndoStateAfter: function (timestamp) {
-                            var i;
-                            for (i = 0; i < this.undoCache.length; i++) {
-                                if (this.undoCache[i].t > timestamp) {
-                                    break;
-                                }
-                            }
-                            this.undoCache = this.undoCache.slice(0, i);
-                        },
-                        //Layouts
-                        updateLayoutsList: function () {
-                            try {
-                                this.layouts.list.removeAll();
-                                // Load the saved layouts for this city
-                                this.loadCityLayouts();
-                                if (this.layouts.current) {
-                                    for (var i in this.layouts.current) {
-                                        var layout = this.layouts.current[i];
-                                        var item = new qx.ui.form.ListItem(layout.label, null, layout.id);
-                                        //item.addListener("cellDblclick", function (){},this)
-                                        this.layouts.list.add(item);
+                            this.saveLayouts();
+                            this.updateLayoutsList();
+                            this.layouts.label.setValue("");
+                        } catch (e) {
+                            console.log(e);
+                        }
+                        return lid; // return value at the end
+                    },
+                    loadCityLayouts: function () {
+                        try {
+                            if (this._MainData.get_Cities().get_CurrentCity() == null) return;
+                            var target_city = this._MainData.get_Cities().get_CurrentCity().get_Id();
+                            var base_city = this._MainData.get_Cities().get_CurrentOwnCity().get_Id();
+                            if (!this.layouts.all.hasOwnProperty(target_city)) this.layouts.all[target_city] = {};
+                            if (!this.layouts.all[target_city].hasOwnProperty(base_city)) this.layouts.all[target_city][base_city] = {};
+                            this.layouts.current = this.layouts.all[target_city][base_city];
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    loadLayouts: function () {
+                        try {
+                            var temp = localStorage.ta_sim_layouts;
+                            if (temp) this.layouts.all = JSON.parse(temp);
+                            else this.layouts.all = {};
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    saveLayouts: function () {
+                        try {
+                            localStorage.ta_sim_layouts = JSON.stringify(this.layouts.all);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    //Formations
+                    loadFormation: function (formation) {
+                        try {
+                            this.layouts.restore = true;
+                            //console.log("this.view = ");
+                            //console.log(this.view);
+                            for (var i = 0; i < formation.length; i++) {
+                                var unit = formation[i];
+                                if (i == formation.length - 1) this.layouts.restore = false;
+                                for (var j = 0; j < this.view.lastUnitList.length; j++) {
+                                    if (this.view.lastUnitList[j].get_Id() === unit.id) {
+                                        this.view.lastUnitList[j].MoveBattleUnit(unit.x, unit.y);
+                                        if (unit.e === undefined) this.view.lastUnitList[j].set_Enabled(true);
+                                        else this.view.lastUnitList[j].set_Enabled(unit.e);
                                     }
                                 }
-                            } catch (e) {
-                                console.log(e);
                             }
-                        },
-                        deleteCityLayout: function () {
-                            try {
-                                var list = this.layouts.list.getSelection();
-                                if (list != null && list.length > 0) {
-                                    var lid = list[0].getModel();
-                                    if (this.layouts.current && typeof this.layouts.current[lid] !== 'undefined') {
-                                        delete this.layouts.current[lid];
-                                        this.saveLayouts();
-                                        this.updateLayoutsList();
-                                    }
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        loadCityLayout: function (lid) {
-                            try {
-                                var list = this.layouts.list.getSelection();
-                                if (list != null && list.length > 0) {
-                                    var layout = typeof lid === 'object' ? list[0].getModel() : lid;
-                                    if (this.layouts.current && typeof this.layouts.current[layout] !== 'undefined') {
-                                        //console.log("layout: ");
-                                        //console.log(layout);
-                                        //console.log(this.layouts.current[layout].layout);
-                                        this.loadFormation(this.layouts.current[layout].layout);
-                                    }
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        saveCityLayout: function () {
-                            var formation = [],
-                            	lid, title;
-                            try {
-                                formation = this.getFormation();
-                                lid = new Date().getTime().toString();
-                                if (this.stats.damage.structures.construction !== null) {
-                                    title = this.layouts.label.getValue() + " (" + this.stats.damage.structures.construction.toFixed(0).toString() + ":" + this.stats.damage.structures.defense.toFixed(0).toString() + ":" + this.stats.damage.units.overall.toFixed(0).toString() + ")";
-                                } else {
-                                    title = this.layouts.label.getValue() + " (??:??:??)";
-                                }
-                                this.layouts.current[lid] = {
-                                    id: lid,
-                                    label: title,
-                                    layout: formation
-                                };
-                                this.saveLayouts();
-                                this.updateLayoutsList();
-                                this.layouts.label.setValue("");
-                            } catch (e) {
-                                console.log(e);
-                            }
-                            return lid; // return value at the end
-                        },
-                        loadCityLayouts: function () {
-                            try {
-                                if (this._MainData.get_Cities().get_CurrentCity() == null) return;
-                                var target_city = this._MainData.get_Cities().get_CurrentCity().get_Id();
-                                var base_city = this._MainData.get_Cities().get_CurrentOwnCity().get_Id();
-                                if (!this.layouts.all.hasOwnProperty(target_city)) this.layouts.all[target_city] = {};
-                                if (!this.layouts.all[target_city].hasOwnProperty(base_city)) this.layouts.all[target_city][base_city] = {};
-                                this.layouts.current = this.layouts.all[target_city][base_city];
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        loadLayouts: function () {
-                            try {
-                                var temp = localStorage.ta_sim_layouts;
-                                if (temp) this.layouts.all = JSON.parse(temp);
-                                else this.layouts.all = {};
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        saveLayouts: function () {
-                            try {
-                                localStorage.ta_sim_layouts = JSON.stringify(this.layouts.all);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        //Formations
-                        loadFormation: function (formation) {
-                            try {
-                                this.layouts.restore = true;
-                                //console.log("this.view = ");
-                                //console.log(this.view);
-                                for (var i = 0; i < formation.length; i++) {
-                                    var unit = formation[i];
-                                    if (i == formation.length - 1) this.layouts.restore = false;
-                                    for (var j = 0; j < this.view.lastUnitList.length; j++) {
-                                        if (this.view.lastUnitList[j].get_Id() === unit.id) {
-                                            this.view.lastUnitList[j].MoveBattleUnit(unit.x, unit.y);
-                                            if (unit.e === undefined) this.view.lastUnitList[j].set_Enabled(true);
-                                            else this.view.lastUnitList[j].set_Enabled(unit.e);
-                                        }
-                                    }
-                                }
-                                //this.view.lastUnits.RefreshData(); // RefreshData() has been obfuscated ?
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        getFormation: function () {
-                            var formation = [];
-                            try {
-                                for (var i = 0; i < this.view.lastUnitList.length; i++) {
-                                    var unit = this.view.lastUnitList[i];
-                                    var armyUnit = {};
-                                    armyUnit.x = unit.get_CoordX();
-                                    armyUnit.y = unit.get_CoordY();
-                                    armyUnit.id = unit.get_Id();
-                                    armyUnit.e = unit.get_Enabled();
-                                    formation.push(armyUnit);
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                            return formation; // return value at the end
-                        },
-                        shiftFormation: function (direction) { //left right up down
-                            var Army = [],
-                            	v_shift = 0,
-                            	h_shift = 0;
-                            if (direction === "u") v_shift = -1;
-                            if (direction === "d") v_shift = 1;
-                            if (direction === "l") h_shift = -1;
-                            if (direction === "r") h_shift = 1;
-                            //read army, consider use getFormation(?)
+                            //this.view.lastUnits.RefreshData(); // RefreshData() has been obfuscated ?
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    getFormation: function () {
+                        var formation = [];
+                        try {
                             for (var i = 0; i < this.view.lastUnitList.length; i++) {
                                 var unit = this.view.lastUnitList[i];
                                 var armyUnit = {};
-                                var x = unit.get_CoordX() + h_shift;
-                                switch (x) {
+                                armyUnit.x = unit.get_CoordX();
+                                armyUnit.y = unit.get_CoordY();
+                                armyUnit.id = unit.get_Id();
+                                armyUnit.e = unit.get_Enabled();
+                                formation.push(armyUnit);
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                        return formation; // return value at the end
+                    },
+                    shiftFormation: function (direction) { //left right up down
+                        var Army = [],
+                            v_shift = 0,
+                            h_shift = 0;
+                        if (direction === "u") v_shift = -1;
+                        if (direction === "d") v_shift = 1;
+                        if (direction === "l") h_shift = -1;
+                        if (direction === "r") h_shift = 1;
+                        //read army, consider use getFormation(?)
+                        for (var i = 0; i < this.view.lastUnitList.length; i++) {
+                            var unit = this.view.lastUnitList[i];
+                            var armyUnit = {};
+                            var x = unit.get_CoordX() + h_shift;
+                            switch (x) {
                                 case 9:
                                     x = 0;
                                     break;
                                 case -1:
                                     x = 8;
                                     break;
-                                }
-                                var y = unit.get_CoordY() + v_shift;
-                                switch (y) {
+                            }
+                            var y = unit.get_CoordY() + v_shift;
+                            switch (y) {
                                 case 4:
                                     y = 0;
                                     break;
                                 case -1:
                                     y = 3;
                                     break;
+                            }
+                            armyUnit.x = x;
+                            armyUnit.y = y;
+                            armyUnit.id = unit.get_Id();
+                            armyUnit.e = unit.get_Enabled();
+                            Army.push(armyUnit);
+                        }
+                        this.loadFormation(Army);
+                    },
+                    flipFormation: function (axis) {
+                        var Army = [];
+                        try {
+                            for (var i = 0; i < this.view.lastUnitList.length; i++) {
+                                var unit = this.view.lastUnitList[i];
+                                var armyUnit = {};
+                                var x = unit.get_CoordX();
+                                var y = unit.get_CoordY();
+                                if (axis === 'horizontal') {
+                                    x = Math.abs(x - 8);
+                                } else if (axis === 'vertical') {
+                                    y = Math.abs(y - 3);
                                 }
                                 armyUnit.x = x;
                                 armyUnit.y = y;
@@ -3388,38 +3402,17 @@
                                 Army.push(armyUnit);
                             }
                             this.loadFormation(Army);
-                        },
-                        flipFormation: function (axis) {
-                            var Army = [];
-                            try {
-                                for (var i = 0; i < this.view.lastUnitList.length; i++) {
-                                    var unit = this.view.lastUnitList[i];
-                                    var armyUnit = {};
-                                    var x = unit.get_CoordX();
-                                    var y = unit.get_CoordY();
-                                    if (axis === 'horizontal') {
-                                        x = Math.abs(x - 8);
-                                    } else if (axis === 'vertical') {
-                                        y = Math.abs(y - 3);
-                                    }
-                                    armyUnit.x = x;
-                                    armyUnit.y = y;
-                                    armyUnit.id = unit.get_Id();
-                                    armyUnit.e = unit.get_Enabled();
-                                    Army.push(armyUnit);
-                                }
-                                this.loadFormation(Army);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        activateUnits: function (type, activate) {
-                            var Army = [];
-                            try {
-                                for (var i = 0; i < this.view.lastUnitList.length; i++) {
-                                    var unit = this.view.lastUnitList[i];
-                                    var armyUnit = {};
-                                    switch (type) {
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    activateUnits: function (type, activate) {
+                        var Army = [];
+                        try {
+                            for (var i = 0; i < this.view.lastUnitList.length; i++) {
+                                var unit = this.view.lastUnitList[i];
+                                var armyUnit = {};
+                                switch (type) {
                                     case 'air':
                                         if (unit.get_UnitGameData_Obj().mt === ClientLib.Base.EUnitMovementType.Air || unit.get_UnitGameData_Obj().mt === ClientLib.Base.EUnitMovementType.Air2) unit.set_Enabled(activate);
                                         break;
@@ -3429,113 +3422,113 @@
                                     case 'vehicles':
                                         if (unit.get_UnitGameData_Obj().mt === ClientLib.Base.EUnitMovementType.Wheel || unit.get_UnitGameData_Obj().mt === ClientLib.Base.EUnitMovementType.Track) unit.set_Enabled(activate);
                                         break;
+                                }
+                                armyUnit.x = unit.get_CoordX();
+                                armyUnit.y = unit.get_CoordY();
+                                armyUnit.e = unit.get_Enabled();
+                                armyUnit.id = unit.get_Id();
+                                Army.push(armyUnit);
+                            }
+                            this.loadFormation(Army);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    resetFormation: function () {
+                        var Army = [];
+                        try {
+                            for (var i = 0; i < this.view.lastUnitList.length; i++) {
+                                var unit = this.view.lastUnitList[i];
+                                var armyUnit = {};
+                                armyUnit.x = unit.GetCityUnit().get_CoordX();
+                                armyUnit.y = unit.GetCityUnit().get_CoordY();
+                                armyUnit.id = unit.get_Id();
+                                Army.push(armyUnit);
+                            }
+                            this.loadFormation(Army);
+                            if (this.buttons.attack.activateInfantry.getValue(true)) this.buttons.attack.activateInfantry.setValue(false);
+                            if (this.buttons.attack.activateVehicles.getValue(true)) this.buttons.attack.activateVehicles.setValue(false);
+                            if (this.buttons.attack.activateAir.getValue(true)) this.buttons.attack.activateAir.setValue(false);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    //Audio
+                    playSound: function (str, _this) {
+                        var temp = _this.audio[str].cloneNode(true);
+                        temp.volume = _this.getAudioSettings().ui / 100;
+                        temp.play();
+                    },
+                    getAudioSettings: function () {
+                        return JSON.parse(localStorage.getItem("CNC_Audio"));
+                    },
+                    //Repair
+                    repairUnit: function () {
+                        try {
+                            ClientLib.Net.CommunicationManager.GetInstance().SendCommand("Repair", {
+                                cityid: this.ownCityId,
+                                entityId: this.unitId,
+                                mode: 4
+                            }, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, window.TACS.getInstance().repairResult), this.buttonId, true);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    repairResult: function (buttonId, result) {
+                        // result erroneously true when not enough RT, button deletes/sound plays but unit does not repair.
+                        try {
+                            if (result) {
+                                var _this = window.TACS.getInstance();
+                                if (_this.saveObj.audio.playRepairSound) {
+                                    if (_this.repairButtons[buttonId].unitType == "Inf") {
+                                        _this.playSound("soundRepairReload", _this);
+                                    } else {
+                                        _this.playSound("soundRepairImpact", _this);
                                     }
-                                    armyUnit.x = unit.get_CoordX();
-                                    armyUnit.y = unit.get_CoordY();
-                                    armyUnit.e = unit.get_Enabled();
-                                    armyUnit.id = unit.get_Id();
-                                    Army.push(armyUnit);
                                 }
-                                this.loadFormation(Army);
-                            } catch (e) {
-                                console.log(e);
+                                _this._armyBar.remove(_this.repairButtons[buttonId]);
+                                delete _this.repairButtons[buttonId];
                             }
-                        },
-                        resetFormation: function () {
-                            var Army = [];
-                            try {
-                                for (var i = 0; i < this.view.lastUnitList.length; i++) {
-                                    var unit = this.view.lastUnitList[i];
-                                    var armyUnit = {};
-                                    armyUnit.x = unit.GetCityUnit().get_CoordX();
-                                    armyUnit.y = unit.GetCityUnit().get_CoordY();
-                                    armyUnit.id = unit.get_Id();
-                                    Army.push(armyUnit);
-                                }
-                                this.loadFormation(Army);
-                                if (this.buttons.attack.activateInfantry.getValue(true)) this.buttons.attack.activateInfantry.setValue(false);
-                                if (this.buttons.attack.activateVehicles.getValue(true)) this.buttons.attack.activateVehicles.setValue(false);
-                                if (this.buttons.attack.activateAir.getValue(true)) this.buttons.attack.activateAir.setValue(false);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        //Audio
-                        playSound: function (str, _this) {
-                            var temp = _this.audio[str].cloneNode(true);
-                            temp.volume = _this.getAudioSettings().ui / 100;
-                            temp.play();
-                        },
-                        getAudioSettings: function () {
-                            return JSON.parse(localStorage.getItem("CNC_Audio"));
-                        },
-                        //Repair
-                        repairUnit: function () {
-                            try {
-                                ClientLib.Net.CommunicationManager.GetInstance().SendCommand("Repair", {
-                                    cityid: this.ownCityId,
-                                    entityId: this.unitId,
-                                    mode: 4
-                                }, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, window.TACS.getInstance().repairResult), this.buttonId, true);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        repairResult: function (buttonId, result) {
-                            // result erroneously true when not enough RT, button deletes/sound plays but unit does not repair.
-                            try {
-                                if (result) {
-                                    var _this = window.TACS.getInstance();
-                                    if (_this.saveObj.audio.playRepairSound) {
-                                        if (_this.repairButtons[buttonId].unitType == "Inf") {
-                                            _this.playSound("soundRepairReload", _this);
-                                        } else {
-                                            _this.playSound("soundRepairImpact", _this);
-                                        }
-                                    }
-                                    _this._armyBar.remove(_this.repairButtons[buttonId]);
-                                    delete _this.repairButtons[buttonId];
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        removeAllRepairButtons: function () {
-                            for (var i in this.repairButtons) {
-                                this._armyBar.remove(this.repairButtons[i]);
-                            }
-                            this.repairButtons = [];
-                        },
-                        setResizeTimer: function () {
-                            var _this = this;
-                            if (this.repairButtonsRedrawTimer) {
-                                clearTimeout(_this.repairButtonsRedrawTimer);
-                            }
-                            this.repairButtonsRedrawTimer = setTimeout(function () {
-                                _this.redrawRepairButtons(_this);
-                            }, 500);
-                        },
-                        redrawRepairButtons: function (that) {
-                            var _this = that || this;
-                            var base_city_id = _this._MainData.get_Cities().get_CurrentOwnCity().get_Id();
-                            if (_this.repairButtons.length > 0) {
-                                _this.removeAllRepairButtons();
-                            }
-                            var cbtSetup = _this._VisMain.get_CombatSetup();
-                            var zoomFactor = cbtSetup.get_ZoomFactor();
-                            var startX = Math.round(cbtSetup.get_MinXPosition() * zoomFactor * -1) + 10; //qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP).getChildren()[1].getBounds().left;
-                            var startY = 7;
-                            var gridWidth = Math.round(cbtSetup.get_GridWidth() * zoomFactor);
-                            var gridHeight = 38;
-                            for (var i = 0; i < _this.view.lastUnitList.length; i++) {
-                                var unit = _this.view.lastUnitList[i];
-                                if (unit.get_HitpointsPercent() < 1) {
-                                    var cityUnit = unit.GetCityUnit();
-                                    var unitRepairCharges = cityUnit.GetResourceCostForFullRepair().d;
-                                    var resourceCost, repairCharge, unitType;
-                                    for (var type in unitRepairCharges) {
-                                        type = parseInt(type);
-                                        switch (type) {
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    removeAllRepairButtons: function () {
+                        for (var i in this.repairButtons) {
+                            this._armyBar.remove(this.repairButtons[i]);
+                        }
+                        this.repairButtons = [];
+                    },
+                    setResizeTimer: function () {
+                        var _this = this;
+                        if (this.repairButtonsRedrawTimer) {
+                            clearTimeout(_this.repairButtonsRedrawTimer);
+                        }
+                        this.repairButtonsRedrawTimer = setTimeout(function () {
+                            _this.redrawRepairButtons(_this);
+                        }, 500);
+                    },
+                    redrawRepairButtons: function (that) {
+                        var _this = that || this;
+                        var base_city_id = _this._MainData.get_Cities().get_CurrentOwnCity().get_Id();
+                        if (_this.repairButtons.length > 0) {
+                            _this.removeAllRepairButtons();
+                        }
+                        var cbtSetup = _this._VisMain.get_CombatSetup();
+                        var zoomFactor = cbtSetup.get_ZoomFactor();
+                        var startX = Math.round(cbtSetup.get_MinXPosition() * zoomFactor * -1) + 10; //qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP).getChildren()[1].getBounds().left;
+                        var startY = 7;
+                        var gridWidth = Math.round(cbtSetup.get_GridWidth() * zoomFactor);
+                        var gridHeight = 38;
+                        for (var i = 0; i < _this.view.lastUnitList.length; i++) {
+                            var unit = _this.view.lastUnitList[i];
+                            if (unit.get_HitpointsPercent() < 1) {
+                                var cityUnit = unit.GetCityUnit();
+                                var unitRepairCharges = cityUnit.GetResourceCostForFullRepair().d;
+                                var resourceCost, repairCharge, unitType;
+                                for (var type in unitRepairCharges) {
+                                    type = parseInt(type);
+                                    switch (type) {
                                         case ClientLib.Base.EResourceType.Crystal:
                                             resourceCost = unitRepairCharges[type];
                                             break;
@@ -3551,239 +3544,239 @@
                                             repairCharge = unitRepairCharges[type];
                                             unitType = "Air";
                                             break;
-                                        }
                                     }
-                                    repairCharge = phe.cnc.Util.getTimespanString(_this._MainData.get_Time().GetTimeSpan(repairCharge));
-                                    resourceCost = _this.formatNumberWithCommas(resourceCost);
-                                    _this.repairButtons[i] = new qx.ui.form.Button("", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QERCx8kSr25tQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAABmJLR0QA/wD/AP+gvaeTAAAGVUlEQVQYGQXBeZCWdQEA4Of3e9/3O3aXD2EBAcFWQcyLQ3Qcwxs88koJxXQ0y7QcTRunsfJIM9HRmTxIKrzKP/IqybPySscZdQylVZTEVRLDDeQS2F2W3e97fz1PSCmBpYuuSXMXfhcAAAAAAAAAAAA8t+yPrrz6hgAhpWTJomvSmAmjvfDwYkM7NmorgmpOFsgCMRIBRQwgIIGglLRKBlsMNpMdQ0llxFgnnXuFotYw/9xLQrjrlmvS+PGjvPLoYmlgk5H1YGSFehFUY1CJCOSRPBADWRZlyAIlWmi26GuyY6i0dTDZ1Fcq62PM+9YVdrVqQk9PT7r1B8fJd220e0fU2RaMaYv23meioe19hrf1yXOqkWqklgdZJAtBNScfN47Jk2mMoH/AutWf6V7Zq3dHU++20q6i03VLX5HDYN9GezQyYzqC3Ttyp111hrf+vNL+h03VPrhB/0drFJG2IpIjD+SB/Q+ydm3p7mte9t7HyZ6juf+Zcwxs2CIZtLPZ9NmWTSB/4PpT1YugvcKIWrDH2Jr6lwMuvukd++K5dy/QMbiV/u1UI5VINTCiw66yw/xLnrILs9u59udfU5/YMLERfdEXjOgP2orggetPFaGWB/UiqBdRHNolTBvjriv2tRq/+vEzTJ/GyILROWNyxhV8ZYz3u3vtQobHnj/bAYfmQmTSgnkm7d7QVolqRQAR8kiRU2RUczbc/4RTF3Z56OZZlr641T9f28RhMxibMT5nj4zxNRu39oMW7lz0klXvtZzSda/7b3he18wutZw8AyLEEBQxquZBrcjUJd7pNue0CR5ZfJjvXL1c74ctDpzBpIK99mH9WHfdvgrAkr9tcfqlr1udOOP8Wfo/36DIgzwGEKESKSK1SFukvYIc73WbfXKn39w6y0nffMGX72HCfprvdzhh1mM+BuRoYG8su2+OsZOj/t7NMmQByCHPgyJSL4L2epTVMjoCHRn/+8DRl8/0k8+3O+L4Z3R3n+1nlz9pDeDIPfndsgWqExqMrrGmx+DL3QiyLAohgBxCpCiCLI9qBSqBeqAj0shornHer2caLktzZz7ujt/PseaK1+13cJubX76QbDVbevhgkP/uBCknKYlADkUMijyq50GlktGWUYs0MnbL2W0v1tZM3HuUM84ZcNNlr/vlQ8dq7FYjW4/1pBIlMZAFURRDFGMpIYcsCypZ0F7NqAbqkVE1xlXZcwobGuZ1PeRTPPb4sVav/ML8s17Ribd2fp9aovYR1UAWiVEWW2IW5CEYRoQYqWRUMnS2cex05pxE15F6u0vHjX/Ip4DNm7bb/EUCm3FC21Ib3g+0H0BEEciDPCOPhABEqISglmeKSsa8mR695xNHhbsdEpY4atZTPgMcPyM64dJj/PS+49QAaxInHLTM209uYv+DiYE8qGYUkTwEECHGKM9w+DSvLfvcdTeu0osvATBvevTb7qvxodnfmOSGm6cD6Md5Z/7DR68NcMQhRLIsk8dMzAKIkATNEJg21R9uedOJB1e89NYCx88oANz21PlYhfX42FnXLjCzE4AWzj36aQNbOpgzQ8yDmAUhRhChFZJUYuVHHvz3lZa8c7Gu6ckP7/g6gJFj2mltZXCYZh/ede9bF6gB4EvM73qAPfYV26pSIIYEIqTEYBkMr/hE+usLGO/1J7f70bynwVfb0DGB/2zjsxaftvj0Q6OnRA///XQRAB8Ps+LZlUyZJEbKBEQYKpOhZmn7LlKrIm3bYNG3XzSUuHD+7p7dfCVbVrBuJ71DrBti3TBvvGH6iaM98uTJJqIT+9aZOXeqgbVf2NlMmgkIPT096cGrDjWlMzels9A1OjPulNnCtAOFkDHUy4oPWLeeBAjIAhAiR86ic38pRSkN2tndbdVT3Xo2DevZ2HTRHcvlMJSNsrl/u1pRGsbWJ97WXv2XaiBmpESJsgRiJA9kIZC1eHQ5liubpR1DpQ19pc+3JVv6GM5Hg3D3bTemqZMb3vzLEiPCNqPaokY9qudEZDkpkRIEECQhEGKQA4iaqbSzybaB0pb+0tZWw+FnXmZEY4KQUrL49l+kqZMbXv3TPYrmVrUiquTkAhFQAgAiARAAJYaa7BwqDWa7Oeasy4kNJy+8KISUElh656I097SFAAAAAAAAAAAA4O1Xn3PO964M8H8RODTRLDM3YgAAAABJRU5ErkJggg%3D%3D");
-                                    _this.repairButtons[i].set({
-                                        decorator: new qx.ui.decoration.Decorator().set({
-                                            backgroundColor: 'transparent'
-                                        }),
-                                        width: gridWidth,
-                                        height: gridHeight,
-                                        show: "icon",
-                                        center: false,
-                                        padding: 3,
-                                        appearance: "button-text-small",
-                                        cursor: "pointer",
-                                        toolTipText: "Crystal: " + resourceCost + " / Time: " + repairCharge + " / Type: " + unitType
-                                    });
-                                    _this.repairButtons[i].addListener("execute", _this.repairUnit, {
-                                        ownCityId: base_city_id,
-                                        unitId: unit.get_Id(),
-                                        buttonId: i,
-                                        frm: _this
-                                    });
-                                    _this.repairButtons[i].unitType = unitType;
-                                    //        allowGrowY: false
-                                    _this._armyBar.add(_this.repairButtons[i], {
-                                        left: startX + gridWidth * unit.get_CoordX(),
-                                        top: startY + gridHeight * unit.get_CoordY()
-                                    });
                                 }
+                                repairCharge = phe.cnc.Util.getTimespanString(_this._MainData.get_Time().GetTimeSpan(repairCharge));
+                                resourceCost = _this.formatNumberWithCommas(resourceCost);
+                                _this.repairButtons[i] = new qx.ui.form.Button("", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QERCx8kSr25tQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAABmJLR0QA/wD/AP+gvaeTAAAGVUlEQVQYGQXBeZCWdQEA4Of3e9/3O3aXD2EBAcFWQcyLQ3Qcwxs88koJxXQ0y7QcTRunsfJIM9HRmTxIKrzKP/IqybPySscZdQylVZTEVRLDDeQS2F2W3e97fz1PSCmBpYuuSXMXfhcAAAAAAAAAAAA8t+yPrrz6hgAhpWTJomvSmAmjvfDwYkM7NmorgmpOFsgCMRIBRQwgIIGglLRKBlsMNpMdQ0llxFgnnXuFotYw/9xLQrjrlmvS+PGjvPLoYmlgk5H1YGSFehFUY1CJCOSRPBADWRZlyAIlWmi26GuyY6i0dTDZ1Fcq62PM+9YVdrVqQk9PT7r1B8fJd220e0fU2RaMaYv23meioe19hrf1yXOqkWqklgdZJAtBNScfN47Jk2mMoH/AutWf6V7Zq3dHU++20q6i03VLX5HDYN9GezQyYzqC3Ttyp111hrf+vNL+h03VPrhB/0drFJG2IpIjD+SB/Q+ydm3p7mte9t7HyZ6juf+Zcwxs2CIZtLPZ9NmWTSB/4PpT1YugvcKIWrDH2Jr6lwMuvukd++K5dy/QMbiV/u1UI5VINTCiw66yw/xLnrILs9u59udfU5/YMLERfdEXjOgP2orggetPFaGWB/UiqBdRHNolTBvjriv2tRq/+vEzTJ/GyILROWNyxhV8ZYz3u3vtQobHnj/bAYfmQmTSgnkm7d7QVolqRQAR8kiRU2RUczbc/4RTF3Z56OZZlr641T9f28RhMxibMT5nj4zxNRu39oMW7lz0klXvtZzSda/7b3he18wutZw8AyLEEBQxquZBrcjUJd7pNue0CR5ZfJjvXL1c74ctDpzBpIK99mH9WHfdvgrAkr9tcfqlr1udOOP8Wfo/36DIgzwGEKESKSK1SFukvYIc73WbfXKn39w6y0nffMGX72HCfprvdzhh1mM+BuRoYG8su2+OsZOj/t7NMmQByCHPgyJSL4L2epTVMjoCHRn/+8DRl8/0k8+3O+L4Z3R3n+1nlz9pDeDIPfndsgWqExqMrrGmx+DL3QiyLAohgBxCpCiCLI9qBSqBeqAj0shornHer2caLktzZz7ujt/PseaK1+13cJubX76QbDVbevhgkP/uBCknKYlADkUMijyq50GlktGWUYs0MnbL2W0v1tZM3HuUM84ZcNNlr/vlQ8dq7FYjW4/1pBIlMZAFURRDFGMpIYcsCypZ0F7NqAbqkVE1xlXZcwobGuZ1PeRTPPb4sVav/ML8s17Ribd2fp9aovYR1UAWiVEWW2IW5CEYRoQYqWRUMnS2cex05pxE15F6u0vHjX/Ip4DNm7bb/EUCm3FC21Ib3g+0H0BEEciDPCOPhABEqISglmeKSsa8mR695xNHhbsdEpY4atZTPgMcPyM64dJj/PS+49QAaxInHLTM209uYv+DiYE8qGYUkTwEECHGKM9w+DSvLfvcdTeu0osvATBvevTb7qvxodnfmOSGm6cD6Md5Z/7DR68NcMQhRLIsk8dMzAKIkATNEJg21R9uedOJB1e89NYCx88oANz21PlYhfX42FnXLjCzE4AWzj36aQNbOpgzQ8yDmAUhRhChFZJUYuVHHvz3lZa8c7Gu6ckP7/g6gJFj2mltZXCYZh/ede9bF6gB4EvM73qAPfYV26pSIIYEIqTEYBkMr/hE+usLGO/1J7f70bynwVfb0DGB/2zjsxaftvj0Q6OnRA///XQRAB8Ps+LZlUyZJEbKBEQYKpOhZmn7LlKrIm3bYNG3XzSUuHD+7p7dfCVbVrBuJ71DrBti3TBvvGH6iaM98uTJJqIT+9aZOXeqgbVf2NlMmgkIPT096cGrDjWlMzels9A1OjPulNnCtAOFkDHUy4oPWLeeBAjIAhAiR86ic38pRSkN2tndbdVT3Xo2DevZ2HTRHcvlMJSNsrl/u1pRGsbWJ97WXv2XaiBmpESJsgRiJA9kIZC1eHQ5liubpR1DpQ19pc+3JVv6GM5Hg3D3bTemqZMb3vzLEiPCNqPaokY9qudEZDkpkRIEECQhEGKQA4iaqbSzybaB0pb+0tZWw+FnXmZEY4KQUrL49l+kqZMbXv3TPYrmVrUiquTkAhFQAgAiARAAJYaa7BwqDWa7Oeasy4kNJy+8KISUElh656I097SFAAAAAAAAAAAA4O1Xn3PO964M8H8RODTRLDM3YgAAAABJRU5ErkJggg%3D%3D");
+                                _this.repairButtons[i].set({
+                                    decorator: new qx.ui.decoration.Decorator().set({
+                                        backgroundColor: 'transparent'
+                                    }),
+                                    width: gridWidth,
+                                    height: gridHeight,
+                                    show: "icon",
+                                    center: false,
+                                    padding: 3,
+                                    appearance: "button-text-small",
+                                    cursor: "pointer",
+                                    toolTipText: "Crystal: " + resourceCost + " / Time: " + repairCharge + " / Type: " + unitType
+                                });
+                                _this.repairButtons[i].addListener("execute", _this.repairUnit, {
+                                    ownCityId: base_city_id,
+                                    unitId: unit.get_Id(),
+                                    buttonId: i,
+                                    frm: _this
+                                });
+                                _this.repairButtons[i].unitType = unitType;
+                                //        allowGrowY: false
+                                _this._armyBar.add(_this.repairButtons[i], {
+                                    left: startX + gridWidth * unit.get_CoordX(),
+                                    top: startY + gridHeight * unit.get_CoordY()
+                                });
                             }
-                        },
-                        toggleRepairMode: function () {
-                            try {
-                                var _this = this;
-                                if (!this.audio.soundRepairImpact) {
-                                    this.audio.soundRepairImpact = new Audio(window.soundRepairImpact.d);
-                                    this.audio.soundRepairReload = new Audio(window.soundRepairReload.d);
-                                    this.audio.soundRepairImpact.volume = this.getAudioSettings().ui / 100;
-                                    this.audio.soundRepairReload.volume = this.getAudioSettings().ui / 100;
-                                }
-                                this._armyBar.getLayoutParent().toggleEnabled();
-                                this._armyBar.setEnabled(true);
-                                this.userInterface.toggleEnabled();
-                                this.battleResultsBox.toggleEnabled();
-                                if (this.buttons.attack.repairMode.getValue()) {
-                                    this.redrawRepairButtons();
-                                    this._armyBar.addListener("resize", this.setResizeTimer, this);
-                                    this.repairInfo.show();
-                                    this.updateRepairTimeInfobox();
-                                    this.repairModeTimer = setInterval(this.updateRepairTimeInfobox, 1000);
-                                } else {
-                                    this.removeAllRepairButtons();
-                                    this._armyBar.removeListener("resize", this.setResizeTimer, this);
-                                    this.repairInfo.hide();
-                                    clearInterval(this.repairModeTimer);
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        updateRepairTimeInfobox: function () {
-                            try {
-                                var _this = window.TACS.getInstance();
-                                var ownCity = _this._MainData.get_Cities().get_CurrentOwnCity();
-                                var availableInfRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf);
-                                var availableVehRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh);
-                                var availableAirRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeAir);
-                                _this.stats.repair.available = ClientLib.Base.Resource.GetResourceCount(ownCity.get_RepairOffenseResources().get_RepairChargeOffense());
-                                _this.labels.repairinfos.available.setValue(phe.cnc.Util.getTimespanString(_this.stats.repair.available));
-                                _this.labels.repairinfos.infantry.setValue(phe.cnc.Util.getTimespanString(availableInfRT - _this.stats.repair.available));
-                                _this.labels.repairinfos.vehicle.setValue(phe.cnc.Util.getTimespanString(availableVehRT - _this.stats.repair.available));
-                                _this.labels.repairinfos.aircraft.setValue(phe.cnc.Util.getTimespanString(availableAirRT - _this.stats.repair.available));
-/*var unitGroupData = phe.cnc.gui.RepairUtil.getUnitGroupCityData(ownCity);
-							if (unitGroupData[ClientLib.Data.EUnitGroup.Infantry].lowestUnitDmgRatio == 1) console.log("No damage to Infantry");
-							if (unitGroupData[ClientLib.Data.EUnitGroup.Vehicle].lowestUnitDmgRatio == 1) console.log("No damage to Vehicles");
-							if (unitGroupData[ClientLib.Data.EUnitGroup.Aircraft].lowestUnitDmgRatio == 1) console.log("No damage to Aircraft");*/
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        resetDblClick: function () {
-                            try {
-                                var _this = window.TACS.getInstance();
-                                clearInterval(_this.armybarClearnClickCounter);
-                                _this.armybarClickCount = 0;
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        },
-                        //Util
-                        getDateFromMillis: function (ms) {
-                            return new Date(ms);
-                        },
-                        getTimestamp: function () {
-                            return new Date().getTime();
-                        },
-                        timerStart: function () {
-                            this.ts1 = this.getTimestamp();
-                        },
-                        timerEnd: function (functionName) {
-                            functionName = functionName || "nullName";
-                            this.ts2 = this.getTimestamp();
-                            var diff = this.ts2 - this.ts1;
-                            console.log(diff + "ms to run " + functionName)
-                        },
-                        badClone: function (obj) {
-                            // broken
-                            var stringied = JSON.stringify(obj);
-                            //var p = JSON.parse(stringied);
-                            return stringied;
                         }
-                    }
-                });
-            }
-            var TASuite_timeout = 0; // 10 seconds
-
-            function TASuite_checkIfLoaded() {
-                try {
-                    if (typeof qx !== 'undefined') {
-                        var a = qx.core.Init.getApplication(); // application
-                        var mb = qx.core.Init.getApplication().getMenuBar();
-                        var v = ClientLib.Vis.VisMain.GetInstance();
-                        var md = ClientLib.Data.MainData.GetInstance();
-                        if (a && mb && v && md && typeof PerforceChangelist !== 'undefined') {
-                            if (TASuite_timeout > 10 || typeof CCTAWrapper_IsInstalled !== 'undefined') {
-                                CreateTweak();
-                                window.TACS.getInstance().initialize();
-/*if (typeof ClientLib.API.Util.GetUnitMaxHealthByLevel == 'undefined') {
-								for (var key in ClientLib.Base.Util) {
-									var strFunction = ClientLib.Base.Util[key].toString();
-									if (typeof ClientLib.Base.Util[key] === 'function' & strFunction.indexOf("1.1") > -1 & strFunction.indexOf("*=") > -1) {
-										ClientLib.API.Util.GetUnitMaxHealthByLevel = ClientLib.Base.Util[key];
-										break;
-									}
-								}
-							}*/
-                                if (PerforceChangelist >= 392583) { //endgame patch - repair costs fix
-                                    var currentCity = ClientLib.Data.Cities.prototype.get_CurrentCity.toString();
-                                    for (var i in ClientLib.Data.Cities.prototype) {
-                                        if (ClientLib.Data.Cities.prototype.hasOwnProperty(i) && typeof (ClientLib.Data.Cities.prototype[i]) === 'function') {
-                                            var strCityFunction = ClientLib.Data.Cities.prototype[i].toString();
-                                            if (strCityFunction.indexOf(currentCity) > -1) {
-                                                if (i.length == 6) {
-                                                    currentCity = i;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    var currentOwnCity = ClientLib.Data.Cities.prototype.get_CurrentOwnCity.toString();
-                                    for (var y in ClientLib.Data.Cities.prototype) {
-                                        if (ClientLib.Data.Cities.prototype.hasOwnProperty(y) && typeof (ClientLib.Data.Cities.prototype[y]) === 'function') {
-                                            var strOwnCityFunction = ClientLib.Data.Cities.prototype[y].toString();
-                                            if (strOwnCityFunction.indexOf(currentOwnCity) > -1) {
-                                                if (y.length == 6) {
-                                                    currentOwnCity = y;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    var strFunction = ClientLib.API.Util.GetUnitRepairCosts.toString();
-                                    strFunction = strFunction.replace(currentCity, currentOwnCity);
-                                    var functionBody = strFunction.substring(strFunction.indexOf("{") + 1, strFunction.lastIndexOf("}"));
-                                    var fn = Function('a,b,c', functionBody);
-                                    ClientLib.API.Util.GetUnitRepairCosts = fn;
-                                }
-                                // Solution for OnSimulateBattleFinishedEvent issue
-                                for (var key in ClientLib.API.Battleground.prototype) {
-                                    if (typeof ClientLib.API.Battleground.prototype[key] === 'function') {
-                                        strFunction = ClientLib.API.Battleground.prototype[key].toString();
-                                        if (strFunction.indexOf(",-1,0,0,0);") > -1) {
-                                            strFunction = strFunction.substring(strFunction.indexOf("{") + 1, strFunction.lastIndexOf("}"));
-                                            var re = /.I.[A-Z]{6}.[A-Z]{6}\(.I.[A-Z]{6}.[a-zA-Z]+,-1,0,0,0\)\;/;
-                                            //$I.QPYKHN.IVAYJF($I.XIMKGT.pavmCombatSimulation,-1,0,0,0);
-                                            strFunction = strFunction.replace(re, "");
-                                            var re2 = /.I.[A-Z]{6}.[A-Z]{6}\(\).[A-Z]{6}\(\).[A-Z]{6}\([a-z].[a-z]\)\;/;
-                                            //$I.BFALSI.DZYMBX().JLBGOK().KLRGNI(b.d);
-                                            var temp = strFunction.match(re2).toString();
-                                            console.log(temp);
-                                            strFunction = strFunction.replace(re2, "");
-                                            strFunction = strFunction.replace("}}", "}}" + temp);
-                                            //strFunction = strFunction.replace("var $createHelper;", "var $createHelper;var offenseData = b.d.a;var baseData = b.d.s;var defenseData = b.d.d;var simResults = b.e;for (var i in offenseData) {simResults[offenseData[i].ci-1].Value.x = offenseData[i].x;simResults[offenseData[i].ci-1].Value.y = offenseData[i].y;}for (var u in baseData) {simResults[baseData[u].ci-1].Value.x = baseData[u].x;simResults[baseData[u].ci-1].Value.y = baseData[u].y;}for (var e in defenseData) {simResults[defenseData[e].ci-1].Value.x = defenseData[e].x;simResults[defenseData[e].ci-1].Value.y = defenseData[e].y;}"); // Add Coords
-                                            var fn = Function('a,b', strFunction);
-                                            ClientLib.API.Battleground.prototype[key] = fn;
-                                            break;
-                                        }
-                                    }
-                                }
-                                for (var key in ClientLib.Vis.BaseView.BaseView.prototype) {
-                                    if (typeof ClientLib.Vis.BaseView.BaseView.prototype[key] === 'function') {
-                                        strFunction = ClientLib.Vis.BaseView.BaseView.prototype[key].toString();
-                                        if (strFunction.indexOf(ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip.toString()) > -1) {
-                                            console.log("ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype." + key);
-                                            var showToolTip_Original = "ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype." + key;
-                                            var stto = Function('', showToolTip_Original);
-                                            stto();
-                                            var showToolTip_New = "ClientLib.Vis.BaseView.BaseView.prototype." + key + "=function (a){if(ClientLib.Vis.VisMain.GetInstance().get_Mode()==7&&window.TACS.getInstance().saveObj.checkbox.disableAttackPreparationTooltips){return;}else{this.ShowToolTip_Original(a);}}";
-                                            var sttn = Function('', showToolTip_New);
-                                            sttn();
-                                            console.log(showToolTip_New);
-                                            break;
-                                        }
-                                    }
-                                }
-                                qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility_Original = qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility;
-                                qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility = function (a) {
-                                    if (window.TACS.getInstance().saveObj.checkbox.disableArmyFormationManagerTooltips) {
-                                        qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility_Original(false);
-                                    } else {
-                                        qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility_Original(a);
-                                    }
-                                };
-                            } else {
-                                TASuite_timeout++;
-                                window.setTimeout(TASuite_checkIfLoaded, 1000);
+                    },
+                    toggleRepairMode: function () {
+                        try {
+                            var _this = this;
+                            if (!this.audio.soundRepairImpact) {
+                                this.audio.soundRepairImpact = new Audio(window.soundRepairImpact.d);
+                                this.audio.soundRepairReload = new Audio(window.soundRepairReload.d);
+                                this.audio.soundRepairImpact.volume = this.getAudioSettings().ui / 100;
+                                this.audio.soundRepairReload.volume = this.getAudioSettings().ui / 100;
                             }
-                        } else window.setTimeout(TASuite_checkIfLoaded, 1000);
-                    } else {
-                        window.setTimeout(TASuite_checkIfLoaded, 1000);
+                            this._armyBar.getLayoutParent().toggleEnabled();
+                            this._armyBar.setEnabled(true);
+                            this.userInterface.toggleEnabled();
+                            this.battleResultsBox.toggleEnabled();
+                            if (this.buttons.attack.repairMode.getValue()) {
+                                this.redrawRepairButtons();
+                                this._armyBar.addListener("resize", this.setResizeTimer, this);
+                                this.repairInfo.show();
+                                this.updateRepairTimeInfobox();
+                                this.repairModeTimer = setInterval(this.updateRepairTimeInfobox, 1000);
+                            } else {
+                                this.removeAllRepairButtons();
+                                this._armyBar.removeListener("resize", this.setResizeTimer, this);
+                                this.repairInfo.hide();
+                                clearInterval(this.repairModeTimer);
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    updateRepairTimeInfobox: function () {
+                        try {
+                            var _this = window.TACS.getInstance();
+                            var ownCity = _this._MainData.get_Cities().get_CurrentOwnCity();
+                            var availableInfRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf);
+                            var availableVehRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh);
+                            var availableAirRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeAir);
+                            _this.stats.repair.available = ClientLib.Base.Resource.GetResourceCount(ownCity.get_RepairOffenseResources().get_RepairChargeOffense());
+                            _this.labels.repairinfos.available.setValue(phe.cnc.Util.getTimespanString(_this.stats.repair.available));
+                            _this.labels.repairinfos.infantry.setValue(phe.cnc.Util.getTimespanString(availableInfRT - _this.stats.repair.available));
+                            _this.labels.repairinfos.vehicle.setValue(phe.cnc.Util.getTimespanString(availableVehRT - _this.stats.repair.available));
+                            _this.labels.repairinfos.aircraft.setValue(phe.cnc.Util.getTimespanString(availableAirRT - _this.stats.repair.available));
+                            /*var unitGroupData = phe.cnc.gui.RepairUtil.getUnitGroupCityData(ownCity);
+                            							if (unitGroupData[ClientLib.Data.EUnitGroup.Infantry].lowestUnitDmgRatio == 1) console.log("No damage to Infantry");
+                            							if (unitGroupData[ClientLib.Data.EUnitGroup.Vehicle].lowestUnitDmgRatio == 1) console.log("No damage to Vehicles");
+                            							if (unitGroupData[ClientLib.Data.EUnitGroup.Aircraft].lowestUnitDmgRatio == 1) console.log("No damage to Aircraft");*/
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    resetDblClick: function () {
+                        try {
+                            var _this = window.TACS.getInstance();
+                            clearInterval(_this.armybarClearnClickCounter);
+                            _this.armybarClickCount = 0;
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    },
+                    //Util
+                    getDateFromMillis: function (ms) {
+                        return new Date(ms);
+                    },
+                    getTimestamp: function () {
+                        return new Date().getTime();
+                    },
+                    timerStart: function () {
+                        this.ts1 = this.getTimestamp();
+                    },
+                    timerEnd: function (functionName) {
+                        functionName = functionName || "nullName";
+                        this.ts2 = this.getTimestamp();
+                        var diff = this.ts2 - this.ts1;
+                        console.log(diff + "ms to run " + functionName)
+                    },
+                    badClone: function (obj) {
+                        // broken
+                        var stringied = JSON.stringify(obj);
+                        //var p = JSON.parse(stringied);
+                        return stringied;
                     }
-                } catch (e) {
-                    if (typeof console !== 'undefined') console.log(e);
-                    else if (window.opera) opera.postError(e);
-                    else GM_log(e);
                 }
+            });
+        }
+        var TASuite_timeout = 0; // 10 seconds
+
+        function TASuite_checkIfLoaded() {
+            try {
+                if (typeof qx !== 'undefined') {
+                    var a = qx.core.Init.getApplication(); // application
+                    var mb = qx.core.Init.getApplication().getMenuBar();
+                    var v = ClientLib.Vis.VisMain.GetInstance();
+                    var md = ClientLib.Data.MainData.GetInstance();
+                    if (a && mb && v && md && typeof PerforceChangelist !== 'undefined') {
+                        if (TASuite_timeout > 10 || typeof CCTAWrapper_IsInstalled !== 'undefined') {
+                            CreateTweak();
+                            window.TACS.getInstance().initialize();
+                            /*if (typeof ClientLib.API.Util.GetUnitMaxHealthByLevel == 'undefined') {
+                            								for (var key in ClientLib.Base.Util) {
+                            									var strFunction = ClientLib.Base.Util[key].toString();
+                            									if (typeof ClientLib.Base.Util[key] === 'function' & strFunction.indexOf("1.1") > -1 & strFunction.indexOf("*=") > -1) {
+                            										ClientLib.API.Util.GetUnitMaxHealthByLevel = ClientLib.Base.Util[key];
+                            										break;
+                            									}
+                            								}
+                            							}*/
+                            if (PerforceChangelist >= 392583) { //endgame patch - repair costs fix
+                                var currentCity = ClientLib.Data.Cities.prototype.get_CurrentCity.toString();
+                                for (var i in ClientLib.Data.Cities.prototype) {
+                                    if (ClientLib.Data.Cities.prototype.hasOwnProperty(i) && typeof (ClientLib.Data.Cities.prototype[i]) === 'function') {
+                                        var strCityFunction = ClientLib.Data.Cities.prototype[i].toString();
+                                        if (strCityFunction.indexOf(currentCity) > -1) {
+                                            if (i.length == 6) {
+                                                currentCity = i;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                var currentOwnCity = ClientLib.Data.Cities.prototype.get_CurrentOwnCity.toString();
+                                for (var y in ClientLib.Data.Cities.prototype) {
+                                    if (ClientLib.Data.Cities.prototype.hasOwnProperty(y) && typeof (ClientLib.Data.Cities.prototype[y]) === 'function') {
+                                        var strOwnCityFunction = ClientLib.Data.Cities.prototype[y].toString();
+                                        if (strOwnCityFunction.indexOf(currentOwnCity) > -1) {
+                                            if (y.length == 6) {
+                                                currentOwnCity = y;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                var strFunction = ClientLib.API.Util.GetUnitRepairCosts.toString();
+                                strFunction = strFunction.replace(currentCity, currentOwnCity);
+                                var functionBody = strFunction.substring(strFunction.indexOf("{") + 1, strFunction.lastIndexOf("}"));
+                                var fn = Function('a,b,c', functionBody);
+                                ClientLib.API.Util.GetUnitRepairCosts = fn;
+                            }
+                            // Solution for OnSimulateBattleFinishedEvent issue
+                            for (var key in ClientLib.API.Battleground.prototype) {
+                                if (typeof ClientLib.API.Battleground.prototype[key] === 'function') {
+                                    strFunction = ClientLib.API.Battleground.prototype[key].toString();
+                                    if (strFunction.indexOf(",-1,0,0,0);") > -1) {
+                                        strFunction = strFunction.substring(strFunction.indexOf("{") + 1, strFunction.lastIndexOf("}"));
+                                        var re = /.I.[A-Z]{6}.[A-Z]{6}\(.I.[A-Z]{6}.[a-zA-Z]+,-1,0,0,0\)\;/;
+                                        //$I.QPYKHN.IVAYJF($I.XIMKGT.pavmCombatSimulation,-1,0,0,0);
+                                        strFunction = strFunction.replace(re, "");
+                                        var re2 = /.I.[A-Z]{6}.[A-Z]{6}\(\).[A-Z]{6}\(\).[A-Z]{6}\([a-z].[a-z]\)\;/;
+                                        //$I.BFALSI.DZYMBX().JLBGOK().KLRGNI(b.d);
+                                        var temp = strFunction.match(re2).toString();
+                                        console.log(temp);
+                                        strFunction = strFunction.replace(re2, "");
+                                        strFunction = strFunction.replace("}}", "}}" + temp);
+                                        //strFunction = strFunction.replace("var $createHelper;", "var $createHelper;var offenseData = b.d.a;var baseData = b.d.s;var defenseData = b.d.d;var simResults = b.e;for (var i in offenseData) {simResults[offenseData[i].ci-1].Value.x = offenseData[i].x;simResults[offenseData[i].ci-1].Value.y = offenseData[i].y;}for (var u in baseData) {simResults[baseData[u].ci-1].Value.x = baseData[u].x;simResults[baseData[u].ci-1].Value.y = baseData[u].y;}for (var e in defenseData) {simResults[defenseData[e].ci-1].Value.x = defenseData[e].x;simResults[defenseData[e].ci-1].Value.y = defenseData[e].y;}"); // Add Coords
+                                        var fn = Function('a,b', strFunction);
+                                        ClientLib.API.Battleground.prototype[key] = fn;
+                                        break;
+                                    }
+                                }
+                            }
+                            for (var key in ClientLib.Vis.BaseView.BaseView.prototype) {
+                                if (typeof ClientLib.Vis.BaseView.BaseView.prototype[key] === 'function') {
+                                    strFunction = ClientLib.Vis.BaseView.BaseView.prototype[key].toString();
+                                    if (strFunction.indexOf(ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip.toString()) > -1) {
+                                        console.log("ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype." + key);
+                                        var showToolTip_Original = "ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype." + key;
+                                        var stto = Function('', showToolTip_Original);
+                                        stto();
+                                        var showToolTip_New = "ClientLib.Vis.BaseView.BaseView.prototype." + key + "=function (a){if(ClientLib.Vis.VisMain.GetInstance().get_Mode()==7&&window.TACS.getInstance().saveObj.checkbox.disableAttackPreparationTooltips){return;}else{this.ShowToolTip_Original(a);}}";
+                                        var sttn = Function('', showToolTip_New);
+                                        sttn();
+                                        console.log(showToolTip_New);
+                                        break;
+                                    }
+                                }
+                            }
+                            qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility_Original = qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility;
+                            qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility = function (a) {
+                                if (window.TACS.getInstance().saveObj.checkbox.disableArmyFormationManagerTooltips) {
+                                    qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility_Original(false);
+                                } else {
+                                    qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility_Original(a);
+                                }
+                            };
+                        } else {
+                            TASuite_timeout++;
+                            window.setTimeout(TASuite_checkIfLoaded, 1000);
+                        }
+                    } else window.setTimeout(TASuite_checkIfLoaded, 1000);
+                } else {
+                    window.setTimeout(TASuite_checkIfLoaded, 1000);
+                }
+            } catch (e) {
+                if (typeof console !== 'undefined') console.log(e);
+                else if (window.opera) opera.postError(e);
+                else GM_log(e);
             }
-            if (/commandandconquer\.com/i.test(document.domain)) {
-                window.setTimeout(TASuite_checkIfLoaded, 1000);
-            }
-    	};
+        }
+        if (/commandandconquer\.com/i.test(document.domain)) {
+            window.setTimeout(TASuite_checkIfLoaded, 1000);
+        }
+    };
     // injecting, because there seem to be problems when creating game interface with unsafeWindow
     var TASuiteScript = document.createElement("script");
     var txt = TASuite_mainFunction.toString();
