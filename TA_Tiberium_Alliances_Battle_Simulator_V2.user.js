@@ -2472,17 +2472,13 @@
                             });*/
                             this._playAreaChildren[4].resetDecorator();
                             // lowering playArea children by Netquik 
-                            if (this._playAreaChildren[24]) {
-                                this._playAreaChildren[24].setMarginTop(25);
-                            }
                             for (var i in this._playAreaChildren) {
-                                if (i > 2 && i < 16) {
-                                    if (this._playAreaChildren[i]) {
-                                        this._playAreaChildren[i].setMarginTop(25);
-                                    }
-                                } else if (i > 15 && i < 24) {
-                                    if (this._playAreaChildren[i]) {
-                                        this._playAreaChildren[i].setMarginTop(-25);
+                                if (this._playAreaChildren[i]) {
+                                    playchild = this._playAreaChildren[i];
+                                    if (playchild.basename === "FormationSaver" || (i > 2 && i < 16)) {
+                                        playchild.setMarginTop(25);
+                                    } else if (i > 15 && i < this._playAreaChildren.length) {
+                                        playchild.setMarginTop(-25);
                                     }
                                 }
                             }
