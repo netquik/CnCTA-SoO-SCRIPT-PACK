@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.15
+// @version         20.02.16
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - Move Box save position code
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2452,12 +2452,12 @@
                             this.ArmySetupAttackBarMainChildren = this.ArmySetupAttackBar.getMainContainer().getChildren();
                             this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
                             this._playAreaChildren = this._playArea.getChildren();
-                            this._PlayAreaHeight = this._playArea.getLayoutParent().getBounds().height;
-                            this._PlayAreaHeight2 = this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().height;
+                            this.OverlayFixed = false;
+
                             // 19.5 FIX VIEW by Netquik 
                             if (PerforceChangelist >= 472117) { // 19.5 patch
                                 this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
-                                this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar
+                                this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar FIXME
                                 this.ArmySetupAttackBarChildren[1].setOpacity(0.4); // setting opacity to next setup
                                 this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // setting hidden to next setup
                                 //this._playArea.setMarginTop(-5); // up playArea
@@ -2467,18 +2467,46 @@
                                 this._playAreaChildren[4].resetDecorator();
 
                                 // lowering playArea children by Netquik FIXME 
-                                var fixOverlay;
-                                fixOverlay = this._PlayAreaHeight2 <= 930 && this._PlayAreaHeight <= 800;
-                                for (var i in this._playAreaChildren) {
-                                    if (this._playAreaChildren[i]) {
-                                        playchild = this._playAreaChildren[i];
-                                        if ((playchild.basename === "FormationSaver" || (i > 2 && i < 16)) && fixOverlay) {
+                                this.FixOverlay = function (e) {
+                                    var _this = (this.TABS) ? this.TABS.GUI.ArmySetupAttackBar.getInstance() : this;
+                                    PlayArea = _this._playArea;
+                                    PlayAreaHeight = PlayArea.getLayoutParent().getBounds().height;
+                                    PlayAreaHeight2 = _this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().height;
+                                    PlayAreaOffSet = PlayAreaHeight2 - PlayAreaHeight;
+                                    playAreaChildren = PlayArea.getChildren();
+                                    var fixOverlay;
+                                    var fix = 0;
+                                    fixOverlay = PlayAreaOffSet < 150;
+                                    for (var i in playAreaChildren) {
+                                        playchild = playAreaChildren[i];
+                                        if (playchild.basename === "FormationSaver" && playchild.getMarginTop() != 25) {
                                             playchild.setMarginTop(25);
-                                        } else if (i > 15 && i < this._playAreaChildren.length) {
-                                            playchild.setMarginTop(-25);
+                                        } else if (!_this.OverlayFixed) {
+                                            if ((i > 2 && i < 16) && fixOverlay) {
+                                                playchild.setMarginTop(25);
+                                                fix++;
+                                            } else if (i > 15 && i < playAreaChildren.length && e) {
+                                                playchild.setMarginTop(-25);
+                                            }
+
+                                        } else if (!fixOverlay) {
+                                            if (i > 2 && i < 16) {
+                                                playchild.setMarginTop(1);
+                                                fix--;
+                                            }
                                         }
                                     }
+                                    _this.OverlayFixed = (fix < 0) ? false : (fix > 0) ? true : _this.OverlayFixed;
+
                                 }
+                                this.FixOverlay(true);
+                                this.RunTimeFixOverlay = function () {
+                                    var _this = (this.TABS) ? this.TABS.GUI.ArmySetupAttackBar.getInstance() : this;
+                                    setTimeout(function () {
+                                        _this.FixOverlay()
+                                    }, 2000)
+                                }
+                                this.MainOverlay.addListener('changeHeight', this.RunTimeFixOverlay.bind(null, event));
                                 // adjusting and change bars 19.5 by Netquik 
                                 this.ArmySetupAttackBarMainChildren[9].resetDecorator();
                                 this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
@@ -2543,14 +2571,14 @@
                                 flex: 1
                             });
                             this.ArmySetupAttackBar.getChildren()[2].addAt(btnHBoxouter, 0, {
-                                left: 16,
+                                left: 0,
                                 top: 2,
                                 right: 0
                             });
                             var formationContainer = this.ArmySetupAttackBar.getMainContainer();
                             formationContainer.setMarginTop(formationContainer.getMarginTop() + 20);
                             // 19.5 FIX VIEW by Netquik
-                            if (PerforceChangelist >= 472117) { // 19.5 patch                  
+                            if (PerforceChangelist >= 472117) { // 19.5 patch FIXME                 
                                 formationContainer.setMarginTop(formationContainer.getMarginTop() - 40);
                             }
                             formation.bind("changeWidth", btnHBox, "width");
