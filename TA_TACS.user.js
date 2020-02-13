@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.56e
+// @version        3.56f
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - FIX OPTIONS
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -523,8 +523,7 @@
                             this.ArmySetupAttackBarMainChildren = this._armyBarContainer.getMainContainer().getChildren();
                             this._playAreaChildren = this._PlayArea.getChildren();
                             this.MainOverlay = this._Application.getMainOverlay();
-                            this._PlayAreaHeight = this._PlayArea.getLayoutParent().getBounds().height;
-                            this._PlayAreaHeight2 = this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().height;
+                            this.OverlayFixed = false;
 
                             // 19.5 FIX VIEW by Netquik REVIEW  
                             if (PerforceChangelist >= 472117) { // 19.5 patch
@@ -535,20 +534,48 @@
                                 this._playAreaChildren[2].setHeight(120); // fix opacity for better view
                                 this._playAreaChildren[4].resetDecorator();
 
-
                                 // lowering playArea children by Netquik FIXME 
-                                var fixOverlay;
-                                fixOverlay = this._PlayAreaHeight2 <= 930 && this._PlayAreaHeight <= 800;
-                                for (var i in this._playAreaChildren) {
-                                    if (this._playAreaChildren[i]) {
-                                        playchild = this._playAreaChildren[i];
-                                        if ((playchild.basename === "FormationSaver" || (i > 2 && i < 16)) && fixOverlay) {
+                                this.FixOverlay = function (e) {
+                                    var _this = (this.TACS) ? this.TACS.getInstance() : this;
+                                    PlayArea = _this._PlayArea;
+                                    PlayAreaHeight = PlayArea.getLayoutParent().getBounds().height;
+                                    PlayAreaHeight2 = _this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().height;
+                                    PlayAreaOffSet = PlayAreaHeight2 - PlayAreaHeight;
+                                    playAreaChildren = PlayArea.getChildren();
+                                    var fixOverlay;
+                                    var fix = 0;
+                                    fixOverlay = PlayAreaOffSet < 150;
+                                    for (var i in playAreaChildren) {
+                                        playchild = playAreaChildren[i];
+                                        if (playchild.basename === "FormationSaver" && playchild.getMarginTop() != 25) {
                                             playchild.setMarginTop(25);
-                                        } else if (i > 15 && i < this._playAreaChildren.length) {
-                                            playchild.setMarginTop(-25);
+                                        } else if (!_this.OverlayFixed) {
+                                            if ((i > 2 && i < 16) && fixOverlay) {
+                                                playchild.setMarginTop(25);
+                                                fix++;
+                                            } else if (i > 15 && i < playAreaChildren.length && e) {
+                                                playchild.setMarginTop(-25);
+                                            }
+
+                                        } else if (!fixOverlay) {
+                                            if (i > 2 && i < 16) {
+                                                playchild.setMarginTop(1);
+                                                fix--;
+                                            }
                                         }
                                     }
+                                    _this.OverlayFixed = (fix < 0) ? false : (fix > 0) ? true : _this.OverlayFixed;
+
                                 }
+                                this.FixOverlay(true);
+                                this.RunTimeFixOverlay = function () {
+                                    var _this = (this.TACS) ? this.TACS.getInstance() : this;
+                                    setTimeout(function () {
+                                        _this.FixOverlay()
+                                    }, 2000)
+                                }
+                                this.MainOverlay.addListener('changeHeight', this.RunTimeFixOverlay.bind(null, event));
+
                                 // adjusting bars 19.5 by Netquik 
                                 this.ArmySetupAttackBarMainChildren[2].setVisibility("hidden");
                                 this.ArmySetupAttackBarMainChildren[9].resetDecorator();
@@ -797,6 +824,7 @@
                             console.log(e);
                         }
                     },
+
                     fixBonusRounding: function (bonus, data) {
                         try {
                             if (data == null) data = "";
@@ -3592,7 +3620,7 @@
                             this.battleResultsBox.toggleEnabled();
                             if (this.buttons.attack.repairMode.getValue()) {
                                 this.redrawRepairButtons();
-                                this._armyBar.addListener("resize", this.setResizeTimer, this);
+                                this._armyBar.addListener("changeHeight", this.setResizeTimer, this);
                                 this.repairInfo.show();
                                 this.updateRepairTimeInfobox();
                                 this.repairModeTimer = setInterval(this.updateRepairTimeInfobox, 1000);
