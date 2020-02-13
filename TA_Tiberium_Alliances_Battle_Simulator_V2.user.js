@@ -2,9 +2,9 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.16
+// @version         20.02.17
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
-// @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - Move Box save position code
+// @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW + AUTO - Move Box save position code - New Top Bar Button
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
@@ -2457,7 +2457,7 @@
                             // 19.5 FIX VIEW by Netquik 
                             if (PerforceChangelist >= 472117) { // 19.5 patch
                                 this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
-                                this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar FIXME
+                                //this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar FIXME
                                 this.ArmySetupAttackBarChildren[1].setOpacity(0.4); // setting opacity to next setup
                                 this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // setting hidden to next setup
                                 //this._playArea.setMarginTop(-5); // up playArea
@@ -2560,9 +2560,28 @@
                                 cntWave._add(this.newSideButton(TABS.RES.IMG.Arrows.Right, this.tr("Shifts units one space right."), this.onClick_btnShift, "r", i));
                             }
                             // Mirror and Shift Buttons top
-                            var formation = this.ArmySetupAttackBar.getMainContainer().getChildren()[1].getChildren()[0],
-                                btnHBox = new qx.ui.container.Composite(new qx.ui.layout.HBox()),
-                                btnHBoxouter = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+                            //New rewrite for 19.5 by Netquik REVIEW 
+                            this.ArmySetupAttackBarMainChildren[3].resetDecorator();
+                            this.ArmySetupAttackBarMainChildren[3].setPaddingTop(10);
+                            this.shiftbuttonopacity = function (e) {
+                                if (e.getTarget() && e.getTarget().basename === "SoundButton") {
+                                    shiftbutton = (e.getTarget().getLayoutParent().getLayoutParent().getLayoutParent()) ? (e.getTarget().getLayoutParent().getLayoutParent().getLayoutParent()) : null;
+                                    if (shiftbutton.getOpacity() === 0.3) {
+                                        shiftbutton.setOpacity(1);
+
+                                    } else {
+                                        shiftbutton.setOpacity(0.3);
+                                    }
+                                }
+                            }
+                            for (let i = 0; i < this.ArmySetupAttackBarMainChildren[3].getChildren().length; i++) {
+                                shiftbox = this.ArmySetupAttackBarMainChildren[3].getChildren()[i];
+                                shiftbox.setOpacity(0.3);
+                                shiftbox.addListener("mouseover", this.shiftbuttonopacity.bind((null, event)));
+                                shiftbox.addListener("mouseout", this.shiftbuttonopacity.bind((null, event)));
+                            }
+                            /* btnHBox = new qx.ui.container.Composite(new qx.ui.layout.HBox()),
+                              btnHBoxouter = new qx.ui.container.Composite(new qx.ui.layout.HBox());
                             btnHBoxouter.add(new qx.ui.core.Spacer(), {
                                 flex: 1
                             });
@@ -2574,14 +2593,14 @@
                                 left: 0,
                                 top: 2,
                                 right: 0
-                            });
+                            }); */
                             var formationContainer = this.ArmySetupAttackBar.getMainContainer();
                             formationContainer.setMarginTop(formationContainer.getMarginTop() + 20);
                             // 19.5 FIX VIEW by Netquik
                             if (PerforceChangelist >= 472117) { // 19.5 patch FIXME                 
                                 formationContainer.setMarginTop(formationContainer.getMarginTop() - 40);
                             }
-                            formation.bind("changeWidth", btnHBox, "width");
+                            /* formation.bind("changeWidth", btnHBox, "width");
                             for (i = 0; i < ClientLib.Base.Util.get_ArmyMaxSlotCountX(); i++) {
                                 btnHBox.add(new qx.ui.core.Spacer(), {
                                     flex: 1
@@ -2595,7 +2614,7 @@
                                 btnHBox.add(new qx.ui.core.Spacer(), {
                                     flex: 1
                                 });
-                            }
+                            } */
                         } catch (e) {
                             console.group("Tiberium Alliances Battle Simulator V2");
                             console.error("Error setting up GUI.ArmySetupAttackBar constructor", e);
@@ -2624,7 +2643,7 @@
                             btn.addListener("click", onClick, this);
                             return btn;
                         },
-                        newTopButton: function (icon, text, onClick, pos, sel) {
+                         /* newTopButton: function (icon, text, onClick, pos, sel) {
                             var btn = new qx.ui.form.ModelButton(null, icon).set({
                                 toolTipText: text,
                                 width: 25,
@@ -2653,7 +2672,7 @@
                                 });
                             }, this);
                             return btn;
-                        },
+                        }, */
                         onClick_btnMirror: function (e) {
                             var formation = TABS.UTIL.Formation.Get();
                             formation = TABS.UTIL.Formation.Mirror(formation, e.getTarget().getModel()[0], e.getTarget().getModel()[1]);
@@ -2664,7 +2683,7 @@
                             formation = TABS.UTIL.Formation.Shift(formation, e.getTarget().getModel()[0], e.getTarget().getModel()[1]);
                             TABS.UTIL.Formation.Set(formation);
                         }
-                    },
+                    }, 
                     defer: function () {
                         TABS.addInit("TABS.GUI.ArmySetupAttackBar");
                     }
