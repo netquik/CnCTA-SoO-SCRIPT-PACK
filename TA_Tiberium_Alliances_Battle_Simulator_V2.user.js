@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.17
+// @version         20.02.18
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW + AUTO - Move Box save position code - New Top Bar Button
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -69,9 +69,19 @@
                             Left: "webfrontend/theme/arrows/left.png",
                             Right: "webfrontend/theme/arrows/right.png"
                         },
+                        Arrows2: {
+                            Up: "FactionUI/icons/icon_step_up_button.png",
+                            Down: "FactionUI/icons/icon_step_down_button.png",
+                            Left: "FactionUI/icons/icon_step_left_button.png",
+                            Right: "FactionUI/icons/icon_step_right_button.png",
+                        },
                         Flip: {
                             H: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOvgAADr4B6kKxwAAAABp0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjUuMTAw9HKhAAACo0lEQVQ4T2PABkJq+rjmH7nUdPrV119nXn/9s+7S/R1NCzc4rTx1a8ay41c7WuYsl5WRkWGEKicM4honSux7+Pb42Tdf/4LwwacfP7Wv3pOz8sydVavO3lk5f9cx15jCGhaocsJgys7jAUeffXiGZODn1lW7Claeub16xelb64C4Ma+lnx+qHD/wySpjXnnqeifQq79RDFy5qxBq4PqVp25Ombxmhw4QQHXhAdH1fWL77r++DDToD04Dz9xeteDAuajc1gn4ve0UkciU3zvT4vTrb79ghmEzEOTtNefvL8pomyrExsYG1Y0FxNT18my4dH8KKGYJGLgeGDkrJqzeoR9ZWMMM1Y4Jercctjr46N1NZMNwGQhy5YpTN/PzWvu5oNpRgUdGGdOc/WfST736guJdPAauX3HiekfH4vXyUCNQQVhtn8D2W8+2nEGKDEIGgrw9a+cxeyUlJdRE7pldxZjcOlXj6LOPj9ENw2cgkL9m2dHL2TGljZxQoyAgrKaHdfmZWxVA734jxUAQXnXm9tS6yXMlTG2doKYBQWrrZIHNVx4sBWrG8C4I4zNw5enbi+ftPuGSVNGMiO2edXstjz3/9BabYSBMwMC1y09cr2pbvFEIbJh/RinrlI1744CRAc9q6BifgSC8+tzdpT1rdmuAE3l80yTZ/UglCzZMyECQ+MID58NiyprYGGbuO5t1/MWn99gMgmFCBoLwytO3Wir6ZggzLDpycQJyyYINH3r66WP7mj25wPDCZ+DsSRv2WTAsPHCmChgh7068/PwTGz4OlFtz+npX7/p9LstP3WwA4hZseMXp2w3Td56wYyho6lSdsfNY6YzdJydM330CBYPEQHIVnROVIzMLOIvb+oVq+meIVPVOQ8EgsYqeqUJJpfWcAKWymA2EsiGlAAAAAElFTkSuQmCC",
                             V: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOvgAADr4B6kKxwAAAABp0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjUuMTAw9HKhAAAClklEQVQ4T2MgB/iVd7CH1/SI9G3YF7D4+JUlR59/+nH61dff8w6cnQBVgh+EN01hjGqZxpY9eYlI39YjNvMOni888Ojd0aNP3z8+8/rr77Nvvv498+brn/n7T0+HasEOIlpnMIc1TBIJq+vX3HjtSd/ma4/WnHj59TtQM9gQZAwycO7ekzOhWhHAo6CRKaymh6d69krVWfvOpO19+O700WcfYS75g24QDGMYCPQWS1TzFKmktmkmO26/XLHv3sujwHD5CVSM0xBkDDcwqLJLcMHxa/FLT17rOPz04/PTb779wqaBEIYbOHv/2ZxjLz6/BglgU0gshhu44MDZaUABigwDYbCB+07NZJi29WDFvrsvLu+78/waDnwdixgmBpoxbduhMgav6ETZyNxSm+j8creoPPJwdH4FkC6z9o1NlWaYsnGf0ZpzdyeuOnt3GSUYZMZUoFkMk7ceDV555s6KFadvrQPi9eRioBmrpu44EcLQvHijweJDFzJWnrrRu/LM7VVASbIMBupdPWX78TAGt8Bw1oSsfL6qCbMUp2855Lvk+LXGFaduTgcpACpci64RF4YbCALe3t6MLi4uTC6BEZwhqXnC3Us3ms7acSxi+YlrLaDwgRqO1SAYRjEQGYAMB2JmN08v9vCMAuGWafPVFu4/E7H8+NWaVWduz11x+vYakgyEAaChDEBXM3r5+rOGJmVwlzZ1Svav2m656NDFghWnbk0FGrAEaBAoSMBhTtBAdAByuZOrO4t7eDxfWlWz7IztR70WHDiXA3T1jFVn76wE4hVTtx8PhionDoBc7eDgwODq4ckcFJPEHp9TJNA0e5n6tPU77ZcfvZLaNnupClQpeQDkaktLS2Y3Hz9Ov8h4XltnV3YAMTRvewY5T1wAAAAASUVORK5CYII="
+                        },
+                        Flip2: {
+                            H: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOvgAADr4B6kKxwAAAABp0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjUuMTAw9HKhAAACo0lEQVQ4T2PABkJq+rjmH7nUdPrV119nXn/9s+7S/R1NCzc4rTx1a8ay41c7WuYsl5WRkWGEKicM4honSux7+Pb42Tdf/4LwwacfP7Wv3pOz8sydVavO3lk5f9cx15jCGhaocsJgys7jAUeffXiGZODn1lW7Claeub16xelb64C4Ma+lnx+qHD/wySpjXnnqeifQq79RDFy5qxBq4PqVp25Ombxmhw4QQHXhAdH1fWL77r++DDToD04Dz9xeteDAuajc1gn4ve0UkciU3zvT4vTrb79ghmEzEOTtNefvL8pomyrExsYG1Y0FxNT18my4dH8KKGYJGLgeGDkrJqzeoR9ZWMMM1Y4Jercctjr46N1NZMNwGQhy5YpTN/PzWvu5oNpRgUdGGdOc/WfST736guJdPAauX3HiekfH4vXyUCNQQVhtn8D2W8+2nEGKDEIGgrw9a+cxeyUlJdRE7pldxZjcOlXj6LOPj9ENw2cgkL9m2dHL2TGljZxQoyAgrKaHdfmZWxVA734jxUAQXnXm9tS6yXMlTG2doKYBQWrrZIHNVx4sBWrG8C4I4zNw5enbi+ftPuGSVNGMiO2edXstjz3/9BabYSBMwMC1y09cr2pbvFEIbJh/RinrlI1744CRAc9q6BifgSC8+tzdpT1rdmuAE3l80yTZ/UglCzZMyECQ+MID58NiyprYGGbuO5t1/MWn99gMgmFCBoLwytO3Wir6ZggzLDpycQJyyYINH3r66WP7mj25wPDCZ+DsSRv2WTAsPHCmChgh7068/PwTGz4OlFtz+npX7/p9LstP3WwA4hZseMXp2w3Td56wYyho6lSdsfNY6YzdJydM330CBYPEQHIVnROVIzMLOIvb+oVq+meIVPVOQ8EgsYqeqUJJpfWcAKWymA2EsiGlAAAAAElFTkSuQmCC",
+                            V: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAOCAMAAAD32Kf8AAAAA3NCSVQICAjb4U/gAAABKVBMVEX////u1ZNVVVV9FBSKAADu1ZNVVVV6GhqAEBCFCAju1ZNVVVV4HBx7GBju1ZPs05LYrXi1pXxVVVV4HBzs05KtVTxnODh4HBx7GBiGBgbp0ZHnz5CVJRt6GhqAEBDnz5B6Ghp7GBjnz5DlzY/Zw4qaj3FnODh1IiJ6Ghp7GBjp0ZHlzY/jy457GBh8FhblzY+NhGyLgmtoNzd9FBR+FBTlzY+Dd2RmOjp+FBR/EhLnz5DlzY/Uv4nRrHmfUDxwV09qREF5Gxt/EhKAEBCECgrp0ZHnz5CLGBOAEBCBDg6CDAzp0ZHnz5DQvIe2mXKGSz+URjd+Hx1+FBR/EhKECgqFCAju1ZPt1JPs05Lp0ZHRrHnNqXmOQzaHDAuGBgaHBgaIBASJAgKKAABvavGGAAAAY3RSTlMAERERESIiIiIiMzMzM0RERERERFVVVVVVVWZmZmZmd3d3iIiIiIiIiIiZmZmZmaqqqqqqqru7u7u7zMzMzMzMzMzMzMzd3d3d3d3u7u7u7u7u7u7u7v////////////////+j/yqnAAAACXBIWXMAAA6cAAAOnAEHlFPdAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAALpJREFUGJVV0MUWwjAQQNEUKBLc3d3d3Yp7Ca7//xE0yKF9u7kzJ4sAwIkgSZJgzwQJodLiifnUvN8BVOis3mS+Qk0nNb8QG7Q4o8kqxcB+hxCapaSMwkifmhz26NcsjVVRQZw+qqofT+zmBaz6xvLMbtHUACCwDS6cVi2s5t72en/+WxcZBRJHrtQd08zq8dZNBr8L+HKt0R5OlDojmt7eHl99xxfJtHZXPFsetgNC7t+I5SZ3KGjggRdMvzXoF/cDXAAAAABJRU5ErkJggg=="
                         },
                         DisableUnit: "FactionUI/icons/icon_disable_unit.png",
                         Undo: "FactionUI/icons/icon_refresh_funds.png",
@@ -2457,7 +2467,6 @@
                             // 19.5 FIX VIEW by Netquik 
                             if (PerforceChangelist >= 472117) { // 19.5 patch
                                 this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
-                                //this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar FIXME
                                 this.ArmySetupAttackBarChildren[1].setOpacity(0.4); // setting opacity to next setup
                                 this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // setting hidden to next setup
                                 //this._playArea.setMarginTop(-5); // up playArea
@@ -2466,7 +2475,7 @@
                                 //this._playAreaChildren[2].setMarginTop(-25);
                                 this._playAreaChildren[4].resetDecorator();
 
-                                // lowering playArea children by Netquik FIXME 
+                                //  REVIEW  Lowering playArea children by Netquik
                                 this.FixOverlay = function (e) {
                                     var _this = (this.TABS) ? this.TABS.GUI.ArmySetupAttackBar.getInstance() : this;
                                     PlayArea = _this._playArea;
@@ -2560,11 +2569,11 @@
                                 cntWave._add(this.newSideButton(TABS.RES.IMG.Arrows.Right, this.tr("Shifts units one space right."), this.onClick_btnShift, "r", i));
                             }
                             // Mirror and Shift Buttons top
-                            //New rewrite for 19.5 by Netquik REVIEW 
+                            //New rewrite for 19.5 by Netquik  NOTE NEWTOPBUTTONREWRITE
                             this.ArmySetupAttackBarMainChildren[3].resetDecorator();
                             this.ArmySetupAttackBarMainChildren[3].setPaddingTop(10);
                             this.shiftbuttonopacity = function (e) {
-                                if (e.getTarget() && e.getTarget().basename === "SoundButton") {
+                                if (e.getTarget() && (e.getTarget().basename === "SoundButton" || e.getTarget().basename === "ModelButton")) {
                                     shiftbutton = (e.getTarget().getLayoutParent().getLayoutParent().getLayoutParent()) ? (e.getTarget().getLayoutParent().getLayoutParent().getLayoutParent()) : null;
                                     if (shiftbutton.getOpacity() === 0.3) {
                                         shiftbutton.setOpacity(1);
@@ -2579,6 +2588,18 @@
                                 shiftbox.setOpacity(0.3);
                                 shiftbox.addListener("mouseover", this.shiftbuttonopacity.bind((null, event)));
                                 shiftbox.addListener("mouseout", this.shiftbuttonopacity.bind((null, event)));
+
+                                shiftbox_inside = shiftbox.getChildren()[0].getChildren()[1];
+                                shiftbox_inside._removeAll();
+                                shiftbox_inside.add(new qx.ui.core.Spacer());
+                                //3 buttons (1 long + 2 updown)
+                                shiftbox_inside.add(this.newTopButton(TABS.RES.IMG.Flip2.V, this.tr("Mirrors units vertically."), this.onClick_btnMirror, "v", i, 45, null));
+                                shiftbox_inside.add(new qx.ui.core.Spacer());
+                                shiftbox_inside.add(this.newTopButton(TABS.RES.IMG.Arrows2.Up, this.tr("Shifts units one space up."), this.onClick_btnShift, "u", i, 20, 20));
+                                shiftbox_inside.add(this.newTopButton(TABS.RES.IMG.Arrows2.Down, this.tr("Shifts units one space down."), this.onClick_btnShift, "d", i, 20, 20));
+                                shiftbox_inside.add(new qx.ui.core.Spacer());
+
+
                             }
                             /* btnHBox = new qx.ui.container.Composite(new qx.ui.layout.HBox()),
                               btnHBoxouter = new qx.ui.container.Composite(new qx.ui.layout.HBox());
@@ -2597,7 +2618,7 @@
                             var formationContainer = this.ArmySetupAttackBar.getMainContainer();
                             formationContainer.setMarginTop(formationContainer.getMarginTop() + 20);
                             // 19.5 FIX VIEW by Netquik
-                            if (PerforceChangelist >= 472117) { // 19.5 patch FIXME                 
+                            if (PerforceChangelist >= 472117) { // 19.5 patch                  
                                 formationContainer.setMarginTop(formationContainer.getMarginTop() - 40);
                             }
                             /* formation.bind("changeWidth", btnHBox, "width");
@@ -2643,25 +2664,25 @@
                             btn.addListener("click", onClick, this);
                             return btn;
                         },
-                         /* newTopButton: function (icon, text, onClick, pos, sel) {
+
+                        //NOTE NEWTOPBUTTON Function rewrite by Netquik for 19.5
+                        newTopButton: function (icon, text, onClick, pos, sel, w, mw) {
                             var btn = new qx.ui.form.ModelButton(null, icon).set({
                                 toolTipText: text,
-                                width: 25,
+                                width: w,
                                 maxHeight: 20,
-                                alignY: "middle",
-                                show: "icon",
-                                iconPosition: "top",
-                                appearance: "button-addpoints",
-                                opacity: 0.3,
+                                maxWidth: mw,
+                                appearance: "button-friendlist-scroll",
+                                padding: 0,
                                 model: [pos, sel]
                             });
-                            btn.getChildControl("icon").set({
+                            /* btn.getChildControl("icon").set({
                                 maxWidth: 14,
                                 maxHeight: 14,
                                 scale: true
-                            });
+                            }); */
                             btn.addListener("click", onClick, this);
-                            btn.addListener("mouseover", function (e) {
+                            /* btn.addListener("mouseover", function (e) {
                                 e.getTarget().set({
                                     opacity: 1.0
                                 });
@@ -2670,9 +2691,9 @@
                                 e.getTarget().set({
                                     opacity: 0.3
                                 });
-                            }, this);
+                            }, this); */
                             return btn;
-                        }, */
+                        },
                         onClick_btnMirror: function (e) {
                             var formation = TABS.UTIL.Formation.Get();
                             formation = TABS.UTIL.Formation.Mirror(formation, e.getTarget().getModel()[0], e.getTarget().getModel()[1]);
@@ -2683,7 +2704,7 @@
                             formation = TABS.UTIL.Formation.Shift(formation, e.getTarget().getModel()[0], e.getTarget().getModel()[1]);
                             TABS.UTIL.Formation.Set(formation);
                         }
-                    }, 
+                    },
                     defer: function () {
                         TABS.addInit("TABS.GUI.ArmySetupAttackBar");
                     }
@@ -2827,8 +2848,8 @@
                                 column: 2
                             });
                             // Move Box init by Netquik
-                            this.boxMove.xy = TABS.SETTINGS.get("GUI.Window.MoveBox.position", [5, 470]);
-                            this.PlayArea.add(this.boxMove, {
+                            this.boxMove.xy = TABS.SETTINGS.get("GUI.Window.MoveBox.position", [390, 470]);
+                            this.PlayArea.getLayoutParent().getLayoutParent().add(this.boxMove, {
                                 left: this.boxMove.xy[0],
                                 top: this.boxMove.xy[1]
                             });
