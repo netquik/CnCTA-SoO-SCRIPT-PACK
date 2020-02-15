@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.18
+// @version         20.02.19
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW + AUTO - Move Box save position code - New Top Bar Button
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -302,8 +302,8 @@
                              */
                             var CityId = ((cityid !== undefined && cityid !== null) ? cityid : ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCityId()),
                                 OwnId = ((ownid !== undefined && ownid !== null) ? ownid : ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCityId()),
-                                unit, target, freePos, transported = [],
-                                i, targetFormation = this.GetFormation(CityId, OwnId),
+                                unit, target, /* freePos,*/ transported = [], 
+                                i, targetFormation = this.GetFormation(CityId, OwnId)/*,
                                 getFreePos = function (formation) {
                                     for (var x = 0; x < ClientLib.Base.Util.get_ArmyMaxSlotCountX(); x++) {
                                         for (var y = 0; y < ClientLib.Base.Util.get_ArmyMaxSlotCountY(); y++) {
@@ -315,43 +315,47 @@
                                     }
                                     return null;
                                 },
-                                freeTransported = function (unit, freePos) {
+                                 freeTransported = function (unit, freePos) {
                                     if (unit.get_TransportedCityEntity() !== null) unit = unit.get_TransportedCityEntity();
                                     if (unit.get_IsTransportedCityEntity() && freePos !== null) unit.MoveBattleUnit(freePos.x, freePos.y);
-                                };
+                                }*/; 
                             if (targetFormation !== null) {
                                 for (i = 0; i < formation.length; i++) {
                                     unit = this.GetUnitById(formation[i].id, CityId, OwnId);
-                                    if (formation[i].gs == 2) {
+                                       if (formation[i].gs == 2) {
                                         transported.push(formation[i]);
                                         continue;
-                                    }
+                                    }   
                                     target = targetFormation.GetUnitByCoord(formation[i].x, formation[i].y);
-                                    freePos = getFreePos(targetFormation);
+                                    /* freePos = getFreePos(targetFormation);
                                     if (freePos !== null && target !== null) freeTransported(target, freePos);
                                     freePos = getFreePos(targetFormation);
-                                    if (freePos !== null) freeTransported(unit, freePos);
+                                    if (freePos !== null) freeTransported(unit, freePos); */
                                     unit.set_Enabled(formation[i].enabled);
-                                    target = targetFormation.GetUnitByCoord(formation[i].x, formation[i].y);
+                                    /* target = targetFormation.GetUnitByCoord(formation[i].x, formation[i].y);*/
                                     if (target !== null && ClientLib.Base.Unit.CanBeTransported(target.get_UnitGameData_Obj(), unit.get_UnitGameData_Obj())) target.MoveBattleUnit(unit.get_CoordX(), unit.get_CoordY());
-                                    else unit.MoveBattleUnit(formation[i].x, formation[i].y);
+                                    unit.MoveBattleUnit(formation[i].x, formation[i].y); 
                                 }
-                                //transported units
+                                //transported units FIXME 
                                 for (i = 0; i < transported.length; i++) {
-                                    unit = this.GetUnitById(transported[i].id, CityId, OwnId);
-                                    target = targetFormation.GetUnitByCoord(transported[i].x, transported[i].y);
-                                    freePos = getFreePos(targetFormation);
-                                    if (freePos !== null && target !== null) freeTransported(target, freePos);
-                                    freePos = getFreePos(targetFormation);
-                                    if (freePos !== null) freeTransported(unit, freePos);
-                                    target = targetFormation.GetUnitByCoord(transported[i].x, transported[i].y);
-                                    if (target !== null) target.set_Enabled(true);
-                                    unit.set_Enabled(true);
-                                    unit.MoveBattleUnit(transported[i].x, transported[i].y);
-                                    if (target !== null) target.set_Enabled(transported[i].enabled);
-                                    else unit.set_Enabled(transported[i].enabled);
-                                    if (target !== null) target.MoveBattleUnit(transported[i].x, transported[i].y);
-                                }
+                                    unit = this.GetUnitById(transported[i].id, CityId, OwnId); //unit being trasported
+                                    target = targetFormation.GetUnitByCoord(transported[i].x, transported[i].y); //unit trasporter
+                                    if (target !== null && target.get_Enabled()) unit.set_Enabled(true);
+                                      /*freePos = getFreePos(targetFormation); //find free spaces
+                                    if (freePos !== null && target !== null) freeTransported(target, freePos); //if trasporter and free space
+                                    freePos = getFreePos(targetFormation); //find other free spaces
+                                    if (freePos !== null) freeTransported(unit, freePos); // if other spaces so from function if trasported is also trasporter so unit = second unit trasported and if second unit trasported move it free
+                                    target = targetFormation.GetUnitByCoord(transported[i].x, transported[i].y); // trasporter = xy original
+                                    if (target !== null) target.set_Enabled(true); if xy exist xy enabled
+                                    unit.set_Enabled(true); unit being trasported enabled 
+                                    unit.MoveBattleUnit(transported[i].x, transported[i].y); unit being trasported move to xy
+                                    
+                                    
+                                    if (target !== null) target.set_Enabled(transported[i].enabled); // if trasporter exist toggle enable with trasported state
+                                    else unit.set_Enabled(transported[i].enabled); // if not exist unit being trasported toggle enable with trasported state
+                                    if (target !== null) target.MoveBattleUnit(transported[i].x, transported[i].y); // if trasporter exist move to xy original
+                                
+                              */ } 
                             }
                         },
                         Merge: function (formation, attacker) {
@@ -444,7 +448,7 @@
                             var all = (EUnitGroup != ClientLib.Data.EUnitGroup.Infantry && EUnitGroup != ClientLib.Data.EUnitGroup.Vehicle && EUnitGroup != ClientLib.Data.EUnitGroup.Aircraft);
                             for (var i = 0; i < formation.length; i++) {
                                 var unitGroup = this.GetUnitGroupTypeFromUnit(ClientLib.Res.ResMain.GetInstance().GetUnit_Obj(formation[i].i));
-                                if (all || (EUnitGroup == unitGroup && formation[i].gs === 0)) formation[i].enabled = set;
+                                if (all || (EUnitGroup == unitGroup   /* && formation[i].gs === 0 */  )) formation[i].enabled = set;
                             }
                             return formation;
                         },
@@ -452,7 +456,7 @@
                             var all = (EUnitGroup != ClientLib.Data.EUnitGroup.Infantry && EUnitGroup != ClientLib.Data.EUnitGroup.Vehicle && EUnitGroup != ClientLib.Data.EUnitGroup.Aircraft);
                             for (var i = 0, num_total = 0, num_enabled = 0; i < formation.length; i++) {
                                 var unitGroup = this.GetUnitGroupTypeFromUnit(ClientLib.Res.ResMain.GetInstance().GetUnit_Obj(formation[i].i));
-                                if (all || (EUnitGroup == unitGroup && formation[i].gs === 0)) {
+                                if (all || (EUnitGroup == unitGroup  /* && formation[i].gs === 0 */  )) {
                                     num_total++;
                                     if (formation[i].enabled) num_enabled++;
                                 }
