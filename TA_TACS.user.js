@@ -525,7 +525,8 @@
                             this.MainOverlay = this._Application.getMainOverlay();
                             this.OverlayFixed = false;
 
-                            // 19.5 FIX VIEW by Netquik REVIEW  
+                            // REVIEW 19.5 FIX VIEW 
+                            //by Netquik   
                             if (PerforceChangelist >= 472117) { // 19.5 patch
                                 this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
                                 this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar
@@ -534,7 +535,8 @@
                                 this._playAreaChildren[2].setHeight(120); // fix opacity for better view
                                 this._playAreaChildren[4].resetDecorator();
 
-                                // lowering playArea children by Netquik FIXME 
+                                // REVIEW Lowering playArea children 
+                                // by Netquik 
                                 this.FixOverlay = function (e) {
                                     var _this = (this.TACS) ? this.TACS.getInstance() : this;
                                     PlayArea = _this._PlayArea;
@@ -576,7 +578,8 @@
                                 }
                                 this.MainOverlay.addListener('changeHeight', this.RunTimeFixOverlay.bind(null, event));
 
-                                // adjusting bars 19.5 by Netquik 
+                                // REVIEW adjusting bars 19.5
+                                // by Netquik 
                                 this.ArmySetupAttackBarMainChildren[2].setVisibility("hidden");
                                 this.ArmySetupAttackBarMainChildren[9].resetDecorator();
                                 this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
@@ -1776,7 +1779,7 @@
                             } else { //old
                                 this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent();
                             }
-                            if (this.toolBar) {
+                            if (this.toolBar) { // REVIEW added toolBarMouseRemove
                                 this.toolBarParent.remove(this.toolBar);
                                 this.toolBarParent.remove(this.toolBarMouse);
                             }
@@ -2155,6 +2158,8 @@
                             if (this.userInterface) {
                                 this._armyBar.remove(this.userInterface);
                             }
+                            // REVIEW Modded 19.5
+                            // by Netquik 
                             if (this.options.rightSide.getValue()) {
                                 var canvasWidth = 75;
                                 var interfaceBG = rightBG;
@@ -2182,7 +2187,8 @@
                                     backgroundImage: interfaceBG
                                 })
                             });
-                            // Repositionig Buttons by Netquik
+                            // REVIEW Repositionig Buttons
+                            // by Netquik
                             if (this.rightBGbar) {
                                 this._armyBar.remove(this.rightBGbar);
                             }
