@@ -2,9 +2,9 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.18
+// @version         20.02.20
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
-// @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW + AUTO - Move Box save position code - New Top Bar Button
+// @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW + AUTO - Move Box save position code - New Top Bar Button - Native Unit Enabling
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
@@ -69,6 +69,7 @@
                             Left: "webfrontend/theme/arrows/left.png",
                             Right: "webfrontend/theme/arrows/right.png"
                         },
+                        //Added by Netquik
                         Arrows2: {
                             Up: "FactionUI/icons/icon_step_up_button.png",
                             Down: "FactionUI/icons/icon_step_down_button.png",
@@ -79,9 +80,10 @@
                             H: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOvgAADr4B6kKxwAAAABp0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjUuMTAw9HKhAAACo0lEQVQ4T2PABkJq+rjmH7nUdPrV119nXn/9s+7S/R1NCzc4rTx1a8ay41c7WuYsl5WRkWGEKicM4honSux7+Pb42Tdf/4LwwacfP7Wv3pOz8sydVavO3lk5f9cx15jCGhaocsJgys7jAUeffXiGZODn1lW7Claeub16xelb64C4Ma+lnx+qHD/wySpjXnnqeifQq79RDFy5qxBq4PqVp25Ombxmhw4QQHXhAdH1fWL77r++DDToD04Dz9xeteDAuajc1gn4ve0UkciU3zvT4vTrb79ghmEzEOTtNefvL8pomyrExsYG1Y0FxNT18my4dH8KKGYJGLgeGDkrJqzeoR9ZWMMM1Y4Jercctjr46N1NZMNwGQhy5YpTN/PzWvu5oNpRgUdGGdOc/WfST736guJdPAauX3HiekfH4vXyUCNQQVhtn8D2W8+2nEGKDEIGgrw9a+cxeyUlJdRE7pldxZjcOlXj6LOPj9ENw2cgkL9m2dHL2TGljZxQoyAgrKaHdfmZWxVA734jxUAQXnXm9tS6yXMlTG2doKYBQWrrZIHNVx4sBWrG8C4I4zNw5enbi+ftPuGSVNGMiO2edXstjz3/9BabYSBMwMC1y09cr2pbvFEIbJh/RinrlI1744CRAc9q6BifgSC8+tzdpT1rdmuAE3l80yTZ/UglCzZMyECQ+MID58NiyprYGGbuO5t1/MWn99gMgmFCBoLwytO3Wir6ZggzLDpycQJyyYINH3r66WP7mj25wPDCZ+DsSRv2WTAsPHCmChgh7068/PwTGz4OlFtz+npX7/p9LstP3WwA4hZseMXp2w3Td56wYyho6lSdsfNY6YzdJydM330CBYPEQHIVnROVIzMLOIvb+oVq+meIVPVOQ8EgsYqeqUJJpfWcAKWymA2EsiGlAAAAAElFTkSuQmCC",
                             V: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOvgAADr4B6kKxwAAAABp0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjUuMTAw9HKhAAAClklEQVQ4T2MgB/iVd7CH1/SI9G3YF7D4+JUlR59/+nH61dff8w6cnQBVgh+EN01hjGqZxpY9eYlI39YjNvMOni888Ojd0aNP3z8+8/rr77Nvvv498+brn/n7T0+HasEOIlpnMIc1TBIJq+vX3HjtSd/ma4/WnHj59TtQM9gQZAwycO7ekzOhWhHAo6CRKaymh6d69krVWfvOpO19+O700WcfYS75g24QDGMYCPQWS1TzFKmktmkmO26/XLHv3sujwHD5CVSM0xBkDDcwqLJLcMHxa/FLT17rOPz04/PTb779wqaBEIYbOHv/2ZxjLz6/BglgU0gshhu44MDZaUABigwDYbCB+07NZJi29WDFvrsvLu+78/waDnwdixgmBpoxbduhMgav6ETZyNxSm+j8creoPPJwdH4FkC6z9o1NlWaYsnGf0ZpzdyeuOnt3GSUYZMZUoFkMk7ceDV555s6KFadvrQPi9eRioBmrpu44EcLQvHijweJDFzJWnrrRu/LM7VVASbIMBupdPWX78TAGt8Bw1oSsfL6qCbMUp2855Lvk+LXGFaduTgcpACpci64RF4YbCALe3t6MLi4uTC6BEZwhqXnC3Us3ms7acSxi+YlrLaDwgRqO1SAYRjEQGYAMB2JmN08v9vCMAuGWafPVFu4/E7H8+NWaVWduz11x+vYakgyEAaChDEBXM3r5+rOGJmVwlzZ1Svav2m656NDFghWnbk0FGrAEaBAoSMBhTtBAdAByuZOrO4t7eDxfWlWz7IztR70WHDiXA3T1jFVn76wE4hVTtx8PhionDoBc7eDgwODq4ckcFJPEHp9TJNA0e5n6tPU77ZcfvZLaNnupClQpeQDkaktLS2Y3Hz9Ov8h4XltnV3YAMTRvewY5T1wAAAAASUVORK5CYII="
                         },
+                        //Added by Netquik
                         Flip2: {
                             H: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOvgAADr4B6kKxwAAAABp0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjUuMTAw9HKhAAACo0lEQVQ4T2PABkJq+rjmH7nUdPrV119nXn/9s+7S/R1NCzc4rTx1a8ay41c7WuYsl5WRkWGEKicM4honSux7+Pb42Tdf/4LwwacfP7Wv3pOz8sydVavO3lk5f9cx15jCGhaocsJgys7jAUeffXiGZODn1lW7Claeub16xelb64C4Ma+lnx+qHD/wySpjXnnqeifQq79RDFy5qxBq4PqVp25Ombxmhw4QQHXhAdH1fWL77r++DDToD04Dz9xeteDAuajc1gn4ve0UkciU3zvT4vTrb79ghmEzEOTtNefvL8pomyrExsYG1Y0FxNT18my4dH8KKGYJGLgeGDkrJqzeoR9ZWMMM1Y4Jercctjr46N1NZMNwGQhy5YpTN/PzWvu5oNpRgUdGGdOc/WfST736guJdPAauX3HiekfH4vXyUCNQQVhtn8D2W8+2nEGKDEIGgrw9a+cxeyUlJdRE7pldxZjcOlXj6LOPj9ENw2cgkL9m2dHL2TGljZxQoyAgrKaHdfmZWxVA734jxUAQXnXm9tS6yXMlTG2doKYBQWrrZIHNVx4sBWrG8C4I4zNw5enbi+ftPuGSVNGMiO2edXstjz3/9BabYSBMwMC1y09cr2pbvFEIbJh/RinrlI1744CRAc9q6BifgSC8+tzdpT1rdmuAE3l80yTZ/UglCzZMyECQ+MID58NiyprYGGbuO5t1/MWn99gMgmFCBoLwytO3Wir6ZggzLDpycQJyyYINH3r66WP7mj25wPDCZ+DsSRv2WTAsPHCmChgh7068/PwTGz4OlFtz+npX7/p9LstP3WwA4hZseMXp2w3Td56wYyho6lSdsfNY6YzdJydM330CBYPEQHIVnROVIzMLOIvb+oVq+meIVPVOQ8EgsYqeqUJJpfWcAKWymA2EsiGlAAAAAElFTkSuQmCC",
-                            V: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAOCAMAAAD32Kf8AAAAA3NCSVQICAjb4U/gAAABKVBMVEX////u1ZNVVVV9FBSKAADu1ZNVVVV6GhqAEBCFCAju1ZNVVVV4HBx7GBju1ZPs05LYrXi1pXxVVVV4HBzs05KtVTxnODh4HBx7GBiGBgbp0ZHnz5CVJRt6GhqAEBDnz5B6Ghp7GBjnz5DlzY/Zw4qaj3FnODh1IiJ6Ghp7GBjp0ZHlzY/jy457GBh8FhblzY+NhGyLgmtoNzd9FBR+FBTlzY+Dd2RmOjp+FBR/EhLnz5DlzY/Uv4nRrHmfUDxwV09qREF5Gxt/EhKAEBCECgrp0ZHnz5CLGBOAEBCBDg6CDAzp0ZHnz5DQvIe2mXKGSz+URjd+Hx1+FBR/EhKECgqFCAju1ZPt1JPs05Lp0ZHRrHnNqXmOQzaHDAuGBgaHBgaIBASJAgKKAABvavGGAAAAY3RSTlMAERERESIiIiIiMzMzM0RERERERFVVVVVVVWZmZmZmd3d3iIiIiIiIiIiZmZmZmaqqqqqqqru7u7u7zMzMzMzMzMzMzMzd3d3d3d3u7u7u7u7u7u7u7v////////////////+j/yqnAAAACXBIWXMAAA6cAAAOnAEHlFPdAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAALpJREFUGJVV0MUWwjAQQNEUKBLc3d3d3Yp7Ca7//xE0yKF9u7kzJ4sAwIkgSZJgzwQJodLiifnUvN8BVOis3mS+Qk0nNb8QG7Q4o8kqxcB+hxCapaSMwkifmhz26NcsjVVRQZw+qqofT+zmBaz6xvLMbtHUACCwDS6cVi2s5t72en/+WxcZBRJHrtQd08zq8dZNBr8L+HKt0R5OlDojmt7eHl99xxfJtHZXPFsetgNC7t+I5SZ3KGjggRdMvzXoF/cDXAAAAABJRU5ErkJggg=="
+                            V: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAOCAMAAAD32Kf8AAAAA3NCSVQICAjb4U/gAAAA51BMVEX////u1ZNVVVVUVF5TU2Du1ZNVVVVUVF7u1ZNVVVVUVF5UVFlTU2Du1ZPs05LbxY21pXykl3t6dG5UVF5TU2Ds05JUVF5UVFnq0ZHp0ZHnz5BUVFpUVF5TU2Dnz5BUVF5TU2Dnz5DlzY/Zw4qaj3FUVFlTU2Dp0ZHlzY/jy45TU2JTU2DlzY+ckHeNhGyLgmt0b2tiYF1TU2BTU13lzY+EfGluamBTU2Dnz5DlzY/Uv4lva2hrZ2Tp0ZHnz5BsaGbp0ZHnz5DQvIe5qX6VinOPhnGFfmzu1ZPs05Lt05Pq0ZHWwYrUv4k2s1xpAAAATXRSTlMAERERESIiIjMzMzMzRERERERERERVVVVmZmZmZmZ3d3eIiIiIiIiZmZmZmaqqqqqqqqqqu7u7u8zMzMzM3d3d7u7u7u7u7v///////2WvYGIAAAAJcEhZcwAADpwAAA6cAQeUU90AAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzbovLKMAAAAqklEQVQYlV3O6RaBUBSG4UrpiMwyRqZMmTIlJBlOhvu/HmdLVnl/Pt/aa22K+kbTHELJcnPQTjMecBwSC5WWtjSsk212omCoVO9rW4uAe8cYO5MYUdQ7WPbDxX7OFFQ0cChPU+bzFey8As2ML9dgtzVodrY7BtvPQROKrm8CLbqgbF5WFFUd+o2q8C/F8ryQk2oymWBTPf3ERniBbGRqFBkqFAtHUvxPf70BysEmbzfULiYAAAAASUVORK5CYII="
                         },
                         DisableUnit: "FactionUI/icons/icon_disable_unit.png",
                         Undo: "FactionUI/icons/icon_refresh_funds.png",
@@ -302,23 +304,25 @@
                              */
                             var CityId = ((cityid !== undefined && cityid !== null) ? cityid : ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCityId()),
                                 OwnId = ((ownid !== undefined && ownid !== null) ? ownid : ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCityId()),
-                                unit, target, freePos, transported = [],
-                                i, targetFormation = this.GetFormation(CityId, OwnId),
-                                getFreePos = function (formation) {
-                                    for (var x = 0; x < ClientLib.Base.Util.get_ArmyMaxSlotCountX(); x++) {
-                                        for (var y = 0; y < ClientLib.Base.Util.get_ArmyMaxSlotCountY(); y++) {
-                                            if (formation.GetUnitByCoord(x, y) === null) return {
-                                                x: x,
-                                                y: y
-                                            };
-                                        }
-                                    }
-                                    return null;
-                                },
-                                freeTransported = function (unit, freePos) {
-                                    if (unit.get_TransportedCityEntity() !== null) unit = unit.get_TransportedCityEntity();
-                                    if (unit.get_IsTransportedCityEntity() && freePos !== null) unit.MoveBattleUnit(freePos.x, freePos.y);
-                                };
+                                unit, target, /* freePos,*/ transported = [],
+                                i, targetFormation = this.GetFormation(CityId, OwnId)
+                            /*,
+                                                            getFreePos = function (formation) {
+                                                                for (var x = 0; x < ClientLib.Base.Util.get_ArmyMaxSlotCountX(); x++) {
+                                                                    for (var y = 0; y < ClientLib.Base.Util.get_ArmyMaxSlotCountY(); y++) {
+                                                                        if (formation.GetUnitByCoord(x, y) === null) return {
+                                                                            x: x,
+                                                                            y: y
+                                                                        };
+                                                                    }
+                                                                }
+                                                                return null;
+                                                            },
+                                                             freeTransported = function (unit, freePos) {
+                                                                if (unit.get_TransportedCityEntity() !== null) unit = unit.get_TransportedCityEntity();
+                                                                if (unit.get_IsTransportedCityEntity() && freePos !== null) unit.MoveBattleUnit(freePos.x, freePos.y);
+                                                            }*/
+                            ;
                             if (targetFormation !== null) {
                                 for (i = 0; i < formation.length; i++) {
                                     unit = this.GetUnitById(formation[i].id, CityId, OwnId);
@@ -327,30 +331,36 @@
                                         continue;
                                     }
                                     target = targetFormation.GetUnitByCoord(formation[i].x, formation[i].y);
-                                    freePos = getFreePos(targetFormation);
+                                    /* freePos = getFreePos(targetFormation);
                                     if (freePos !== null && target !== null) freeTransported(target, freePos);
                                     freePos = getFreePos(targetFormation);
-                                    if (freePos !== null) freeTransported(unit, freePos);
+                                    if (freePos !== null) freeTransported(unit, freePos); */
                                     unit.set_Enabled(formation[i].enabled);
-                                    target = targetFormation.GetUnitByCoord(formation[i].x, formation[i].y);
+                                    /* target = targetFormation.GetUnitByCoord(formation[i].x, formation[i].y);*/
                                     if (target !== null && ClientLib.Base.Unit.CanBeTransported(target.get_UnitGameData_Obj(), unit.get_UnitGameData_Obj())) target.MoveBattleUnit(unit.get_CoordX(), unit.get_CoordY());
-                                    else unit.MoveBattleUnit(formation[i].x, formation[i].y);
+                                    unit.MoveBattleUnit(formation[i].x, formation[i].y);
                                 }
-                                //transported units
+                                //transported units NOTE Functions Deactiveted
+                                // Modded  by Nequik  for revert to native unit enabling
                                 for (i = 0; i < transported.length; i++) {
-                                    unit = this.GetUnitById(transported[i].id, CityId, OwnId);
-                                    target = targetFormation.GetUnitByCoord(transported[i].x, transported[i].y);
-                                    freePos = getFreePos(targetFormation);
-                                    if (freePos !== null && target !== null) freeTransported(target, freePos);
-                                    freePos = getFreePos(targetFormation);
-                                    if (freePos !== null) freeTransported(unit, freePos);
-                                    target = targetFormation.GetUnitByCoord(transported[i].x, transported[i].y);
-                                    if (target !== null) target.set_Enabled(true);
-                                    unit.set_Enabled(true);
-                                    unit.MoveBattleUnit(transported[i].x, transported[i].y);
-                                    if (target !== null) target.set_Enabled(transported[i].enabled);
-                                    else unit.set_Enabled(transported[i].enabled);
-                                    if (target !== null) target.MoveBattleUnit(transported[i].x, transported[i].y);
+                                    unit = this.GetUnitById(transported[i].id, CityId, OwnId); //unit being trasported
+                                    target = targetFormation.GetUnitByCoord(transported[i].x, transported[i].y); //unit trasporter
+                                    if (target !== null && target.get_Enabled()) unit.set_Enabled(true);
+                                    /*freePos = getFreePos(targetFormation); //find free spaces
+                                    if (freePos !== null && target !== null) freeTransported(target, freePos); //if trasporter and free space
+                                    freePos = getFreePos(targetFormation); //find other free spaces
+                                    if (freePos !== null) freeTransported(unit, freePos); // if other spaces so from function if trasported is also trasporter so unit = second unit trasported and if second unit trasported move it free
+                                    target = targetFormation.GetUnitByCoord(transported[i].x, transported[i].y); // trasporter = xy original
+                                    if (target !== null) target.set_Enabled(true); if xy exist xy enabled
+                                    unit.set_Enabled(true); unit being trasported enabled 
+                                    unit.MoveBattleUnit(transported[i].x, transported[i].y); unit being trasported move to xy
+                                    
+                                    
+                                    if (target !== null) target.set_Enabled(transported[i].enabled); // if trasporter exist toggle enable with trasported state
+                                    else unit.set_Enabled(transported[i].enabled); // if not exist unit being trasported toggle enable with trasported state
+                                    if (target !== null) target.MoveBattleUnit(transported[i].x, transported[i].y); // if trasporter exist move to xy original
+                                
+                              */
                                 }
                             }
                         },
@@ -444,15 +454,18 @@
                             var all = (EUnitGroup != ClientLib.Data.EUnitGroup.Infantry && EUnitGroup != ClientLib.Data.EUnitGroup.Vehicle && EUnitGroup != ClientLib.Data.EUnitGroup.Aircraft);
                             for (var i = 0; i < formation.length; i++) {
                                 var unitGroup = this.GetUnitGroupTypeFromUnit(ClientLib.Res.ResMain.GetInstance().GetUnit_Obj(formation[i].i));
-                                if (all || (EUnitGroup == unitGroup && formation[i].gs === 0)) formation[i].enabled = set;
+                                if (all || (EUnitGroup == unitGroup /* && formation[i].gs === 0 */ )) formation[i].enabled = set;
                             }
                             return formation;
                         },
+
+                        // Mooded by Netquik
+
                         toggle_Enabled: function (formation, EUnitGroup) {
                             var all = (EUnitGroup != ClientLib.Data.EUnitGroup.Infantry && EUnitGroup != ClientLib.Data.EUnitGroup.Vehicle && EUnitGroup != ClientLib.Data.EUnitGroup.Aircraft);
                             for (var i = 0, num_total = 0, num_enabled = 0; i < formation.length; i++) {
                                 var unitGroup = this.GetUnitGroupTypeFromUnit(ClientLib.Res.ResMain.GetInstance().GetUnit_Obj(formation[i].i));
-                                if (all || (EUnitGroup == unitGroup && formation[i].gs === 0)) {
+                                if (all || (EUnitGroup == unitGroup /* && formation[i].gs === 0 */ )) {
                                     num_total++;
                                     if (formation[i].enabled) num_enabled++;
                                 }
