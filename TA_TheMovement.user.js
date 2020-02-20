@@ -771,15 +771,15 @@
                     this.GetTerritoryTypeByCoordinatesMethodName = ClientLib.Data.World.prototype.CheckFoundBase.toString().match(/switch\s?\(this\.([A-Z]{6})\([a-z],[a-z]\)\)/)[1];
                     var rewrittenFunctionBody = ClientLib.Data.World.prototype.GetTerritoryTypeByCoordinates.toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/var ([a-z])=(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\))\.[A-Z]{6}\(\);var ([a-z])=\2\.[A-Z]{6}\(\);/, 'var $1=territoryIdentity.playerId;var $3=territoryIdentity.allianceId;');
                     var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
-                    var fn = Function('territoryIdentity,a,b', fnBody);
-                    this.GetTerritoryTypeByCoordinatesPatched = fn;
+                    var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
+                    this.GetTerritoryTypeByCoordinatesPatched = new Function(args, fnBody);
                     //this.GetTerritoryTypeByCoordinatesPatched = eval('(' + rewrittenFunctionBody + ')');
                     this.CheckMoveBaseMethodName = ClientLib.Vis.MouseTool.MoveBaseTool.prototype.VisUpdate.toString().match(/var [A-Za-z]+=[A-Za-z]+\.([A-Z]{6})\([A-Za-z]+,[A-Za-z]+,this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\);/)[1];
                     // The second replace takes care of landing on a ruin and the third one landing next to a ruin
                     rewrittenFunctionBody = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\((n\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\$I\.[A-Z]{6}\.FailFieldOccupied;)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\((w\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\(\$I\.[A-Z]{6}\.FailNeighborRuin)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5');
                     fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
-                    fn = Function('territoryIdentity,a,b,c,d,e', fnBody);
-                    this.CheckMoveBasePatched = fn;
+                    args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
+                    this.CheckMoveBasePatched = new Function(args, fnBody);
                     //this.CheckMoveBasePatched = eval('(' + rewrittenFunctionBody + ')');
                 },
                 members: {
