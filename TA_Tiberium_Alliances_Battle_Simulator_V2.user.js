@@ -3089,7 +3089,7 @@
                                     if (i == formation.length - 1) this.layouts.restore = false;
                                     for (var j = 0; j < this.view.lastUnitList.length; j++) {
                                         if (this.view.lastUnitList[j].get_Id() === unit.id) {
-                                            this.view.lastUnitList[j].ty(unit.x, unit.y);
+                                            this.view.lastUnitList[j].MoveBattleUnit(unit.x, unit.y);
                                             if (unit.e === undefined) this.view.lastUnitList[j].set_Enabled(true);
                                             else this.view.lastUnitList[j].set_Enabled(unit.e);
                                         }
