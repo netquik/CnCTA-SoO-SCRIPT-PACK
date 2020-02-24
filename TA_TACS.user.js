@@ -1568,7 +1568,7 @@
                                 colSpan: 2
                             });
                             this.options.statsOpacity.setValue(this.saveObj.slider.statsOpacity);
-                            this.options.statsOpacityOutput = new qx.ui.basic.Label(String(this.saveObj.slider.statsOpacity));
+                            this.options.statsOpacityOutput = new qx.ui.basic.Label(String(this.saveObj.slider.statsOpacity)+ "%");
                             pssVBox.add(this.options.statsOpacityOutput, {
                                 row: 16,
                                 column: 0
