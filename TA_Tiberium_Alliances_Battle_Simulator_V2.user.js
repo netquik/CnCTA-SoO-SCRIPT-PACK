@@ -2485,7 +2485,7 @@
                             this.MenuBarButtons = this.MenuBar.getChildren()[1].getChildren().length;
                             if (this.MenuBarButtons > 10) {
                                 this.MenuBar.setMarginLeft(-(this.MenuBarButtons - 10) * (50));
-                            }
+                            } //FIXME
 
                             // 19.5 FIX VIEW by Netquik 
                             if (PerforceChangelist >= 472117) { // 19.5 patch
