@@ -527,8 +527,8 @@
                             // Fix a problem if new button is added in Menu Bar that cause misalign on center
                             this.MenuBar = qx.core.Init.getApplication().getMenuBar();
                             this.MenuBarButtons = this.MenuBar.getChildren()[1].getChildren().length;
-                            if (this.MenuBarButtons > 10) {
-                                this.MenuBar.setMarginLeft(-(this.MenuBarButtons - 10) * (50));
+                            if (this.MenuBarButtons > 9) {
+                                this.MenuBar.setMarginLeft(-(this.MenuBarButtons - 9) * (50));
                             }
 
                             // REVIEW 19.5 FIX VIEW 
@@ -1854,7 +1854,7 @@
                                 column: 0
                             });
                             playArea.add(this.repairInfo, {
-                                bottom: 130,
+                                bottom: 180,
                                 right: 3
                             });
                             // Toolbar
