@@ -2480,12 +2480,7 @@
                             this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
                             this._playAreaChildren = this._playArea.getChildren();
                             this.OverlayFixed = false;
-                            // Fix a problem if new button is added in Menu Bar that cause misalign on center
-                            this.MenuBar = qx.core.Init.getApplication().getMenuBar();
-                            this.MenuBarButtons = this.MenuBar.getChildren()[1].getChildren().length;
-                            if (this.MenuBarButtons > 9) {
-                                this.MenuBar.setMarginLeft(-(this.MenuBarButtons - 9) * (50));
-                            } //FIXME
+
 
                             // 19.5 FIX VIEW by Netquik 
                             if (PerforceChangelist >= 472117) { // 19.5 patch
@@ -2506,14 +2501,19 @@
                                     PlayAreaHeight2 = _this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().height;
                                     PlayAreaOffSet = PlayAreaHeight2 - PlayAreaHeight;
                                     playAreaChildren = PlayArea.getChildren();
+                                    MainOverlaychild = _this.MainOverlay.getChildren();
                                     var fixOverlay;
                                     var fix = 0;
                                     fixOverlay = PlayAreaOffSet < 150;
-                                    if (Math.round(window.devicePixelRatio * 100) >= 125) {
-                                        this.MainOverlay.setMarginTop(0); // down Mainoverlay not playArea
-                                        fixOverlay = null;
+                                    _this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
+                                    if (Math.round(window.devicePixelRatio * 100) >= 125 || PlayAreaHeight2 < 752) {
+                                        MainOverlaychild[1].setHeight(3);
+                                        MainOverlaychild[2].setMarginTop(-32);
+                                        MainOverlaychild[10].setMarginTop(29);
                                     } else {
-                                        this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
+                                        MainOverlaychild[1].resetHeight();
+                                        MainOverlaychild[2].setMarginTop(0);
+                                        MainOverlaychild[10].setMarginTop(0);
                                     }
                                     for (var i in playAreaChildren) {
                                         playchild = playAreaChildren[i];
@@ -2604,10 +2604,10 @@
                             this.shiftbuttonopacity = function (e) {
                                 if (e.getTarget() && (e.getTarget().basename === "SoundButton" || e.getTarget().basename === "ModelButton")) {
                                     shiftbutton = (e.getTarget().getLayoutParent().getLayoutParent().getLayoutParent()) ? (e.getTarget().getLayoutParent().getLayoutParent().getLayoutParent()) : null;
-                                    if (shiftbutton.getOpacity() === 0.3) {
+                                    if (shiftbutton.getOpacity() === 0.3 && e._type === "mouseover") {
                                         shiftbutton.setOpacity(1);
 
-                                    } else {
+                                    } else if (e._type === "mouseout") {
                                         shiftbutton.setOpacity(0.3);
                                     }
                                 }
@@ -3159,7 +3159,7 @@
                             TABS.SETTINGS.set("skipVictoryPopup", skipVictoryPopup ? false : true);
 
                             e._target.setIcon(TABS.SETTINGS.get("skipVictoryPopup", false) ? TABS.RES.IMG.VictoryPop2 : TABS.RES.IMG.VictoryPop);
-                           
+
                             this.skip_VictoryPopup();
 
 
