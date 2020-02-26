@@ -31,7 +31,7 @@
 						opacity: 0.8
 					});
 					HUD.add(this.SectorText);
-					HUD.addListener("click", function (e) {
+					HUD.addListener("mousedown", function (e) {
 						if (e.getButton() == "left") this.paste_Coords();
 						if (e.getButton() == "right") this.jump_Coords();
 					}, this);
