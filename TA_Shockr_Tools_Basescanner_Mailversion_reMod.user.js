@@ -3,7 +3,7 @@
 // @author          EHz
 // @description     Tools to work with Tiberium alliances - mod by EHz - remod by Netquik
 // @include         http*://*.alliances.commandandconquer.com/*/index.aspx*
-// @version         2.7.2.29
+// @version         2.7.2.30
 // ==/UserScript==
 (function () {
     /* globals qx, ClientLib */
@@ -698,7 +698,7 @@
                         //console.log('DEBUG: ' + 'function initialize');
                         this.buttonScan = new qx.ui.form.Button('Scan');
                         this.buttonScan.set({
-                            width: 100,
+                            width: 94,
                             appearance: 'button-bar-right',
                             toolTipText: 'Scan'
                         });
@@ -708,6 +708,7 @@
                         var childs = mainBar.getChildren()[1].getChildren();
                         var childCount = childs.length;
                         console.log('shockr childs count: ' + childCount);
+                        var Barsize = 0;
                         for (var z = childCount - 1; z >= 0; z--) {
                             if (typeof childs[z].setAppearance === "function") {
                                 if (childs[z].getAppearance() == "button-bar-right") {
@@ -715,10 +716,20 @@
                                 }
                             }
                         }
+                       
                         mainBar.getChildren()[1].add(this.buttonScan);
+                        childs = mainBar.getChildren()[1].getChildren();
+                        for (var i in childs) {
+                            if (typeof childs[i].setAppearance === "function" && childs[i].isVisible()) {                           
+                                Barsize += childs[i].getWidth();                   
+                        }
+                        }
+                        mainBar.getChildren()[1].setMarginLeft(4);
                         mainBar.getChildren()[0].setScale(true);
-                        //mainBar.getChildren()[0].setWidth(764 + 100 );
-                        mainBar.getChildren()[0].setWidth(mainBar.getChildren()[1].getWidth() + ((childCount - 9) * 100));
+                        mainBar.setMarginLeft(-50);
+                        //ScriptsButton = mainBar.getScriptsButton().isVisible() ? 1 : 0;
+                        mainBar.getChildren()[0].setWidth(Barsize+10);
+                        //mainBar.getChildren()[1].setWidth(Barsize+94);
                         console.log('Scan Button added');
                     },
                     scan: function () {
