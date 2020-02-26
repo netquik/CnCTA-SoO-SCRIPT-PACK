@@ -7,7 +7,7 @@
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW - FIX OPTIONS
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
-// @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TACS.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TACS.user.js
 // @grant none
 // ==/UserScript==
 //window.TACS_version = GM_info.script.version;
@@ -533,13 +533,6 @@
                             this._playAreaChildren = this._PlayArea.getChildren();
                             this.MainOverlay = this._Application.getMainOverlay();
                             this.OverlayFixed = false;
-                            // Fix a problem if new button is added in Menu Bar that cause misalign on center
-                            this.MenuBar = qx.core.Init.getApplication().getMenuBar();
-                            this.MenuBarButtons = this.MenuBar.getChildren()[1].getChildren().length;
-                            if (this.MenuBarButtons > 9) {
-                                this.MenuBar.setMarginLeft(-(this.MenuBarButtons - 9) * (50));
-                                
-                            }
 
                             // REVIEW 19.5 FIX VIEW 
                             //by Netquik   
@@ -547,29 +540,32 @@
                                 this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
                                 this.ArmySetupAttackBarMainChildren[3].setVisibility("hidden"); // hiding new bar
                                 this._armyBarContainer.removeAt(1); // removing Next Army Setup msg
-                                //this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
                                 this._playAreaChildren[2].setHeight(120); // fix opacity for better view
                                 this._playAreaChildren[4].resetDecorator();
                                 
 
                                 // REVIEW Lowering playArea children 
                                 // by Netquik 
-                                this.FixOverlay = function (e) {
+                                this.FixOverlay = function (e) {                                  
                                     var _this = (this.TACS) ? this.TACS.getInstance() : this;
                                     PlayArea = _this._PlayArea;
                                     PlayAreaHeight = PlayArea.getLayoutParent().getBounds().height;
                                     PlayAreaHeight2 = _this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().height;
                                     PlayAreaOffSet = PlayAreaHeight2 - PlayAreaHeight;
                                     playAreaChildren = PlayArea.getChildren();
+                                    MainOverlaychild = _this.MainOverlay.getChildren();
                                     var fixOverlay;
                                     var fix = 0;
                                     fixOverlay = PlayAreaOffSet < 150;
-                                    if (Math.round(window.devicePixelRatio * 100) >= 125) {
-                                        this.MainOverlay.setMarginTop(0); // down Mainoverlay not playArea
-                                        fixOverlay = null;
+                                    _this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
+                                    if (Math.round(window.devicePixelRatio * 100) >= 125 || PlayAreaHeight2 < 752) {
+                                        MainOverlaychild[1].setHeight(3);
+                                        MainOverlaychild[2].setMarginTop(-32);
+                                        MainOverlaychild[10].setMarginTop(29);
                                     } else {
-                                        this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
-
+                                        MainOverlaychild[1].resetHeight();
+                                        MainOverlaychild[2].setMarginTop(0);
+                                        MainOverlaychild[10].setMarginTop(0);
                                     }
                                     for (var i in playAreaChildren) {
                                         playchild = playAreaChildren[i];
