@@ -129,7 +129,7 @@
 							};
 						}
 
-						/* Detect and fix bug described in http://forum.alliances.commandandconquer.com/showthread.php?tid=30346 */ {
+						/* Detect and fix bug described in https://forum.alliances.commandandconquer.com/showthread.php?tid=30346 */ {
 							source = ClientLib.Data.Reports.Reports.prototype.AddReport.toString();
 							var initMethodName = source.match(/break;\}[a-z]\.([A-Z]{6})\([a-z]\);if/)[1];
 
