@@ -2,7 +2,7 @@
 // @name            MovableMailMessage
 // @description     Make Mail Messages Movable
 // @author          Netquik [SoO] (https://github.com/netquik)
-// @version         1.0
+// @version         1.0.1
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_MovableMailMessage.user.js
@@ -26,11 +26,41 @@
                         console.error("Error setting up MovagleMailMessage", e);
                         console.groupEnd();
                     }
+                },
+                members: {
+                    createMM: function () {
+                        var A = qx.core.Init.getApplication();
+                        var C = A.getDesktop().getBounds();
+                        var B = A.getMenuBar().getBounds();
+                        var x = Math.floor((C.width - webfrontend.gui.MenuOverlayWidget.OverlayWidth) / 2);
+                        var y = B.height;
+                        var position = {
+                            left: x,
+                            top: y
+                        };
+                        if (this.MMessage) {
+                            position = this.MMessage.getLayoutProperties();
+                            this.MMessage.toggleMovable();
+                            A.getDesktop().remove(this.MMessage);
+                        };
+                        this.MMessage = new MMovableMail(new qx.ui.layout.Basic());
+                        A.getDesktop().add(this.MMessage, position);
+                        return this.MMessage;
+                    },
+                    activateMM: function () {
+                        if (this.MMessage && this.MMessage.getChildren()[0].getChildren().length > 0) {
+                            this.MMessage._activateMoveHandle(this.MMessage.getChildren()[0].getChildren()[13]);
+                        }
+                    }
+
+
                 }
             });
+
+
             var qxA = qx.core.Init.getApplication();
             var MOW = webfrontend.gui.MenuOverlayWidget.prototype;
-            var MOW_open = "var A=qx.core.Init.getApplication();var C=A.getDesktop().getBounds();var B=A.getMenuBar().getBounds();if(A.getCurrentMenuOverlay()!==this)m=new MMovableMail(new qx.ui.layout.Basic()); this.toggle(); m.add(this,{top:0,left:0});m._activateMoveHandle(this.getChildren()[13]);m.hide();var x=Math.floor((C.width-webfrontend.gui.MenuOverlayWidget.OverlayWidth)/2);var y=B.height;A.getDesktop().add(m, {left:x,top:y});m.fadeIn();m.show();";
+            var MOW_open = "var A=qx.core.Init.getApplication();var MM = MMovableMail.getInstance();if(A.getCurrentMenuOverlay()!==this)m=MM.createMM(); this.toggle(); m.add(this,{top:0,left:0});MM.activateMM();m.fadeIn();this.addListener('move', function (e) {this.setLayoutProperties({top:0,left:0})})";
             MOW.open = new Function('', MOW_open);
 
             var source = qxA.switchMenuOverlay.toString()
