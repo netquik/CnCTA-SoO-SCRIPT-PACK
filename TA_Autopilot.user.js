@@ -4,7 +4,7 @@
 // @include         http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include			http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @description		Autoupgrade deiner Basen, script based on FlunikTools - ServerPatch-FIX 2017
-// @version			1.2.3
+// @version			1.2.3b
 // @authors			many others and Chillchef
 // @grant			none
 // @icon			http://eaassets-a.akamaihd.net/cncalliancesweb/static/2.1/theme/cca-home-redux-theme/images/global/logo.png
@@ -130,7 +130,8 @@
 
                             _this.listbox = new qx.ui.form.TextArea().set({
                                 readOnly: true,
-                                height: 180,
+                                height: 165,
+                                maxHeight: 165,
                                 width: 470
                             });
 
@@ -712,7 +713,7 @@
                                 contentPadding: 0,
                                 minWidth: 350,
                                 maxWidth: 900,
-                                maxHeight: 390,
+                                maxHeight: 300,
                                 appearance: "tabview",
                                 margin: 5,
                                 barPosition: "left"
@@ -1214,8 +1215,8 @@
                             })
                             var textH = new qx.ui.form.TextArea().set({
                                 readOnly: true,
-                                height: 140,
-                                maxHeight: 140,
+                                height: 110,
+                                maxHeight: 110,
                                 width: 250,
                                 maxWidth: 300
                             }); //statusbox
@@ -1445,7 +1446,7 @@
                                 button.setUserData("isNotification", true);
                             } else {
                                 _this.einaus = 0;
-                                button.setLabel("Auto-Upgrade: AUS");
+                                button.setLabel("Auto-Upgrade: OFF");
                                 button.setAppearance("button-playarea-mode-frame");
                                 button.setIcon("https://goo.gl/Tsst0o");
                                 button.set({
