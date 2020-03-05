@@ -3,9 +3,9 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.57
+// @version        3.57b
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
-// @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW - FIX OPTIONS - 21.1 FIX - OTHER FIXES
+// @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW - FIX OPTIONS - 20.1 FIX - OTHER FIXES
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TACS.user.js
 // @grant none
@@ -493,25 +493,33 @@
                             this._VisMain = ClientLib.Vis.VisMain.GetInstance();
                             this._ActiveView = this._VisMain.GetActiveView();
                             this._PlayArea = this._Application.getPlayArea();
-                            this._armyBarContainer = this._Application.getArmySetupAttackBar();
+                            this.ArmySetupAttackBar = this._Application.getArmySetupAttackBar();
                             this._armyBar = this._Application.getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
+                            // Just some shortcuts by Netquik
+                            this.ArmySetupAttackBarMainChildren = this._armyBar.getChildren();
+                            this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
+                            this._playAreaChildren = this._PlayArea.getChildren();
+                            this.MainOverlay = this._Application.getMainOverlay();
+                            this.OverlayFixed = false; // MOD: needed for 19.5 patch 
+
+
                             if (PerforceChangelist >= 443425) { // 16.1 patch
-                                for (var i in this._armyBarContainer) {
-                                    if (typeof this._armyBarContainer[i] == "object" && this._armyBarContainer[i] != null) {
-                                        if (this._armyBarContainer[i].objid == "btn_disable") {
-                                            console.log(this._armyBarContainer[i].objid);
-                                            var nativeSimBarDisableButton = this._armyBarContainer[i];
+                                for (var i in this.ArmySetupAttackBar) {
+                                    if (typeof this.ArmySetupAttackBar[i] == "object" && this.ArmySetupAttackBar[i] != null) {
+                                        if (this.ArmySetupAttackBar[i].objid == "btn_disable") {
+                                            console.log(this.ArmySetupAttackBar[i].objid);
+                                            var nativeSimBarDisableButton = this.ArmySetupAttackBar[i];
                                         }
-                                        if (this._armyBarContainer[i].objid == "cnt_controls" || this._armyBarContainer[i].objid == "btn_toggle") {
-                                            this._armyBarContainer[i].setVisibility("excluded");
+                                        if (this.ArmySetupAttackBar[i].objid == "cnt_controls" || this.ArmySetupAttackBar[i].objid == "btn_toggle") {
+                                            this.ArmySetupAttackBar[i].setVisibility("excluded");
                                         }
                                     }
                                 }
-                                var armyBarChildren = this._armyBar.getChildren();
-                                for (var i in armyBarChildren) {
-                                    if (armyBarChildren[i].$$user_decorator == "pane-armysetup-right") {
-                                        //console.log(armyBarChildren[i].$$user_decorator)
-                                        this.armySetupRight = armyBarChildren[i];
+                            
+                                for (var i in this.ArmySetupAttackBarMainChildren) {
+                                    if (this.ArmySetupAttackBarMainChildren[i].$$user_decorator == "pane-armysetup-right") {
+                                        //console.log(this.ArmySetupAttackBarMainChildren[i].$$user_decorator)
+                                        this.armySetupRight = this.ArmySetupAttackBarMainChildren[i];
                                         this.armySetupRight.removeAt(1);
                                         this.armySetupRight.addAt(nativeSimBarDisableButton, 1);
                                         break;
@@ -528,12 +536,7 @@
                                     }
                                 }
                             }
-                            // Just some shortcuts by Netquik
-                            this.ArmySetupAttackBarMainChildren = this._armyBar.getChildren();
-                            this.ArmySetupAttackBarChildren = this._armyBarContainer.getChildren();
-                            this._playAreaChildren = this._PlayArea.getChildren();
-                            this.MainOverlay = this._Application.getMainOverlay();
-                            this.OverlayFixed = false; // MOD: needed for 19.5 patch 
+                            
 
 
                             this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // NOTE Resizing ArmySetup after topbuttons remove
@@ -541,33 +544,37 @@
                             this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // NOTE  setting hidden to next setup 
 
 
-                            this._armyBarContainer.removeAt(1); // removing Next Army Setup msg
+                            this.ArmySetupAttackBar.removeAt(1); // removing Next Army Setup msg
 
-                            if (PerforceChangelist >= 472233) { // NOTE  21.1 patch
+                            if (PerforceChangelist >= 472233) { // NOTE  20.1 patch
                                 this.COMBATEXTENDEDSETUP = phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
                                 if (this.COMBATEXTENDEDSETUP === false) {
                                     ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, true);
-                                    this._armyBarContainer.showSetup(true);
+                                    this.ArmySetupAttackBar.showSetup(true);
                                 }
-                                for (var i in armyBarChildren) {
-                                    if (armyBarChildren[i].$$user_decorator == "bg-armysetup-top") {
-                                        console.log('armysetup-top detected! : armyBarChildren ' + i);
-                                        this._armyBar.addAt(armyBarChildren[i], 3);
+                                for (var i in this.ArmySetupAttackBarMainChildren) {
+                                    if (this.ArmySetupAttackBarMainChildren[i].$$user_decorator == "bg-armysetup-top") {
+                                        console.log('armysetup-top detected! : ArmySetupAttackBarMainChildren at ' + i);
+                                        this._armyBar.addAt(this.ArmySetupAttackBarMainChildren[i], 3);
+                                        break;
+                                        
+                                    }
                                         var patch211body = "{return;}"
                                         //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
-                                        this._armyBarContainer.__bvE = new Function('', patch211body);
+                                        this.ArmySetupAttackBar.__bvE = new Function('', patch211body);
                                         ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
-                                        this._armyBarContainer.showSetup(false);
-                                        this.ArmySetupAttackBarMainChildren[3].exclude();
-                                        console.log('armysetup-top excluded');
-                                        break;
-
-                                    }
+                                        this.ArmySetupAttackBar.showSetup(false);
+                                    
                                 }
                             }
 
+                            this.ArmySetupAttackBarMainChildren[3].exclude(); // NOTE TACS doesn't need newtopButtons
+                            console.log('armysetup-top excluded');
+
+
                             // REVIEW adjusting rightbar and set left hidden
                             // by Netquik 
+                            
                             this.ArmySetupAttackBarMainChildren[2].setVisibility("hidden");
                             this.armySetupRight.resetDecorator();
                             this.armySetupRight.set({
@@ -1745,14 +1752,14 @@
                                     this.toolBar.setZIndex(1);
                                 }
                             }, this);
-                            this._armyBarContainer.addListener("appear", function () {
+                            this.ArmySetupAttackBar.addListener("appear", function () {
                                 //console.log("_armyBarContainer appeared");
-                                this._armyBarContainer.setZIndex(3);
+                                this.ArmySetupAttackBar.setZIndex(3);
                                 this.toolBar.show();
                                 this.toolBarMouse.show();
                             }, this);
-                            this._armyBarContainer.addListener("changeVisibility", function () {
-                                if (!this._armyBarContainer.isVisible()) {
+                            this.ArmySetupAttackBar.addListener("changeVisibility", function () {
+                                if (!this.ArmySetupAttackBar.isVisible()) {
                                     //console.log("changeVisibility: _armyBarContainer hidden");
                                     this.toolBar.hide();
                                     this.toolBarMouse.hide();
@@ -1767,7 +1774,7 @@
                                 if (playAreaWidth !== paw) {
                                     playAreaWidth = paw;
                                     //need to do this on maximize as well
-                                    var armyBarBounds = this._armyBarContainer.getBounds();
+                                    var armyBarBounds = this.ArmySetupAttackBar.getBounds();
                                     if (armyBarBounds) {
                                         this.toolBar.setDomLeft(armyBarBounds.left + ((armyBarBounds.width - this.TOOL_BAR_WIDTH) / 2));
                                         this.toolBarMouse.setDomLeft(armyBarBounds.left + ((armyBarBounds.width - this.TOOL_BAR_WIDTH) / 2));
@@ -2751,7 +2758,7 @@
                     },
                     ownCityChangeHandler: function (oldId, newId) {
                         console.log("CurrentOwnChange event");
-                        if (this._armyBarContainer.isVisible()) {
+                        if (this.ArmySetupAttackBar.isVisible()) {
                             this.buttons.attack.refreshStats.setEnabled(false);
                             this.buttons.attack.toolbarRefreshStats.setEnabled(false);
                             this.buttons.attack.simulate.setEnabled(false);
@@ -2956,7 +2963,7 @@
                             case ClientLib.Data.PlayerAreaViewMode.pavmCombatAttacker: {
                                 if (this.options.autoDisplayStats.getValue() && this.saveObj.checkbox.showStatsDuringAttack) {
                                     this.battleResultsBox.open();
-                                    /*if(this._armyBarContainer.isVisible()){
+                                    /*if(this.ArmySetupAttackBar.isVisible()){
                                     										this.toolBar.show();
                                     									}*/
                                 }

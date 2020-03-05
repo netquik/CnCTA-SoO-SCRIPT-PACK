@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.03.06
+// @version         20.03.07
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW + AUTO - Move Box save position code - New Top Bar Button - Native Unit Enabling - SkipVictory - 21.1 FIX
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2447,39 +2447,40 @@
                         try {
                             this.base(arguments);
                             this._Application = qx.core.Init.getApplication();
-                            this._armyBarContainer = this._Application.getArmySetupAttackBar();
+                            this.ArmySetupAttackBar = this._Application.getArmySetupAttackBar();
                             this._armyBar = this._Application.getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
                             this._playArea = this._Application.getPlayArea();
+                            // just some shortcuts by Netquik 
+                            this.MainOverlay = this._Application.getMainOverlay();
+                            this.ArmySetupAttackBarMainChildren = this._armyBar.getChildren();
+                            this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
+                            this._playAreaChildren = this._playArea.getChildren();
+                            this.OverlayFixed = false; // MOD: needed for 19.5 patch 
+
+
                             if (PerforceChangelist >= 443425) { // 16.1 patch
-                                for (var i in this._armyBarContainer) {
-                                    if (typeof this._armyBarContainer[i] == "object" && this._armyBarContainer[i] != null) {
-                                        if (this._armyBarContainer[i].objid == "btn_disable") {
-                                            console.log(this._armyBarContainer[i].objid);
-                                            var nativeSimBarDisableButton = this._armyBarContainer[i];
+                                for (var i in this.ArmySetupAttackBar) {
+                                    if (typeof this.ArmySetupAttackBar[i] == "object" && this.ArmySetupAttackBar[i] != null) {
+                                        if (this.ArmySetupAttackBar[i].objid == "btn_disable") {
+                                            console.log(this.ArmySetupAttackBar[i].objid);
+                                            var nativeSimBarDisableButton = this.ArmySetupAttackBar[i];
                                         }
-                                        if (this._armyBarContainer[i].objid == "cnt_controls" || this._armyBarContainer[i].objid == "btn_toggle") {
-                                            this._armyBarContainer[i].setVisibility("excluded");
+                                        if (this.ArmySetupAttackBar[i].objid == "cnt_controls" || this.ArmySetupAttackBar[i].objid == "btn_toggle") {
+                                            this.ArmySetupAttackBar[i].setVisibility("excluded");
                                         }
                                     }
                                 }
-                                var armyBarChildren = this._armyBar.getChildren();
-                                for (var i in armyBarChildren) {
-                                    if (armyBarChildren[i].$$user_decorator == "pane-armysetup-right") {
-                                        console.log(armyBarChildren[i].$$user_decorator)
-                                        this.armySetupRight = armyBarChildren[i];
+                                for (var i in this.ArmySetupAttackBarMainChildren) {
+                                    if (this.ArmySetupAttackBarMainChildren[i].$$user_decorator == "pane-armysetup-right") {
+                                        console.log(this.ArmySetupAttackBarMainChildren[i].$$user_decorator)
+                                        this.armySetupRight = this.ArmySetupAttackBarMainChildren[i];
                                         this.armySetupRight.removeAt(1);
                                         this.armySetupRight.addAt(nativeSimBarDisableButton, 1);
                                         break;
                                     }
                                 }
                             }
-                            // just some shortcuts by Netquik 
-                            this.ArmySetupAttackBar = this._Application.getArmySetupAttackBar();
-                            this.MainOverlay = this._Application.getMainOverlay();
-                            this.ArmySetupAttackBarMainChildren = this._armyBar.getChildren();
-                            this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
-                            this._playAreaChildren = this._playArea.getChildren();
-                            this.OverlayFixed = false; // MOD: needed for 19.5 patch 
+                            
 
 
                             this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // NOTE Resizing ArmySetup after topbuttons remove
@@ -2498,16 +2499,16 @@
                             }
 
 
-                            if (PerforceChangelist >= 472233) { // NOTE  21.1 patch
+                            if (PerforceChangelist >= 472233) { // NOTE  20.1 patch
                                 this.COMBATEXTENDEDSETUP = phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
                                 if (this.COMBATEXTENDEDSETUP === false) {
                                     ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, true);
                                     this.ArmySetupAttackBar.showSetup(true);
                                 }
-                                for (var i in armyBarChildren) {
-                                    if (armyBarChildren[i].$$user_decorator == "bg-armysetup-top") {
-                                        console.log('armysetup-top detected! : armyBarChildren ' + i);
-                                        this._armyBar.addAt(armyBarChildren[i], 3);
+                                for (var i in this.ArmySetupAttackBarMainChildren) {
+                                    if (this.ArmySetupAttackBarMainChildren[i].$$user_decorator == "bg-armysetup-top") {
+                                        console.log('armysetup-top detected! : at  ArmySetupAttackBarChildren' + i);
+                                        this._armyBar.addAt(this.ArmySetupAttackBarMainChildren[i], 3);
                                         break;
                                     }
                                 }
@@ -2650,12 +2651,12 @@
 
 
                             }
-                            if (PerforceChangelist >= 472233) { // MOD: 21.1 patch
+                            if (PerforceChangelist >= 472233) { // MOD: 20.1 patch
                                 var patch211body = "{return;}"
                                 //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
-                                this._armyBarContainer.__bvE = new Function('', patch211body);
+                                this.ArmySetupAttackBar.__bvE = new Function('', patch211body);
                                 ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
-                                this._armyBarContainer.showSetup(false);
+                                this.ArmySetupAttackBar.showSetup(false);
                             }
 
                             this._armyBar.setMarginTop(this._armyBar.getMarginTop() + 20);
