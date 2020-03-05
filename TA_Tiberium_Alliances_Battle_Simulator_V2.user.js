@@ -2508,7 +2508,6 @@
                                     if (armyBarChildren[i].$$user_decorator == "bg-armysetup-top") {
                                         console.log('armysetup-top detected! : armyBarChildren ' + i);
                                         this._armyBar.addAt(armyBarChildren[i], 3);
-                                        this.ArmySetupTop = armyBarChildren[3];
                                         break;
                                     }
                                 }
@@ -2617,9 +2616,8 @@
                             }
 
                             // Mirror and Shift Buttons top
-                            //New rewrite for 19.5 by Netquik  NOTE NEWTOPBUTTONREWRITE
-                            var formationContainer = this.ArmySetupAttackBar.getMainContainer();
-                            this.newtopbuttons = this.ArmySetupTop;
+                            //New rewrite for 19.5 by Netquik  NOTE NEWTOPBUTTONREWRITE   
+                            this.newtopbuttons = this.ArmySetupAttackBarMainChildren[3];
                             this.newtopbuttons.resetDecorator();
                             this.newtopbuttons.setPaddingTop(10);
 
@@ -2655,15 +2653,15 @@
                             if (PerforceChangelist >= 472233) { // MOD: 21.1 patch
                                 var patch211body = "{return;}"
                                 //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
-                                qx.core.Init.getApplication().getArmySetupAttackBar().__bvE = new Function('', patch211body);
+                                this._armyBarContainer.__bvE = new Function('', patch211body);
                                 ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
-                                qx.core.Init.getApplication().getArmySetupAttackBar().showSetup(false);
+                                this._armyBarContainer.showSetup(false);
                             }
 
-                            formationContainer.setMarginTop(formationContainer.getMarginTop() + 20);
+                            this._armyBar.setMarginTop(this._armyBar.getMarginTop() + 20);
                             // 19.5 FIX VIEW by Netquik
                             if (PerforceChangelist >= 472117) { // 19.5 patch                  
-                                formationContainer.setMarginTop(formationContainer.getMarginTop() - 40);
+                                this._armyBar.setMarginTop(this._armyBar.getMarginTop() - 40);
                             }
 
                         } catch (e) {
