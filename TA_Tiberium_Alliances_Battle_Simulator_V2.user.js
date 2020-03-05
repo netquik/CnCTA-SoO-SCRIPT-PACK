@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.03.05
+// @version         20.03.06
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW + AUTO - Move Box save position code - New Top Bar Button - Native Unit Enabling - SkipVictory - 21.1 FIX
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2503,14 +2503,16 @@
                                 if (this.COMBATEXTENDEDSETUP === false) {
                                     ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, true);
                                     this.ArmySetupAttackBar.showSetup(true);
-                                    for (var i in armyBarChildren) {
-                                        if (armyBarChildren[i].$$user_decorator == "bg-armysetup-top") {
-                                            console.log('armysetup-top detected! : armyBarChildren ' + i);
-                                            this._armyBar.addAt(armyBarChildren[i], 3);
-                                            break;
-                                        }
+                                }
+                                for (var i in armyBarChildren) {
+                                    if (armyBarChildren[i].$$user_decorator == "bg-armysetup-top") {
+                                        console.log('armysetup-top detected! : armyBarChildren ' + i);
+                                        this._armyBar.addAt(armyBarChildren[i], 3);
+                                        this.ArmySetupTop = armyBarChildren[3];
+                                        break;
                                     }
                                 }
+
                             }
 
                             // 19.5 FIX VIEW by Netquik 
@@ -2590,10 +2592,20 @@
                             });
 
                             // Mirror and Shift Buttons left Side (Rows/Wave)
+                            // MOD cntWaves manage
+                            for (i = 0; i < this.ArmySetupAttackBarMainChildren.length - 1; i++) {
+                                var wavechild = this.ArmySetupAttackBarMainChildren[i]
+                                findwave = wavechild._hasChildren() && wavechild.basename === "Composite" ? wavechild.getChildren()[0].$$user_value : false;
+                                this.cntWaveI = (findwave && findwave === "Wave 1") ? true : false;
+                                if (this.cntWaveI) {
+                                    this.cntWaveI = i;
+                                    break;
+                                }
+
+                            }
                             var i, cntWave;
-                            for (i = 0; i < ClientLib.Base.Util.get_ArmyMaxSlotCountY(); i++) {
-                                // 19.5 FIX VIEW by Netquik
-                                cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[(i + 4)];
+                            for (i = this.cntWaveI; i < ClientLib.Base.Util.get_ArmyMaxSlotCountY()+this.cntWaveI; i++) {
+                                cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[i];
                                 cntWave._removeAll();
                                 cntWave._setLayout(new qx.ui.layout.HBox());
                                 cntWave._add(this.newSideButton(TABS.RES.IMG.Flip.H, this.tr("Mirrors units horizontally."), this.onClick_btnMirror, "h", i));
@@ -2607,7 +2619,7 @@
                             // Mirror and Shift Buttons top
                             //New rewrite for 19.5 by Netquik  NOTE NEWTOPBUTTONREWRITE
                             var formationContainer = this.ArmySetupAttackBar.getMainContainer();
-                            this.newtopbuttons = this.ArmySetupAttackBarMainChildren[3];
+                            this.newtopbuttons = this.ArmySetupTop;
                             this.newtopbuttons.resetDecorator();
                             this.newtopbuttons.setPaddingTop(10);
 
