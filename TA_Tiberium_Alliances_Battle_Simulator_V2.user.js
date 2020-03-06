@@ -2,14 +2,28 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.03.07
+// @version         20.03.08
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
-// @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW + AUTO - Move Box save position code - New Top Bar Button - Native Unit Enabling - SkipVictory - 21.1 FIX
+// @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Tiberium_Alliances_Battle_Simulator_V2.user.js
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- 19.5 FIX MOd VIEW + AUTO
+- MovableBox Save Position
+- New Top Bar Button
+- Native Unit Enabling
+- SkipVictory
+- 21.1 FIX
+- MovableBox in Battleground 
+----------------
+*/
+
 (function () {
     var script = document.createElement("script");
     script.innerHTML = "(" +
@@ -344,7 +358,7 @@
                                     if (target !== null && ClientLib.Base.Unit.CanBeTransported(target.get_UnitGameData_Obj(), unit.get_UnitGameData_Obj())) target.MoveBattleUnit(unit.get_CoordX(), unit.get_CoordY());
                                     unit.MoveBattleUnit(formation[i].x, formation[i].y);
                                 }
-                                //transported units NOTE Functions Deactiveted
+                                // MOD transported units  Functions Deactiveted
                                 // Modded  by Nequik  for revert to native unit enabling
                                 for (i = 0; i < transported.length; i++) {
                                     unit = this.GetUnitById(transported[i].id, CityId, OwnId); //unit being trasported
@@ -2572,6 +2586,8 @@
                                 this.MainOverlay.addListener('changeHeight', this.RunTimeFixOverlay.bind(null, event));
 
                             }
+
+                            // NOTE Adjusting left/right Bars
                             this.armySetupRight.resetDecorator();
                             this.armySetupRight.set({
                                 decorator: new qx.ui.decoration.Decorator().set({
@@ -2604,8 +2620,8 @@
 
                             }
                             var i, cntWave;
-                            for (i = this.cntWaveI; i < ClientLib.Base.Util.get_ArmyMaxSlotCountY()+this.cntWaveI; i++) {
-                                cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[i];
+                            for (i = 0; i < ClientLib.Base.Util.get_ArmyMaxSlotCountY(); i++) {
+                                cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[i+this.cntWaveI];
                                 cntWave._removeAll();
                                 cntWave._setLayout(new qx.ui.layout.HBox());
                                 cntWave._add(this.newSideButton(TABS.RES.IMG.Flip.H, this.tr("Mirrors units horizontally."), this.onClick_btnMirror, "h", i));
@@ -2617,7 +2633,7 @@
                             }
 
                             // Mirror and Shift Buttons top
-                            //New rewrite for 19.5 by Netquik  NOTE NEWTOPBUTTONREWRITE   
+                            // REVIEW NewTopButtons rewrite code 
                             this.newtopbuttons = this.ArmySetupAttackBarMainChildren[3];
                             this.newtopbuttons.resetDecorator();
                             this.newtopbuttons.setPaddingTop(10);
@@ -2651,7 +2667,7 @@
 
 
                             }
-                            if (PerforceChangelist >= 472233) { // MOD: 20.1 patch
+                            if (PerforceChangelist >= 472233) { // MOD: 20.1 patch 2
                                 var patch211body = "{return;}"
                                 //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
                                 this.ArmySetupAttackBar.__bvE = new Function('', patch211body);
@@ -2749,6 +2765,7 @@
                         try {
                             this.base(arguments);
                             this.PlayArea = qx.core.Init.getApplication().getPlayArea();
+                            this.ArmySetupAttackBar = qx.core.Init.getApplication().getArmySetupAttackBar();
                             this.HUD = this.PlayArea.getHUD();
                             var WDG_COMBATSWAPVIEW = this.HUD.getUIItem(ClientLib.Data.Missions.PATH.WDG_COMBATSWAPVIEW);
                             //View Simulation
@@ -2873,6 +2890,11 @@
                             this.boxMove.addListener("move", function () {
                                 TABS.SETTINGS.set("GUI.Window.MoveBox.position", [this.boxMove.getBounds().left, this.boxMove.getBounds().top]);
                             }, this);
+
+                            // NOTE Added listener to show movebox on prearmysetup
+                            this.ArmySetupAttackBar.addListener("changeVisibility", function () {
+                                if (this.ArmySetupAttackBar.isVisible()) this.boxMove.show(); else this.boxMove.hide();
+                            }, this);
                             // SkipVictory Button init by Netquik
                             this.boxMove.getChildren()[12].setIcon(TABS.SETTINGS.get("skipVictoryPopup", false) ? TABS.RES.IMG.VictoryPop2 : TABS.RES.IMG.VictoryPop);
                             this.skip_VictoryPopup();
@@ -2975,7 +2997,7 @@
                             }
                             if (oldMode == ClientLib.Vis.Mode.CombatSetup) {
                                 this.btnSimulation.hide();
-                                this.boxMove.hide();
+                                if (newMode != ClientLib.Vis.Mode.Battleground) this.boxMove.hide(); // MOD leave boxMove in Battleground for pre army setup
                                 qx.bom.Element.removeListener(document, "keydown", this.onHotKeyPress, this);
                                 TABS.APISimulation.getInstance().removeListener("OnSimulateBattleFinished", this.OnSimulateBattleFinished, this);
                             }
