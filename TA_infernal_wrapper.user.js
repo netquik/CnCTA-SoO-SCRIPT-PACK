@@ -10,10 +10,11 @@
 // @contributor leo7044 (https://github.com/leo7044)
 // @contributor Netquik
 // ==/UserScript==
-window.navigator.pointerEnabled = "PointerEvent" in window;
 
 (function () {
     var CCTAWrapper_main = function () {
+        
+window.navigator.pointerEnabled = "PointerEvent" in window;
         try {
             _log = function () {
                 if (typeof console != 'undefined') console.log(arguments);
@@ -31,7 +32,7 @@ window.navigator.pointerEnabled = "PointerEvent" in window;
                 // SharedLib.Combat.CbtSimulation.prototype.DoStep
                 for (var x in $I) {
                     for (var key in $I[x].prototype) {
-                        if ($I[x].prototype.hasOwnProperty(key) && typeof($I[x].prototype[key]) === 'function') {  // reduced iterations from 20K to 12K
+                        if ($I[x].prototype.hasOwnProperty(key) && typeof ($I[x].prototype[key]) === 'function') { // reduced iterations from 20K to 12K
                             strFunction = $I[x].prototype[key].toString();
                             if (strFunction.indexOf("().l;var b;for (var d = 0 ; d < c.length ; d++){b = c[d];if((b.") > -1) {
                                 $I[x].prototype.DoStep = $I[x].prototype[key];
