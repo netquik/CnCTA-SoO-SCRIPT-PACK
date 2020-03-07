@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.03.08
+// @version         20.03.09
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2609,10 +2609,12 @@ codes by NetquiK
 
                             // Mirror and Shift Buttons left Side (Rows/Wave)
                             // MOD cntWaves manage
+                            /* var TRwave = qx.locale.Manager.tr("tnf:army wave 1");
+                            TRwave = TRwave.substring(0, TRwave.indexOf(' ')); */
                             for (i = 0; i < this.ArmySetupAttackBarMainChildren.length - 1; i++) {
                                 var wavechild = this.ArmySetupAttackBarMainChildren[i]
                                 findwave = wavechild._hasChildren() && wavechild.basename === "Composite" ? wavechild.getChildren()[0].$$user_value : false;
-                                this.cntWaveI = (findwave && findwave === "Wave 1") ? true : false;
+                                this.cntWaveI = (typeof(findwave) === 'string' && findwave.match(/.+\s{1}1/)) ? true : false;
                                 if (this.cntWaveI) {
                                     this.cntWaveI = i;
                                     break;

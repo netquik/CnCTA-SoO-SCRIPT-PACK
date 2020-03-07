@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.57b
+// @version        3.57c
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW - FIX OPTIONS - 20.1 FIX - OTHER FIXES
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -539,12 +539,10 @@
                             
 
 
-                            this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // NOTE Resizing ArmySetup after topbuttons remove
-                            this.ArmySetupAttackBarChildren[1].setOpacity(0.4); // NOTE  setting opacity to next setup
-                            this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // NOTE  setting hidden to next setup 
-
-
-                            this.ArmySetupAttackBar.removeAt(1); // removing Next Army Setup msg
+                            this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // NOTE Resizing ArmySetup for topbuttons remove
+                            //this.ArmySetupAttackBarChildren[1].setOpacity(0.4); //  setting opacity to next setup
+                            //this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // REVIEW   setting hidden to next setup 
+                              this.ArmySetupAttackBar.removeAt(1); // removing Next Army Setup msg
 
                             if (PerforceChangelist >= 472233) { // NOTE  20.1 patch
                                 this.COMBATEXTENDEDSETUP = phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
@@ -589,7 +587,7 @@
 
                             // REVIEW 19.5 FIX VIEW 
                             //by Netquik   
-                            if (PerforceChangelist < 472233) { // MOD 19.5 patch
+                            if (PerforceChangelist < 472233) { // 19.5 patch
                                 this._playAreaChildren[2].setHeight(120); // fix opacity for better view
                                 this._playAreaChildren[4].resetDecorator();
                                 this.FixOverlay = function (e) {
@@ -2297,16 +2295,18 @@
 
                                 // MOD cntWaves manage 
                                 // by Netquik
-                                this.cntWaves = ['Wave 1', 'Wave 2', 'Wave 3', 'Wave 4'];
+                                //var TRwave = qx.locale.Manager.tr("tnf:army wave 1");
+                                //TRwave = TRwave.substring(0, TRwave.indexOf(' '));
+                                var match;
                                 for (i = 0; i < this.ArmySetupAttackBarMainChildren.length - 1; i++) {
-                                    var wavechild = this.ArmySetupAttackBarMainChildren[i]
+                                    var wavechild = this.ArmySetupAttackBarMainChildren[i];
                                     findwave = wavechild._hasChildren() && wavechild.basename === "Composite" ? wavechild.getChildren()[0].$$user_value : false;
-                                    this.cntWave = (findwave && this.cntWaves.indexOf(findwave) > -1) ? true : false;
+                                    this.cntWave = (typeof(findwave) === 'string' && (match=findwave.match(/.+\s{1}([1-4]{1})/))) ? true : false;
                                     if (this.cntWave) {
                                         wavechild.setZIndex(12);
-                                        if (findwave === "Wave 1") wavechild.setPaddingTop(7);
+                                        if (match[1] === "1") wavechild.setPaddingTop(7);
                                         wavechild.setPaddingLeft(5);
-                                        if (findwave === "Wave 4") break;
+                                        if (match[1] === "4") break;
                                     }
 
                                 }
@@ -3686,7 +3686,7 @@
                             this._armyBar.setEnabled(true);
                             this.userInterface.toggleEnabled();
                             this.battleResultsBox.toggleEnabled();
-                            if (this.buttons.attack.repairMode.getValue()) { //REVIEW
+                            if (this.buttons.attack.repairMode.getValue()) {
                                 this.redrawRepairButtons();
                                 this._armyBar.addListener("changeHeight", this.setResizeTimer, this);
                                 this.repairInfo.show();
