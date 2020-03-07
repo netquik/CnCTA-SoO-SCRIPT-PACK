@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.57c
+// @version        3.57d
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW - FIX OPTIONS - 20.1 FIX - OTHER FIXES
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -1779,7 +1779,7 @@
                                     }
                                 }
                                 this.toolBarMouse.hide();
-                                this.toolBar.setZIndex(11);
+                                this.toolBar.setZIndex(12);
                                 this.toolBar.setLayoutProperties({
                                     bottom: this.TOOL_BAR_HIGH
                                 });
@@ -1920,12 +1920,12 @@
                                 decorator: new qx.ui.decoration.Decorator().set({
                                     backgroundImage: "FactionUI/menues/victory_screen/bgr_victscr_header.png"
                                 }),
-                                visibility: false
+                                visibility: "hidden",
+                                ZIndex:11
                             });
                             this.toolBarParent.add(this.toolBar, {
                                 bottom: this.TOOL_BAR_HIGH,
                                 left: (playAreaWidth - this.TOOL_BAR_WIDTH) / 2,
-                                visibility: false
                             });
                             // Toolbar Mouse Region
                             this.toolBarMouse = new qx.ui.container.Composite();
@@ -1939,7 +1939,7 @@
                             this.toolBarMouse.hide();
                             this.toolBarMouse.setBackgroundColor("#FF0000");
                             this.toolBarMouse.setOpacity(0);
-                            this.toolBarMouse.setZIndex(10);
+                            this.toolBarMouse.setZIndex(12);
                             this.initToolBarListeners();
                             /*
                             							// does the game init in combat mode?
@@ -2326,7 +2326,7 @@
                                     left: 5
                                 });
                             }
-
+                            this.toolBar.show();
 
                             // Simulate Button
                             this.buttons.attack.simulate = new qx.ui.form.Button();
