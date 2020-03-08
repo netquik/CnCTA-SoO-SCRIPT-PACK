@@ -4,7 +4,7 @@
 // @include         http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include			http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @description		Autoupgrade deiner Basen, script based on FlunikTools - ServerPatch-FIX 2017
-// @version			1.2.4
+// @version			1.2.4b
 // @authors			many others and Chillchef
 // @grant			none
 // @icon			http://eaassets-a.akamaihd.net/cncalliancesweb/static/2.1/theme/cca-home-redux-theme/images/global/logo.png
@@ -91,6 +91,8 @@
 
                         initialize: function () {
                             var _this = window.FlunikTools.Main.getInstance();
+                            _this.iconOFF = "data:image/png;base64,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",
+                            _this.iconON = "data:image/png;base64,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",
 
                             locale = ClientLib.Config.Main.GetInstance().GetConfig(ClientLib.Config.Main.CONFIG_LANGUAGE);
                             languages = ["tr_TR", "de_DE", "pt_PT", "it_IT", "nl_NL", "hu_HU", "fr_FR", "fi_FI", "ro_RO", "es_ES"]; //en is default
@@ -297,7 +299,7 @@
                             });
 
 
-                            _this.button = new qx.ui.form.Button("Auto-Upgrade: OFF", "https://goo.gl/Tsst0o").set({
+                            _this.button = new qx.ui.form.Button("Auto-Upgrade: OFF", _this.iconOFF).set({
                                 width: 40,
                                 height: 40,
                                 toolTipText: "No automatic upgrade active",
@@ -657,6 +659,7 @@
                            // MOD adjust popups and window by Netquik
                            _this.button.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
+                                _this.autoUpgradePopupOeffnen(false);
                                 _this.popupcreate();
                                 var buttonpos = _this.button.getLayoutProperties(); 
                                 _this.popup.setLayoutProperties({bottom: buttonpos.bottom+45, right:buttonpos.right});
@@ -677,7 +680,7 @@
                                     var _this = window.FlunikTools.Main.getInstance();
                                     _this.popup1.exclude();
                                     _this.popup.exclude();
-                                    _this.autoUpgradePopupOeffnen();
+                                    _this.autoUpgradePopupOeffnen(true);
                                 }, this);
 
                             var app = qx.core.Init.getApplication();
@@ -711,10 +714,10 @@
                         //initialize() ENDE
 
 
-                        autoUpgradePopupOeffnen: function () {
+                        autoUpgradePopupOeffnen: function (mode) {
                             var _this = window.FlunikTools.Main.getInstance();
                             _this.timer = true;
-                            _this.button.setEnabled(false);
+                            if(mode===true) _this.button.setEnabled(false);
                             _this.objektcount = 0;
                             _this.autoUpgradePopup.setLayout(new qx.ui.layout.VBox());
                             var allebasen = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
@@ -1299,8 +1302,10 @@
                             tabPageAUG.add(boxF);
                             tabPageAUG.add(boxE);
                             tabPageAUG.add(boxG);
+                            
                             _this.autoUpgradePopup.add(tabviewHaupt);
                             _this.autoUpgradePopup.moveTo(300, 5);
+                            if(mode===true)
                             _this.autoUpgradePopup.open();
                             _this.autoUpgradePopup.focus();
                         },
@@ -1469,7 +1474,7 @@
                             if (kat > 0) {
                                 _this.einaus = 1;
                                 _this.button.setAppearance("button-playarea-mode-frame"); //button-detailview-mode-frame
-                                _this.button.setIcon("https://goo.gl/7eO9gD");
+                                _this.button.setIcon(_this.iconON);
                                 _this. button.set({
                                     toolTipText: ttt
                                 });
@@ -1478,7 +1483,7 @@
                                 _this.einaus = 0;
                                 _this.button.setLabel("Auto-Upgrade: OFF");
                                 _this.button.setAppearance("button-playarea-mode-frame");
-                                _this.button.setIcon("https://goo.gl/Tsst0o");
+                                _this.button.setIcon(_this.iconOFF);
                                 _this.button.set({
                                     toolTipText: ttt
                                 });
