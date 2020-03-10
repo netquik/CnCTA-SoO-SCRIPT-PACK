@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.57e
+// @version        3.58
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW - FIX OPTIONS - 20.1 FIX - OTHER FIXES
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -429,7 +429,7 @@
                     allActivated: null,
                     toolBar: null,
                     toolBarParent: null,
-                    TOOL_BAR_LOW: 113,
+                    //TOOL_BAR_LOW: 113,
                     // hidden
                     TOOL_BAR_HIGH: 155,
                     // popped-up
@@ -515,7 +515,7 @@
                                         }
                                     }
                                 }
-                            
+
                                 for (var i in this.ArmySetupAttackBarMainChildren) {
                                     if (this.ArmySetupAttackBarMainChildren[i].$$user_decorator == "pane-armysetup-right") {
                                         //console.log(this.ArmySetupAttackBarMainChildren[i].$$user_decorator)
@@ -536,13 +536,13 @@
                                     }
                                 }
                             }
-                            
+
 
 
                             this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // NOTE Resizing ArmySetup for topbuttons remove
                             //this.ArmySetupAttackBarChildren[1].setOpacity(0.4); //  setting opacity to next setup
                             //this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // REVIEW   setting hidden to next setup 
-                              this.ArmySetupAttackBar.removeAt(1); // removing Next Army Setup msg
+                            this.ArmySetupAttackBar.removeAt(1); // removing Next Army Setup msg
 
                             if (PerforceChangelist >= 472233) { // NOTE  20.1 patch
                                 this.COMBATEXTENDEDSETUP = phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
@@ -555,14 +555,14 @@
                                         console.log('armysetup-top detected! : ArmySetupAttackBarMainChildren at ' + i);
                                         this._armyBar.addAt(this.ArmySetupAttackBarMainChildren[i], 3);
                                         break;
-                                        
+
                                     }
-                                        var patch211body = "{return;}"
-                                        //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
-                                        this.ArmySetupAttackBar.__bvE = new Function('', patch211body);
-                                        ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
-                                        this.ArmySetupAttackBar.showSetup(false);
-                                    
+                                    var patch211body = "{return;}"
+                                    //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
+                                    this.ArmySetupAttackBar.__bvE = new Function('', patch211body);
+                                    ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
+                                    this.ArmySetupAttackBar.showSetup(false);
+
                                 }
                             }
 
@@ -572,7 +572,7 @@
 
                             // REVIEW adjusting rightbar and set left hidden
                             // by Netquik 
-                            
+
                             this.ArmySetupAttackBarMainChildren[2].setVisibility("hidden");
                             this.armySetupRight.resetDecorator();
                             this.armySetupRight.set({
@@ -1578,12 +1578,7 @@
                                 colSpan: 3
                             });
                             webfrontend.gui.reports.CombatVictoryPopup.getInstance().addListener("appear", function () {
-                                /*if (this.toolBar.isVisible()) {
-                                									this.toolBar.hide();
-                                								}
-                                								if (this.toolBarMouse.isVisible()) {
-                                									this.toolBarMouse.hide();
-                                								}*/
+
                                 if (this.saveObj.checkbox.skipVictoryPopup) {
                                     webfrontend.gui.reports.CombatVictoryPopup.getInstance()._onBtnClose();
                                 }
@@ -1737,63 +1732,31 @@
                         }
                     },
                     initToolBarListeners: function () {
+                        // MOD TOOLBAR LISTENERS
+                        // by Netquik
                         try {
-                            var playAreaBounds = this._PlayArea.getLayoutParent().getBounds();
-                            var playAreaWidth = this._PlayArea.getLayoutParent().getBounds().width;
-                            this._PlayArea.addListener("mouseover", function () {
-                                //this.toolBar.setOpacity(0);
-                                if (this.toolBar.isVisible()) {
-                                    this.toolBarMouse.show();
-                                    this.toolBar.setLayoutProperties({
-                                        bottom: this.TOOL_BAR_LOW
-                                    });
-                                    this.toolBar.setZIndex(1);
-                                }
-                            }, this);
                             this.ArmySetupAttackBar.addListener("appear", function () {
-                                //console.log("_armyBarContainer appeared");
-                                this.ArmySetupAttackBar.setZIndex(3);
-                                this.toolBar.show();
                                 this.toolBarMouse.show();
                             }, this);
                             this.ArmySetupAttackBar.addListener("changeVisibility", function () {
                                 if (!this.ArmySetupAttackBar.isVisible()) {
-                                    //console.log("changeVisibility: _armyBarContainer hidden");
-                                    this.toolBar.hide();
-                                    this.toolBarMouse.hide();
+                                    this.toolBarMouse.exclude();
                                 } else {
-                                    //console.log("changeVisibility: armybar is visible");
-                                    this.toolBar.show();
                                     this.toolBarMouse.show();
                                 }
                             }, this);
+                            this.MainOverlay.addListener('changeWidth', function () {
+                                this.toolBarMouse.setLayoutProperties({
+                                    left: (this._Application.getDesktop().getBounds().width - this.TOOL_BAR_WIDTH) / 2
+                                })
+                            }, this);
                             this.toolBarMouse.addListener("mouseover", function () {
-                                var paw = playAreaBounds.width;
-                                if (playAreaWidth !== paw) {
-                                    playAreaWidth = paw;
-                                    //need to do this on maximize as well
-                                    var armyBarBounds = this.ArmySetupAttackBar.getBounds();
-                                    if (armyBarBounds) {
-                                        this.toolBar.setDomLeft(armyBarBounds.left + ((armyBarBounds.width - this.TOOL_BAR_WIDTH) / 2));
-                                        this.toolBarMouse.setDomLeft(armyBarBounds.left + ((armyBarBounds.width - this.TOOL_BAR_WIDTH) / 2));
-                                    }
-                                }
-                                this.toolBarMouse.hide();
-                                this.toolBar.setZIndex(10);
-                                this.toolBar.setLayoutProperties({
-                                    bottom: this.TOOL_BAR_HIGH
-                                });
+                                this.toolBar.show();
+
                             }, this);
-                            this.toolBar.addListener("appear", function () {
-                                this.toolBar.setZIndex(1);
-                            }, this);
-                            this._armyBar.addListener("mouseover", function () {
-                                //this.toolBar.setOpacity(0);
-                                this.toolBarMouse.show();
-                                this.toolBar.setZIndex(1);
-                                this.toolBar.setLayoutProperties({
-                                    bottom: this.TOOL_BAR_LOW
-                                });
+                            this.toolBarMouse.addListener("mouseout", function () {
+                                this.toolBar.hide();
+
                             }, this);
                             this._armyBar.addListener("click", function () {
                                 this.armybarClickCount += 1;
@@ -1835,13 +1798,10 @@
                                     var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABqlBMVEX////09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb29vc29va2trZ2dnZ2NjY2NjX19fY2NfW19bW1tbX19bV1dXV1NTT09PS0tLR0dHQ0NDPz8/Ozs7Pzs7Ozs3MzMzLy8vJycnIyMjFxcXDw8PTv7zCwsLSvLm9vr29vb3Oube7vLu6urq5ubm5uri4uLi4uLa3t7e0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmnp6Wmp6WlpqOkpaKlpaOkpKOhop+ioqGgoZ2hoZ6goZ6foJyen5uen52enpudnpqcnZmcnZqam5ibm5mZmpeXmJWXmJSYmJaWl5OVlpOTlJCSk4+Rko+QkY6NjoqOjouNjYyMjYuKi4mLi4mKi4eIiYeHiIWHiISGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN1dnR2dnR0dXN0dXJ0dHJyc3Bzc3FvcG5vb21vb25ub25ub2xtbmtubmxubm1sbWpra2lqa2hpamewRT2vRDumHBymGxsjsLVTAAAAjnRSTlMA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////0TDHVgAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAALNSURBVGiB7ZvpU9NAGIeJdAaR0pQudFu01FBPiki9Kop4gddCazCt0gxqVbCieE61SL3vg//Z7KZpwxc/sHnDLLO/mcx02plnMk9z/HbepK1NxseseZm/69B9jeyOxWJ9dONJ5rcbjTFOaNGopmEPgjJ/XOjpo9GEhpA3aIyOudivrkVZkvZP3DnccvLsvf1V0huym138irSE4xqls9kxjkyMULbjRP8U0Zy/EaWQqqo9G05vepyyHd/X6+d3MSHWNhgKKIrSvvF0D50ZaTmZefJyEdvoveEAb0JD4y127ubjzxVsHXzWTncqCi+7Oz1BHWToeZkzyvdrD/spGndu497tQO9pdpysWWhipVSrUSF4hwfo8Ng6NCGrDN3Vzo/ucaH1OybRfzIhAqFZVmwh/GS/0G4h4qCla//Q0rV/aEFd37WE/AIRYpRNYvwAc322H0aITqbiCAZt3tiDEIiQ2ZMHNCD0kt1dIYTUIdEalJAVSLR0vRVcR+DQk/vBTvTXT1NQl6dSdQEDXVT1UrUSh+oh5tsvMDcw0yQECA1YFnRC9LponU9M17JfB6TrzUJL1/6hoV1XwVxfGIByfTkO00PIFbq2AxEye2QAqvMtw5Vg0OoOVoJBl0nS9VZwHYFzfQ7sRF96sYCB0IVHHxozMIDr9YNqZSfUvbFUhbmBuWdgHqNlD/EPLV37h5au/UNL1/6hoV1/F20GZkXAGVjhlIgzMEH7tVzLSNf/Rws5A1t+J+IMjK6SFoWbgdF7oyF7iOx8m4GWrv1Di/9MsDhogV2vwj3r/oahgx7sdTjbROeM8nzuYoIJUTu4yYrqQhfvzV9tzMBwaDs3Gw030fl8/lJjBoZwItTB8QYHe4sjhZromcJx5KCt/VaDwS6OqIOohdafN0swY3NF24dc6OI3N9qzUPStjwfZ56T36Lm5YSj07elDUEJOjI6CoP8Bxks+VXu6zlMAAAAASUVORK5CYII=";
                                     break;
                             }
-                            if (PerforceChangelist >= 441272) { // 15.4 patch
-                                this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent().getLayoutParent();
-                            } else { //old
-                                this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent();
-                            }
-                            if (this.toolBar) { // REVIEW added toolBarMouseRemove
-                                this.toolBarParent.remove(this.toolBar);
+
+                            this.toolBarParent = this._armyBar.getLayoutParent().getLayoutParent().getLayoutParent();
+
+                            if (this.toolBarMouse) { // REVIEW added toolBarMouseRemove
                                 this.toolBarParent.remove(this.toolBarMouse);
                             }
                             if (this.repairInfo) {
@@ -1911,47 +1871,33 @@
                                 bottom: 180,
                                 right: 3
                             });
-                            // Toolbar
+                            // Toolbar // NOTE TOOLBAR
                             this.toolBar = new qx.ui.container.Composite();
-                            this.toolBar.setLayout(new qx.ui.layout.Canvas());
-                            this.toolBar.setHeight(53);
-                            this.toolBar.setWidth(this.TOOL_BAR_WIDTH);
+                            this.toolBar.setLayout(new qx.ui.layout.Grid());
                             this.toolBar.set({
                                 decorator: new qx.ui.decoration.Decorator().set({
                                     backgroundImage: "FactionUI/menues/victory_screen/bgr_victscr_header.png"
                                 }),
                                 visibility: "hidden",
-                                ZIndex:11
+                                ZIndex: 10,
+                                padding: 10,
+                                paddingBottom: 4
                             });
-                            this.toolBarParent.add(this.toolBar, {
-                                bottom: this.TOOL_BAR_HIGH,
-                                left: (playAreaWidth - this.TOOL_BAR_WIDTH) / 2,
-                            });
-                            // Toolbar Mouse Region
+
                             this.toolBarMouse = new qx.ui.container.Composite();
                             this.toolBarMouse.setLayout(new qx.ui.layout.Canvas());
-                            this.toolBarMouse.setHeight(25);
-                            this.toolBarMouse.setWidth(740);
+                            this.toolBarMouse.setZIndex(12);
+                            this.toolBarMouse.setHeight(53);
+                            this.toolBarMouse.setWidth(this.TOOL_BAR_WIDTH);
                             this.toolBarParent.add(this.toolBarMouse, {
-                                bottom: 155,
+                                bottom: this.TOOL_BAR_HIGH,
                                 left: (playAreaWidth - this.TOOL_BAR_WIDTH) / 2
                             });
-                            this.toolBarMouse.hide();
-                            this.toolBarMouse.setBackgroundColor("#FF0000");
-                            this.toolBarMouse.setOpacity(0);
-                            this.toolBarMouse.setZIndex(10);
+                            this.toolBarMouse.add(this.toolBar);
+                            if (!this.ArmySetupAttackBar.isVisible()) this.toolBarMouse.exclude();
+
                             this.initToolBarListeners();
-                            /*
-                            							// does the game init in combat mode?
-                            							if (this._VisMain.get_Mode() === ClientLib.Vis.Mode.CombatSetup) {
-                            							this.toolBar.show();
-                            							this.toolBarMouse.show();
-                            							//this.toolBar.setOpacity(0);
-                            							this.toolBar.setLayoutProperties({
-                            							bottom : this.TOOL_BAR_LOW
-                            							});
-                            							}
-                            							 */
+
                             // (De)activate All Button
                             this.buttons.attack.activateAll = new qx.ui.form.ToggleButton("", "FactionUI/icons/icon_disable_unit_active.png");
                             this.buttons.attack.activateAll.set({
@@ -2164,57 +2110,87 @@
                             });
                             this.buttons.attack.options.addListener("click", this.toggleOptionsWindow, this);
                             this.toolBar.add(this.buttons.attack.flipVertical, {
-                                top: 10,
-                                left: 10
+                                row: 0,
+                                column: 1
                             });
                             this.toolBar.add(this.buttons.attack.flipHorizontal, {
-                                top: 10,
-                                left: 60
+                                row: 0,
+                                column: 2
+                            });
+                            this.toolBar.add(new qx.ui.core.Spacer().set({
+                                width: 25
+                            }), {
+                                row: 0,
+                                column: 3
                             });
                             this.toolBar.add(this.buttons.attack.activateAll, {
-                                top: 10,
-                                left: 130
+                                row: 0,
+                                column: 4
                             });
                             this.toolBar.add(this.buttons.attack.activateInfantry, {
-                                top: 10,
-                                left: 180
+                                row: 0,
+                                column: 5
                             });
                             this.toolBar.add(this.buttons.attack.activateVehicles, {
-                                top: 10,
-                                left: 230
+                                row: 0,
+                                column: 6
                             });
                             this.toolBar.add(this.buttons.attack.activateAir, {
-                                top: 10,
-                                left: 280
+                                row: 0,
+                                column: 7
+                            });
+                            this.toolBar.add(new qx.ui.core.Spacer().set({
+                                width: 20
+                            }), {
+                                row: 0,
+                                column: 8
                             });
                             this.toolBar.add(this.buttons.attack.toolbarRefreshStats, {
-                                top: 10,
-                                left: 349
+                                row: 0,
+                                column: 9
+                            });
+                            this.toolBar.add(new qx.ui.core.Spacer().set({
+                                width: 18
+                            }), {
+                                row: 0,
+                                column: 10
                             });
                             // right bound buttons
                             this.toolBar.add(this.buttons.attack.options, {
-                                top: 10,
-                                right: 10
+                                row: 0,
+                                column: 18
+                            });
+                            this.toolBar.add(new qx.ui.core.Spacer().set({
+                                width: 10
+                            }), {
+                                row: 0,
+                                column: 17
                             });
                             this.toolBar.add(this.buttons.attack.repairMode, {
-                                top: 10,
-                                right: 60
+                                row: 0,
+                                column: 16
                             });
                             this.toolBar.add(this.buttons.attack.toolbarShowStats, {
-                                top: 10,
-                                right: 110
+                                row: 0,
+                                column: 15
+                            });
+                            this.toolBar.add(new qx.ui.core.Spacer().set({
+                                width: 10
+                            }), {
+                                row: 0,
+                                column: 14
                             });
                             this.toolBar.add(this.buttons.attack.toolbarRedo, {
-                                top: 10,
-                                right: 175
+                                row: 0,
+                                column: 13
                             });
                             this.toolBar.add(this.buttons.attack.toolbarUndo, {
-                                top: 10,
-                                right: 225
+                                row: 0,
+                                column: 12
                             });
                             this.toolBar.add(this.buttons.attack.formationReset, {
-                                top: 10,
-                                right: 275
+                                row: 0,
+                                column: 11
                             });
                             if (this.userInterface) {
                                 this._armyBar.remove(this.userInterface);
@@ -2301,7 +2277,7 @@
                                 for (i = 0; i < this.ArmySetupAttackBarMainChildren.length - 1; i++) {
                                     var wavechild = this.ArmySetupAttackBarMainChildren[i];
                                     findwave = wavechild._hasChildren() && wavechild.basename === "Composite" ? wavechild.getChildren()[0].$$user_value : false;
-                                    this.cntWave = (typeof(findwave) === 'string' && (match=findwave.match(/.+\s{1}([1-4]{1})/))) ? true : false;
+                                    this.cntWave = (typeof (findwave) === 'string' && (match = findwave.match(/.+\s{1}([1-4]{1})/))) ? true : false;
                                     if (this.cntWave) {
                                         wavechild.setZIndex(12);
                                         if (match[1] === "1") wavechild.setPaddingTop(7);
@@ -2326,10 +2302,6 @@
                                     left: 5
                                 });
                             }
-                            if (this.ArmySetupAttackBar.isVisible()){
-                            this.ArmySetupAttackBar.hide();
-                            this.ArmySetupAttackBar.show();
-                        }
                             // Simulate Button
                             this.buttons.attack.simulate = new qx.ui.form.Button();
                             this.buttons.attack.simulate.set({
@@ -2743,10 +2715,7 @@
                         if (this.battleResultsBox.isVisible()) this.battleResultsBox.close();
                         if (this.resourceLayoutWindow.isVisible()) this.resourceLayoutWindow.close();
                         if (this.optionsWindow.isVisible()) this.optionsWindow.close();
-                        /*if (this.toolBar.isVisible())
-                        							this.toolBar.hide();
-                        						if (this.toolBarMouse.isVisible())
-                        							this.toolBarMouse.hide();*/
+
                     },
                     gameOverlaysToFront: function () {
                         webfrontend.gui.reports.ReportsOverlay.getInstance().setZIndex(20);
@@ -2965,9 +2934,7 @@
                             case ClientLib.Data.PlayerAreaViewMode.pavmCombatAttacker: {
                                 if (this.options.autoDisplayStats.getValue() && this.saveObj.checkbox.showStatsDuringAttack) {
                                     this.battleResultsBox.open();
-                                    /*if(this.ArmySetupAttackBar.isVisible()){
-                                    										this.toolBar.show();
-                                    									}*/
+
                                 }
                                 break;
                             }
