@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.57d
+// @version        3.57e
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW - FIX OPTIONS - 20.1 FIX - OTHER FIXES
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -1779,7 +1779,7 @@
                                     }
                                 }
                                 this.toolBarMouse.hide();
-                                this.toolBar.setZIndex(12);
+                                this.toolBar.setZIndex(10);
                                 this.toolBar.setLayoutProperties({
                                     bottom: this.TOOL_BAR_HIGH
                                 });
@@ -1939,7 +1939,7 @@
                             this.toolBarMouse.hide();
                             this.toolBarMouse.setBackgroundColor("#FF0000");
                             this.toolBarMouse.setOpacity(0);
-                            this.toolBarMouse.setZIndex(12);
+                            this.toolBarMouse.setZIndex(10);
                             this.initToolBarListeners();
                             /*
                             							// does the game init in combat mode?
@@ -2326,8 +2326,10 @@
                                     left: 5
                                 });
                             }
-                            this.toolBar.show();
-
+                            if (this.ArmySetupAttackBar.isVisible()){
+                            this.ArmySetupAttackBar.hide();
+                            this.ArmySetupAttackBar.show();
+                        }
                             // Simulate Button
                             this.buttons.attack.simulate = new qx.ui.form.Button();
                             this.buttons.attack.simulate.set({
