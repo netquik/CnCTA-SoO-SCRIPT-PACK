@@ -2,14 +2,28 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.02.22
+// @version         20.03.09
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
-// @contributor     NetquiK (https://github.com/netquik) - 19.5 FIX MOD VIEW + AUTO - Move Box save position code - New Top Bar Button - Native Unit Enabling - SkipVictory
+// @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Tiberium_Alliances_Battle_Simulator_V2.user.js
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- 19.5 FIX MOd VIEW + AUTO
+- MovableBox Save Position
+- New Top Bar Button
+- Native Unit Enabling
+- SkipVictory
+- 20.1 FIX
+- MovableBox in Battleground 
+----------------
+*/
+
 (function () {
     var script = document.createElement("script");
     script.innerHTML = "(" +
@@ -106,7 +120,7 @@
                             Infantry: "FactionUI/icons/icon_arsnl_off_squad.png",
                             Vehicle: "FactionUI/icons/icon_arsnl_off_vehicle.png",
                             Aircraft: "FactionUI/icons/icon_arsnl_off_plane.png",
-                            //DS-MOD
+                            //DS-MOd
                             ResetFormLine: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAAfSURBVHjaYvz//z8DJYCJgUIwasCoAaMGDBYDAAIMAGOaAx1bYuPGAAAAAElFTkSuQmCC",
                             ResetFormation: "data:image/png;base64,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"
                         },
@@ -344,7 +358,7 @@
                                     if (target !== null && ClientLib.Base.Unit.CanBeTransported(target.get_UnitGameData_Obj(), unit.get_UnitGameData_Obj())) target.MoveBattleUnit(unit.get_CoordX(), unit.get_CoordY());
                                     unit.MoveBattleUnit(formation[i].x, formation[i].y);
                                 }
-                                //transported units NOTE Functions Deactiveted
+                                // MOD transported units  Functions Deactiveted
                                 // Modded  by Nequik  for revert to native unit enabling
                                 for (i = 0; i < transported.length; i++) {
                                     unit = this.GetUnitById(transported[i].id, CityId, OwnId); //unit being trasported
@@ -2447,53 +2461,78 @@
                         try {
                             this.base(arguments);
                             this._Application = qx.core.Init.getApplication();
-                            this._armyBarContainer = this._Application.getArmySetupAttackBar();
+                            this.ArmySetupAttackBar = this._Application.getArmySetupAttackBar();
                             this._armyBar = this._Application.getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
                             this._playArea = this._Application.getPlayArea();
+                            // just some shortcuts by Netquik 
+                            this.MainOverlay = this._Application.getMainOverlay();
+                            this.ArmySetupAttackBarMainChildren = this._armyBar.getChildren();
+                            this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
+                            this._playAreaChildren = this._playArea.getChildren();
+                            this.OverlayFixed = false; // MOD: needed for 19.5 patch 
+
+
                             if (PerforceChangelist >= 443425) { // 16.1 patch
-                                for (var i in this._armyBarContainer) {
-                                    if (typeof this._armyBarContainer[i] == "object" && this._armyBarContainer[i] != null) {
-                                        if (this._armyBarContainer[i].objid == "btn_disable") {
-                                            console.log(this._armyBarContainer[i].objid);
-                                            var nativeSimBarDisableButton = this._armyBarContainer[i];
+                                for (var i in this.ArmySetupAttackBar) {
+                                    if (typeof this.ArmySetupAttackBar[i] == "object" && this.ArmySetupAttackBar[i] != null) {
+                                        if (this.ArmySetupAttackBar[i].objid == "btn_disable") {
+                                            console.log(this.ArmySetupAttackBar[i].objid);
+                                            var nativeSimBarDisableButton = this.ArmySetupAttackBar[i];
                                         }
-                                        if (this._armyBarContainer[i].objid == "cnt_controls" || this._armyBarContainer[i].objid == "btn_toggle") {
-                                            this._armyBarContainer[i].setVisibility("excluded");
+                                        if (this.ArmySetupAttackBar[i].objid == "cnt_controls" || this.ArmySetupAttackBar[i].objid == "btn_toggle") {
+                                            this.ArmySetupAttackBar[i].setVisibility("excluded");
                                         }
                                     }
                                 }
-                                var armyBarChildren = this._armyBar.getChildren();
-                                for (var i in armyBarChildren) {
-                                    if (armyBarChildren[i].$$user_decorator == "pane-armysetup-right") {
-                                        console.log(armyBarChildren[i].$$user_decorator)
-                                        var armySetupRight = armyBarChildren[i];
-                                        armySetupRight.removeAt(1);
-                                        armySetupRight.addAt(nativeSimBarDisableButton, 1);
+                                for (var i in this.ArmySetupAttackBarMainChildren) {
+                                    if (this.ArmySetupAttackBarMainChildren[i].$$user_decorator == "pane-armysetup-right") {
+                                        console.log(this.ArmySetupAttackBarMainChildren[i].$$user_decorator)
+                                        this.armySetupRight = this.ArmySetupAttackBarMainChildren[i];
+                                        this.armySetupRight.removeAt(1);
+                                        this.armySetupRight.addAt(nativeSimBarDisableButton, 1);
                                         break;
                                     }
                                 }
                             }
-                            // just some shortcuts by Netquik 
-                            this.ArmySetupAttackBar = this._Application.getArmySetupAttackBar();
-                            this.MainOverlay = this._Application.getMainOverlay();
-                            this.ArmySetupAttackBarMainChildren = this.ArmySetupAttackBar.getMainContainer().getChildren();
-                            this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
-                            this._playAreaChildren = this._playArea.getChildren();
-                            this.OverlayFixed = false;
+                            
 
+
+                            this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // NOTE Resizing ArmySetup after topbuttons remove
+                            this.ArmySetupAttackBarChildren[1].setOpacity(0.4); // NOTE  setting opacity to next setup
+                            this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // NOTE  setting hidden to next setup 
+                            var playerFaction = ClientLib.Data.MainData.GetInstance().get_Player().get_Faction(); // NOTE  new Left/Right Bars 
+                            switch (playerFaction) {
+                                case ClientLib.Base.EFactionType.GDIFaction:
+                                    var leftBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAABklBMVEUAAAD///8bfqbc3Nyhop/T09PZ2dnY2Njx8fHy8vLz8/Oen5t2d3XW1tZyc3C5ubnJycnLy8ugoZ6hoZ7X19bX19eKioiXmJTa2tqXmJXg4ODh4eHi4uLr6+ucnZmcnZqdnpr09PTR0dHS0tLV1dV0dXPj4+Pq6uqen52LjIrK09eMjIvOzs3Q0NC3t7e4uLiRko9qa2iWl5NtbmsbfqZ0dHK9vr3b29t2dnTf39/IyMifoJygoZ3CwsLo6Ojp6enDw8Pu7u7w8PCGh4OIiYewsLC0tLR1dnRnoblsbWqpqairq6irrKmsrKutrq2ur6xub22zs7OHiISHiIW4uLZub26Jioi5uri6urq7vLtvb22Ki4dvb27FxcVra2nIz9KNjoqOjouQkY5zc3HOzs7O1djPz8+Sk4+TlJCVlpNpamd0dXJubmyYmJaZmpeam5ibm5l1dnNqpbxubm2enptub2x4eXd6enh8fXuCgoGEhYKEhYOioqHt7e2io6Hv7++jo6OkpaKlpaOlpqOmp6Wnp6Um7BAdAAAAA3RSTlMAAH5Ny5jlAAACu0lEQVR4Xu3b1Y/bQBDA4Wtm1+wgM8MhMzOUmZmZmfH/rtc5K6kq9SGbac/qjnSv38NPymmccbr2oM3vtKC7nPGMdXRaaM/THuAZSZLYX9kBmrRnqwekDkyZQpyacUmyaEe+5MjcNFj0xEdGN2rcAO5p0ABxaz6/ZLQj80+DZjYcfsdoVoPJS+sDg+2Pz+cHp7VJ4X6O0awzkzf8k8npdieZTEERbDoepxRO6Ixu1Fg6EqiuaGq7o2kFJV0CgDLLYR7wzlr0jrwRSH9SeEbVlORNRgPI3a+Ozln0mP1JWfdXmcxlFzIli6YgR18cexRiNLAZmFxReEfLSIw2T05dHso36cGkxk/XGA2bUwkSDJEmPa1y0+qiTY8HCQkRDJoO6yR2W/9LtMI/Ng0VwsY9NGKQ/6a1aC1ai9Z3rSC3cFpfzJPYUB4lSOQQWmuQfxAdJwhA//MYFk37TtVxgrBZw6O9WEEoJl1BC/JHWrQWrfv2YtH9b58gfdDlXiNRR6EjUSOB9P96+14Caw8ZDZJYzG3LAnh1QnS3LWZ0lLirNT8t9mvRWrQWrQ281uH9aK1B/obVmj3dfSFINIQn6nhL8Coe7XXlfl35N0FEa9E6fBCrtdz7eg0niBw9ey6LQoejxhWkPcQwEijLgnMDQ6HFHiJ2PtFatBatRettJBr/BkaIG29gx7O75QYm9mvxLCNau/EGdm3VdTewbvac5LYb2HB+F+0hYucTrUVrzHeC3UNjBnF/a4x33cfJr1/G+TpAqws2vWm5wVALnSpwF1lO2UHMfaGR1pf/Z0DROO0P6YhNg/x15GquSUOxqhQ0jt9wqMtpU4KdG9h3Mhts0lBKZTK1xXantpCKSODQcCY710LDdSrxjMxkOwgUKbzRbbqT4+zXz3IItA0Ezj/GomcePMQKcuH9HSx6fv70T0KzcLgY6GqkAAAAAElFTkSuQmCC";
+                                    var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABsFBMVEX09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb3Nzb29va2trZ2dnY2NjY2dnY2NfX19fW1tbX19bV1dXU1dXT09PN1djS0tLJ09fR0dHJ0tfQ0NDPz8/Ozs7Pzs7Ozs3Hz9LMzMzLy8vJycnIyMjFxcXDw8PCwsK9vr27vLu6urq5uri5ubm4uLiQwNS3t7e4uLaPwNO0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmmp6Wnp6WlpqOlpaOkpaKkpKSio6Ghop+ioqGgoZ6goZ2hoZ6foJyen52en5udnpqenpucnZmcnZqam5ibm5mZmpdqpLyXmJWYmJaXmJSWl5OVlpNnoLmTlJCSk4+Rko+QkY6OjouNjoqMjYuNjYyLi4mKi4eKi4mIiYeHiISHiIWGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN2dnR1dnR0dXJ0dXN0dHJyc3Bzc3FvcG5ub25ub2xvb21vb25ubmxubm1tbmscf6ZsbWobfqZqa2hra2lpamf///8wScmyAAAAkHRSTlP//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wADZeeHAAAACXBIWXMAAAsSAAALEgHS3X78AAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAAt5JREFUaIHtm/1P00AYxytLEBnr2MFukzIrDN8ZAupAQXzF1zomnZviUnyZClMUXzOnMN8V8eVf9u7ajRoTf+D6lBy5b9Jk2ZJPms/68r08rfIbLIpE/4Ne9TIrY250h5Md8Xi8g2486bs56kJjjDU9GtV17EFQ7+3RNfTl4aimI+QNGqP9dTZBv7oUZUnYP3Fnp+OEoJ+9t79KeENusAm68AXpWt01SqXTIxyZGKRs5oSgzQ8Rvf43oiRSVbV93elMjVM2803QV2unNCaEbD2hgKIoTetPW//xQccJQU89fjmHbfTucIA3of5xmz1G0NnrTz6WMTn4yE63KAovuy01QR30rVB0rvSg+qiLonHLFu7dDnQeZcfJKkEbJMVqlQrB2zxAh0f+QhvGMkO3NvGj211o845lmD+YEIHQLEu2EH6yX2i3EHHQ0rV/aOnaP7Sgru8SIb9AhORKlpH7Ceb6RBeMENM4F0MwaOvaLoRAhEwf2acDoRfs7gohpAaJ1qGELEGipevN4DoChz67F+xEf/00CXV5KlbmMdBF1SxWyjGoHmK9/QZzA7MswwBCA5YF0zDMmmidT0zXsl8HpOuNQkvX/qGhXVfAXJ/uhnJ9PgbTQ4yLdG0HImR6uBuq8y3ClWDQ6g5WgkGXSdL1ZnAdgXN9EuxEX3gxj4HQ+YefnBkYwPX6fqW8HereWKzA3MDcMzCP0bKH+IeWrv1DS9f+oaVr/9DQrr+LNgMjEXAGlj8m4gxM0H4t1zLS9f/RQs7AFt+JOAOjq6Q54WZg9N6Ykz1Edr6NQEvX/qHFfyZYHLTArpfhnnV/w9BBD/Y6nG6gs7nSbPaMxoSozdxkRXWhC/dmLzgzMBzays1GAw10JpOZdGZgCGuhZo43ONhbHEnUQE/lD6E6muy3Ggy2ckTtQWto83mjBDM2V/Q9yIUufHWjPQtF3/h8gH1OeI+emRmAQt+6chBKyOGhIRD0H2r7n40x6THiAAAAAElFTkSuQmCC";
+                                    break;
+                                case ClientLib.Base.EFactionType.NODFaction:
+                                    var leftBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAABj1BMVEX///+hop/p6el0dXOXmJSTlJBqa2jY2NihoZ6XmJV2d3XX19egoZ6dnprOzs3X19aIiYeKiojQ0NDr6+vq6uqen51sbWqnp6WRko+cnZl0dHKMjIuur6yLjIro6Oh2dnTIyMh1dnRtbmupqajCwsLu7u6enpuWl5OGh4OgoZ2EhYJ0dXKHiIWHiIR6eniSk49ub2yam5hpameJioiNjoqlpqOkpaK9vr25uritrq18fXtvb22Ki4d1dnOOjou4uLZzc3Fra2mrq6irrKnPz8/t7e2lpaOQkY6mp6W7vLvOzs6CgoFubm1vb26bm5mYmJaZmpfFxcWVlpO6urrc3NzZ2dnT09PV1dXa2trg4ODz8/PW1tbJycnLy8u0tLTi4uLSvbq5ubnDw8OwsLC3t7fb29vw8PDR0dHv7+/f39+uRDqvRTzj4+Px8fGcnZrh4eGsrKv09PSioqHTwL2mGxvW19by8vJyc3Czs7Ojo6KfoJxubmyEhYPOuri4uLjS0tK9vb2en5tub254eXdub21rpm98AAAAAXRSTlMAQObYZgAAAr9JREFUeF7s0MUOwzAURNF+5DxTEIrMzPDhjRtZztqx1E2vNNuzmNZv+rf2Wl0epWgSEelxA9TkYQryEGcQLBBENfkC8kSjpO9L+8YKjatoQJQdXj5loKK1jffZvKHlvGhf3cuyEObrgOE0NT9rOQ47cuCalDP08KWFYAzPh30j30fjrtq6ptRiktwAcH3HZr47WjmOkv6nffPsbRoKozBva+oRO6NJS5OSpIWWTubee+/xxqgOqCBGQaobpUKOxIdW/udwrUgOX/jA7UGxeM8PeBQ90rWOc65DnURBuHZHoZnN+rGjS+oMJifl49tNRdZid8u7v9A+m6UTqycthWaVT5+/hLoJyi2Fbp9unpnyUvTOWqCPrig0zzZtci1K0d8ibXQ0kqBrLpFFCLQ/FpOxP/5H6FA/CZpHSSU7aKCQ/8a1uBbX4vpUTMZxjOubHhlTHkRI7iDMNZsHKMYIYR4/YqDQfv7CBEaIShGH7qGE+Ej0KEzIH9HiWlznD6PQ48tXQQfdnHZszOMpV3Js0PN6csVG9ZBDLhlG1soC92KiGFbMYK4J63r40NKvxbW4FtcOznXhNsw1m2dRrtXb3TkCoblwfgJXghfh1R3fr/FovBBxLa4LF1GuzelLRYwQs3T5ShWCLpSca6Ae4jg2oCykGxgELT1EOp+4FtfiWlxPgtD4DYwoixvY9eqwbGDSr+VdRlxncQO7sZi5Dazu2ERZ28DGvCHqIdL5xLW4Rt4Jzg4aKST7rhF33Wv0+4X0D3uAjhoJetYicq0BdKerbWS+kwhp37IWBi//z3AYaLLvruf6G9i9hftbKZo3NsNuoPENRzS/3m5xfwN7QD/cFM27nXK5MvK3qTQ66jf30fywujSA5kd+SyemIidCeMPnx3GC3tP0+/WTLQCaVd49fYZCzzx/gRLycvsVCj039/onvUF9K+HA7eQAAAAASUVORK5CYII%3D";
+                                    var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABqlBMVEX////09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb29vc29va2trZ2dnZ2NjY2NjX19fY2NfW19bW1tbX19bV1dXV1NTT09PS0tLR0dHQ0NDPz8/Ozs7Pzs7Ozs3MzMzLy8vJycnIyMjFxcXDw8PTv7zCwsLSvLm9vr29vb3Oube7vLu6urq5ubm5uri4uLi4uLa3t7e0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmnp6Wmp6WlpqOkpaKlpaOkpKOhop+ioqGgoZ2hoZ6goZ6foJyen5uen52enpudnpqcnZmcnZqam5ibm5mZmpeXmJWXmJSYmJaWl5OVlpOTlJCSk4+Rko+QkY6NjoqOjouNjYyMjYuKi4mLi4mKi4eIiYeHiIWHiISGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN1dnR2dnR0dXN0dXJ0dHJyc3Bzc3FvcG5vb21vb25ub25ub2xtbmtubmxubm1sbWpra2lqa2hpamewRT2vRDumHBymGxsjsLVTAAAAjnRSTlMA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////0TDHVgAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAALNSURBVGiB7ZvpU9NAGIeJdAaR0pQudFu01FBPiki9Kop4gddCazCt0gxqVbCieE61SL3vg//Z7KZpwxc/sHnDLLO/mcx02plnMk9z/HbepK1NxseseZm/69B9jeyOxWJ9dONJ5rcbjTFOaNGopmEPgjJ/XOjpo9GEhpA3aIyOudivrkVZkvZP3DnccvLsvf1V0huym138irSE4xqls9kxjkyMULbjRP8U0Zy/EaWQqqo9G05vepyyHd/X6+d3MSHWNhgKKIrSvvF0D50ZaTmZefJyEdvoveEAb0JD4y127ubjzxVsHXzWTncqCi+7Oz1BHWToeZkzyvdrD/spGndu497tQO9pdpysWWhipVSrUSF4hwfo8Ng6NCGrDN3Vzo/ucaH1OybRfzIhAqFZVmwh/GS/0G4h4qCla//Q0rV/aEFd37WE/AIRYpRNYvwAc322H0aITqbiCAZt3tiDEIiQ2ZMHNCD0kt1dIYTUIdEalJAVSLR0vRVcR+DQk/vBTvTXT1NQl6dSdQEDXVT1UrUSh+oh5tsvMDcw0yQECA1YFnRC9LponU9M17JfB6TrzUJL1/6hoV1XwVxfGIByfTkO00PIFbq2AxEye2QAqvMtw5Vg0OoOVoJBl0nS9VZwHYFzfQ7sRF96sYCB0IVHHxozMIDr9YNqZSfUvbFUhbmBuWdgHqNlD/EPLV37h5au/UNL1/6hoV1/F20GZkXAGVjhlIgzMEH7tVzLSNf/Rws5A1t+J+IMjK6SFoWbgdF7oyF7iOx8m4GWrv1Di/9MsDhogV2vwj3r/oahgx7sdTjbROeM8nzuYoIJUTu4yYrqQhfvzV9tzMBwaDs3Gw030fl8/lJjBoZwItTB8QYHe4sjhZromcJx5KCt/VaDwS6OqIOohdafN0swY3NF24dc6OI3N9qzUPStjwfZ56T36Lm5YSj07elDUEJOjI6CoP8Bxks+VXu6zlMAAAAASUVORK5CYII=";
+                                    break;
+                            }
+
+
+                            if (PerforceChangelist >= 472233) { // NOTE  20.1 patch
+                                this.COMBATEXTENDEDSETUP = phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
+                                if (this.COMBATEXTENDEDSETUP === false) {
+                                    ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, true);
+                                    this.ArmySetupAttackBar.showSetup(true);
+                                }
+                                for (var i in this.ArmySetupAttackBarMainChildren) {
+                                    if (this.ArmySetupAttackBarMainChildren[i].$$user_decorator == "bg-armysetup-top") {
+                                        console.log('armysetup-top detected! : at  ArmySetupAttackBarChildren' + i);
+                                        this._armyBar.addAt(this.ArmySetupAttackBarMainChildren[i], 3);
+                                        break;
+                                    }
+                                }
+
+                            }
 
                             // 19.5 FIX VIEW by Netquik 
-                            if (PerforceChangelist >= 472117) { // 19.5 patch
-                                this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // lowering item
-                                this.ArmySetupAttackBarChildren[1].setOpacity(0.4); // setting opacity to next setup
-                                this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // setting hidden to next setup
-                                //this._playArea.setMarginTop(-5); // up playArea
-                                //this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea     
+                            else if (PerforceChangelist < 472233) { // MOD: 19.5 patch
                                 this._playAreaChildren[2].setHeight(130); // fix opacity for better view
-                                //this._playAreaChildren[2].setMarginTop(-25);
                                 this._playAreaChildren[4].resetDecorator();
-
-                                //  REVIEW  Lowering playArea children by Netquik
                                 this.FixOverlay = function (e) {
                                     var _this = (this.TABS) ? this.TABS.GUI.ArmySetupAttackBar.getInstance() : this;
                                     PlayArea = _this._playArea;
@@ -2545,49 +2584,46 @@
                                     }, 2000)
                                 }
                                 this.MainOverlay.addListener('changeHeight', this.RunTimeFixOverlay.bind(null, event));
-                                // adjusting and change bars 19.5 by Netquik 
-                                this.ArmySetupAttackBarMainChildren[9].resetDecorator();
-                                this.ArmySetupAttackBarMainChildren[9].setMinWidth(55);
-                                this.ArmySetupAttackBarMainChildren[9].setMarginRight(10);
-                                var playerFaction = ClientLib.Data.MainData.GetInstance().get_Player().get_Faction();
-                                switch (playerFaction) {
-                                    case ClientLib.Base.EFactionType.GDIFaction:
-                                        var leftBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAABklBMVEUAAAD///8bfqbc3Nyhop/T09PZ2dnY2Njx8fHy8vLz8/Oen5t2d3XW1tZyc3C5ubnJycnLy8ugoZ6hoZ7X19bX19eKioiXmJTa2tqXmJXg4ODh4eHi4uLr6+ucnZmcnZqdnpr09PTR0dHS0tLV1dV0dXPj4+Pq6uqen52LjIrK09eMjIvOzs3Q0NC3t7e4uLiRko9qa2iWl5NtbmsbfqZ0dHK9vr3b29t2dnTf39/IyMifoJygoZ3CwsLo6Ojp6enDw8Pu7u7w8PCGh4OIiYewsLC0tLR1dnRnoblsbWqpqairq6irrKmsrKutrq2ur6xub22zs7OHiISHiIW4uLZub26Jioi5uri6urq7vLtvb22Ki4dvb27FxcVra2nIz9KNjoqOjouQkY5zc3HOzs7O1djPz8+Sk4+TlJCVlpNpamd0dXJubmyYmJaZmpeam5ibm5l1dnNqpbxubm2enptub2x4eXd6enh8fXuCgoGEhYKEhYOioqHt7e2io6Hv7++jo6OkpaKlpaOlpqOmp6Wnp6Um7BAdAAAAA3RSTlMAAH5Ny5jlAAACu0lEQVR4Xu3b1Y/bQBDA4Wtm1+wgM8MhMzOUmZmZmfH/rtc5K6kq9SGbac/qjnSv38NPymmccbr2oM3vtKC7nPGMdXRaaM/THuAZSZLYX9kBmrRnqwekDkyZQpyacUmyaEe+5MjcNFj0xEdGN2rcAO5p0ABxaz6/ZLQj80+DZjYcfsdoVoPJS+sDg+2Pz+cHp7VJ4X6O0awzkzf8k8npdieZTEERbDoepxRO6Ixu1Fg6EqiuaGq7o2kFJV0CgDLLYR7wzlr0jrwRSH9SeEbVlORNRgPI3a+Ozln0mP1JWfdXmcxlFzIli6YgR18cexRiNLAZmFxReEfLSIw2T05dHso36cGkxk/XGA2bUwkSDJEmPa1y0+qiTY8HCQkRDJoO6yR2W/9LtMI/Ng0VwsY9NGKQ/6a1aC1ai9Z3rSC3cFpfzJPYUB4lSOQQWmuQfxAdJwhA//MYFk37TtVxgrBZw6O9WEEoJl1BC/JHWrQWrfv2YtH9b58gfdDlXiNRR6EjUSOB9P96+14Caw8ZDZJYzG3LAnh1QnS3LWZ0lLirNT8t9mvRWrQWrQ281uH9aK1B/obVmj3dfSFINIQn6nhL8Coe7XXlfl35N0FEa9E6fBCrtdz7eg0niBw9ey6LQoejxhWkPcQwEijLgnMDQ6HFHiJ2PtFatBatRettJBr/BkaIG29gx7O75QYm9mvxLCNau/EGdm3VdTewbvac5LYb2HB+F+0hYucTrUVrzHeC3UNjBnF/a4x33cfJr1/G+TpAqws2vWm5wVALnSpwF1lO2UHMfaGR1pf/Z0DROO0P6YhNg/x15GquSUOxqhQ0jt9wqMtpU4KdG9h3Mhts0lBKZTK1xXantpCKSODQcCY710LDdSrxjMxkOwgUKbzRbbqT4+zXz3IItA0Ezj/GomcePMQKcuH9HSx6fv70T0KzcLgY6GqkAAAAAElFTkSuQmCC";
-                                        var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABsFBMVEX09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb3Nzb29va2trZ2dnY2NjY2dnY2NfX19fW1tbX19bV1dXU1dXT09PN1djS0tLJ09fR0dHJ0tfQ0NDPz8/Ozs7Pzs7Ozs3Hz9LMzMzLy8vJycnIyMjFxcXDw8PCwsK9vr27vLu6urq5uri5ubm4uLiQwNS3t7e4uLaPwNO0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmmp6Wnp6WlpqOlpaOkpaKkpKSio6Ghop+ioqGgoZ6goZ2hoZ6foJyen52en5udnpqenpucnZmcnZqam5ibm5mZmpdqpLyXmJWYmJaXmJSWl5OVlpNnoLmTlJCSk4+Rko+QkY6OjouNjoqMjYuNjYyLi4mKi4eKi4mIiYeHiISHiIWGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN2dnR1dnR0dXJ0dXN0dHJyc3Bzc3FvcG5ub25ub2xvb21vb25ubmxubm1tbmscf6ZsbWobfqZqa2hra2lpamf///8wScmyAAAAkHRSTlP//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wADZeeHAAAACXBIWXMAAAsSAAALEgHS3X78AAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAAt5JREFUaIHtm/1P00AYxytLEBnr2MFukzIrDN8ZAupAQXzF1zomnZviUnyZClMUXzOnMN8V8eVf9u7ajRoTf+D6lBy5b9Jk2ZJPms/68r08rfIbLIpE/4Ne9TIrY250h5Md8Xi8g2486bs56kJjjDU9GtV17EFQ7+3RNfTl4aimI+QNGqP9dTZBv7oUZUnYP3Fnp+OEoJ+9t79KeENusAm68AXpWt01SqXTIxyZGKRs5oSgzQ8Rvf43oiRSVbV93elMjVM2803QV2unNCaEbD2hgKIoTetPW//xQccJQU89fjmHbfTucIA3of5xmz1G0NnrTz6WMTn4yE63KAovuy01QR30rVB0rvSg+qiLonHLFu7dDnQeZcfJKkEbJMVqlQrB2zxAh0f+QhvGMkO3NvGj211o845lmD+YEIHQLEu2EH6yX2i3EHHQ0rV/aOnaP7Sgru8SIb9AhORKlpH7Ceb6RBeMENM4F0MwaOvaLoRAhEwf2acDoRfs7gohpAaJ1qGELEGipevN4DoChz67F+xEf/00CXV5KlbmMdBF1SxWyjGoHmK9/QZzA7MswwBCA5YF0zDMmmidT0zXsl8HpOuNQkvX/qGhXVfAXJ/uhnJ9PgbTQ4yLdG0HImR6uBuq8y3ClWDQ6g5WgkGXSdL1ZnAdgXN9EuxEX3gxj4HQ+YefnBkYwPX6fqW8HereWKzA3MDcMzCP0bKH+IeWrv1DS9f+oaVr/9DQrr+LNgMjEXAGlj8m4gxM0H4t1zLS9f/RQs7AFt+JOAOjq6Q54WZg9N6Ykz1Edr6NQEvX/qHFfyZYHLTArpfhnnV/w9BBD/Y6nG6gs7nSbPaMxoSozdxkRXWhC/dmLzgzMBzays1GAw10JpOZdGZgCGuhZo43ONhbHEnUQE/lD6E6muy3Ggy2ckTtQWto83mjBDM2V/Q9yIUufHWjPQtF3/h8gH1OeI+emRmAQt+6chBKyOGhIRD0H2r7n40x6THiAAAAAElFTkSuQmCC";
-                                        break;
-                                    case ClientLib.Base.EFactionType.NODFaction:
-                                        var leftBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAABj1BMVEX///+hop/p6el0dXOXmJSTlJBqa2jY2NihoZ6XmJV2d3XX19egoZ6dnprOzs3X19aIiYeKiojQ0NDr6+vq6uqen51sbWqnp6WRko+cnZl0dHKMjIuur6yLjIro6Oh2dnTIyMh1dnRtbmupqajCwsLu7u6enpuWl5OGh4OgoZ2EhYJ0dXKHiIWHiIR6eniSk49ub2yam5hpameJioiNjoqlpqOkpaK9vr25uritrq18fXtvb22Ki4d1dnOOjou4uLZzc3Fra2mrq6irrKnPz8/t7e2lpaOQkY6mp6W7vLvOzs6CgoFubm1vb26bm5mYmJaZmpfFxcWVlpO6urrc3NzZ2dnT09PV1dXa2trg4ODz8/PW1tbJycnLy8u0tLTi4uLSvbq5ubnDw8OwsLC3t7fb29vw8PDR0dHv7+/f39+uRDqvRTzj4+Px8fGcnZrh4eGsrKv09PSioqHTwL2mGxvW19by8vJyc3Czs7Ojo6KfoJxubmyEhYPOuri4uLjS0tK9vb2en5tub254eXdub21rpm98AAAAAXRSTlMAQObYZgAAAr9JREFUeF7s0MUOwzAURNF+5DxTEIrMzPDhjRtZztqx1E2vNNuzmNZv+rf2Wl0epWgSEelxA9TkYQryEGcQLBBENfkC8kSjpO9L+8YKjatoQJQdXj5loKK1jffZvKHlvGhf3cuyEObrgOE0NT9rOQ47cuCalDP08KWFYAzPh30j30fjrtq6ptRiktwAcH3HZr47WjmOkv6nffPsbRoKozBva+oRO6NJS5OSpIWWTubee+/xxqgOqCBGQaobpUKOxIdW/udwrUgOX/jA7UGxeM8PeBQ90rWOc65DnURBuHZHoZnN+rGjS+oMJifl49tNRdZid8u7v9A+m6UTqycthWaVT5+/hLoJyi2Fbp9unpnyUvTOWqCPrig0zzZtci1K0d8ibXQ0kqBrLpFFCLQ/FpOxP/5H6FA/CZpHSSU7aKCQ/8a1uBbX4vpUTMZxjOubHhlTHkRI7iDMNZsHKMYIYR4/YqDQfv7CBEaIShGH7qGE+Ej0KEzIH9HiWlznD6PQ48tXQQfdnHZszOMpV3Js0PN6csVG9ZBDLhlG1soC92KiGFbMYK4J63r40NKvxbW4FtcOznXhNsw1m2dRrtXb3TkCoblwfgJXghfh1R3fr/FovBBxLa4LF1GuzelLRYwQs3T5ShWCLpSca6Ae4jg2oCykGxgELT1EOp+4FtfiWlxPgtD4DYwoixvY9eqwbGDSr+VdRlxncQO7sZi5Dazu2ERZ28DGvCHqIdL5xLW4Rt4Jzg4aKST7rhF33Wv0+4X0D3uAjhoJetYicq0BdKerbWS+kwhp37IWBi//z3AYaLLvruf6G9i9hftbKZo3NsNuoPENRzS/3m5xfwN7QD/cFM27nXK5MvK3qTQ66jf30fywujSA5kd+SyemIidCeMPnx3GC3tP0+/WTLQCaVd49fYZCzzx/gRLycvsVCj039/onvUF9K+HA7eQAAAAASUVORK5CYII%3D";
-                                        var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABqlBMVEX////09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb29vc29va2trZ2dnZ2NjY2NjX19fY2NfW19bW1tbX19bV1dXV1NTT09PS0tLR0dHQ0NDPz8/Ozs7Pzs7Ozs3MzMzLy8vJycnIyMjFxcXDw8PTv7zCwsLSvLm9vr29vb3Oube7vLu6urq5ubm5uri4uLi4uLa3t7e0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmnp6Wmp6WlpqOkpaKlpaOkpKOhop+ioqGgoZ2hoZ6goZ6foJyen5uen52enpudnpqcnZmcnZqam5ibm5mZmpeXmJWXmJSYmJaWl5OVlpOTlJCSk4+Rko+QkY6NjoqOjouNjYyMjYuKi4mLi4mKi4eIiYeHiIWHiISGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN1dnR2dnR0dXN0dXJ0dHJyc3Bzc3FvcG5vb21vb25ub25ub2xtbmtubmxubm1sbWpra2lqa2hpamewRT2vRDumHBymGxsjsLVTAAAAjnRSTlMA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////0TDHVgAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAALNSURBVGiB7ZvpU9NAGIeJdAaR0pQudFu01FBPiki9Kop4gddCazCt0gxqVbCieE61SL3vg//Z7KZpwxc/sHnDLLO/mcx02plnMk9z/HbepK1NxseseZm/69B9jeyOxWJ9dONJ5rcbjTFOaNGopmEPgjJ/XOjpo9GEhpA3aIyOudivrkVZkvZP3DnccvLsvf1V0huym138irSE4xqls9kxjkyMULbjRP8U0Zy/EaWQqqo9G05vepyyHd/X6+d3MSHWNhgKKIrSvvF0D50ZaTmZefJyEdvoveEAb0JD4y127ubjzxVsHXzWTncqCi+7Oz1BHWToeZkzyvdrD/spGndu497tQO9pdpysWWhipVSrUSF4hwfo8Ng6NCGrDN3Vzo/ucaH1OybRfzIhAqFZVmwh/GS/0G4h4qCla//Q0rV/aEFd37WE/AIRYpRNYvwAc322H0aITqbiCAZt3tiDEIiQ2ZMHNCD0kt1dIYTUIdEalJAVSLR0vRVcR+DQk/vBTvTXT1NQl6dSdQEDXVT1UrUSh+oh5tsvMDcw0yQECA1YFnRC9LponU9M17JfB6TrzUJL1/6hoV1XwVxfGIByfTkO00PIFbq2AxEye2QAqvMtw5Vg0OoOVoJBl0nS9VZwHYFzfQ7sRF96sYCB0IVHHxozMIDr9YNqZSfUvbFUhbmBuWdgHqNlD/EPLV37h5au/UNL1/6hoV1/F20GZkXAGVjhlIgzMEH7tVzLSNf/Rws5A1t+J+IMjK6SFoWbgdF7oyF7iOx8m4GWrv1Di/9MsDhogV2vwj3r/oahgx7sdTjbROeM8nzuYoIJUTu4yYrqQhfvzV9tzMBwaDs3Gw030fl8/lJjBoZwItTB8QYHe4sjhZromcJx5KCt/VaDwS6OqIOohdafN0swY3NF24dc6OI3N9qzUPStjwfZ56T36Lm5YSj07elDUEJOjI6CoP8Bxks+VXu6zlMAAAAASUVORK5CYII=";
-                                        break;
-                                }
-                                var canvasWidth = 90;
-                                this.rightBGbar = new qx.ui.container.Composite();
-                                this.rightBGbar.setLayout(new qx.ui.layout.Canvas());
-                                this.rightBGbar.setHeight(160);
-                                this.rightBGbar.setWidth(canvasWidth);
-                                this.rightBGbar.set({
-                                    decorator: new qx.ui.decoration.Decorator().set({
-                                        backgroundImage: rightBG
-                                    })
-                                });
-                                this.ArmySetupAttackBar.getMainContainer().addAt(this.rightBGbar, 8, {
-                                    top: 40,
-                                    right: 0
-                                });
-                                this._buttonsArmy = this.ArmySetupAttackBarMainChildren[10];
-                                this.ArmySetupAttackBar.getMainContainer().removeAt(10);
-                                this.ArmySetupAttackBar.getMainContainer().addAt(this._buttonsArmy, 10);
-                                this.ArmySetupAttackBarMainChildren[2].setSource(leftBG);
-                                this.ArmySetupAttackBarMainChildren[2].setLayoutProperties({
-                                    top: 40,
-                                    left: 0
-                                });
+
                             }
+
+                            // NOTE Adjusting left/right Bars
+                            this.armySetupRight.resetDecorator();
+                            this.armySetupRight.set({
+                                decorator: new qx.ui.decoration.Decorator().set({
+                                    backgroundImage: rightBG,
+                                    backgroundRepeat: 'no-repeat'
+                                })
+                            });
+                            this.armySetupRight.set({
+                                paddingTop: 8,
+                                marginTop: 40,
+                                paddingLeft: 20,
+                                paddingRight: 20,
+                            });
+                            this.ArmySetupAttackBarMainChildren[2].setSource(leftBG);
+                            this.ArmySetupAttackBarMainChildren[2].setLayoutProperties({
+                                top: 40,
+                                left: 0
+                            });
+
                             // Mirror and Shift Buttons left Side (Rows/Wave)
+                            // MOD cntWaves manage
+                            /* var TRwave = qx.locale.Manager.tr("tnf:army wave 1");
+                            TRwave = TRwave.substring(0, TRwave.indexOf(' ')); */
+                            for (i = 0; i < this.ArmySetupAttackBarMainChildren.length - 1; i++) {
+                                var wavechild = this.ArmySetupAttackBarMainChildren[i]
+                                findwave = wavechild._hasChildren() && wavechild.basename === "Composite" ? wavechild.getChildren()[0].$$user_value : false;
+                                this.cntWaveI = (typeof(findwave) === 'string' && findwave.match(/.+\s{1}1/)) ? true : false;
+                                if (this.cntWaveI) {
+                                    this.cntWaveI = i;
+                                    break;
+                                }
+
+                            }
                             var i, cntWave;
                             for (i = 0; i < ClientLib.Base.Util.get_ArmyMaxSlotCountY(); i++) {
-                                // 19.5 FIX VIEW by Netquik
-                                cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[(i + 4)];
+                                cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[i+this.cntWaveI];
                                 cntWave._removeAll();
                                 cntWave._setLayout(new qx.ui.layout.HBox());
                                 cntWave._add(this.newSideButton(TABS.RES.IMG.Flip.H, this.tr("Mirrors units horizontally."), this.onClick_btnMirror, "h", i));
@@ -2597,10 +2633,13 @@
                                 cntWave._add(this.newSideButton(TABS.RES.IMG.Arrows.Left, this.tr("Shifts units one space left."), this.onClick_btnShift, "l", i));
                                 cntWave._add(this.newSideButton(TABS.RES.IMG.Arrows.Right, this.tr("Shifts units one space right."), this.onClick_btnShift, "r", i));
                             }
+
                             // Mirror and Shift Buttons top
-                            //New rewrite for 19.5 by Netquik  NOTE NEWTOPBUTTONREWRITE
-                            this.ArmySetupAttackBarMainChildren[3].resetDecorator();
-                            this.ArmySetupAttackBarMainChildren[3].setPaddingTop(10);
+                            // REVIEW NewTopButtons rewrite code 
+                            this.newtopbuttons = this.ArmySetupAttackBarMainChildren[3];
+                            this.newtopbuttons.resetDecorator();
+                            this.newtopbuttons.setPaddingTop(10);
+
                             this.shiftbuttonopacity = function (e) {
                                 if (e.getTarget() && (e.getTarget().basename === "SoundButton" || e.getTarget().basename === "ModelButton")) {
                                     shiftbutton = (e.getTarget().getLayoutParent().getLayoutParent().getLayoutParent()) ? (e.getTarget().getLayoutParent().getLayoutParent().getLayoutParent()) : null;
@@ -2612,8 +2651,8 @@
                                     }
                                 }
                             }
-                            for (let i = 0; i < this.ArmySetupAttackBarMainChildren[3].getChildren().length; i++) {
-                                shiftbox = this.ArmySetupAttackBarMainChildren[3].getChildren()[i];
+                            for (let i = 0; i < this.newtopbuttons.getChildren().length; i++) {
+                                shiftbox = this.newtopbuttons.getChildren()[i];
                                 shiftbox.setOpacity(0.3);
                                 shiftbox.addListener("mouseover", this.shiftbuttonopacity.bind((null, event)));
                                 shiftbox.addListener("mouseout", this.shiftbuttonopacity.bind((null, event)));
@@ -2622,7 +2661,7 @@
                                 shiftbox_inside._removeAll();
                                 shiftbox_inside.add(new qx.ui.core.Spacer());
                                 //3 buttons (1 long + 2 updown)
-                                shiftbox_inside.add(this.newTopButton(TABS.RES.IMG.Flip2.V, this.tr("Mirrors units vertically."), this.onClick_btnMirror, "v", i, 45, null));
+                                shiftbox_inside.add(this.newTopButton(TABS.RES.IMG.Flip2.V, this.tr("Mirrors units vertically."), this.onClick_btnMirror, "v", i, 35, null));
                                 shiftbox_inside.add(new qx.ui.core.Spacer());
                                 shiftbox_inside.add(this.newTopButton(TABS.RES.IMG.Arrows2.Up, this.tr("Shifts units one space up."), this.onClick_btnShift, "u", i, 20, 20));
                                 shiftbox_inside.add(this.newTopButton(TABS.RES.IMG.Arrows2.Down, this.tr("Shifts units one space down."), this.onClick_btnShift, "d", i, 20, 20));
@@ -2630,41 +2669,20 @@
 
 
                             }
-                            /* btnHBox = new qx.ui.container.Composite(new qx.ui.layout.HBox()),
-                              btnHBoxouter = new qx.ui.container.Composite(new qx.ui.layout.HBox());
-                            btnHBoxouter.add(new qx.ui.core.Spacer(), {
-                                flex: 1
-                            });
-                            btnHBoxouter.add(btnHBox);
-                            btnHBoxouter.add(new qx.ui.core.Spacer(), {
-                                flex: 1
-                            });
-                            this.ArmySetupAttackBar.getChildren()[2].addAt(btnHBoxouter, 0, {
-                                left: 0,
-                                top: 2,
-                                right: 0
-                            }); */
-                            var formationContainer = this.ArmySetupAttackBar.getMainContainer();
-                            formationContainer.setMarginTop(formationContainer.getMarginTop() + 20);
+                            if (PerforceChangelist >= 472233) { // MOD: 20.1 patch 2
+                                var patch211body = "{return;}"
+                                //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
+                                this.ArmySetupAttackBar.__bvE = new Function('', patch211body);
+                                ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
+                                this.ArmySetupAttackBar.showSetup(false);
+                            }
+
+                            this._armyBar.setMarginTop(this._armyBar.getMarginTop() + 20);
                             // 19.5 FIX VIEW by Netquik
                             if (PerforceChangelist >= 472117) { // 19.5 patch                  
-                                formationContainer.setMarginTop(formationContainer.getMarginTop() - 40);
+                                this._armyBar.setMarginTop(this._armyBar.getMarginTop() - 40);
                             }
-                            /* formation.bind("changeWidth", btnHBox, "width");
-                            for (i = 0; i < ClientLib.Base.Util.get_ArmyMaxSlotCountX(); i++) {
-                                btnHBox.add(new qx.ui.core.Spacer(), {
-                                    flex: 1
-                                });
-                                btnHBox.add(this.newTopButton(TABS.RES.IMG.Flip.V, this.tr("Mirrors units vertically."), this.onClick_btnMirror, "v", i));
-                                btnHBox.add(new qx.ui.core.Spacer().set({
-                                    width: 2
-                                }));
-                                btnHBox.add(this.newTopButton(TABS.RES.IMG.Arrows.Up, this.tr("Shifts units one space up."), this.onClick_btnShift, "u", i));
-                                btnHBox.add(this.newTopButton(TABS.RES.IMG.Arrows.Down, this.tr("Shifts units one space down."), this.onClick_btnShift, "d", i));
-                                btnHBox.add(new qx.ui.core.Spacer(), {
-                                    flex: 1
-                                });
-                            } */
+
                         } catch (e) {
                             console.group("Tiberium Alliances Battle Simulator V2");
                             console.error("Error setting up GUI.ArmySetupAttackBar constructor", e);
@@ -2705,22 +2723,9 @@
                                 padding: 0,
                                 model: [pos, sel]
                             });
-                            /* btn.getChildControl("icon").set({
-                                maxWidth: 14,
-                                maxHeight: 14,
-                                scale: true
-                            }); */
+
                             btn.addListener("click", onClick, this);
-                            /* btn.addListener("mouseover", function (e) {
-                                e.getTarget().set({
-                                    opacity: 1.0
-                                });
-                            }, this);
-                            btn.addListener("mouseout", function (e) {
-                                e.getTarget().set({
-                                    opacity: 0.3
-                                });
-                            }, this); */
+
                             return btn;
                         },
                         onClick_btnMirror: function (e) {
@@ -2762,6 +2767,7 @@
                         try {
                             this.base(arguments);
                             this.PlayArea = qx.core.Init.getApplication().getPlayArea();
+                            this.ArmySetupAttackBar = qx.core.Init.getApplication().getArmySetupAttackBar();
                             this.HUD = this.PlayArea.getHUD();
                             var WDG_COMBATSWAPVIEW = this.HUD.getUIItem(ClientLib.Data.Missions.PATH.WDG_COMBATSWAPVIEW);
                             //View Simulation
@@ -2851,7 +2857,7 @@
                                 row: 3,
                                 column: 2
                             });
-                            //DS-MOD
+                            //DS-MOd
                             this.boxMove.add(this.newButton(TABS.RES.IMG.VictoryPop, this.tr("Skip Victory-Popup After Battle"), this.onClick_btnVictory, null, null), {
                                 row: 4,
                                 column: 0
@@ -2885,6 +2891,11 @@
                             // Move Box save position by Netquik
                             this.boxMove.addListener("move", function () {
                                 TABS.SETTINGS.set("GUI.Window.MoveBox.position", [this.boxMove.getBounds().left, this.boxMove.getBounds().top]);
+                            }, this);
+
+                            // NOTE Added listener to show movebox on prearmysetup
+                            this.ArmySetupAttackBar.addListener("changeVisibility", function () {
+                                if (this.ArmySetupAttackBar.isVisible()) this.boxMove.show(); else this.boxMove.hide();
                             }, this);
                             // SkipVictory Button init by Netquik
                             this.boxMove.getChildren()[12].setIcon(TABS.SETTINGS.get("skipVictoryPopup", false) ? TABS.RES.IMG.VictoryPop2 : TABS.RES.IMG.VictoryPop);
@@ -2988,7 +2999,7 @@
                             }
                             if (oldMode == ClientLib.Vis.Mode.CombatSetup) {
                                 this.btnSimulation.hide();
-                                this.boxMove.hide();
+                                if (newMode != ClientLib.Vis.Mode.Battleground) this.boxMove.hide(); // MOD leave boxMove in Battleground for pre army setup
                                 qx.bom.Element.removeListener(document, "keydown", this.onHotKeyPress, this);
                                 TABS.APISimulation.getInstance().removeListener("OnSimulateBattleFinished", this.OnSimulateBattleFinished, this);
                             }
@@ -3084,7 +3095,7 @@
                             formation = TABS.UTIL.Formation.toggle_Enabled(formation, e.getTarget().getModel()[0]);
                             TABS.UTIL.Formation.Set(formation);
                         },
-                        //DS-MOD
+                        //DS-MOd
                         loadFormationn: function (formation) {
                             try {
                                 this.layouts.restore = true;
@@ -3152,7 +3163,7 @@
                             }
                         },
 
-                        // skipVictoryPopup button function by Netquik REVIEW 
+                        //  REVIEW skipVictoryPopup button function by Netquik
                         onClick_btnVictory: function (e) {
 
                             var skipVictoryPopup = TABS.SETTINGS.get("skipVictoryPopup", false);
