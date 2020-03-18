@@ -1,10 +1,12 @@
 // ==UserScript==
-// @name       Tiberium Alliances Info Sticker
-// @namespace  TAInfoSticker
-// @version    1.11.10.2
+// @name         Tiberium Alliances Info Sticker
+// @namespace    TAInfoSticker
+// @version      1.11.10.4
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
-// @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @author unicode
+// @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @author       unicode
+// @contributor  NetquiK (https://github.com/netquik) GUI FIX
+// @updateURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Info_Sticker.user.js
 // ==/UserScript==
 (function () {
     var InfoSticker_main = function () {
@@ -31,12 +33,12 @@
                                 this.hasStorage = 'localStorage' in window && window['localStorage'] !== null;
                             } catch (se) {}
                             try {
-                                var fileManager = ClientLib.File.FileManager.GetInstance();
-                                this.tibIcon = fileManager.GetPhysicalPath("ui/common/icn_res_tiberium.png");
-                                this.cryIcon = fileManager.GetPhysicalPath("ui/common/icn_res_chrystal.png");
-                                this.powIcon = fileManager.GetPhysicalPath("ui/common/icn_res_power.png");
-                                this.creditIcon = fileManager.GetPhysicalPath("ui/common/icn_res_dollar.png");
-                                this.repairIcon = fileManager.GetPhysicalPath("ui/icons/icn_repair_off_points.png");
+                                //var fileManager = ClientLib.File.FileManager.GetInstance();
+                                this.tibIcon = "ui/common/icn_res_tiberium.png";
+                                this.cryIcon = "ui/common/icn_res_chrystal.png";
+                                this.powIcon = "ui/common/icn_res_power.png";
+                                this.creditIcon = "ui/common/icn_res_dollar.png";
+                                this.repairIcon = "ui/icons/icn_repair_off_points.png";
 
                                 if (typeof phe.cnc.Util.attachNetEvent == 'undefined')
                                     this.attachEvent = webfrontend.gui.Util.attachNetEvent;
@@ -73,6 +75,7 @@
                         infoSticker: null,
                         mcvPopup: null,
                         mcvTimerLabel: null,
+                        mcvResearchLabel: null,
                         mcvInfoLabel: null,
                         mcvPane: null,
 
@@ -125,31 +128,32 @@
                         repairHide: false,
                         resourceHide: false,
                         productionHide: false,
+                        contProductionHide: false,
                         stickerBackground: null,
 
                         mcvPane: null,
 
                         pinLockPos: 0,
 
-                        attachEvent: function() {},
+                        attachEvent: function () {},
 
-                        isNull: function(e) {
+                        isNull: function (e) {
                             return typeof e == "undefined" || e == null;
                         },
 
-                        getApp: function() {
+                        getApp: function () {
                             return qx.core.Init.getApplication();
                         },
 
-                        getBaseListBar: function() {
+                        getBaseListBar: function () {
                             var app = this.getApp();
                             var b;
-                            if(!this.isNull(app)) {
+                            if (!this.isNull(app)) {
                                 b = app.getBaseNavigationBar();
-                                if(!this.isNull(b)) {
-                                    if(b.getChildren().length > 0) {
+                                if (!this.isNull(b)) {
+                                    if (b.getChildren().length > 0) {
                                         b = b.getChildren()[0];
-                                        if(b.getChildren().length > 0) {
+                                        if (b.getChildren().length > 0) {
                                             b = b.getChildren()[0];
                                             return b;
                                         }
@@ -164,63 +168,29 @@
                                 var i;
 
                                 if (this.infoSticker && !this.mcvInfoLabel.isDisposed() && !this.mcvPopup.isDisposed()) {
-                                    var dele;
-
-                                    try {
-                                        if (this.top_image != null) {
-                                            dele = this.top_image.getContentElement().getDomElement();
-                                            if (dele != null) {
-                                                dele.style["-moz-transform"] = "scaleY(-1)";
-                                                dele.style["-o-transform"] = "scaleY(-1)";
-                                                dele.style["-webkit-transform"] = "scaleY(-1)";
-                                                dele.style.transform = "scaleY(-1)";
-                                                dele.style.filter = "FlipV";
-                                                dele.style["-ms-filter"] = "FlipV";
-                                                this.top_image = null;
-                                            }
-                                        }
-                                        for (i = this.toFlipH.length - 1; i >= 0; i--) {
-                                            var e = this.toFlipH[i];
-                                            if(e.isDisposed()) this.toFlipH.splice(i, 1);
-                                            /*else {
-                                                dele = e.getDecoratorElement().getDomElement();
-                                                if (dele != null) {
-                                                    dele.style["-moz-transform"] = "scaleX(-1)";
-                                                    dele.style["-o-transform"] = "scaleX(-1)";
-                                                    dele.style["-webkit-transform"] = "scaleX(-1)";
-                                                    dele.style.transform = "scaleX(-1)";
-                                                    dele.style.filter = "FlipH";
-                                                    dele.style["-ms-filter"] = "FlipH";
-                                                    this.toFlipH.splice(i, 1);
-                                                }
-                                            }*/
-                                        }
-                                    } catch (e2) {
-                                        console.log("Error flipping images.", e2.toString());
-                                    }
                                     var baseListBar = this.getBaseListBar();
-                                    if(baseListBar!=null) {
+                                    if (baseListBar != null) {
                                         var baseCont = baseListBar.getChildren();
                                         for (i = 0; i < baseCont.length; i++) {
                                             var baseButton = baseCont[i];
-                                            if(typeof baseButton.getBaseId === 'function') {
-                                                if(baseButton.getBaseId() == ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().get_Id()
-                                                   && baseButton.getBounds() != null && baseButton.getBounds().top!=null) {
+                                            if (typeof baseButton.getBaseId === 'function') {
+                                                if (baseButton.getBaseId() == ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().get_Id() &&
+                                                    baseButton.getBounds() != null && baseButton.getBounds().top != null) {
                                                     //var baseButtonDecorator = baseButton.getDecorator();
                                                     //if (baseButton!=this.mcvPopup && baseButtonDecorator != null && typeof baseButtonDecorator === "string" && baseButton.getBounds() != null && baseButton.getBounds().top!=null) {
                                                     //if (baseButtonDecorator.indexOf("focused") >= 0 || baseButtonDecorator.indexOf("pressed") >= 0) {
-                                                    if(this.locked) {
-                                                        if(!this.pinned) {
-                                                            if(baseListBar.indexOf(this.mcvPopup)>=0) {
+                                                    if (this.locked) {
+                                                        if (!this.pinned) {
+                                                            if (baseListBar.indexOf(this.mcvPopup) >= 0) {
                                                                 baseListBar.remove(this.mcvPopup);
                                                             }
-                                                            this.pinLockPos = baseListBar.indexOf(baseButton)+1;
+                                                            this.pinLockPos = baseListBar.indexOf(baseButton) + 1;
                                                             baseListBar.addAt(this.mcvPopup, this.pinLockPos);
-                                                        } else if(baseListBar.indexOf(this.mcvPopup)<0) {
+                                                        } else if (baseListBar.indexOf(this.mcvPopup) < 0) {
                                                             baseListBar.addAt(this.mcvPopup, Math.max(0, Math.min(this.pinLockPos, baseCont.length)));
                                                         }
                                                     } else {
-                                                        if(baseListBar.indexOf(this.mcvPopup)>=0) {
+                                                        if (baseListBar.indexOf(this.mcvPopup) >= 0) {
                                                             baseListBar.remove(this.mcvPopup);
                                                         }
                                                         if (!this.pinned) {
@@ -233,7 +203,7 @@
                                                             } catch (heighterror) {
                                                                 infoTop = 130 + top;
                                                             }
-                                                            if(this.infoSticker.getContentElement().getDomElement()!=null)
+                                                            if (this.infoSticker.getContentElement().getDomElement() != null)
                                                                 this.infoSticker.setDomTop(infoTop);
 
                                                             this.pinTop = infoTop;
@@ -253,22 +223,21 @@
                         toLock: function (e) {
                             try {
                                 this.locked = !this.locked;
-                                if(!this.locked) {
+                                if (!this.locked) {
                                     this.infoSticker.show();
                                     this.stickerBackground.add(this.mcvPopup);
-                                }
-                                else this.infoSticker.hide();
+                                } else this.infoSticker.hide();
                                 this.lockButton.setIcon(this.locked ? "FactionUI/icons/icn_thread_locked_active.png" : "FactionUI/icons/icn_thread_locked_inactive.png");
                                 this.updateLockButtonDecoration();
                                 if (this.hasStorage) {
                                     if (this.locked) {
                                         localStorage["infoSticker-locked"] = "true";
-                                        if(this.pinned) localStorage["infoSticker-pinLock"] = this.pinLockPos.toString();
+                                        if (this.pinned) localStorage["infoSticker-pinLock"] = this.pinLockPos.toString();
                                     } else {
                                         localStorage["infoSticker-locked"] = "false";
                                     }
                                 }
-                                if(this.locked && this.pinned) {
+                                if (this.locked && this.pinned) {
                                     this.menuUpButton.setEnabled(true);
                                     this.menuDownButton.setEnabled(true);
                                 } else {
@@ -276,7 +245,7 @@
                                     this.menuDownButton.setEnabled(false);
                                 }
                                 this.repositionSticker();
-                            } catch(e) {
+                            } catch (e) {
                                 console.log("InfoSticker.toLock: ", e.toString());
                             }
                         },
@@ -298,21 +267,21 @@
                                     if (this.pinned) {
                                         localStorage["infoSticker-pinned"] = "true";
                                         localStorage["infoSticker-top"] = this.pinTop.toString();
-                                        if(this.locked) {
+                                        if (this.locked) {
                                             localStorage["infoSticker-pinLock"] = this.pinLockPos.toString();
                                         }
                                     } else {
                                         localStorage["infoSticker-pinned"] = "false";
                                     }
                                 }
-                                if(this.locked && this.pinned) {
+                                if (this.locked && this.pinned) {
                                     this.menuUpButton.setEnabled(true);
                                     this.menuDownButton.setEnabled(true);
                                 } else {
                                     this.menuUpButton.setEnabled(false);
                                     this.menuDownButton.setEnabled(false);
                                 }
-                            } catch(e) {
+                            } catch (e) {
                                 console.log("InfoSticker.toPin: ", e.toString());
                             }
                         },
@@ -331,7 +300,7 @@
                         },
                         hideResource: function () {
                             try {
-                                //if(this.resourceHidden)
+                                //if(this.resourceHidden) 
                                 if (this.resourcePane.isVisible()) {
                                     //this.resourcePane.hide();
                                     this.resourcePane.exclude();
@@ -340,7 +309,7 @@
                                     this.resourcePane.show();
                                     this.resourceHideButton.setLabel("-");
                                 }
-                            } catch(e) {
+                            } catch (e) {
                                 console.log("InfoSticker.hideResource: ", e.toString());
                             }
                         },
@@ -351,31 +320,36 @@
                                     padding: [5, 0, 5, 5],
                                     width: 124,
                                     decorator: new qx.ui.decoration.Decorator().set({
-                                        backgroundImage: "decoration/pane_messaging_item/messaging_items_pane.png",
+                                        //backgroundImage: "decoration/pane_messaging_item/messaging_items_pane.png",
+                                        backgroundImage: "decoration2/button-missionbar/button-missionbar.png",
                                         backgroundRepeat: "scale",
                                     }),
                                     alignX: "right"
                                 });
 
                                 var labelStyle = {
-                                    font: qx.bom.Font.fromString('bold').set({
-                                        size: 12
-                                    }),
+                                    font: "bold",
                                     textColor: '#595969'
                                 };
                                 titleLabel.set(labelStyle);
 
                                 var hidePane = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
-                                    width: 124,
+                                    
                                     alignX: "right"
                                 });
 
                                 var hideButton = new qx.ui.form.Button("-").set({
-                                    //decorator: new qx.ui.decoration.Single(1, "solid", "black"),
+                                    decorator: null,
+                                    paddingBottom: 2,
+                                    paddingLeft: 2,
+                                    paddingRight: 2,
+                                    width: 15,
                                     maxWidth: 15,
                                     maxHeight: 10,
-                                    //textColor: "black"
                                 });
+                                var hideButtonLabel = hideButton.getChildControl("label");
+                                hideButtonLabel.setTextColor("#4a0c0c");
+                                hideButtonLabel.setFont("font_size_14_bold");
                                 var self = this;
                                 //resourceHideButton.addListener("execute", this.hideResource, this);
                                 hideButton.addListener("execute", function () {
@@ -386,8 +360,8 @@
                                         hidePane.show();
                                         hideButton.setLabel("-");
                                     }
-                                    if(self.hasStorage)
-                                        localStorage["infoSticker-"+visibilityStorageName] = !hidePane.isVisible();
+                                    if (self.hasStorage)
+                                        localStorage["infoSticker-" + visibilityStorageName] = !hidePane.isVisible();
                                 });
 
                                 var titleBar = new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
@@ -396,7 +370,7 @@
                                 pane.add(titleBar);
                                 pane.add(hidePane);
 
-                                if(!visible) hidePane.exclude();
+                                if (!visible) hidePane.exclude(), hideButton.setLabel("+");
 
                                 this.toFlipH.push(pane);
 
@@ -404,7 +378,7 @@
                                 parent.add(pane);
 
                                 return hidePane;
-                            } catch(e) {
+                            } catch (e) {
                                 console.log("InfoSticker.createSection: ", e.toString());
                                 throw e;
                             }
@@ -435,49 +409,67 @@
                             var i = 0;
                             var value = Math.round(parseInt(comps[i], 10)).toString();
                             var len = comps.length;
-                            while(value==0) {
+                            while (value == 0) {
                                 value = Math.round(parseInt(comps[++i], 10)).toString();
                                 len--;
                             }
                             var unit;
-                            switch(len) {
-                                case 1: unit = "s"; break;
-                                case 2: unit = "m"; break;
-                                case 3: unit = "h"; break;
-                                case 4: unit = "d"; break;
+                            switch (len) {
+                                case 1:
+                                    unit = "s";
+                                    break;
+                                case 2:
+                                    unit = "m";
+                                    break;
+                                case 3:
+                                    unit = "h";
+                                    break;
+                                case 4:
+                                    unit = "d";
+                                    break;
                             }
-                            return value+unit;
+                            return value + unit;
                         },
-                        createImage: function(icon) {
+                        createImage: function (icon, w, p) {
+                            w||(w=20);
                             var image = new qx.ui.basic.Image(icon);
                             image.setScale(true);
                             image.setWidth(20);
                             image.setHeight(20);
+                            p||(p=0);
+                            image.setPadding([0, p, 0, 0,]);
                             return image;
                         },
 
-                        createMCVPane: function() {
+                        createMCVPane: function () {
                             try {
-                                this.mcvInfoLabel = new qx.ui.basic.Label();
+                                this.mcvInfoLabel = new qx.ui.basic.Label().set({
+                                    font: "bold",
+                                    marginLeft:2,
+                                    alignY: "middle"
+                                });
                                 this.mcvTimerLabel = new qx.ui.basic.Label().set({
-                                    font: qx.bom.Font.fromString('bold').set({
-                                        size: 18
-                                    }),
+                                    font: "bold",
+                                    textColor: '#282828',
+                                    height: 20,
+                                    width: 114,
+                                    textAlign: 'center'
+                                });
+                                this.mcvResearchLabel = new qx.ui.basic.Label().set({
+                                    font: "bold",
                                     textColor: '#282828',
                                     height: 20,
                                     width: 114,
                                     textAlign: 'center'
                                 });
                                 this.mcvTimerCreditProdLabel = new qx.ui.basic.Label().set({
-                                    font: qx.bom.Font.fromString('normal').set({
-                                        size: 12
-                                    }),
+                                    font: "bold",
                                     textColor: '#282828',
                                     height: 20,
                                     width: 114,
                                     textAlign: 'center',
-                                    marginTop: 4,
-                                    marginBottom: -4
+                                    /* marginTop: 4,
+                                    marginBottom: -4 */
                                 });
                                 var app = qx.core.Init.getApplication();
                                 var b3 = app.getBaseNavigationBar().getChildren()[0].getChildren()[0];
@@ -485,52 +477,54 @@
 
                                 var pane = this.createSection(b3, this.mcvInfoLabel, !this.mcvHide, "mcvHide");
                                 pane.add(this.mcvTimerLabel);
+                                pane.add(this.mcvResearchLabel);
                                 pane.add(this.mcvTimerCreditProdLabel);
                                 this.mcvPane = this.lastPane;
-                                this.lastPane.setMarginLeft(7);
+                                this.lastPane.setMarginLeft(5);
 
-                            } catch(e) {
+                            } catch (e) {
                                 console.log("InfoSticker.createMCVPopup", e.toString());
                             }
                         },
-                        moveStickerUp: function() {
+                        moveStickerUp: function () {
                             try {
                                 var baseListBar = this.getBaseListBar();
-                                this.pinLockPos=Math.max(0, this.pinLockPos-1);
-                                if(baseListBar.indexOf(this.mcvPopup)>=0) {
+                                this.pinLockPos = Math.max(0, this.pinLockPos - 1);
+                                if (baseListBar.indexOf(this.mcvPopup) >= 0) {
                                     baseListBar.remove(this.mcvPopup);
                                 }
                                 if (this.hasStorage) {
                                     localStorage["infoSticker-pinLock"] = this.pinLockPos.toString();
                                 }
-                            } catch(e) {
+                            } catch (e) {
                                 console.log("InfoSticker.moveStickerUp", e.toString());
                             }
                         },
-                        moveStickerDown: function() {
+                        moveStickerDown: function () {
                             try {
                                 var baseListBar = this.getBaseListBar();
-                                this.pinLockPos=Math.min(baseListBar.getChildren().length, this.pinLockPos+1);
-                                if(baseListBar.indexOf(this.mcvPopup)>=0) {
+                                this.pinLockPos = Math.min(baseListBar.getChildren().length, this.pinLockPos + 1);
+                                if (baseListBar.indexOf(this.mcvPopup) >= 0) {
                                     baseListBar.remove(this.mcvPopup);
                                 }
                                 if (this.hasStorage) {
                                     localStorage["infoSticker-pinLock"] = this.pinLockPos.toString();
                                 }
-                            } catch(e) {
+                            } catch (e) {
                                 console.log("InfoSticker.moveStickerDown", e.toString());
                             }
                         },
                         menuUpButton: null,
                         menuDownButton: null,
-                        createMCVPopup: function() {
+                        createMCVPopup: function () {
                             try {
                                 var self = this;
                                 this.mcvPopup = new qx.ui.container.Composite(new qx.ui.layout.VBox().set({
-                                    spacing: 3})).set({
+                                    spacing: 3
+                                })).set({
                                     paddingLeft: 5,
-                                    width: 105,
-                                    decorator: new qx.ui.decoration.Decorator()
+                                    //width: 105,
+                                    decorator: null
                                 });
 
                                 var menu = new qx.ui.menu.Menu();
@@ -540,16 +534,16 @@
                                 var menuLockButton = new qx.ui.menu.Button("Lock", "FactionUI/icons/icn_thread_locked_inactive.png");
                                 menuLockButton.addListener("execute", this.toLock, this);
                                 menu.add(menuLockButton);
-                                var fileManager = ClientLib.File.FileManager.GetInstance();
-                                this.menuUpButton = new qx.ui.menu.Button("Move up", fileManager.GetPhysicalPath("ui/icons/icon_tracker_arrow_up.png"));
+                                //var fileManager = ClientLib.File.FileManager.GetInstance();
+                                this.menuUpButton = new qx.ui.menu.Button("Move up", "ui/icons/icon_tracker_arrow_up.png");
                                 //ui/icons/icon_tracker_arrow_up.png ui/gdi/icons/cht_opt_arrow_down.png
                                 this.menuUpButton.addListener("execute", this.moveStickerUp, this);
                                 menu.add(this.menuUpButton);
-                                this.menuDownButton = new qx.ui.menu.Button("Move down", fileManager.GetPhysicalPath("ui/icons/icon_tracker_arrow_down.png"));
+                                this.menuDownButton = new qx.ui.menu.Button("Move down", "ui/icons/icon_tracker_arrow_down.png");
                                 this.menuDownButton.addListener("execute", this.moveStickerDown, this);
                                 menu.add(this.menuDownButton);
                                 this.mcvPopup.setContextMenu(menu);
-                                if(!this.locked) {
+                                if (!this.locked) {
                                     this.stickerBackground.add(this.mcvPopup);
                                 }
 
@@ -572,6 +566,8 @@
                                 this.pinPane = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
                                     //width: 50,
                                     maxWidth: 37,
+                                    alignY: "middle",
+                                    allowGrowY:false
                                 });
 
                                 this.updatePinButtonDecoration();
@@ -604,6 +600,8 @@
                                 this.lockPane = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
                                     //width: 50,
                                     maxWidth: 37,
+                                    alignY: "middle",
+                                    allowGrowY:false
                                 });
 
                                 this.updateLockButtonDecoration();
@@ -620,10 +618,10 @@
                                 ////////////////////////////----------------------------------------------------------
                                 this.resourceTitleLabel = new qx.ui.basic.Label();
                                 this.resourceTitleLabel.setValue("Base");
+                                this.resourceTitleLabel.setAlignY("middle");
+                                this.resourceTitleLabel.setMarginRight(5);
                                 var resStyle = {
-                                    font: qx.bom.Font.fromString('bold').set({
-                                        size: 14
-                                    }),
+                                    font: "bold",
                                     textColor: '#282828',
                                     height: 20,
                                     width: 65,
@@ -636,9 +634,7 @@
                                 this.resourceLabel3 = new qx.ui.basic.Label().set(resStyle);
 
                                 var perStyle = {
-                                    font: qx.bom.Font.fromString('bold').set({
-                                        size: 9
-                                    }),
+                                    font: "bold-small",
                                     textColor: '#282828',
                                     height: 18,
                                     width: 33,
@@ -650,99 +646,152 @@
 
 
                                 var pane3 = this.createSection(this.mcvPopup, this.resourceTitleLabel, !this.resourceHide, "resourceHide");
-
+                                var mcvC = this.mcvPopup.getChildren();
+                                mcvC[mcvC.length - 1].getChildren()[0].add(this.pinPane);
+                                mcvC[mcvC.length - 1].getChildren()[0].add(this.lockPane);
 
                                 this.repairTimerLabel = new qx.ui.basic.Label().set({
-                                    font: qx.bom.Font.fromString('bold').set({
-                                        size: 16
-                                    }),
+                                    font: "font_size_14_bold", //bigger
                                     textColor: '#282828',
                                     height: 20,
                                     width: 85,
                                     marginLeft: 0,
                                     textAlign: 'center'
                                 });
-                                pane3.add(this.createHBox(this.createImage(this.repairIcon), this.repairTimerLabel));
+                                pane3.add(this.createHBox(this.createImage(this.repairIcon, 18), this.repairTimerLabel));
 
-                                pane3.add(this.createHBox(this.createImage(this.tibIcon), this.resourceLabel1, this.resourceLabel1per));
-                                pane3.add(this.createHBox(this.createImage(this.cryIcon), this.resourceLabel2, this.resourceLabel2per));
-                                pane3.add(this.createHBox(this.createImage(this.powIcon), this.resourceLabel3, this.resourceLabel3per));
+                                pane3.add(this.createHBox(this.createImage(this.tibIcon, 20), this.resourceLabel1, this.resourceLabel1per));
+                                pane3.add(this.createHBox(this.createImage(this.cryIcon, 20), this.resourceLabel2, this.resourceLabel2per));
+                                pane3.add(this.createHBox(this.createImage(this.powIcon, 20, 4), this.resourceLabel3, this.resourceLabel3per));
 
-                                var mcvC = this.mcvPopup.getChildren();
-                                mcvC[mcvC.length-1].getChildren()[0].add(this.pinPane);
-                                mcvC[mcvC.length-1].getChildren()[0].add(this.lockPane);
+                                
                                 ////////////////////////////----------------------------------------------------------
 
                                 this.productionTitleLabel = new qx.ui.basic.Label();
-                                this.productionTitleLabel.setValue("Productions");
-
+                                this.productionTitleLabel.setValue("db.Produce");
+                                this.productionTitleLabel.setAlignY("middle");
                                 var productionStyle = {
-                                    font: qx.bom.Font.fromString('bold').set({
-                                        size: 13
-                                    }),
+                                    font: "bold",
                                     textColor: '#282828',
                                     height: 20,
-                                    width: 60,
+                                    width: 85,
                                     textAlign: 'right',
-                                    marginTop: 2,
-                                    marginBottom: -2
+                                    /* marginTop: 2,
+                                    marginBottom: -2 */
                                 };
-                                this.productionLabelPower = new qx.ui.basic.Label().set(productionStyle);
+                                this.productionLabelTiberium = new qx.ui.basic.Label().set(productionStyle);
+                                this.productionLabelCrystal = new qx.ui.basic.Label().set(productionStyle);
+
+                                this.productionLabelPower1 = new qx.ui.basic.Label().set(productionStyle);
                                 this.productionLabelCredit = new qx.ui.basic.Label().set(productionStyle);
 
                                 var pane4 = this.createSection(this.mcvPopup, this.productionTitleLabel, !this.productionHide, "productionHide");
-                                pane4.add(this.createHBox(this.createImage(this.powIcon), this.productionLabelPower));
-                                pane4.add(this.createHBox(this.createImage(this.creditIcon), this.productionLabelCredit));
+                                pane4.add(this.createHBox(this.createImage(this.tibIcon), this.productionLabelTiberium));
+                                pane4.add(this.createHBox(this.createImage(this.cryIcon), this.productionLabelCrystal));
+
+                                pane4.add(this.createHBox(this.createImage(this.powIcon, 20, 4), this.productionLabelPower1));
+                                pane4.add(this.createHBox(this.createImage(this.creditIcon, 20, 4), this.productionLabelCredit));
                                 ////////////////////////////----------------------------------------------------------
-                            } catch(e) {
+
+                                this.contProductionTitleLabel = new qx.ui.basic.Label();
+                                this.contProductionTitleLabel.setValue("Cont'+Ally");
+                                this.contProductionTitleLabel.setAlignY("middle");
+                                var contProductionStyle = {
+                                    font: "bold",
+                                    textColor: '#282828',
+                                    height: 20,
+                                    width: 85,
+                                    textAlign: 'right',
+                                    /* marginTop: 2,
+                                    marginBottom: -2 */
+                                };
+                                this.contProductionLabelTiberium = new qx.ui.basic.Label().set(contProductionStyle);
+                                this.contProductionLabelCrystal = new qx.ui.basic.Label().set(contProductionStyle);
+                                this.contProductionLabelPower = new qx.ui.basic.Label().set(contProductionStyle);
+
+                                this.contProductionLabelCredit = new qx.ui.basic.Label().set(contProductionStyle);
+
+                                var pane5 = this.createSection(this.mcvPopup, this.contProductionTitleLabel, !this.contProductionHide, "contProductionHide");
+                                pane5.add(this.createHBox(this.createImage(this.tibIcon), this.contProductionLabelTiberium));
+                                pane5.add(this.createHBox(this.createImage(this.cryIcon), this.contProductionLabelCrystal));
+                                pane5.add(this.createHBox(this.createImage(this.powIcon, 20, 4), this.contProductionLabelPower));
+                                pane5.add(this.createHBox(this.createImage(this.creditIcon, 20, 4), this.contProductionLabelCredit));
+                                ////////////////////////////----------------------------------------------------------								
+                                this.repairTimeTitleLabel = new qx.ui.basic.Label();
+                                this.repairTimeTitleLabel.setValue("RepairTimes");
+                                this.repairTimeTitleLabel.setAlignY("middle");
+                                this.repairTimeStyle = {
+                                    font: "bold",
+                                    textColor: '#282828',
+                                    height: 20,
+                                    width: 85,
+                                    textAlign: 'center',
+                                    /* marginTop: 2,
+                                    marginBottom: -2 */
+                                };
+
+                                this.repairTimeLabel0 = new qx.ui.basic.Label().set(this.repairTimeStyle);
+                                this.repairTimeLabel1 = new qx.ui.basic.Label().set(this.repairTimeStyle);
+                                this.repairTimeLabel2 = new qx.ui.basic.Label().set(this.repairTimeStyle);
+
+                                var pane6 = this.createSection(this.mcvPopup, this.repairTimeTitleLabel, !this.rtHide, "repairHide");
+                                pane6.add(this.createHBox(this.createImage(this.repairIcon, 18), this.repairTimeLabel0));
+                                pane6.add(this.createHBox(this.createImage(this.repairIcon, 18), this.repairTimeLabel1));
+                                pane6.add(this.createHBox(this.createImage(this.repairIcon, 18), this.repairTimeLabel2));
+                                //pane6.add(this.createHBox(this.createImage(this.creditIcon), this.productionLabelCredit));
+                                ////////////////////////////----------------------------------------------------------
+
+
+
+                            } catch (e) {
                                 console.log("InfoSticker: createMCVPopup", e.toString());
                             }
                         },
-                        currentCityChange: function() {
+                        currentCityChange: function () {
                             this.calculateInfoData();
                             this.repositionSticker();
                         },
-                        disposeRecover: function() {
+                        disposeRecover: function () {
 
                             try {
-                                if(this.mcvPane.isDisposed()) {
+                                if (this.mcvPane.isDisposed()) {
                                     this.createMCVPane();
                                 }
 
-                                if(this.mcvPopup.isDisposed()) {
+                                if (this.mcvPopup.isDisposed()) {
                                     this.createMCVPopup();
 
                                     this.repositionSticker();
                                 }
                                 this.waitingRecovery = false;
-                            } catch(e) {
+                            } catch (e) {
                                 console.log("InfoSticker: disposeRecover", e.toString());
                             }
 
                         },
                         waitingRecovery: false,
-                        citiesChange: function() {
+                        citiesChange: function () {
                             try {
                                 var self = this;
                                 var baseListBar = this.getBaseListBar();
                                 this.disposeRecover();
 
-                                if(baseListBar.indexOf(this.mcvPopup)>=0) {
+                                if (baseListBar.indexOf(this.mcvPopup) >= 0) {
                                     baseListBar.remove(this.mcvPopup);
                                     this.mcvPopup.dispose();
                                 }
 
-                                if(baseListBar.indexOf(this.mcvPane)>=0) {
+                                if (baseListBar.indexOf(this.mcvPane) >= 0) {
                                     baseListBar.remove(this.mcvPane);
                                     this.mcvPane.dispose();
                                 }
-                                if(!this.waitingRecovery) {
+                                if (!this.waitingRecovery) {
                                     this.waitingRecovery = true;
                                     window.setTimeout(function () {
                                         self.disposeRecover();
                                     }, 10);
                                 }
-                            } catch(e) {
+                            } catch (e) {
                                 console.log("InfoSticker: citiesChange", e.toString());
                             }
                         },
@@ -757,7 +806,7 @@
 
                                 var app = qx.core.Init.getApplication();
                                 var b3 = app.getBaseNavigationBar().getChildren()[0].getChildren()[0];
-                                if(b3.getChildren().length==0) return;
+                                if (b3.getChildren().length == 0) return;
                                 if (!this.infoSticker) {
                                     this.infoSticker = new qx.ui.container.Composite(new qx.ui.layout.VBox().set({
                                         alignX: "right"
@@ -771,10 +820,10 @@
                                         if (l != null) {
                                             this.locked = l;
                                             var pl = localStorage["infoSticker-pinLock"];
-                                            if(pl!=null) {
+                                            if (pl != null) {
                                                 try {
                                                     this.pinLockPos = parseInt(pl, 10);
-                                                } catch(etm) {}
+                                                } catch (etm) {}
                                             }
                                         }
 
@@ -792,8 +841,10 @@
                                         }
                                         this.mcvHide = localStorage["infoSticker-mcvHide"] == "true";
                                         this.repairHide = localStorage["infoSticker-repairHide"] == "true";
+                                        this.rtHide = localStorage["infoSticker-repairHide"] == "true";
                                         this.resourceHide = localStorage["infoSticker-resourceHide"] == "true";
                                         this.productionHide = localStorage["infoSticker-productionHide"] == "true";
+                                        this.contProductionHide = localStorage["infoSticker-contProductionHide"] == "true";
                                     }
 
 
@@ -801,23 +852,30 @@
                                         right: 124,
                                         top: top
                                     });
-                                    if(this.locked) {
+                                    if (this.locked) {
                                         this.infoSticker.hide();
                                     }
 
                                     this.stickerBackground = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
                                         //paddingLeft: 5,
-                                        width: 105,
+                                        //width: 105,
+                                        paddingTop: 9,
+                                        paddingLeft: -4,
                                         decorator: new qx.ui.decoration.Decorator().set({
                                             backgroundImage: "webfrontend/ui/common/bgr_region_world_select_scaler.png",
                                             backgroundRepeat: "scale",
+                                            widthLeft: 1,
+                                            widthRight : 1,
+                                            colorLeft: "#7F0707",
+                                            colorRight : "#7F0707"
+                                            
                                         })
                                     });
 
                                     this.createMCVPane();
                                     this.createMCVPopup();
 
-                                    if(this.locked && this.pinned) {
+                                    if (this.locked && this.pinned) {
                                         this.menuUpButton.setEnabled(true);
                                         this.menuDownButton.setEnabled(true);
                                     } else {
@@ -825,13 +883,24 @@
                                         this.menuDownButton.setEnabled(false);
                                     }
 
-                                    this.top_image = new qx.ui.basic.Image("webfrontend/ui/common/bgr_region_world_select_end.png");
+                                    this.top_image = new qx.ui.basic.Image("ui/common/bgr_messaging_t.png").set({
+                                     zIndex: 12,
+                                     marginBottom: -10,
+                                     marginLeft: 2,
+                                     width:  124
+                                    });
+                                    this.top_image.setZIndex(12);
+                                    this.top_image.setMarginBottom(-10);
                                     this.infoSticker.add(this.top_image);
 
                                     this.infoSticker.add(this.stickerBackground);
                                     //this.infoSticker.add(this.mcvPopup);
 
-                                    this.bot_image = new qx.ui.basic.Image("webfrontend/ui/common/bgr_region_world_select_end.png");
+                                    this.bot_image = new qx.ui.basic.Image("ui/common/bgr_messaging_b.png").set({
+                                        zIndex: 12,
+                                        marginLeft: 2,
+                                        width:  124
+                                       });;
                                     this.infoSticker.add(this.bot_image);
 
                                     this.runPositionTimer();
@@ -839,31 +908,21 @@
                                     try {
                                         this.attachEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.currentCityChange);
                                         this.attachEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "Change", ClientLib.Data.CitiesChange, this, this.citiesChange);
-                                    } catch(eventError) {
+                                    } catch (eventError) {
                                         console.log("InfoSticker.EventAttach:", eventError);
                                         console.log("The script will continue to run, but with slower response speed.");
                                     }
                                 }
                                 this.disposeRecover();
 
-                                if (cd == null)
-                                {
+                                if (cd == null) {
                                     if (this.mcvPopup) {
                                         //this.mcvInfoLabel.setValue("MCV ($???)");
                                         this.mcvInfoLabel.setValue("MCV<br>$???");
                                         this.mcvTimerLabel.setValue("Loading");
+                                        this.mcvResearchLabel.setValue("Loading");
                                     }
-                                }
-                                else if (ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().c == 31)
-                                {
-                                    if (this.mcvPopup)
-                                    {
-                                        this.mcvInfoLabel.setValue("MCV<br>$???");
-                                        this.mcvTimerLabel.setValue("max Bases reached");
-                                    }
-                                }
-                                else
-                                {
+                                } else {
                                     var nextLevelInfo = cd.get_NextLevelInfo_Obj();
                                     var resourcesNeeded = [];
                                     for (var i in nextLevelInfo.rr) {
@@ -871,25 +930,34 @@
                                             resourcesNeeded[nextLevelInfo.rr[i].t] = nextLevelInfo.rr[i].c;
                                         }
                                     }
-                                    //var researchNeeded = resourcesNeeded[ClientLib.Base.EResourceType.ResearchPoints];
-                                    //var currentResearchPoints = player.get_ResearchPoints();
+                                    var researchNeeded = resourcesNeeded[ClientLib.Base.EResourceType.ResearchPoints];
+                                    var currentResearchPoints = player.get_ResearchPoints();
+                                    var XY = 100 / researchNeeded;
+                                    var XYX = currentResearchPoints;
+                                    var PercentageOfResearchPoints = XYX * XY;
                                     var creditsNeeded = resourcesNeeded[ClientLib.Base.EResourceType.Gold];
                                     var creditsResourceData = player.get_Credits();
                                     var creditGrowthPerHour = (creditsResourceData.Delta + creditsResourceData.ExtraBonusDelta) * ClientLib.Data.MainData.GetInstance().get_Time().get_StepsPerHour();
                                     var creditTimeLeftInHours = (creditsNeeded - player.GetCreditsCount()) / creditGrowthPerHour;
                                     this.mcvInfoLabel.setValue("MCV ($ " + this.formatNumbersCompact(creditsNeeded) + ")");
                                     //this.mcvInfoLabel.setValue("MCV<br>$" + this.formatNumbersCompact(creditsNeeded));
-                                    this.mcvTimerCreditProdLabel.setValue("at " + this.formatNumbersCompact(creditGrowthPerHour) + "/h");
+                                    this.mcvTimerCreditProdLabel.setValue("at " + this.formatNumbersCompact(creditGrowthPerHour * 24) + "/1d");
                                     if (creditTimeLeftInHours <= 0) {
                                         this.mcvTimerLabel.setValue("Ready");
                                     } else if (creditGrowthPerHour == 0) {
-                                        this.mcvTimerLabel.setValue("Never");
+                                        this.mcvTimerLabel.setValue("No Production");
                                     } else {
-                                        if(creditTimeLeftInHours >= 24 * 100) {
+                                        if (creditTimeLeftInHours >= 24 * 100) {
                                             this.mcvTimerLabel.setValue("> 99 days");
                                         } else {
                                             this.mcvTimerLabel.setValue(this.FormatTimespan(creditTimeLeftInHours * 60 * 60));
                                         }
+                                    }
+
+                                    if (PercentageOfResearchPoints >= 100) {
+                                        this.mcvResearchLabel.setValue("RP: 100%");
+                                    } else {
+                                        this.mcvResearchLabel.setValue("RP: " + (PercentageOfResearchPoints).toFixed(2) + "%");
                                     }
                                 }
 
@@ -897,7 +965,9 @@
                                 if (ncity == null) {
                                     if (this.mcvPopup) {
                                         this.repairTimerLabel.setValue("Select a base");
-
+                                        this.repairTimeLabel0.setValue("Select a base");
+                                        this.repairTimeLabel1.setValue("Select a base");
+                                        this.repairTimeLabel2.setValue("Select a base");
                                         this.resourceLabel1.setValue("N/A");
                                         this.resourceLabel2.setValue("N/A");
                                         this.resourceLabel3.setValue("N/A");
@@ -905,13 +975,36 @@
                                 } else {
 
                                     var rt = Math.min(ncity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf),
-                                                      ncity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh),
-                                                      ncity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeAir));
+                                        ncity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh),
+                                        ncity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeAir));
                                     if (ncity.get_CityUnitsData().get_UnitLimitOffense() == 0) {
                                         this.repairTimerLabel.setValue("No army");
                                     } else {
                                         this.repairTimerLabel.setValue(this.FormatTimespan(rt));
                                     }
+
+                                    var airRT = ncity.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false);
+                                    if (ncity.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false) == 0) {
+                                        this.repairTimeLabel0.setValue("No birds");
+                                    } else {
+                                        this.repairTimeLabel0.setValue(this.FormatTimespan(airRT) + " AIR");
+                                    }
+
+                                    var vehRT = ncity.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Vehicle, false);
+                                    if (ncity.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Vehicle, false) == 0) {
+                                        this.repairTimeLabel1.setValue("No cars");
+                                    } else {
+                                        this.repairTimeLabel1.setValue(this.FormatTimespan(vehRT) + " VEH");
+                                    }
+                                    var infRT = ncity.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Infantry, false);
+                                    if (ncity.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false) == 0) {
+                                        this.repairTimeLabel2.setValue("No dudes");
+                                    } else {
+                                        this.repairTimeLabel2.setValue(this.FormatTimespan(infRT) + " INF");
+                                    }
+                                    //this.repairTimerLabel0.setValue(this.FormatTimespan(airRT));
+                                    //this.repairTimerLabel1.setValue(this.FormatTimespan(vehRT));
+                                    //this.repairTimerLabel2.setValue(this.FormatTimespan(infRT));
 
                                     var tib = ncity.GetResourceCount(ClientLib.Base.EResourceType.Tiberium);
                                     var tibMax = ncity.GetResourceMaxStorage(ClientLib.Base.EResourceType.Tiberium);
@@ -934,18 +1027,69 @@
                                     this.resourceLabel3.setValue(this.formatNumbersCompact(power));
                                     this.resourceLabel3per.setValue(this.formatPercent(powerRatio));
 
+
                                     var powerCont = ncity.GetResourceGrowPerHour(ClientLib.Base.EResourceType.Power, false, false);
                                     var powerBonus = ncity.GetResourceBonusGrowPerHour(ClientLib.Base.EResourceType.Power);
                                     var alliance = ClientLib.Data.MainData.GetInstance().get_Alliance();
                                     var powerAlly = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Power);
-                                    var powerProd = powerCont + powerBonus + powerAlly;
+                                    var powerProd = (powerCont + powerAlly);
+                                    var powerPac = (powerCont + powerAlly + powerBonus) * 6;
+                                    if (powerRatio >= 1) {
+                                        powerProd = 0;
+                                        powerPac = (powerBonus) * 6;
+
+                                    }
+
+
+                                    var tiberiumCont = ncity.GetResourceGrowPerHour(ClientLib.Base.EResourceType.Tiberium, false, false);
+                                    var tiberiumBonus = ncity.GetResourceBonusGrowPerHour(ClientLib.Base.EResourceType.Tiberium);
+                                    //var alliance = ClientLib.Data.MainData.GetInstance().get_Alliance();
+                                    var tiberiumAlly = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Tiberium);
+                                    var tiberiumPac = (tiberiumCont + tiberiumAlly + tiberiumBonus) * 6;
+                                    var tiberiumProd = (tiberiumCont + tiberiumAlly);
+                                    if (tibRatio >= 1) {
+                                        tiberiumProd = 0;
+                                        tiberiumPac = (tiberiumBonus) * 6;
+
+                                    }
+
+                                    var crystalCont = ncity.GetResourceGrowPerHour(ClientLib.Base.EResourceType.Crystal, false, false);
+                                    var crystalBonus = ncity.GetResourceBonusGrowPerHour(ClientLib.Base.EResourceType.Crystal);
+                                    //var alliance = ClientLib.Data.MainData.GetInstance().get_Alliance();
+                                    var crystalAlly = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Crystal);
+                                    var crystalPac = (crystalCont + crystalAlly + crystalBonus) * 6;
+                                    var crystalProd = (crystalCont + crystalAlly);
+
+                                    if (cryRatio >= 1) {
+                                        crystalProd = 0;
+                                        crystalPac = (crystalBonus) * 6;
+
+                                    }
+
 
                                     var creditCont = ClientLib.Base.Resource.GetResourceGrowPerHour(ncity.get_CityCreditsProduction(), false);
                                     var creditBonus = ClientLib.Base.Resource.GetResourceBonusGrowPerHour(ncity.get_CityCreditsProduction(), false);
-                                    var creditProd = creditCont + creditBonus;
+                                    var creditProd = (creditCont + creditBonus) * 6;
 
-                                    this.productionLabelPower.setValue(this.formatNumbersCompact(powerProd) + "/h");
-                                    this.productionLabelCredit.setValue(this.formatNumbersCompact(creditProd) + "/h");
+                                    if (ncity.get_hasCooldown() == true) {
+
+                                        powerPac = (powerCont + powerAlly) * 6;
+                                        creditProd = (creditCont) * 6;
+                                        crystalPac = (crystalCont + crystalAlly) * 6;
+                                        tiberiumPac = (tiberiumCont + tiberiumAlly) * 6;
+                                    }
+
+                                    this.productionLabelTiberium.setValue(this.formatNumbersCompact(tiberiumPac) + "/6h");
+                                    this.productionLabelCrystal.setValue(this.formatNumbersCompact(crystalPac) + "/6h");
+                                    this.productionLabelPower1.setValue(this.formatNumbersCompact(powerPac) + "/6h");
+                                    this.productionLabelCredit.setValue(this.formatNumbersCompact(creditProd) + "/6h");
+
+                                    this.contProductionLabelTiberium.setValue(this.formatNumbersCompact(tiberiumProd) + "/h");
+                                    this.contProductionLabelCrystal.setValue(this.formatNumbersCompact(crystalProd) + "/h");
+                                    this.contProductionLabelPower.setValue(this.formatNumbersCompact(powerProd) + "/h");
+                                    this.contProductionLabelCredit.setValue(this.formatNumbersCompact(creditCont) + "/h");
+
+
                                 }
                             } catch (e) {
                                 console.log("InfoSticker.calculateInfoData", e.toString());
@@ -959,13 +1103,13 @@
                             var ratio = value / max;
 
                             var color;
-                            var black = [40, 180, 40];
-                            var yellow = [181, 181, 0];
-                            var red = [187, 43, 43];
+                            var green = [40, 150, 40];
+                            var middle = [181, 151, 0];
+                            var red = [157, 43, 43];
 
-                            if (ratio < 0.5) color = black;
-                            else if (ratio < 0.75) color = this.interpolateColor(black, yellow, (ratio - 0.5) / 0.25);
-                            else if (ratio < 1) color = this.interpolateColor(yellow, red, (ratio - 0.75) / 0.25);
+                            if (ratio < 0.5) color = green;
+                            else if (ratio < 0.75) color = this.interpolateColor(green, middle, (ratio - 0.5) / 0.25);
+                            else if (ratio < 1) color = this.interpolateColor(middle, red, (ratio - 0.75) / 0.25);
                             else color = red;
 
                             //console.log(qx.util.ColorUtil.rgbToHexString(color));
@@ -974,8 +1118,9 @@
                         interpolateColor: function (color1, color2, s) {
                             //console.log("interp "+s+ " " + color1[1]+" " +color2[1]+" " +(color1[1]+s*(color2[1]-color1[1])));
                             return [Math.floor(color1[0] + s * (color2[0] - color1[0])),
-                                    Math.floor(color1[1] + s * (color2[1] - color1[1])),
-                                    Math.floor(color1[2] + s * (color2[2] - color1[2]))];
+                                Math.floor(color1[1] + s * (color2[1] - color1[1])),
+                                Math.floor(color1[2] + s * (color2[2] - color1[2]))
+                            ];
                         },
                         formatNumbersCompact: function (value, decimals) {
                             if (decimals == undefined) decimals = 2;
@@ -1021,7 +1166,6 @@
                                     } else {
                                         r += t.charAt(i);
                                     }
-
                                     colonCount--;
                                 } else {
                                     r += t.charAt(i);
