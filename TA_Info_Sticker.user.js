@@ -857,10 +857,8 @@
                                     }
 
                                     this.stickerBackground = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
-                                        //paddingLeft: 5,
-                                        //width: 105,
-                                        paddingTop: 9,
                                         paddingLeft: -4,
+                                        maxWidth: 124,
                                         decorator: new qx.ui.decoration.Decorator().set({
                                             backgroundImage: "webfrontend/ui/common/bgr_region_world_select_scaler.png",
                                             backgroundRepeat: "scale",
@@ -885,24 +883,29 @@
 
                                     this.top_image = new qx.ui.basic.Image("ui/common/bgr_messaging_t.png").set({
                                      zIndex: 12,
-                                     marginBottom: -10,
-                                     marginLeft: 2,
+                                     marginRight: 3,
                                      width:  124
-                                    });
-                                    this.top_image.setZIndex(12);
-                                    this.top_image.setMarginBottom(-10);
-                                    this.infoSticker.add(this.top_image);
 
+                                    });
+                                
+                                    this.infoSticker.add(this.top_image);
+                                    this.top_image.addListener("appear", function(){
+                                    let flip = this.top_image.getContentElement().getDomElement();
+                                    flip.style.transform = "scale(-1, 1)";
+                                    }, this);
                                     this.infoSticker.add(this.stickerBackground);
                                     //this.infoSticker.add(this.mcvPopup);
 
                                     this.bot_image = new qx.ui.basic.Image("ui/common/bgr_messaging_b.png").set({
                                         zIndex: 12,
-                                        marginLeft: 2,
+                                        marginRight: 3,
                                         width:  124
                                        });;
                                     this.infoSticker.add(this.bot_image);
-
+                                    this.top_image.addListener("appear", function(){
+                                        let flip = this.bot_image.getContentElement().getDomElement();
+                                        flip.style.transform = "scale(-1, 1)";
+                                        }, this);
                                     this.runPositionTimer();
 
                                     try {
