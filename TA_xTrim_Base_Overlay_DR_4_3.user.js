@@ -7,7 +7,7 @@
 // @author xTr1m/DLwarez
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_xTrim_Base_Overlay_DR_4_3.user.js
 // @grant none
-// @source https://github.com/xTr1m/BaseOverlay
+// @source         https://github.com/xTr1m/BaseOverlay
 // ==/UserScript==
 
 (function () {
@@ -33,18 +33,18 @@
                                 switch (ClientLib.Vis.VisMain.GetInstance().get_Mode()) {
                                     case ClientLib.Vis.Mode.City:
                                         xt.__openWindow();
+                                }
                             }
-                                                }                       
-                                             };
+                        };
 
                         var onKeyUp = function (e) {
                             var xt = xTr1m_Base_Overlay.getInstance();
                             if (!e.altKey && xt.__windowOpened) {
                                 switch (ClientLib.Vis.VisMain.GetInstance().get_Mode()) {
-                                case ClientLib.Vis.Mode.City:
-                                    xt.__closeWindow();
+                                    case ClientLib.Vis.Mode.City:
+                                        xt.__closeWindow();
+                                }
                             }
-                        }
                         };
 
                         document.addEventListener('keydown', onKeyDown, true);
@@ -173,14 +173,14 @@
                                 allowGrowX: false,
                                 allowGrowY: false,
                                 textColor: "black",
-                                        font: "font_size_16_bold"
+                                font: "font_size_16_bold"
                             });
 
                             overlay._add(label);
 
                             this.__background._add(overlay, {
                                 left: entity.X + 1,
-                                        top: entity.Y + 1
+                                top: entity.Y + 1
                             });
                         }
 
