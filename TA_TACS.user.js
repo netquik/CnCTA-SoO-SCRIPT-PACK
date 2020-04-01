@@ -3,9 +3,9 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.58
+// @version        3.59
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
-// @contributor    NetquiK (https://github.com/netquik) - 19.5 FIX MOd VIEW - FIX OPTIONS - 20.1 FIX - NEW CODE FOR TOP TOOLBAR - OTHER FIXES
+// @contributor    NetquiK (https://github.com/netquik) - FIX OPTIONS - 20.1 FIX + MAP MOVE - NEW CODE FOR TOP TOOLBAR - OTHER FIXES
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TACS.user.js
 // @grant none
@@ -500,7 +500,6 @@
                             this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
                             this._playAreaChildren = this._PlayArea.getChildren();
                             this.MainOverlay = this._Application.getMainOverlay();
-                            this.OverlayFixed = false; // MOD: needed for 19.5 patch 
 
 
                             if (PerforceChangelist >= 443425) { // 16.1 patch
@@ -544,6 +543,11 @@
                             //this.ArmySetupAttackBarChildren[1].setVisibility("hidden"); // REVIEW   setting hidden to next setup 
                             this.ArmySetupAttackBar.removeAt(1); // removing Next Army Setup msg
 
+                            // MOD NEW PATCH for moving Map (adjusted for 20.1 Patch)
+                            var source = ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().get_MinYPosition.toString();
+                            var CombatMinY = source.match(/return\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
+                            if (typeof $I[CombatMinY[1]] === "function") $I[CombatMinY[1]][CombatMinY[2]] = -178;
+
                             if (PerforceChangelist >= 472233) { // NOTE  20.1 patch
                                 this.COMBATEXTENDEDSETUP = phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
                                 if (this.COMBATEXTENDEDSETUP === false) {
@@ -583,65 +587,6 @@
                                 zIndex: 12
                             });
 
-
-
-                            // REVIEW 19.5 FIX VIEW 
-                            //by Netquik   
-                            if (PerforceChangelist < 472233) { // 19.5 patch
-                                this._playAreaChildren[2].setHeight(120); // fix opacity for better view
-                                this._playAreaChildren[4].resetDecorator();
-                                this.FixOverlay = function (e) {
-                                    var _this = (this.TACS) ? this.TACS.getInstance() : this;
-                                    PlayArea = _this._PlayArea;
-                                    PlayAreaHeight = PlayArea.getLayoutParent().getBounds().height;
-                                    PlayAreaHeight2 = _this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().height;
-                                    PlayAreaOffSet = PlayAreaHeight2 - PlayAreaHeight;
-                                    playAreaChildren = PlayArea.getChildren();
-                                    MainOverlaychild = _this.MainOverlay.getChildren();
-                                    var fixOverlay;
-                                    var fix = 0;
-                                    fixOverlay = PlayAreaOffSet < 150;
-                                    _this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
-                                    if (Math.round(window.devicePixelRatio * 100) >= 125 || PlayAreaHeight2 < 752) {
-                                        MainOverlaychild[1].setHeight(3);
-                                        MainOverlaychild[2].setMarginTop(-32);
-                                        MainOverlaychild[10].setMarginTop(29);
-                                    } else {
-                                        MainOverlaychild[1].resetHeight();
-                                        MainOverlaychild[2].setMarginTop(0);
-                                        MainOverlaychild[10].setMarginTop(0);
-                                    }
-                                    for (var i in playAreaChildren) {
-                                        playchild = playAreaChildren[i];
-                                        if (playchild.basename === "FormationSaver" && playchild.getMarginTop() != 25) {
-                                            playchild.setMarginTop(25);
-                                        } else if (!_this.OverlayFixed) {
-                                            if ((i > 2 && i < 16) && fixOverlay) {
-                                                playchild.setMarginTop(25);
-                                                fix++;
-                                            } else if (i > 15 && i < playAreaChildren.length && e) {
-                                                playchild.setMarginTop(-25);
-                                            }
-
-                                        } else if (!fixOverlay) {
-                                            if (i > 2 && i < 16) {
-                                                playchild.setMarginTop(1);
-                                                fix--;
-                                            }
-                                        }
-                                    }
-                                    _this.OverlayFixed = (fix < 0) ? false : (fix > 0) ? true : _this.OverlayFixed;
-
-                                }
-                                this.FixOverlay(true);
-                                this.RunTimeFixOverlay = function () {
-                                    var _this = (this.TACS) ? this.TACS.getInstance() : this;
-                                    setTimeout(function () {
-                                        _this.FixOverlay()
-                                    }, 2000)
-                                }
-                                this.MainOverlay.addListener('changeHeight', this.RunTimeFixOverlay.bind(null, event));
-                            }
 
 
                             // Event Handlers
