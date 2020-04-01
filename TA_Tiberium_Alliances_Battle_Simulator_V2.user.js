@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.03.09
+// @version         20.04.01
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -14,12 +14,11 @@
 /* 
 codes by NetquiK
 ----------------
-- 19.5 FIX MOd VIEW + AUTO
 - MovableBox Save Position
 - New Top Bar Button
 - Native Unit Enabling
 - SkipVictory
-- 20.1 FIX
+- 20.1 FIX + MAP MOVE
 - MovableBox in Battleground 
 ----------------
 */
@@ -2469,7 +2468,6 @@ codes by NetquiK
                             this.ArmySetupAttackBarMainChildren = this._armyBar.getChildren();
                             this.ArmySetupAttackBarChildren = this.ArmySetupAttackBar.getChildren();
                             this._playAreaChildren = this._playArea.getChildren();
-                            this.OverlayFixed = false; // MOD: needed for 19.5 patch 
 
 
                             if (PerforceChangelist >= 443425) { // 16.1 patch
@@ -2494,7 +2492,7 @@ codes by NetquiK
                                     }
                                 }
                             }
-                            
+
 
 
                             this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // NOTE Resizing ArmySetup after topbuttons remove
@@ -2511,6 +2509,10 @@ codes by NetquiK
                                     var rightBG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAACgCAMAAAC7f4tPAAAAA3NCSVQICAjb4U/gAAABqlBMVEX////09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3r6+vq6urp6eno6Ojj4+Pi4uLh4eHg4ODf39/d3d3c3Nzb29vc29va2trZ2dnZ2NjY2NjX19fY2NfW19bW1tbX19bV1dXV1NTT09PS0tLR0dHQ0NDPz8/Ozs7Pzs7Ozs3MzMzLy8vJycnIyMjFxcXDw8PTv7zCwsLSvLm9vr29vb3Oube7vLu6urq5ubm5uri4uLi4uLa3t7e0tLSzs7OwsLCur6yur66trayrrKmrq6iqqqmnp6Wmp6WlpqOkpaKlpaOkpKOhop+ioqGgoZ2hoZ6goZ6foJyen5uen52enpudnpqcnZmcnZqam5ibm5mZmpeXmJWXmJSYmJaWl5OVlpOTlJCSk4+Rko+QkY6NjoqOjouNjYyMjYuKi4mLi4mKi4eIiYeHiIWHiISGh4OFhoOEhYOCgoF8fXt6enh4eXd3eHZ2d3V1dnN1dnR2dnR0dXN0dXJ0dHJyc3Bzc3FvcG5vb21vb25ub25ub2xtbmtubmxubm1sbWpra2lqa2hpamewRT2vRDumHBymGxsjsLVTAAAAjnRSTlMA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////0TDHVgAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAALNSURBVGiB7ZvpU9NAGIeJdAaR0pQudFu01FBPiki9Kop4gddCazCt0gxqVbCieE61SL3vg//Z7KZpwxc/sHnDLLO/mcx02plnMk9z/HbepK1NxseseZm/69B9jeyOxWJ9dONJ5rcbjTFOaNGopmEPgjJ/XOjpo9GEhpA3aIyOudivrkVZkvZP3DnccvLsvf1V0huym138irSE4xqls9kxjkyMULbjRP8U0Zy/EaWQqqo9G05vepyyHd/X6+d3MSHWNhgKKIrSvvF0D50ZaTmZefJyEdvoveEAb0JD4y127ubjzxVsHXzWTncqCi+7Oz1BHWToeZkzyvdrD/spGndu497tQO9pdpysWWhipVSrUSF4hwfo8Ng6NCGrDN3Vzo/ucaH1OybRfzIhAqFZVmwh/GS/0G4h4qCla//Q0rV/aEFd37WE/AIRYpRNYvwAc322H0aITqbiCAZt3tiDEIiQ2ZMHNCD0kt1dIYTUIdEalJAVSLR0vRVcR+DQk/vBTvTXT1NQl6dSdQEDXVT1UrUSh+oh5tsvMDcw0yQECA1YFnRC9LponU9M17JfB6TrzUJL1/6hoV1XwVxfGIByfTkO00PIFbq2AxEye2QAqvMtw5Vg0OoOVoJBl0nS9VZwHYFzfQ7sRF96sYCB0IVHHxozMIDr9YNqZSfUvbFUhbmBuWdgHqNlD/EPLV37h5au/UNL1/6hoV1/F20GZkXAGVjhlIgzMEH7tVzLSNf/Rws5A1t+J+IMjK6SFoWbgdF7oyF7iOx8m4GWrv1Di/9MsDhogV2vwj3r/oahgx7sdTjbROeM8nzuYoIJUTu4yYrqQhfvzV9tzMBwaDs3Gw030fl8/lJjBoZwItTB8QYHe4sjhZromcJx5KCt/VaDwS6OqIOohdafN0swY3NF24dc6OI3N9qzUPStjwfZ56T36Lm5YSj07elDUEJOjI6CoP8Bxks+VXu6zlMAAAAASUVORK5CYII=";
                                     break;
                             }
+                            // MOD NEW PATCH for moving Map (adjusted for 20.1 Patch)
+                            var source = ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().get_MinYPosition.toString();
+                            var CombatMinY = source.match(/return\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
+                            if (typeof $I[CombatMinY[1]] === "function") $I[CombatMinY[1]][CombatMinY[2]] = -178;
 
 
                             if (PerforceChangelist >= 472233) { // NOTE  20.1 patch
@@ -2526,64 +2528,6 @@ codes by NetquiK
                                         break;
                                     }
                                 }
-
-                            }
-
-                            // 19.5 FIX VIEW by Netquik 
-                            else if (PerforceChangelist < 472233) { // MOD: 19.5 patch
-                                this._playAreaChildren[2].setHeight(130); // fix opacity for better view
-                                this._playAreaChildren[4].resetDecorator();
-                                this.FixOverlay = function (e) {
-                                    var _this = (this.TABS) ? this.TABS.GUI.ArmySetupAttackBar.getInstance() : this;
-                                    PlayArea = _this._playArea;
-                                    PlayAreaHeight = PlayArea.getLayoutParent().getBounds().height;
-                                    PlayAreaHeight2 = _this._Application.getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().getLayoutParent().getBounds().height;
-                                    PlayAreaOffSet = PlayAreaHeight2 - PlayAreaHeight;
-                                    playAreaChildren = PlayArea.getChildren();
-                                    MainOverlaychild = _this.MainOverlay.getChildren();
-                                    var fixOverlay;
-                                    var fix = 0;
-                                    fixOverlay = PlayAreaOffSet < 150;
-                                    _this.MainOverlay.setMarginTop(25); // up Mainoverlay not playArea
-                                    if (Math.round(window.devicePixelRatio * 100) >= 125 || PlayAreaHeight2 < 752) {
-                                        MainOverlaychild[1].setHeight(3);
-                                        MainOverlaychild[2].setMarginTop(-32);
-                                        MainOverlaychild[10].setMarginTop(29);
-                                    } else {
-                                        MainOverlaychild[1].resetHeight();
-                                        MainOverlaychild[2].setMarginTop(0);
-                                        MainOverlaychild[10].setMarginTop(0);
-                                    }
-                                    for (var i in playAreaChildren) {
-                                        playchild = playAreaChildren[i];
-                                        if (playchild.basename === "FormationSaver" && playchild.getMarginTop() != 25) {
-                                            playchild.setMarginTop(25);
-                                        } else if (!_this.OverlayFixed) {
-                                            if ((i > 2 && i < 16) && fixOverlay) {
-                                                playchild.setMarginTop(25);
-                                                fix++;
-                                            } else if (i > 15 && i < playAreaChildren.length && e) {
-                                                playchild.setMarginTop(-25);
-                                            }
-
-                                        } else if (!fixOverlay) {
-                                            if (i > 2 && i < 16) {
-                                                playchild.setMarginTop(1);
-                                                fix--;
-                                            }
-                                        }
-                                    }
-                                    _this.OverlayFixed = (fix < 0) ? false : (fix > 0) ? true : _this.OverlayFixed;
-
-                                }
-                                this.FixOverlay(true);
-                                this.RunTimeFixOverlay = function () {
-                                    var _this = (this.TABS) ? this.TABS.GUI.ArmySetupAttackBar.getInstance() : this;
-                                    setTimeout(function () {
-                                        _this.FixOverlay()
-                                    }, 2000)
-                                }
-                                this.MainOverlay.addListener('changeHeight', this.RunTimeFixOverlay.bind(null, event));
 
                             }
 
@@ -2614,7 +2558,7 @@ codes by NetquiK
                             for (i = 0; i < this.ArmySetupAttackBarMainChildren.length - 1; i++) {
                                 var wavechild = this.ArmySetupAttackBarMainChildren[i]
                                 findwave = wavechild._hasChildren() && wavechild.basename === "Composite" ? wavechild.getChildren()[0].$$user_value : false;
-                                this.cntWaveI = (typeof(findwave) === 'string' && findwave.match(/.+\s{1}1/)) ? true : false;
+                                this.cntWaveI = (typeof (findwave) === 'string' && findwave.match(/.+\s{1}1/)) ? true : false;
                                 if (this.cntWaveI) {
                                     this.cntWaveI = i;
                                     break;
@@ -2623,7 +2567,7 @@ codes by NetquiK
                             }
                             var i, cntWave;
                             for (i = 0; i < ClientLib.Base.Util.get_ArmyMaxSlotCountY(); i++) {
-                                cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[i+this.cntWaveI];
+                                cntWave = this.ArmySetupAttackBar.getMainContainer().getChildren()[i + this.cntWaveI];
                                 cntWave._removeAll();
                                 cntWave._setLayout(new qx.ui.layout.HBox());
                                 cntWave._add(this.newSideButton(TABS.RES.IMG.Flip.H, this.tr("Mirrors units horizontally."), this.onClick_btnMirror, "h", i));
@@ -2895,7 +2839,8 @@ codes by NetquiK
 
                             // NOTE Added listener to show movebox on prearmysetup
                             this.ArmySetupAttackBar.addListener("changeVisibility", function () {
-                                if (this.ArmySetupAttackBar.isVisible()) this.boxMove.show(); else this.boxMove.hide();
+                                if (this.ArmySetupAttackBar.isVisible()) this.boxMove.show();
+                                else this.boxMove.hide();
                             }, this);
                             // SkipVictory Button init by Netquik
                             this.boxMove.getChildren()[12].setIcon(TABS.SETTINGS.get("skipVictoryPopup", false) ? TABS.RES.IMG.VictoryPop2 : TABS.RES.IMG.VictoryPop);
