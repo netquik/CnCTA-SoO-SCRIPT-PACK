@@ -3,9 +3,9 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.59b
+// @version        3.59c
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
-// @contributor    NetquiK (https://github.com/netquik) - FIX OPTIONS - 20.1 FIX + MAP MOVE - NEW CODE FOR TOP TOOLBAR - OTHER FIXES
+// @contributor    NetquiK (https://github.com/netquik) - FIX OPTIONS - 20.2 FIX + MAP MOVE - NEW CODE FOR TOP TOOLBAR - OTHER FIXES
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TACS.user.js
 // @grant none
@@ -548,7 +548,7 @@
                             var CombatMinY = source.match(/return\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
                             if (typeof $I[CombatMinY[1]] === "function") $I[CombatMinY[1]][CombatMinY[2]] = -178;
 
-                            if (PerforceChangelist >= 472233) { // NOTE  20.2 patch
+                            if (PerforceChangelist >= 472233) { // NOTE  20.2 patch RETRO
                                 this.COMBATEXTENDEDSETUP = phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
                                 if (this.COMBATEXTENDEDSETUP === false) {
                                     ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, true);
@@ -563,7 +563,9 @@
                                     }
                                     var patch211body = "{return;}"
                                     //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
-                                    this.ArmySetupAttackBar.__bvF = new Function('', patch211body);
+                                    var source = this.ArmySetupAttackBar.showSetup.toString();
+                                    var extendsetupF = source.match(/\;this\.([A-Za-z_]+)\(\)\;this\.show/)[1];
+                                    this.ArmySetupAttackBar[extendsetupF] = new Function('', patch211body);
                                     ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
                                     this.ArmySetupAttackBar.showSetup(false);
 
