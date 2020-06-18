@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.04.01
+// @version         20.05.26
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -18,7 +18,7 @@ codes by NetquiK
 - New Top Bar Button
 - Native Unit Enabling
 - SkipVictory
-- 20.1 FIX + MAP MOVE
+- 20.2 FIX + MAP MOVE
 - MovableBox in Battleground 
 ----------------
 */
@@ -2613,10 +2613,12 @@ codes by NetquiK
 
 
                             }
-                            if (PerforceChangelist >= 472233) { // MOD: 20.1 patch 2
+                            if (PerforceChangelist >= 472233) { // MOD: 20.2 patch 2 RETRO
                                 var patch211body = "{return;}"
                                 //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
-                                this.ArmySetupAttackBar.__bvE = new Function('', patch211body);
+                                var source = this.ArmySetupAttackBar.showSetup.toString();
+                                var extendsetupF = source.match(/\;this\.([A-Za-z_]+)\(\)\;this\.show/)[1];
+                                this.ArmySetupAttackBar[extendsetupF] = new Function('', patch211body);
                                 ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
                                 this.ArmySetupAttackBar.showSetup(false);
                             }
