@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Tiberium Alliances Report Summary
-// @version         20.07.16
+// @version         20.07.17
 // @description     Tool to view gains/losses on selected date/base. The Summaries are extracted from your combat reports.
 // @namespace   	https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     	https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -9,6 +9,8 @@
 // ==/UserScript==
 
 (function () {
+    var ReportSummary_main = function () {
+    console.log('ReportSummary loaded');
     function g() {
         for (var a = document.getElementsByTagName("script"), b = 0; b < a.length; b++)
             if (-1 != a[b].innerHTML.search(/ReportSummary/g)) {
@@ -267,4 +269,15 @@
         }
     }
     setTimeout(k, 1E3)
+}
+try {
+    var ReportSummary_script = document.createElement("script");
+    ReportSummary_script.innerHTML = "(" + ReportSummary_main.toString() + ")();";
+    ReportSummary_script.type = "text/javascript";
+    if (/commandandconquer\.com/i.test(document.domain)) {
+        document.getElementsByTagName("head")[0].appendChild(ReportSummary_script);
+    }
+} catch (e) {
+    console.log("ReportSummary_script: init error: ", e);
+}
 })();
