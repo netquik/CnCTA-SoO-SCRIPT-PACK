@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Tiberium Alliances The Movement
-// @version        1.0.3.8
+// @version        1.0.3.9
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
@@ -993,6 +993,9 @@
                         var cityMoveInfo = webfrontend.gui.region.RegionCityMoveInfo.getInstance();
                         phe.cnc.Util.detachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, this, this.__onMouseUp);
                         phe.cnc.Util.attachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, cityMoveInfo, cityMoveInfo[this.moveInfoOnMouseUpMethodName]);
+                        // MOD 20.3 by Netquik new oncellchange function
+                        phe.cnc.Util.detachNetEvent(mouseTool, 'OnCellChange', ClientLib.Vis.MouseTool.OnCellChange, this, this.__onCellChange);
+                        phe.cnc.Util.attachNetEvent(mouseTool, 'OnCellChange', ClientLib.Vis.MouseTool.OnCellChange, cityMoveInfo, cityMoveInfo[this.moveInfoOnCellChangeMethodName]);
                         if (this.originalOwnCityId !== null) {
                             ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentOwnCityId(this.originalOwnCityId);
                             this.originalOwnCityId = null;
