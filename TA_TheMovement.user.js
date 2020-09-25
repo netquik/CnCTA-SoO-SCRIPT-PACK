@@ -5,7 +5,7 @@
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    Xdaast (19.4 FIX)
-// @contributor    Netquik (19.3||19.4 FIX||20.3 FIX) + remove eval use
+// @contributor    Netquik (19.3||19.4||20.3 FIX) + remove eval use
 // @description    Strategical territory simulator
 // @include        http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
