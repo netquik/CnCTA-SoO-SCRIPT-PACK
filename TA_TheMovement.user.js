@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Tiberium Alliances The Movement
-// @version        1.0.4.1
+// @version        1.0.3.8
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
@@ -212,7 +212,10 @@
                                 twoStepMenu.add(menuButton);
                             }
                         } else {
+                            // MOD 20.3 by Netquik
+                            var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCityId();
                             qx.core.Init.getApplication().getBackgroundArea().closeCityInfo();
+                            ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentCityId(city);
                         }
                     },
                     /**
@@ -775,8 +778,8 @@
                     this.GetTerritoryTypeByCoordinatesPatched = new Function(args, fnBody);
                     this.CheckMoveBaseMethodName = ClientLib.Vis.MouseTool.MoveBaseTool.prototype.VisUpdate.toString().match(/var [A-Za-z]+=[A-Za-z]+\.([A-Z]{6})\([A-Za-z]+,[A-Za-z]+,this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\);/)[1];
                     // The second replace takes care of landing on a ruin and the third one landing next to a ruin
-                    // MOD 20.3 forcing terrotoryidentity instead of owncity
-                    rewrittenFunctionBody = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/var ([a-z])=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\);/, 'var $1 = territoryIdentity.city;').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\((n\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\$I\.[A-Z]{6}\.FailFieldOccupied;)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\(([A-Za-z]\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\(\$I\.[A-Z]{6}\.FailNeighborRuin)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5');
+                    // MOD fixed regex by Netquik
+                    rewrittenFunctionBody = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\((n\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\$I\.[A-Z]{6}\.FailFieldOccupied;)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\(([A-Za-z]\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\(\$I\.[A-Z]{6}\.FailNeighborRuin)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5');
                     fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
                     args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
                     this.CheckMoveBasePatched = new Function(args, fnBody);
@@ -792,12 +795,10 @@
                     /**
                      * @param {Number} playerId
                      * @param {Number} allianceId
-                     * @param {Object} city
                      */
-                    activate: function (playerId, allianceId, city) {
+                    activate: function (playerId, allianceId) {
                         this.playerId = playerId;
                         this.allianceId = allianceId;
-                        this.city = city;
                         var world = ClientLib.Data.MainData.GetInstance().get_World();
                         world[this.GetTerritoryTypeByCoordinatesMethodName] = this.GetTerritoryTypeByCoordinatesPatched.bind(world, this);
                         world[this.CheckMoveBaseMethodName] = this.CheckMoveBasePatched.bind(world, this);
@@ -923,8 +924,6 @@
                     this.regionManipulator = regionManipulator;
                     this.territoryIdentity = territoryIdentity;
                     this.moveInfoOnMouseUpMethodName = Function.prototype.toString.call(webfrontend.gui.region.RegionCityMoveInfo.constructor).match(/attachNetEvent\(this\.[A-Za-z0-9_]+,[A-Za-z]+,ClientLib\.Vis\.MouseTool\.OnMouseUp,this,this\.([A-Za-z0-9_]+)\);/)[1];
-                    // MOD 20.3 by Netquik oncellchange methodname
-                    this.moveInfoOnCellChangeMethodName = Function.prototype.toString.call(webfrontend.gui.region.RegionCityMoveInfo.constructor).match(/attachNetEvent\(this\.[A-Za-z0-9_]+,[A-Za-z]+,ClientLib\.Vis\.MouseTool\.OnCellChange,this,this\.([A-Za-z0-9_]+)\);/)[1];
                 },
                 members: {
                     worldManipulator: null,
@@ -969,12 +968,11 @@
                                     restrictions.c++;
                                 }
                             }
-                            if ( /* regionCity.get_AllianceId() !== player.get_AllianceId() || (!player.get_AllianceId() && */ !regionCity.IsOwnBase()) {
-                                this.territoryIdentity.activate(regionCity.get_PlayerId(), regionCity.get_AllianceId(), city);
+                            if (regionCity.get_AllianceId() !== player.get_AllianceId() || (!player.get_AllianceId() && !regionCity.IsOwnBase())) {
+                                this.territoryIdentity.activate(regionCity.get_PlayerId(), regionCity.get_AllianceId());
                             }
                             this.originalOwnCityId = cities.get_CurrentOwnCityId();
                             cities.set_CurrentOwnCityId(regionCity.get_Id());
-                            cities.set_CurrentCityId(regionCity.get_Id());
                         }
                         var mouseTool = ClientLib.Vis.VisMain.GetInstance().GetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase);
                         phe.cnc.Util.attachNetEvent(mouseTool, 'OnDeactivate', ClientLib.Vis.MouseTool.OnDeactivate, this, this.__onDeactivateMoveBaseTool);
@@ -982,31 +980,14 @@
                         phe.cnc.Util.detachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, cityMoveInfo, cityMoveInfo[this.moveInfoOnMouseUpMethodName]);
                         phe.cnc.Util.attachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, this, this.__onMouseUp);
                         cityMoveInfo.setCity(regionCity);
-                        // MOD 20.3 by Netquik detour for oncellchange
-                        if (this.territoryIdentity.isActive()) {
-                            phe.cnc.Util.detachNetEvent(mouseTool, 'OnCellChange', ClientLib.Vis.MouseTool.OnCellChange, cityMoveInfo, cityMoveInfo[this.moveInfoOnCellChangeMethodName]);
-                            phe.cnc.Util.attachNetEvent(mouseTool, 'OnCellChange', ClientLib.Vis.MouseTool.OnCellChange, this, this.__onCellChange);
-                        }
-                        ClientLib.Vis.VisMain.GetInstance().SetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase, regionCity.get_Id());
-                    },
-                    /**
-                     * @param {Number} x
-                     * @param {Number} y
-                     */
-                    __onCellChange: function (x, y) { // MOD 20.3 by Netquik new oncellchange function
-                        ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentCityId(this.currentRegionCity.get_Id());
-                        webfrontend.gui.region.RegionCityMoveInfo.getInstance()[this.moveInfoOnCellChangeMethodName](x, y);
+                        ClientLib.Vis.VisMain.GetInstance().SetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase, cities.get_CurrentOwnCityId());
                     },
                     __onDeactivateMoveBaseTool: function () {
                         var mouseTool = ClientLib.Vis.VisMain.GetInstance().GetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase);
                         phe.cnc.Util.detachNetEvent(mouseTool, 'OnDeactivate', ClientLib.Vis.MouseTool.OnDeactivate, this, this.__onDeactivateMoveBaseTool);
-                        var cityMoveInfo = webfrontend.gui.region.RegionCityMoveInfo.prototype;
+                        var cityMoveInfo = webfrontend.gui.region.RegionCityMoveInfo.getInstance();
                         phe.cnc.Util.detachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, this, this.__onMouseUp);
                         phe.cnc.Util.attachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, cityMoveInfo, cityMoveInfo[this.moveInfoOnMouseUpMethodName]);
-                        if (this.territoryIdentity.isActive()) {
-                            phe.cnc.Util.detachNetEvent(mouseTool, 'OnCellChange', ClientLib.Vis.MouseTool.OnCellChange, this, this.__onCellChange);
-                            phe.cnc.Util.attachNetEvent(mouseTool, 'OnCellChange', ClientLib.Vis.MouseTool.OnCellChange, cityMoveInfo, cityMoveInfo[this.moveInfoOnCellChangeMethodName]);
-                        }
                         if (this.originalOwnCityId !== null) {
                             ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentOwnCityId(this.originalOwnCityId);
                             this.originalOwnCityId = null;
