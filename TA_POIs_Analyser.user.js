@@ -130,6 +130,8 @@
 						var poiInfo = phe.cnc.gui.util.Text.getPoiInfosByType;
 						var startRank = ClientLib.Base.EPOIType.RankedTypeBegin;
 						var poiGlobalBonusFactor = data.get_Server().get_POIGlobalBonusFactor();
+						var BonusLabel = "Bonus";
+						1 < poiGlobalBonusFactor && (BonusLabel += " +" + 100 * poiGlobalBonusFactor + "%");
 
 						var tiersData = [],
 							scoreData = [],
@@ -155,7 +157,7 @@
 
 							var columns = [
 								["POI Level", "Score"],
-								["Tier", "Score Required", "Bonus", "Percentage"],
+								["Tier", "Score Required", BonusLabel, "Percentage"],
 								["Rank", "Multiplier"]
 							];
 							var rows = [scoreData, bonusData, tiersData];
@@ -883,6 +885,8 @@
 						var getMultiplier = poiUtil.GetBoostModifierByRank;
 						var getBonus = poiUtil.GetBonusByType;
 						var poiGlobalBonusFactor = ClientLib.Data.MainData.GetInstance().get_Server().get_POIGlobalBonusFactor();
+						var BonusLabel = "Bonus";
+						1 < poiGlobalBonusFactor && (BonusLabel += " +" + 100 * poiGlobalBonusFactor + "%");;
 						var getTier = function (s) {
 							if (s == 0) return "0";
 							else
@@ -941,7 +945,7 @@
 									return ((val - org) * fac > 0) ? st(cs[1]) + fv + et : ((val - org) * fac < 0) ? st(cs[2]) + fv + et : fv;
 								}
 							};
-							var rows = ['Score', 'Tier', 'Rank', 'Multiplier', 'Previous Rank', 'Next Rank', 'Previous Tier', 'Next Tier', 'Bonus', 'Total Bonus'];
+							var rows = ['Score', 'Tier', 'Rank', 'Multiplier', 'Previous Rank', 'Next Rank', 'Previous Tier', 'Next Tier', BonusLabel, 'Total Bonus'];
 							var data = [f(s), sc(t, ot, null, 1), sc(r, or, null, -1), '+' + m + '%', '+' + f(pr), '-' + f(nr), '+' + f(pt), '-' + f(nt), sc(b, ob, pp, 1), sc(tb, otb, pp, 1)];
 							var results = [];
 							for (var i = 0; i < rows.length; i++) results.push([sc(rows[i]), data[i]]);
@@ -993,7 +997,8 @@
 							var endRank = ClientLib.Base.EPOIType.RankedTypeEnd;
 							var poiInfo = phe.cnc.gui.util.Text.getPoiInfosByType;
 							var poiGlobalBonusFactor = data.get_Server().get_POIGlobalBonusFactor();
-
+							var BonusLabel = "Bonus";
+							1 < poiGlobalBonusFactor && (BonusLabel += " +" + 100 * poiGlobalBonusFactor + "%");
 							var pois = {},
 								format = this.__format,
 								tiers = this.__tiers;
@@ -1148,7 +1153,10 @@
 						addRow('Alliance Rank', poiRank, table, 0);
 						addRow('Score', score, table);
 						addRow('Next Tier Requires', nextTier, table, 0);
-						addRow('Bonus', bns, table, 1);
+						var poiGlobalBonusFactor = ClientLib.Data.MainData.GetInstance().get_Server().get_POIGlobalBonusFactor();
+						var BonusLabel = "Bonus";
+						1 < poiGlobalBonusFactor && (BonusLabel += " +" + 100 * poiGlobalBonusFactor + "%");
+						addRow(BonusLabel, bns, table, 1);
 						addRow('Next Tier Bonus', nextBns, table, 0);
 						document.getElementById('graph').appendChild(table.elm);
 					}
