@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.05.26
+// @version         20.07.22
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -19,7 +19,8 @@ codes by NetquiK
 - Native Unit Enabling
 - SkipVictory
 - 20.2 FIX + MAP MOVE
-- MovableBox in Battleground 
+- MovableBox in Battleground
+- Some Sim Presets Fixes
 ----------------
 */
 
@@ -3582,7 +3583,7 @@ codes by NetquiK
                         },
                         makeSimView: function () {
                             var i, num = Math.round((this.getWidth() - 30) / 75);
-                            if (this.simViews.length != num) {
+                            if (this.simViews.length != num && num <= 6) {
                                 for (i = 0; i < num; i++) {
                                     if (this.simViews[i] === undefined) {
                                         this.simViews[i] = new TABS.GUI.Window.Stats.SimView(i, this);
@@ -3732,7 +3733,7 @@ codes by NetquiK
                         try {
                             this.base(arguments);
                             var i, j, defaultPreset = TABS.SETTINGS.get("GUI.Window.Stats.SimView." + num, TABS.STATS.getPreset(num));
-                            if (defaultPreset.Name === undefined) defaultPreset = TABS.SETTINGS.set("GUI.Window.Stats.SimView." + num, TABS.STATS.getPreset(num)); // Reset Settings (if no Name)
+                            if (defaultPreset.Name === undefined || defaultPreset.Name !== TABS.STATS.getPreset(num).Name) defaultPreset = TABS.SETTINGS.set("GUI.Window.Stats.SimView." + num, TABS.STATS.getPreset(num)); // Reset Settings (if no Name)
                             if (defaultPreset.Description === undefined) defaultPreset = TABS.SETTINGS.set("GUI.Window.Stats.SimView." + num, TABS.STATS.getPreset(num)); // Reset Settings (if no Description)
                             this.Num = num;
                             this.Window = window;
