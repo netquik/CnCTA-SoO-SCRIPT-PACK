@@ -3,12 +3,20 @@
 // @description Display alliance's POIs scores and next tier requirements.
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     2.0.4
-// @contributor Netquik (2.0.4 PoiGlobalBonus FIX)
+// @version     2.0.5
+// @contributor NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @grant none
 // @author zdoom
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_POIs_Analyser.user.js
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- PoiGlobalBonus FIX
+- Deep Fix for AllianceOverlay Tabs
+----------------
+*/
 
 (function () {
 	var injectScript = function () {
@@ -597,11 +605,29 @@
 								console.log(e.toString())
 							}
 						}, this);
+						// MOD DEEP FIX for AllianceOVerlay TABS by Netquik
+						var AllianceOverlay = webfrontend.gui.alliance.AllianceOverlay.getInstance();
+						this.AllianceOverlayTabViewPopulateMethod = AllianceOverlay._activate.toString().match(/function\(\)\{this\.([_a-zA-Z]+)\(\);this\.[_a-zA-Z]+/)[1];
+						var TabViewPopulateMethodString = AllianceOverlay[this.AllianceOverlayTabViewPopulateMethod].toString();
+						this.AllianceOverlayTabViewMethod = TabViewPopulateMethodString.match(/this\.([_a-zA-Z]+)\.remove\(this\.[_a-zA-Z]+\);/)[1];
+						var rewrittenFunctionBody = TabViewPopulateMethodString.replace(/(?!if\()this\.[_a-zA-Z]+==(this\.[_a-zA-Z]+)(?=\){(this\.[_a-zA-Z]+)\.remove)/, '-1!=$2.indexOf($1)');
+						var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
+						var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
+						this.AllianceOverlayPatched = new Function(args, fnBody);
+						AllianceOverlay[this.AllianceOverlayTabViewPopulateMethod] = this.AllianceOverlayPatched.bind(AllianceOverlay);
 
-						var overlay = webfrontend.gui.alliance.AllianceOverlay.getInstance();
-						var mainTabview = overlay.getChildren()[11].getChildren()[0];
-						mainTabview.addAt(this, 0);
-						mainTabview.setSelection([this]);
+						webfrontend.gui.alliance.AllianceOverlay.tabs = {
+							EShieldHub: 7,
+							ETabDiplomacyPage: 4,
+							ETabEnterAlliancePage: 1,
+							ETabMyInvitationsPage: 5,
+							ETabOverviewPage: 2,
+							ETabPOI: 6,
+							ETabRosterPage: 3
+						};
+						this.AllianceOverlayMainTabview = AllianceOverlay[this.AllianceOverlayTabViewMethod];
+						this.AllianceOverlayMainTabview.addAt(this, 0);
+						this.AllianceOverlayMainTabview.setSelection([this]);
 					} catch (e) {
 						console.log(e.toString());
 					}
