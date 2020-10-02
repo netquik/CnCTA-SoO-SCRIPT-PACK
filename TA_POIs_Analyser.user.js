@@ -606,7 +606,8 @@ codes by NetquiK
 							}
 						}, this);
 						// MOD DEEP FIX for AllianceOVerlay TABS by Netquik
-						var AllianceOverlay = webfrontend.gui.alliance.AllianceOverlay.getInstance();
+						var AllianceOverlayGUI = webfrontend.gui.alliance.AllianceOverlay;
+						var AllianceOverlay = AllianceOverlayGUI.getInstance();
 						this.AllianceOverlayTabViewPopulateMethod = AllianceOverlay._activate.toString().match(/function\(\)\{this\.([_a-zA-Z]+)\(\);this\.[_a-zA-Z]+/)[1];
 						var TabViewPopulateMethodString = AllianceOverlay[this.AllianceOverlayTabViewPopulateMethod].toString();
 						this.AllianceOverlayTabViewMethod = TabViewPopulateMethodString.match(/this\.([_a-zA-Z]+)\.remove\(this\.[_a-zA-Z]+\);/)[1];
@@ -615,18 +616,13 @@ codes by NetquiK
 						var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
 						this.AllianceOverlayPatched = new Function(args, fnBody);
 						AllianceOverlay[this.AllianceOverlayTabViewPopulateMethod] = this.AllianceOverlayPatched.bind(AllianceOverlay);
-
-						webfrontend.gui.alliance.AllianceOverlay.tabs = {
-							EShieldHub: 7,
-							ETabDiplomacyPage: 4,
-							ETabEnterAlliancePage: 1,
-							ETabMyInvitationsPage: 5,
-							ETabOverviewPage: 2,
-							ETabPOI: 6,
-							ETabRosterPage: 3
-						};
 						this.AllianceOverlayMainTabview = AllianceOverlay[this.AllianceOverlayTabViewMethod];
 						this.AllianceOverlayMainTabview.addAt(this, 0);
+						for (var tab in AllianceOverlayGUI.tabs) {
+							if (Object.prototype.hasOwnProperty.call(AllianceOverlayGUI.tabs, tab)) {
+								AllianceOverlayGUI.tabs[tab] = AllianceOverlayGUI.tabs[tab]+1;
+							}
+						}		
 						this.AllianceOverlayMainTabview.setSelection([this]);
 					} catch (e) {
 						console.log(e.toString());
