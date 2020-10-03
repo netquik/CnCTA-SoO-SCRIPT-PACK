@@ -611,7 +611,10 @@ codes by NetquiK
 						this.AllianceOverlayTabViewPopulateMethod = AllianceOverlay._activate.toString().match(/function\(\)\{this\.([_a-zA-Z]+)\(\);this\.[_a-zA-Z]+/)[1];
 						var TabViewPopulateMethodString = AllianceOverlay[this.AllianceOverlayTabViewPopulateMethod].toString();
 						this.AllianceOverlayTabViewMethod = TabViewPopulateMethodString.match(/this\.([_a-zA-Z]+)\.remove\(this\.[_a-zA-Z]+\);/)[1];
-						var rewrittenFunctionBody = TabViewPopulateMethodString.replace(/(?!if\()this\.[_a-zA-Z]+==(this\.[_a-zA-Z]+)(?=\){(this\.[_a-zA-Z]+)\.remove)/, '-1!=$2.indexOf($1)');
+						var rewrittenFunctionBody = TabViewPopulateMethodString.replace(/(?!if\()this\.[_a-zA-Z]+(!|=)=(this\.[_a-zA-Z]+)(?=\){(this\.[_a-zA-Z]+)\.(?:add|remove))/g, function (match, g1, g2, g3) {
+							return '-1' + ("="==g1?"!":"=") + '==' + g3 + '.indexOf(' + g2 + ')';
+						});
+
 						var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
 						var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
 						this.AllianceOverlayPatched = new Function(args, fnBody);
@@ -620,9 +623,9 @@ codes by NetquiK
 						this.AllianceOverlayMainTabview.addAt(this, 0);
 						for (var tab in AllianceOverlayGUI.tabs) {
 							if (Object.prototype.hasOwnProperty.call(AllianceOverlayGUI.tabs, tab)) {
-								AllianceOverlayGUI.tabs[tab] = AllianceOverlayGUI.tabs[tab]+1;
+								AllianceOverlayGUI.tabs[tab] = AllianceOverlayGUI.tabs[tab] + 1;
 							}
-						}		
+						}
 						this.AllianceOverlayMainTabview.setSelection([this]);
 					} catch (e) {
 						console.log(e.toString());
