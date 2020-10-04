@@ -3,11 +3,11 @@
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.10.3
+// @version     1.8.10.4
 // @author      BlinDManX + chertosha
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
-// @contributor NetquiK Sync with Base Scanner Basic code + Layout Scan Modding + Save window pos and dimension
+// @contributor Netquik (https://github.com/netquik) Sync with Base Scanner Basic code + Layout Scan Modding 2 + Save window pos and dimension
 // @grant       none
 // @copyright   2012+, Claus Neumann
 // @license     CC BY-NC-ND 3.0 - http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -145,16 +145,26 @@
                             this.ZN.setColumnWidth(23, Addons.LocalStorage.getserver("Basescanner_ColWidth_22", 150));
                             var c = 0;
                             var tcm = this.ZN.getTableColumnModel();
+                            // MOD coloring layout filtering
+                            
                             var high5 = new qx.ui.table.cellrenderer.Conditional();
+                            var high4 = new qx.ui.table.cellrenderer.Conditional();
                             var highPow = new qx.ui.table.cellrenderer.Conditional();
                             var highGrow = new qx.ui.table.cellrenderer.Conditional();
                             high5.addRegex("(?:([0-9]) \\| [1-9] \\| [0-9] \\| [0-9])|(?:([1-9]) \\| [0-9] \\| [0-9] \\| [0-9])|(?:([0-9]) \\| [0-9] \\| [1-9] \\| [0-9])", null, "#DD0022", null, "700", null);
+                            high4.addRegex("(?:([0-9]) \\| [1-9] \\| [0-9] \\| [0-9])|(?:([1-9]) \\| [0-9] \\| [0-9] \\| [0-9])|(?:([0-9]) \\| [0-9] \\| [1-9] \\| [0-9])", null, "#DD0022", null, "700", null);
+                            high5.addRegex("(?:0 \\| 0 \\| 0 \\| [2-9])", null, "#f48115", null, "700", null);
+                            high5.addRegex("(?:0 \\| 0 \\| 0 \\| [0-1])", null, "#0a6ba4", null, "700", null);
+                            high4.addRegex("(?:0 \\| 0 \\| 0 \\| [0-9])", null, "#0a6ba4", null, "700", null);
                             highPow.addNumericCondition(">", 1, null, "#DD0022", null, "700", null);
+                            highPow.addNumericCondition("<=", 1, null, "#0a6ba4", null, "700", null);
                             highGrow.addNumericCondition(">", 4, null, "#DD0022", null, "700", null);
+                            highGrow.addBetweenCondition("between", 3, 4, null, "#f48115", null, "700", null);
+                            highGrow.addNumericCondition("<", 3, null, "#0a6ba4", null, "700", null);
                             tcm.setDataCellRenderer(20, highPow);
                             tcm.setDataCellRenderer(21, high5);
-                            tcm.setDataCellRenderer(22, high5);
-                            tcm.setDataCellRenderer(23, high5);
+                            tcm.setDataCellRenderer(22, high4);
+                            tcm.setDataCellRenderer(23, high4);
                             tcm.setDataCellRenderer(14, highGrow);
                             for (c = 0; c < this.ZL.getColumnCount(); c++) {
                                 if (c == 0 || c == 1 || c == 11 || c == 12) {
@@ -749,7 +759,7 @@
                             this.ZH = true;
                             this.ZL.setData(this.ZE);
                             this.FP(0, this.ZE.length, 200);
-                            this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                            this.ZL.sortByColumn(14, false); //Sort form Highlevel to Lowlevel
                             if (this.YY.name != "DR01D") window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FG()", 50);
                         } catch (ex) {
                             console.debug("Maelstrom_Basescanner FJ error: ", ex);
