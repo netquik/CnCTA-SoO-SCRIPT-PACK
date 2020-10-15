@@ -21,7 +21,7 @@
 				type: 'singleton',
 				extend: qx.core.Object,
 				statics: {
-					ForgottenAttackDistance: 11
+					ForgottenAttackDistance: ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance()
 				},
 				members: {
 					regionCityInfoContainer: null,
