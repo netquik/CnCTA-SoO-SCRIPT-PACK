@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.10.05
+// @version         20.11.28
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -20,7 +20,7 @@ codes by NetquiK
 - SkipVictory
 - 20.2 FIX + MAP MOVE
 - MovableBox in Battleground
-- Some Sim Presets Fixes+
+- Some Sim Presets Fixes++
 ----------------
 */
 
@@ -3559,7 +3559,7 @@ codes by NetquiK
                             }
                         },
                         _onViewChanged: function (oldMode, newMode) {
-                            if (newMode != ClientLib.Vis.Mode.CombatSetup && newMode != ClientLib.Vis.Mode.Battleground) this.close();
+                            if (newMode != ClientLib.Vis.Mode.CombatSetup && newMode != ClientLib.Vis.Mode.Battleground && newMode != ClientLib.Vis.Mode.City) this.close();
                         },
                         makeHeader: function (text) {
                             var Header = new qx.ui.container.Composite(new qx.ui.layout.Grow()).set({
