@@ -3060,14 +3060,14 @@ codes by NetquiK
                                             case eModPackageSize: {
                                                 //  MOD Gain per Hour fix for buildings that have packages <12 level by Netquik
                                                 var ModOj = city_buildingdetailview.OwnProdModifiers.d[city_building.get_MainModifierTypeId()];
-                                                if (city_buildingdetailview.TechLevel > 11){
+                                                /* if (city_buildingdetailview.TechLevel > 11){
                                                 var Mod = (ModOj.TotalValue + ModOj.NewLvlDelta) / ClientLib.Data.MainData.GetInstance().get_Time().get_StepsPerHour() ;
                                                 resbuilding["GainPerHour"] += (city_buildingdetailview.OwnProdModifiers.d[ModifierType].NewLvlDelta / Mod);
-                                                } else {
-                                                    var Mod1 = (3600/(ModOj.TotalValue)) * city_buildingdetailview.OwnProdModifiers.d[ModifierType].TotalValue;
-                                                    var Mod2 = (3600/(ModOj.TotalValue + ModOj.NewLvlDelta)) * (city_buildingdetailview.OwnProdModifiers.d[ModifierType].NewLvlDelta + city_buildingdetailview.OwnProdModifiers.d[ModifierType].TotalValue);
-                                                    resbuilding["GainPerHour"] += Mod2 - Mod1; 
-                                                }
+                                                } else { */
+                                                    var prevProdH = (3600/(ModOj.TotalValue)) * city_buildingdetailview.OwnProdModifiers.d[ModifierType].TotalValue;
+                                                    var newProdH = (3600/(ModOj.TotalValue + ModOj.NewLvlDelta)) * (city_buildingdetailview.OwnProdModifiers.d[ModifierType].NewLvlDelta + city_buildingdetailview.OwnProdModifiers.d[ModifierType].TotalValue);
+                                                    resbuilding["GainPerHour"] += newProdH - prevProdH; 
+                                                /* } */
                                                 
                                                 break;
                                             }
