@@ -17,7 +17,7 @@ codes by NetquiK
 - MovableBox Save Position
 - New Top Bar Button
 - Native Unit Enabling
-- SkipVictory
+- Skip Victory
 - 20.2 FIX + MAP MOVE
 - MovableBox in Battleground
 - Some Sim Presets Fixes+
