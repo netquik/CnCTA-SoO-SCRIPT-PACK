@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.6 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.4.7d
+// @version     0.1.4.7e
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -955,6 +955,8 @@ codes by NetquiK
                                     var creditsNeeded = resourcesNeeded[ClientLib.Base.EResourceType.Gold];
                                     var creditsResourceData = player.get_Credits();
                                     var creditGrowthPerHour = (creditsResourceData.Delta + creditsResourceData.ExtraBonusDelta) * ClientLib.Data.MainData.GetInstance().get_Time().get_StepsPerHour();
+                                    // MOD detect no credits prodction by Netquik
+                                    var doGrow = (creditGrowthPerHour > 0) ? true : false;
                                     var creditTimeLeftInHours = (creditsNeeded - player.GetCreditsCount()) / creditGrowthPerHour;
                                     var creditTimeLeftInDays = MaelstromTools.Wrapper.GetDaysFromHours(creditTimeLeftInHours);
                                     var ZX = 100 / creditsNeeded;
@@ -968,7 +970,7 @@ codes by NetquiK
                                     //  return;
                                     //}
                                     this.mcvPopup.setCaption(Lang.gt("NEXT MCV"));
-                                    if (creditTimeLeftInHours > 0) {
+                                    if (creditTimeLeftInHours > 0 && doGrow) {
                                         this.mcvTimerLabel.setValue("TIMER C$ - " + creditTimeLeftInDays); //+ MaelstromTools.Wrapper.FormatTimespan(creditTimeLeftInHours * 60 * 60)
                                     } else {
                                         this.mcvTimerLabel.setValue("TIMER C$ - OFF");
@@ -978,11 +980,12 @@ codes by NetquiK
                                         this.mcvplace.setValue("<span style='color: #92ff7f;'>C$ (+" + MaelstromTools.Wrapper.FormatNumbersCompact(Math.abs(creditsNeeded - ZXZ)) + ")</span>");
                                     }
                                     if (PercentageOfCredits < 100) {
+                                        var nogrowing = "NoGrow";
                                         this.mcvCreditProcentageLabel.setValue("<span style='color: #ff8a7f;'>CREDIT</span> -  <span style='color: #ff8f00;'>" + MaelstromTools.Wrapper.FormatNumbersCompact(creditsNeeded - ZXZ) + "</span> / <span style='font-size:12px;'>" + MaelstromTools.Wrapper.FormatNumbersCompact(creditsNeeded) + " @ " + (PercentageOfCredits).toFixed(1) + "%</span>");
-                                        this.mcvplace.setValue("<span style='color: #ff8a7f;'>T$ - " + creditTimeLeftInDays + "</span>");
+                                        this.mcvplace.setValue("<span style='color: #ff8a7f;'>T$ - " + (doGrow ? creditTimeLeftInDays : nogrowing) + "</span>");
                                     }
                                     if (PercentageOfResearchPoints >= 100) {
-                                        this.mcvResearchTimerLabel.setValue("<span style=' color: #92ff7f;'>RP - OK!</span> <span style='color: #ff8f00;'>" + MaelstromTools.Wrapper.FormatNumbersCompact(XYX) + "</span> / <span style='font-size:12px;'>" + MaelstromTools.Wrapper.FormatNumbersCompact(researchNeeded) + ")</span>");
+                                        this.mcvResearchTimerLabel.setValue("<span style=' color: #92ff7f;'>RP - OK!</span> <span style='color: #ff8f00;'>" + MaelstromTools.Wrapper.FormatNumbersCompact(XYX) + "</span> / <span style='font-size:12px;'>" + MaelstromTools.Wrapper.FormatNumbersCompact(researchNeeded) + "</span>");
                                         this.mcvplace.setValue(this.mcvplace.$$user_value + "<br><span style='color: #92ff7f;'>RP (+" + MaelstromTools.Wrapper.FormatNumbersCompact(Math.abs(researchNeeded - currentResearchPoints)) + ")</span>");
                                     }
                                     if (PercentageOfResearchPoints < 100) {
