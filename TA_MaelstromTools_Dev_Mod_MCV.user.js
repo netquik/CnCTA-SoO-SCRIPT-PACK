@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.6 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.4.7e
+// @version     0.1.4.7f
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -45,6 +45,7 @@ codes by NetquiK
 - mod for MCV
 - Close Chat at start option
 - Gain per Hour fix for buildings that have packages <12 level
+- new toggle view function and button
 ----------------
 */
 
@@ -821,6 +822,22 @@ codes by NetquiK
                             mcvTimerLabel: null,
                             mcvCreditProcentageLabel: null,
                             mcvResearchTimerLabel: null,
+                            // MOD new toggle view function by Netquik
+                            toggleview: function () {
+                                if (this.extMinimized) {
+                                    this.extMinimized = false;
+                                    this.mcvToggleView.setIcon('FactionUI/icons/icon_tracker_minimise.png');
+                                    this.mcvPopup.remove(this.mcvplace);
+                                    for (var k in this.extItems) this.mcvPopup.add(this.extItems[k]);
+                                } else {
+                                    this.extMinimized = true;
+                                    this.mcvToggleView.setIcon('FactionUI/icons/icon_mainui_addpoints_plus.png');
+                                    this.mcvPopup.removeAll();
+                                    this.mcvPopup.add(this.mcvplace);
+                                }
+                                this.mcvPopup.restore(); //trick
+
+                            },
                             calculateCostsForNextMCV: function () {
                                 try {
                                     if (!MT_Preferences.Settings.showCostsForNextMCV) {
@@ -843,12 +860,12 @@ codes by NetquiK
                                     if (!this.mcvPopup) {
                                         this.mcvPopup = new qx.ui.window.Window("").set({
                                             contentPadding: 3,
-                                            //showMinimize : false,
+                                            showMinimize: false,
                                             showMaximize: false,
                                             showClose: false,
                                             resizable: false,
                                             allowMaximize: false,
-                                            //allowMinimize: false,
+                                            allowMinimize: false,
                                             allowClose: false
                                         });
                                         this.mcvPopup.setLayout(new qx.ui.layout.VBox());
@@ -864,18 +881,20 @@ codes by NetquiK
                                                 y: base.mcvPopupY
                                             });
                                         });
-                                        this.mcvPopup.addListener("minimize", function (e) {
-                                            if (this.extMinimized) {
-                                                this.extMinimized = false;
-                                                this.mcvPopup.remove(this.mcvplace);
-                                                for (var k in this.extItems) this.mcvPopup.add(this.extItems[k]);
-                                            } else {
-                                                this.extMinimized = true;
-                                                this.mcvPopup.removeAll();
-                                                this.mcvPopup.add(this.mcvplace);
-                                            }
-                                            this.mcvPopup.restore(); //trick
-                                        }, this);
+                                        // MOD new toggle view button by Netquik
+                                        this.mcvToggleView = new webfrontend.ui.SoundButton(null, "FactionUI/icons/icon_mainui_addpoints_plus.png").set({
+                                            appearance: "button-addpoints",
+                                            width: 15,
+                                            height: 15,
+                                            allowGrowY: false,
+                                            alignY: 'middle',
+                                            toolTipText: 'Toggle View'
+                                        });
+                                        this.mcvToggleView.addListener("execute", this.toggleview, this);
+                                        this.mcvPopup.getChildControl('captionbar').add(this.mcvToggleView, {
+                                            row: 0,
+                                            column: 4
+                                        });
                                         var font1 = qx.bom.Font.fromString('bold').set({
                                             size: 14
                                         });
@@ -935,7 +954,8 @@ codes by NetquiK
                                         this.mcvPopupX = pos.x;
                                         this.mcvPopupY = pos.y;
                                         this.mcvPopup.open();
-                                        this.mcvPopup.minimize();
+                                        // MOD minimize view at start by Netquik
+                                        this.toggleview();
                                     }
                                     var size = qx.core.Init.getApplication().getRoot().getBounds();
                                     this.mcvPopup.moveTo(size.width - this.mcvPopupX, size.height - this.mcvPopupY);
@@ -3067,11 +3087,11 @@ codes by NetquiK
                                                 var Mod = (ModOj.TotalValue + ModOj.NewLvlDelta) / ClientLib.Data.MainData.GetInstance().get_Time().get_StepsPerHour() ;
                                                 resbuilding["GainPerHour"] += (city_buildingdetailview.OwnProdModifiers.d[ModifierType].NewLvlDelta / Mod);
                                                 } else { */
-                                                    var prevProdH = (3600/(ModOj.TotalValue)) * city_buildingdetailview.OwnProdModifiers.d[ModifierType].TotalValue;
-                                                    var newProdH = (3600/(ModOj.TotalValue + ModOj.NewLvlDelta)) * (city_buildingdetailview.OwnProdModifiers.d[ModifierType].NewLvlDelta + city_buildingdetailview.OwnProdModifiers.d[ModifierType].TotalValue);
-                                                    resbuilding["GainPerHour"] += newProdH - prevProdH; 
+                                                var prevProdH = (3600 / (ModOj.TotalValue)) * city_buildingdetailview.OwnProdModifiers.d[ModifierType].TotalValue;
+                                                var newProdH = (3600 / (ModOj.TotalValue + ModOj.NewLvlDelta)) * (city_buildingdetailview.OwnProdModifiers.d[ModifierType].NewLvlDelta + city_buildingdetailview.OwnProdModifiers.d[ModifierType].TotalValue);
+                                                resbuilding["GainPerHour"] += newProdH - prevProdH;
                                                 /* } */
-                                                
+
                                                 break;
                                             }
                                             case eModProduction: {
