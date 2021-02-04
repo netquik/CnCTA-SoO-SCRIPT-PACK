@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.6 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.4.7f
+// @version     0.1.4.8 RC1
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -45,7 +45,7 @@ codes by NetquiK
 - mod for MCV
 - Close Chat at start option
 - Gain per Hour fix for buildings that have packages <12 level
-- new toggle view function and button
+- new toggle view function and button with save state
 ----------------
 */
 
@@ -823,11 +823,12 @@ codes by NetquiK
                             mcvCreditProcentageLabel: null,
                             mcvResearchTimerLabel: null,
                             // MOD new toggle view function by Netquik
-                            toggleview: function () {
+                            toggleview: function (x) {
+                                "init" == x && (undefined === MaelstromTools.LocalStorage.get("mcvPopupExtended") ? this.extMinimized = !1 : this.extMinimized = !MaelstromTools.LocalStorage.get("mcvPopupExtended"));
                                 if (this.extMinimized) {
                                     this.extMinimized = false;
-                                    this.mcvToggleView.setIcon('FactionUI/icons/icon_tracker_minimise.png');
-                                    this.mcvPopup.remove(this.mcvplace);
+                                    this.mcvToggleView.setIcon('FactionUI/icons/icon_tracker_minimise.png'); -
+                                    1 != this.mcvPopup.indexOf(this.mcvplace) && this.mcvPopup.remove(this.mcvplace);
                                     for (var k in this.extItems) this.mcvPopup.add(this.extItems[k]);
                                 } else {
                                     this.extMinimized = true;
@@ -835,6 +836,7 @@ codes by NetquiK
                                     this.mcvPopup.removeAll();
                                     this.mcvPopup.add(this.mcvplace);
                                 }
+                                MaelstromTools.LocalStorage.set("mcvPopupExtended", this.extMinimized);
                                 this.mcvPopup.restore(); //trick
 
                             },
@@ -866,7 +868,8 @@ codes by NetquiK
                                             resizable: false,
                                             allowMaximize: false,
                                             allowMinimize: false,
-                                            allowClose: false
+                                            allowClose: false,
+                                            allowGrowX: true
                                         });
                                         this.mcvPopup.setLayout(new qx.ui.layout.VBox());
                                         this.mcvPopup.addListener("move", function (e) {
@@ -882,7 +885,7 @@ codes by NetquiK
                                             });
                                         });
                                         // MOD new toggle view button by Netquik
-                                        this.mcvToggleView = new webfrontend.ui.SoundButton(null, "FactionUI/icons/icon_mainui_addpoints_plus.png").set({
+                                        this.mcvToggleView = new webfrontend.ui.SoundButton(null, "FactionUI/icons/icon_tracker_minimise.png").set({
                                             appearance: "button-addpoints",
                                             width: 15,
                                             height: 15,
@@ -910,7 +913,7 @@ codes by NetquiK
                                         this.mcvTimerLabel = new qx.ui.basic.Label().set({
                                             font: font1,
                                             textColor: 'cyan',
-                                            width: 195,
+                                            //width: 200,
                                             allowGrowX: true,
                                             textAlign: 'center',
                                             marginBottom: 2,
@@ -919,7 +922,7 @@ codes by NetquiK
                                         this.mcvCreditProcentageLabel = new qx.ui.basic.Label().set({
                                             font: font2,
                                             textColor: 'yellow',
-                                            width: 195,
+                                            //width: 200,
                                             allowGrowX: true,
                                             textAlign: 'center',
                                             marginBottom: 2,
@@ -928,14 +931,14 @@ codes by NetquiK
                                         this.mcvResearchTimerLabel = new qx.ui.basic.Label().set({
                                             font: font3,
                                             textColor: 'yellow',
-                                            width: 195,
+                                            //width: 200,
                                             allowGrowX: true,
                                             textAlign: 'center',
                                             marginBottom: 2,
                                             rich: true
                                         });
                                         this.mcvplace = new qx.ui.basic.Label().set({
-                                            width: 100,
+                                            //width: 105,
                                             font: font4,
                                             textColor: 'yellow',
                                             textAlign: 'center',
@@ -945,7 +948,6 @@ codes by NetquiK
                                         this.mcvPopup.add(this.mcvTimerLabel);
                                         this.mcvPopup.add(this.mcvCreditProcentageLabel);
                                         this.mcvPopup.add(this.mcvResearchTimerLabel);
-                                        this.mcvPopup.setToolTipText('Minimize to Toggle View');
                                         var serverBar = qx.core.Init.getApplication().getServerBar().getBounds();
                                         var pos = MaelstromTools.LocalStorage.get("mcvPopup", {
                                             x: serverBar.width + 30,
@@ -955,7 +957,7 @@ codes by NetquiK
                                         this.mcvPopupY = pos.y;
                                         this.mcvPopup.open();
                                         // MOD minimize view at start by Netquik
-                                        this.toggleview();
+                                        this.toggleview('init');
                                     }
                                     var size = qx.core.Init.getApplication().getRoot().getBounds();
                                     this.mcvPopup.moveTo(size.width - this.mcvPopupX, size.height - this.mcvPopupY);
@@ -1000,7 +1002,7 @@ codes by NetquiK
                                         this.mcvplace.setValue("<span style='color: #92ff7f;'>C$ (+" + MaelstromTools.Wrapper.FormatNumbersCompact(Math.abs(creditsNeeded - ZXZ)) + ")</span>");
                                     }
                                     if (PercentageOfCredits < 100) {
-                                        var nogrowing = "NoGrow";
+                                        var nogrowing = "NoGrow!";
                                         this.mcvCreditProcentageLabel.setValue("<span style='color: #ff8a7f;'>CREDIT</span> -  <span style='color: #ff8f00;'>" + MaelstromTools.Wrapper.FormatNumbersCompact(creditsNeeded - ZXZ) + "</span> / <span style='font-size:12px;'>" + MaelstromTools.Wrapper.FormatNumbersCompact(creditsNeeded) + " @ " + (PercentageOfCredits).toFixed(1) + "%</span>");
                                         this.mcvplace.setValue("<span style='color: #ff8a7f;'>T$ - " + (doGrow ? creditTimeLeftInDays : nogrowing) + "</span>");
                                     }
@@ -1018,6 +1020,7 @@ codes by NetquiK
                                     this.extItems.push(this.mcvResearchTimerLabel);
                                     if (!this.mcvPopup.isVisible()) {
                                         this.mcvPopup.open();
+
                                     }
                                 } catch (e) {
                                     console.log("calculateCostsForNextMCV", e);
