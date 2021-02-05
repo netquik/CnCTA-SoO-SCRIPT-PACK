@@ -17,10 +17,11 @@ codes by NetquiK
 - MovableBox Save Position
 - New Top Bar Button
 - Native Unit Enabling
-- SkipVictory
+- Skip Victory
 - 20.2 FIX + MAP MOVE
 - MovableBox in Battleground
-- Some Sim Presets Fixes++
+- Some Sim Presets Fixes+
+- Fix for Sim View with Autorepair
 ----------------
 */
 
@@ -1345,8 +1346,8 @@ codes by NetquiK
                         //Info
                         this.Menu.add(new qx.ui.menu.Separator());
                         var infoMenu = new qx.ui.menu.Menu(),
-                            infoHomepage = new qx.ui.menu.Button(this.tr("Homepage"), "https://github.global.ssl.fastly.net/favicon.ico", null),
-                            infoFacebook = new qx.ui.menu.Button(this.tr("Facebook"), "https://github.global.ssl.fastly.net/favicon.ico", null);
+                            infoHomepage = new qx.ui.menu.Button(this.tr("Homepage"), "", null),
+                            infoFacebook = new qx.ui.menu.Button(this.tr("Facebook"), "", null);
                         infoHomepage.addListener("execute", function () {
                             qx.core.Init.getApplication().showExternal("http://eistee82.github.io/ta_simv2");
                         }, this);
