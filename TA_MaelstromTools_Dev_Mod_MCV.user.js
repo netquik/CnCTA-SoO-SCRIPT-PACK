@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.6 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.4.8 RC1
+// @version     0.1.4.8 RC2
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -853,7 +853,8 @@ codes by NetquiK
                                     var cj = ClientLib.Base.Tech.GetTechIdFromTechNameAndFaction(ClientLib.Base.ETechName.Research_BaseFound, cw);
                                     var cr = player.get_PlayerResearch();
                                     var cd = cr.GetResearchItemFomMdbId(cj);
-                                    if (cd == null) {
+                                    var nextLevelInfo = cd.get_NextLevelInfo_Obj(); //MOD new check for all bases done
+                                    if (nextLevelInfo == null) {
                                         if (this.mcvPopup) {
                                             this.mcvPopup.close();
                                         }
@@ -961,7 +962,7 @@ codes by NetquiK
                                     }
                                     var size = qx.core.Init.getApplication().getRoot().getBounds();
                                     this.mcvPopup.moveTo(size.width - this.mcvPopupX, size.height - this.mcvPopupY);
-                                    var nextLevelInfo = cd.get_NextLevelInfo_Obj();
+                                    //var nextLevelInfo = cd.get_NextLevelInfo_Obj();
                                     var resourcesNeeded = [];
                                     for (var i in nextLevelInfo.rr) {
                                         if (nextLevelInfo.rr[i].t > 0) {
