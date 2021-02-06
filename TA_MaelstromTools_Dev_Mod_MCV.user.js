@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.6 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.4.8 RC4
+// @version     0.1.4.8 RC5
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -42,7 +42,7 @@ var cd=cr.GetResearchItemFomMdbId(cj);
 /* 
 codes by NetquiK
 ----------------
-- mod for MCV
+- mod for MCV + style
 - Close Chat at start option
 - Gain per Hour fix for buildings that have packages <12 level
 - new MCV toggle view function and button with save state
@@ -864,7 +864,8 @@ codes by NetquiK
                                     }
                                     if (!this.mcvPopup) {
                                         this.mcvPopup = new qx.ui.window.Window("").set({
-                                            contentPadding: 3,
+                                            contentPadding: 2,
+                                            paddingBottom: 0,
                                             showMinimize: false,
                                             showMaximize: false,
                                             showClose: false,
@@ -901,52 +902,36 @@ codes by NetquiK
                                             row: 0,
                                             column: 4
                                         });
-                                        var font1 = qx.bom.Font.fromString('bold').set({
-                                            size: 14
-                                        });
-                                        var font2 = qx.bom.Font.fromString('bold').set({
-                                            size: 14
-                                        });
-                                        var font3 = qx.bom.Font.fromString('bold').set({
-                                            size: 14
-                                        });
-                                        var font4 = qx.bom.Font.fromString('bold').set({
-                                            size: 14
-                                        });
                                         this.mcvTimerLabel = new qx.ui.basic.Label().set({
-                                            font: font1,
+                                            font: 'font_size_14_bold',
                                             textColor: 'cyan',
                                             //width: 200,
                                             allowGrowX: true,
                                             textAlign: 'center',
-                                            marginBottom: 2,
                                             rich: true
                                         });
                                         this.mcvCreditProcentageLabel = new qx.ui.basic.Label().set({
-                                            font: font2,
+                                            font: 'font_size_14_bold',
                                             textColor: 'yellow',
                                             //width: 200,
                                             allowGrowX: true,
                                             textAlign: 'center',
-                                            marginBottom: 2,
                                             rich: true
                                         });
                                         this.mcvResearchTimerLabel = new qx.ui.basic.Label().set({
-                                            font: font3,
+                                            font: 'font_size_14_bold',
                                             textColor: 'yellow',
                                             //width: 200,
                                             allowGrowX: true,
                                             textAlign: 'center',
-                                            marginBottom: 2,
                                             rich: true
                                         });
                                         this.mcvplace = new qx.ui.basic.Label().set({
                                             width: 105,
-                                            font: font4,
+                                            font: 'font_size_14_bold',
                                             textColor: 'yellow',
                                             textAlign: 'center',
                                             rich: true,
-                                            marginBottom: 2
                                         });
                                         this.mcvPopup.add(this.mcvTimerLabel);
                                         this.mcvPopup.add(this.mcvCreditProcentageLabel);
