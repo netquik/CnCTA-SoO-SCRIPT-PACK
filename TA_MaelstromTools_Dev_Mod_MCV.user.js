@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.6 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.4.8 RC5
+// @version     0.1.4.8 RC6
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -927,7 +927,7 @@ codes by NetquiK
                                             rich: true
                                         });
                                         this.mcvplace = new qx.ui.basic.Label().set({
-                                            width: 105,
+                                            minWidth: 105,
                                             font: 'font_size_14_bold',
                                             textColor: 'yellow',
                                             textAlign: 'center',
