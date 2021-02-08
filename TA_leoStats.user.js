@@ -1,6 +1,6 @@
 ﻿// ==UserScript==
 // @name        leoStats
-// @version     2020.02.02.2
+// @version     2020.09.03
 // @author      leo7044 (https://github.com/leo7044)
 // @homepage    https://cnc.indyserver.info/
 // @downloadURL https://cnc.indyserver.info/js/leostats.user.js
@@ -27,7 +27,7 @@
             function setButtons()
             {
                 var linkToRoot = "https://cnc.indyserver.info/";
-                var scriptVersionLocal = '2020.03.07';
+                var scriptVersionLocal = '2020.09.03';
                 qx.Class.define('leoStats',
                 {
                     type: 'singleton',
@@ -153,15 +153,25 @@
                             this.GuiResourcesVBox.setThemedBackgroundColor("#eef");
                             this.GuiResourcesPage.add(this.GuiResourcesVBox);
 
-                            // Tab 8: Sell Base
-                            this.GuiSellBasePage = new qx.ui.tabview.Page("Sell Base");
-                            this.GuiSellBasePage.setLayout(new qx.ui.layout.Grow());
-                            this.GuiTab.add(this.GuiSellBasePage);
-                            this.GuiSellBaseVBox = new qx.ui.container.Composite();
-                            this.GuiSellBaseVBox.setLayout(new qx.ui.layout.VBox(5));
-                            this.GuiSellBaseVBox.setThemedPadding(10);
-                            this.GuiSellBaseVBox.setThemedBackgroundColor("#eef");
-                            this.GuiSellBasePage.add(this.GuiSellBaseVBox);
+                            // Tab 8: Sell Bases
+                            this.GuiSellBasesPage = new qx.ui.tabview.Page("Sell bases");
+                            this.GuiSellBasesPage.setLayout(new qx.ui.layout.Grow());
+                            this.GuiTab.add(this.GuiSellBasesPage);
+                            this.GuiSellBasesVBox = new qx.ui.container.Composite();
+                            this.GuiSellBasesVBox.setLayout(new qx.ui.layout.VBox(5));
+                            this.GuiSellBasesVBox.setThemedPadding(10);
+                            this.GuiSellBasesVBox.setThemedBackgroundColor("#eef");
+                            this.GuiSellBasesPage.add(this.GuiSellBasesVBox);
+
+                            // Tab 9: Sell special Base
+                            this.GuiSellSpecialBasePage = new qx.ui.tabview.Page("Sell special base");
+                            this.GuiSellSpecialBasePage.setLayout(new qx.ui.layout.Grow());
+                            this.GuiTab.add(this.GuiSellSpecialBasePage);
+                            this.GuiSellSpecialBaseVBox = new qx.ui.container.Composite();
+                            this.GuiSellSpecialBaseVBox.setLayout(new qx.ui.layout.VBox(5));
+                            this.GuiSellSpecialBaseVBox.setThemedPadding(10);
+                            this.GuiSellSpecialBaseVBox.setThemedBackgroundColor("#eef");
+                            this.GuiSellSpecialBasePage.add(this.GuiSellSpecialBaseVBox);
 
                             // Button
                             this.GuiButtonLeoStats.addListener('click', function()
@@ -174,7 +184,8 @@
                                 this.GuiPoisVBox.removeAll();
                                 this.GuiPoiDataVBox.removeAll();
                                 this.GuiResourcesVBox.removeAll();
-                                this.GuiSellBaseVBox.removeAll();
+                                this.GuiSellBasesVBox.removeAll();
+                                this.GuiSellSpecialBaseVBox.removeAll();
                                 this.getCurrentStats();
                                 this.showGui();
                                 this.GuiFenster.show();
@@ -559,7 +570,7 @@
                             HeaderTableResources.add(HeadLineOwnResources);
                             this.GuiResourcesVBox.add(HeaderTableResources);
 
-                            // Tab 8: Sell Base
+                            // Tab 8: Sell Bases
                             var HeaderTableResources = new qx.ui.container.Composite(new qx.ui.layout.HBox(50).set({alignX: "center"}));
                             var HeadLineSellResources = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             HeadLineSellResources.add(new qx.ui.basic.Label('<big><u><b>Resources through sell</b></u></big>').set({rich: true}));
@@ -568,14 +579,14 @@
                             var TableSellColBaseName = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             TableSellColBaseName.add(new qx.ui.basic.Label('').set({rich: true}));
                             var TableSellResources = new qx.ui.container.Composite(new qx.ui.layout.HBox(5).set({alignX: "center"}));
-                            var TextSellBaseName = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
-                            TextSellBaseName.add(new qx.ui.basic.Label('<b>BaseName</b>').set({rich: true}));
+                            var TextSellBasesName = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
+                            TextSellBasesName.add(new qx.ui.basic.Label('<b>BaseName</b>').set({rich: true}));
                             for (var i in this.ObjectData.bases)
                             {
-                                TextSellBaseName.add(new qx.ui.basic.Label(this.ObjectData.bases[i].BaseName).set({rich: true, alignX: "right"}));
+                                TextSellBasesName.add(new qx.ui.basic.Label(this.ObjectData.bases[i].BaseName).set({rich: true, alignX: "right"}));
                             }
-                            TextSellBaseName.add(new qx.ui.basic.Label('<b>Overall</b>').set({rich: true}));
-                            TableSellResources.add(TextSellBaseName);
+                            TextSellBasesName.add(new qx.ui.basic.Label('<b>Overall</b>').set({rich: true}));
+                            TableSellResources.add(TextSellBasesName);
                             TableSellColBaseName.add(TableSellResources);
                             TableSellRow.add(TableSellColBaseName);
                             // Column Buildings
@@ -664,7 +675,47 @@
                             // End Columns
                             HeadLineSellResources.add(TableSellRow);
                             HeaderTableResources.add(HeadLineSellResources);
-                            this.GuiSellBaseVBox.add(HeaderTableResources);
+                            this.GuiSellBasesVBox.add(HeaderTableResources);
+
+                            // Tab 9: Sell special bases
+                            var HeaderTableSellSpecialBase = new qx.ui.container.Composite(new qx.ui.layout.HBox(50).set({alignX: "center"}));                            
+                            var HeadLineSellSpecialBase = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
+                            HeadLineSellSpecialBase.add(new qx.ui.basic.Label('<big><u><b>Sell special base</b></u></big>').set({rich: true}));
+                            HeadLineSellSpecialBase.add(new qx.ui.basic.Label('').set({rich: true}));
+                            var TableSellBase = new qx.ui.container.Composite(new qx.ui.layout.HBox(10).set({alignX: "center"}));
+                            var TextBuildingName = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
+                            var TextBuildingTiberium = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
+                            var TextBuildingPower = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
+                            var selectBoxBases = new qx.ui.form.SelectBox();
+                            var self = this;
+                            selectBoxBases.addListener("changeSelection", function(e)
+                            {
+                                TextBuildingName.removeAll();
+                                TextBuildingName.add(new qx.ui.basic.Label('<b>BuildingName</b>').set({rich: true}));
+                                TextBuildingTiberium.removeAll();
+                                TextBuildingTiberium.add(new qx.ui.basic.Label('<b>Tiberium</b>').set({rich: true}));
+                                TextBuildingPower.removeAll();
+                                TextBuildingPower.add(new qx.ui.basic.Label('<b>Power</b>').set({rich: true}));
+                                var ObjectBuildings = self.selectSpecialBaseForSell(e.getData()[0].getModel());
+                                for (var key in ObjectBuildings)
+                                {
+                                    TextBuildingName.add(new qx.ui.basic.Label(key).set({rich: true, alignX: 'left'}));
+                                    TextBuildingTiberium.add(new qx.ui.basic.Label(ObjectBuildings[key][0].toLocaleString()).set({rich: true, alignX: 'right'}));
+                                    TextBuildingPower.add(new qx.ui.basic.Label(ObjectBuildings[key][1].toLocaleString()).set({rich: true, alignX: 'right'}));
+                                }
+                            }, this);
+                            for (var i in this.ObjectData.bases)
+                            {
+                                selectBoxBases.add(new qx.ui.form.ListItem(this.ObjectData.bases[i].BaseName.toLocaleString(), null, this.ObjectData.bases[i].BaseId));
+                            }
+                            TableSellBase.add(TextBuildingName);
+                            TableSellBase.add(TextBuildingTiberium);
+                            TableSellBase.add(TextBuildingPower);
+                            HeadLineSellSpecialBase.add(selectBoxBases);
+                            HeadLineSellSpecialBase.add(new qx.ui.basic.Label('').set({rich: true}));
+                            HeadLineSellSpecialBase.add(TableSellBase);
+                            HeaderTableSellSpecialBase.add(HeadLineSellSpecialBase);
+                            this.GuiSellSpecialBaseVBox.add(HeaderTableSellSpecialBase);
                         },
                         createTabPlayer: function()
                         {
@@ -979,7 +1030,7 @@
                                 {
                                     TextScore.add(new qx.ui.basic.Label(poiRankScore[i].s.toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
                                     var indexArrayScorePoints = 1;
-                                    while (poiRankScore[i].s > ArrayScorePoints[indexArrayScorePoints])
+                                    while (poiRankScore[i].s >= ArrayScorePoints[indexArrayScorePoints])
                                     {
                                         indexArrayScorePoints++;
                                     }
@@ -1017,7 +1068,7 @@
                                     {
                                         TextPoiLevelDiffPrev.add(new qx.ui.basic.Label('n.a.').set({rich: true, alignX: 'right', height: 18}));
                                     }
-                                    if (indexArrayPOILevelPointsNext + 12 < maxPoiLevel)
+                                    if (indexArrayPOILevelPointsNext + 12 <= maxPoiLevel)
                                     {
                                         TextPoiLevelDiffNext.add(new qx.ui.basic.Label((indexArrayPOILevelPointsNext + 12).toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
                                     }
@@ -1112,6 +1163,26 @@
                             this.GuiAllianceVBox.removeAll();
                             this.GuiAllianceVBox.add(HeaderTableAlliance);
                         },
+                        selectSpecialBaseForSell: function(_BaseId)
+                        {
+                            var ArrayBuildingIds = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[_BaseId].get_Buildings().d;
+                            var ObjectBuildings = {};
+                            for (var key in ArrayBuildingIds)
+                            {
+                                var buildingName = ArrayBuildingIds[key].get_TechGameData_Obj().dn;
+                                if (buildingName != 'Construction Yard')
+                                {
+                                    var ArrayRes = this.calculateValueOfBuilding(_BaseId, key);
+                                    if (!ObjectBuildings[buildingName])
+                                    {
+                                        ObjectBuildings[buildingName] = [0, 0];
+                                    }
+                                    ObjectBuildings[buildingName][0] += ArrayRes[0];
+                                    ObjectBuildings[buildingName][1] += ArrayRes[1];
+                                }
+                            }
+                            return ObjectBuildings;
+                        },
                         calculateValueOfBase: function(_BaseId)
                         {
                             var valueTiberium = 0;
@@ -1119,7 +1190,7 @@
                             var ArrayBuildingIds = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[_BaseId].get_Buildings().d;
                             for (var key in ArrayBuildingIds)
                             {
-                                if (ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[_BaseId].get_Buildings().d[key].get_TechGameData_Obj().dn != 'Construction Yard')
+                                if (ArrayBuildingIds[key].get_TechGameData_Obj().dn != 'Construction Yard')
                                 {
                                     var ArrayRes = this.calculateValueOfBuilding(_BaseId, key);
                                     valueTiberium += ArrayRes[0];
@@ -1911,7 +1982,7 @@
                                     var PlayerEventRank = ClientLib.Data.MainData.GetInstance().get_Player().get_EventRank();
                                     var PlayerVeteranPoints = ClientLib.Data.MainData.GetInstance().get_Player().get_EventScore();
                                     var ResearchPoints = ClientLib.Data.MainData.GetInstance().get_Player().get_ResearchPoints();
-                                    var Credits = ClientLib.Data.MainData.GetInstance().get_Player().get_Credits().Base;
+                                    var Credits = ClientLib.Data.MainData.GetInstance().get_Player().GetCreditsCount();
                                     var Funds = ClientLib.Data.MainData.GetInstance().get_Inventory().get_PlayerFunds();
                                     var LegacyPoints = ClientLib.Data.MainData.GetInstance().get_Player().get_LegacyPoints();
                                     var CommandPointsMaxStorage = ClientLib.Data.MainData.GetInstance().get_Player().GetCommandPointMaxStorage();
@@ -2518,14 +2589,14 @@
                         getArrayPrototypeGameObject: function()
                         {
                             var bases = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
+                            var goalXType2 = 0;
+                            var goalYType2 = 0;
+                            var goalXType3 = 0;
+                            var goalYType3 = 0;
                             for (var key in bases)
                             {
                                 var baseX = bases[key].get_X();
                                 var baseY = bases[key].get_Y();
-                                var goalXType2 = 0;
-                                var goalYType2 = 0;
-                                var goalXType3 = 0;
-                                var goalYType3 = 0;
                                 for (var x = baseX - 10; x < baseX + 10; x++)
                                 {
                                     for (var y = baseY - 10; y < baseY + 10; y++)
