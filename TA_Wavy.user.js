@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name           Tiberium Alliances Wavy
-// @version        0.5.5
+// @version        0.5.6
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
+// @contributor    NetquiK (https://github.com/netquik) (Distance FIX)
 // @description    Displays details about forgotten attack wave zones.
 // @include        http*://*.alliances.commandandconquer.com/*/index.aspx*
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Wavy.user.js
 // ==/UserScript==
 'use strict';
 
@@ -20,7 +22,7 @@
 				type: 'singleton',
 				extend: qx.core.Object,
 				statics: {
-					ForgottenAttackDistance: 10
+					ForgottenAttackDistance: ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance()
 				},
 				members: {
 					regionCityInfoContainer: null,
