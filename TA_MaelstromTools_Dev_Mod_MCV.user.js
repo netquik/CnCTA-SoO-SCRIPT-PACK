@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name        MaelstromTools Dev (Modv1.6 for MCV)
+// @name        MaelstromTools Dev (Modv1.7 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.4.8 RC6
+// @version     0.1.4.9 Beta1
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
-// @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option
+// @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option (see first comments for changelog)
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_MaelstromTools_Dev_Mod_MCV.user.js
@@ -3037,9 +3037,15 @@ codes by NetquiK
                                 } else { //old
                                     for (var i = 0; i < buildings.length; i++) objbuildings.push(buildings[i]);
                                 }
+                                var maxlevelworld = ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap();
                                 for (var i = 0; i < objbuildings.length; i++) {
                                     var city_building = objbuildings[i];
                                     // TODO: check for destroyed building
+
+                                    //  MOD Fix for maxlevelworld upggrade
+                                    if ((city_building.get_CurrentLevel() + 1) > maxlevelworld) {
+                                        continue;
+                                    }
                                     var iTechType = city_building.get_TechName();
                                     var bSkip = true;
                                     for (var iTypeKey in arTechtypes) {
