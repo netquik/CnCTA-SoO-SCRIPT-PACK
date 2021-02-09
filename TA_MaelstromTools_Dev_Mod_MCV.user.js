@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.7 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.4.9 Beta1
+// @version     0.1.4.9 Beta2
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option (see first comments for changelog)
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -46,6 +46,7 @@ codes by NetquiK
 - Close Chat at start option
 - Gain per Hour fix for buildings that have packages <12 level
 - new MCV toggle view function and button with save state
+- Fix for maxlevelworld upgrade in priority list
 ----------------
 */
 
@@ -853,6 +854,7 @@ codes by NetquiK
                                     var cj = ClientLib.Base.Tech.GetTechIdFromTechNameAndFaction(ClientLib.Base.ETechName.Research_BaseFound, cw);
                                     var cr = player.get_PlayerResearch();
                                     var cd = cr.GetResearchItemFomMdbId(cj);
+                                    if (cd == null) return; //MOD fix for initial runtimer
                                     var nextLevelInfo = cd.get_NextLevelInfo_Obj(); //MOD new check for all bases done
                                     if (nextLevelInfo == null) {
                                         //MaelstromTools.LocalStorage.set('showCostsForNextMCV', false);
@@ -3041,8 +3043,7 @@ codes by NetquiK
                                 for (var i = 0; i < objbuildings.length; i++) {
                                     var city_building = objbuildings[i];
                                     // TODO: check for destroyed building
-
-                                    //  MOD Fix for maxlevelworld upggrade
+                                    //  MOD Fix for maxlevelworld upgrade by NetquiK
                                     if ((city_building.get_CurrentLevel() + 1) > maxlevelworld) {
                                         continue;
                                     }
