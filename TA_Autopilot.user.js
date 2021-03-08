@@ -4,15 +4,25 @@
 // @include         http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include			http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @description		Autoupgrade deiner Basen, script based on FlunikTools - ServerPatch-FIX 2017
-// @version			1.2.3b
+// @version			1.2.5
 // @authors			many others and Chillchef
 // @grant			none
 // @icon			http://eaassets-a.akamaihd.net/cncalliancesweb/static/2.1/theme/cca-home-redux-theme/images/global/logo.png
-// @contributor     NetquiK (https://github.com/netquik) - ENGLISH VERSION - ADDED LANG SYSTEM - REMOVED SPECIAL CHARS
+// @contributor     NetquiK (https://github.com/netquik) - (see first comments for changelog)
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Autopilot.user.js
 // ==/UserScript==
 
-// ==/UserScript==
+/* 
+codes by NetquiK
+----------------
+- ENGLISH VERSION
+- ADDED LANG SYSTEM
+- REMOVED SPECIAL CHARS
+- FIX POPUPS MODE
+- FIX BASENAMES
+- WORLDMAXLEVEL FIX
+----------------
+*/
 
 (function () {
     var FlunikTools_main = function () {
@@ -91,26 +101,28 @@
 
                         initialize: function () {
                             var _this = window.FlunikTools.Main.getInstance();
+                            _this.iconOFF = "data:image/png;base64,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",
+                            _this.iconON = "data:image/png;base64,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",
 
                             locale = ClientLib.Config.Main.GetInstance().GetConfig(ClientLib.Config.Main.CONFIG_LANGUAGE);
                             languages = ["tr_TR", "de_DE", "pt_PT", "it_IT", "nl_NL", "hu_HU", "fr_FR", "fi_FI", "ro_RO", "es_ES"]; //en is default
                             translations = {
-                                "Building OFF": ["", "Gebaude AUS", "", "", "", "", "", "", "", ""],
-                                "Defense OFF": ["", "Verteidigung AUS", "", "", "", "", "", "", "", ""],
-                                "Offense OFF": ["", "Angriff AUS", "", "", "", "", "", "", "", ""],
-                                "World: NEW": ["", "Welt: NEU", "", "", "", "", "", "", "", ""],
-                                "Only Res OFF": ["", "Nur Ressis AUS", "", "", "", "", "", "", "", ""],
-                                "Allows to only upgrade resources, main buildings such as building yard, Vz, Ve etc. are omitted": ["", "Ermoglicht, nur Resourcen upzugraden,Hauptgebaude wie Bauhof, Vz, Ve usw werden ausgelassen", "", "", "", "", "", "", "", ""],
-                                "Only upgrade buildings": ["", "nur Gebaude upgraden", "", "", "", "", "", "", "", ""],
-                                "Only upgrade defense": ["", "nur Verteidigung upgraden", "", "", "", "", "", "", "", ""],
-                                "Only upgrade offense": ["", "nur Offensive upgraden", "", "", "", "", "", "", "", ""],
-                                "New = collector-heavy, Oold = power plant-heavy": ["", "Neu = Sammler-lastig, Alt = Kraftwerks-lastig", "", "", "", "", "", "", "", ""]
+                                'Building OFF': ['', 'Gebaude AUS', '', '', '', '', '', '', '', ''],
+                                'Defense OFF': ['', 'Verteidigung AUS', '', '', '', '', '', '', '', ''],
+                                'Offense OFF': ['', 'Angriff AUS', '', '', '', '', '', '', '', ''],
+                                'World NEW': ['', 'Welt NEU', '', '', '', '', '', '', '', ''],
+                                'Only Res OFF': ['', 'Nur Ressis AUS', '', '', '', '', '', '', '', ''],
+                                'Allows to only upgrade resources, main buildings such as building yard, Vz, Ve etc. are omitted': ['', 'Ermoglicht, nur Resourcen upzugraden,Hauptgebaude wie Bauhof, Vz, Ve usw werden ausgelassen', '', '', '', '', '', '', '', ''],
+                                'Only upgrade buildings': ['', 'nur Gebaude upgraden', '', '', '', '', '', '', '', ''],
+                                'Only upgrade defense': ['', 'nur Verteidigung upgraden', '', '', '', '', '', '', '', ''],
+                                'Only upgrade offense': ['', 'nur Offensive upgraden', '', '', '', '', '', '', '', ''],
+                                'New = collector-heavy, Oold = power plant-heavy': ['', 'Neu = Sammler-lastig, Alt = Kraftwerks-lastig', '', '', '', '', '', '', '', '']
                             };
                             lang = function (text) {
                                 try {
                                     if (languages.indexOf(locale) > -1) {
                                         var translated = translations[text][languages.indexOf(locale)];
-                                        if (translated !== "") {
+                                        if (translated !== '') {
                                             return translated;
                                         } else {
                                             return text;
@@ -120,7 +132,7 @@
                                     }
                                 } catch (e) {
                                     console.log(e);
-                                    //console.log("Text is undefined: "+text);
+                                    //console.log('Text is undefined: "+text);
                                     return text;
                                 }
                             }
@@ -138,7 +150,7 @@
                             _this.upgradeAuswahl = new Array();
                             _this.meldungArr = new Array();
 
-                            BuildingsButton = new qx.ui.form.Button(lang("Building OFF"), null).set({
+                            _this.BuildingsButton = new qx.ui.form.Button(lang("Building OFF"), null).set({
                                 toolTipText: lang("Only upgrade buildings"),
                                 width: 110,
                                 height: 30,
@@ -149,7 +161,7 @@
 
                             });
 
-                            DefenseButton = new qx.ui.form.Button(lang("Defense OFF"), null).set({
+                             _this.DefenseButton = new qx.ui.form.Button(lang("Defense OFF"), null).set({
                                 toolTipText: lang("Only upgrade defense"),
                                 width: 110,
                                 height: 30,
@@ -160,7 +172,7 @@
 
                             });
 
-                            OffenseButton = new qx.ui.form.Button(lang("Offense OFF"), null).set({
+                             _this.OffenseButton = new qx.ui.form.Button(lang("Offense OFF"), null).set({
                                 toolTipText: lang("Only upgrade offense"),
                                 width: 110,
                                 height: 30,
@@ -170,7 +182,7 @@
                                 center: true,
 
                             });
-                            CommandBuildingChoice = new qx.ui.form.Button(lang("Only Res OFF"), null).set({
+                             _this.CommandBuildingChoice = new qx.ui.form.Button(lang("Only Res OFF"), null).set({
                                 toolTipText: lang("Allows to only upgrade resources, main buildings such as building yard, Vz, Ve etc. are omitted"),
                                 width: 110,
                                 height: 30,
@@ -180,7 +192,7 @@
                                 center: true,
 
                             });
-                            worldResBuildingChoice = new qx.ui.form.Button(lang("World: NEW"), null).set({
+                             _this.worldResBuildingChoice = new qx.ui.form.Button(lang("World NEW"), null).set({
                                 toolTipText: lang("New = collector-hungry, Old = power plant-hungry"),
                                 width: 110,
                                 height: 30,
@@ -200,7 +212,7 @@
                             //	center: true,
                             //});
 
-                            PowerBuildingChoice = new qx.ui.form.CheckBox("Power OFF");
+                             _this.PowerBuildingChoice = new qx.ui.form.CheckBox("Power OFF");
 
                             //HarvBuildingChoice = new qx.ui.form.Button("Tiberium AUS", null).set({
                             //	toolTipText: "P = 0 stoppt Tib-Sammler-upgrading, P = 1 erlaubt Tib-Sammler-upgrading",
@@ -212,7 +224,7 @@
                             //	center: true,
                             //});
 
-                            HarvBuildingChoice = new qx.ui.form.CheckBox("Tiberium OFF");
+                             _this.HarvBuildingChoice = new qx.ui.form.CheckBox("Tiberium OFF");
 
                             //Harv1BuildingChoice = new qx.ui.form.Button("Kristall AUS", null).set({
                             //	toolTipText: "P = 0 stoppt Kristallsammler-upgrading, P = 1 erlaubt Kristallsammler-upgrading",
@@ -224,9 +236,9 @@
                             //	center: true,
                             //});
 
-                            Harv1BuildingChoice = new qx.ui.form.CheckBox("Crystal OFF");
+                             _this.Harv1BuildingChoice = new qx.ui.form.CheckBox("Crystal OFF");
 
-                            //RefBuildingChoice = new qx.ui.form.Button("Raffis AUS", null).set({
+                            // _this.RefBuildingChoice = new qx.ui.form.Button("Raffis AUS", null).set({
                             //	toolTipText: "P = 0 stoppt Raffinerie-upgrades, P = 1 erlaubt Raffinerie-upgrades",
                             //	width: 90,
                             //	height: 30,
@@ -236,9 +248,9 @@
                             //	center: true,
                             //});
 
-                            RefBuildingChoice = new qx.ui.form.CheckBox("Refins OFF");
+                             _this.RefBuildingChoice = new qx.ui.form.CheckBox("Refins OFF");
 
-                            //SiloBuildingChoice = new qx.ui.form.Button("Silos AUS", null).set({
+                            // _this.SiloBuildingChoice = new qx.ui.form.Button("Silos AUS", null).set({
                             //	toolTipText: "P = 0 stoppt Silo-upgrades, P = 1 erlaubt Silo-upgrades",
                             //	width: 90,
                             //	height: 30,
@@ -248,9 +260,9 @@
                             //	center: true,
                             //});
 
-                            SiloBuildingChoice = new qx.ui.form.CheckBox("Silos OFF");
+                             _this.SiloBuildingChoice = new qx.ui.form.CheckBox("Silos OFF");
 
-                            //AccBuildingChoice = new qx.ui.form.Button("Akkus AUS", null).set({
+                            // _this.AccBuildingChoice = new qx.ui.form.Button("Akkus AUS", null).set({
                             //	toolTipText: "P = 0 stoppt Akku-upgrading, P = 1 erlaubt Akku-upgrading",
                             //	width: 90,
                             //	height: 30,
@@ -260,7 +272,7 @@
                             //	center: true,
                             //});
 
-                            AccBuildingChoice = new qx.ui.form.CheckBox("Accus OFF");
+                             _this.AccBuildingChoice = new qx.ui.form.CheckBox("Accus OFF");
 
 
 
@@ -297,7 +309,7 @@
                             });
 
 
-                            button = new qx.ui.form.Button("Auto-Upgrade: OFF", "https://goo.gl/Tsst0o").set({
+                            _this.button = new qx.ui.form.Button("Auto-Upgrade: OFF", _this.iconOFF).set({
                                 width: 40,
                                 height: 40,
                                 toolTipText: "No automatic upgrade active",
@@ -305,7 +317,7 @@
                                 center: true,
                             });
 
-                            button1 = new qx.ui.form.Button("Options").set({
+                            _this.button1 = new qx.ui.form.Button("Options").set({
                                 toolTipText: "Options",
                                 width: 90,
                                 height: 30,
@@ -315,17 +327,27 @@
                                 //button-standard-nod, button-playarea-mode-red-frame, button-notif-cat, button-detailview-small, button-playarea-mode-frame,
                                 center: true,
                             });
+                            _this.buttonMain = new qx.ui.form.Button("Main").set({
+                                toolTipText: "Open Autopilot Window",
+                                width: 90,
+                                height: 30,
+                                maxWidth: 90,
+                                maxHeight: 30,
+                                appearance: ("button-standard-nod"),
+                                //button-standard-nod, button-playarea-mode-red-frame, button-notif-cat, button-detailview-small, button-playarea-mode-frame,
+                                center: true,
+                            });
 
-                            popup = new qx.ui.popup.Popup(new qx.ui.layout.Grid(5)).set({
+                            _this.popup = new qx.ui.popup.Popup(new qx.ui.layout.Grid(5)).set({
                                 width: 120,
                                 height: 30,
                                 allowGrowY: false,
                                 allowGrowX: false,
                                 padding: 5,
-                                position: "top-right"
+                                position: "top-right",
                             });
 
-                            popup1 = new qx.ui.popup.Popup(new qx.ui.layout.Grid(5)).set({
+                            _this.popup1 = new qx.ui.popup.Popup(new qx.ui.layout.Grid(5)).set({
                                 width: 120,
                                 height: 30,
                                 allowGrowY: false,
@@ -341,7 +363,7 @@
                             _this.autoUpgradePopup.addListener("beforeClose", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 _this.timer = false;
-                                button.setEnabled(true);
+                                _this.button.setEnabled(true);
                             }, this);
 
                             _this.FehlerWindow.addListener("close", function (e) {
@@ -349,101 +371,101 @@
                                 if (window.FlunikTools.Main.getInstance().autoUpdateHandleBuilding != null) {
                                     _this.geb = 0;
                                     window.FlunikTools.Main.getInstance().BstopAutoUpdate();
-                                    BuildingsButton.setLabel("Building OFF");
-                                    BuildingsButton.setAppearance("button-text-small");
+                                    _this.BuildingsButton.setLabel("Building OFF");
+                                    _this.BuildingsButton.setAppearance("button-text-small");
                                 }
                                 if (window.FlunikTools.Main.getInstance().autoUpdateHandleDefense != null) {
                                     _this.def = 0;
                                     window.FlunikTools.Main.getInstance().DstopAutoUpdate();
-                                    DefenseButton.setLabel("Defense OFF");
-                                    DefenseButton.setAppearance("button-text-small");
+                                     _this.DefenseButton.setLabel("Defense OFF");
+                                     _this.DefenseButton.setAppearance("button-text-small");
                                 }
                                 if (window.FlunikTools.Main.getInstance().autoUpdateHandleOffense != null) {
                                     _this.off = 0;
                                     window.FlunikTools.Main.getInstance().OstopAutoUpdate();
-                                    OffenseButton.setLabel("Offense OFF");
-                                    OffenseButton.setAppearance("button-text-small");
+                                     _this.OffenseButton.setLabel("Offense OFF");
+                                     _this.OffenseButton.setAppearance("button-text-small");
                                 }
 
                             }, this);
 
-                            BuildingsButton.addListener("click", function (e) {
+                             _this.BuildingsButton.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (window.FlunikTools.Main.getInstance().autoUpdateHandleBuilding != null) {
                                     _this.geb = 0;
                                     window.FlunikTools.Main.getInstance().BstopAutoUpdate();
-                                    BuildingsButton.setLabel("Building OFF");
-                                    BuildingsButton.setAppearance("button-text-small");
+                                     _this.BuildingsButton.setLabel("Building OFF");
+                                     _this.BuildingsButton.setAppearance("button-text-small");
                                 } else {
                                     _this.geb = 1;
                                     window.FlunikTools.Main.getInstance().BuildingstartAutoUpdate();
-                                    BuildingsButton.setLabel("Building ON");
-                                    BuildingsButton.setAppearance("button-detailview-small");
+                                     _this.BuildingsButton.setLabel("Building ON");
+                                     _this.BuildingsButton.setAppearance("button-detailview-small");
                                 }
                             }, this);
 
-                            DefenseButton.addListener("click", function (e) {
+                             _this.DefenseButton.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (window.FlunikTools.Main.getInstance().autoUpdateHandleDefense != null) {
                                     _this.def = 0;
                                     window.FlunikTools.Main.getInstance().DstopAutoUpdate();
-                                    DefenseButton.setLabel("Defense OFF");
-                                    DefenseButton.setAppearance("button-text-small");
+                                     _this.DefenseButton.setLabel("Defense OFF");
+                                     _this.DefenseButton.setAppearance("button-text-small");
                                 } else {
                                     _this.def = 1;
                                     window.FlunikTools.Main.getInstance().DefensestartAutoUpdate();
-                                    DefenseButton.setLabel("Defense ON");
-                                    DefenseButton.setAppearance("button-detailview-small");
+                                     _this.DefenseButton.setLabel("Defense ON");
+                                     _this.DefenseButton.setAppearance("button-detailview-small");
                                 }
                             }, this);
 
-                            OffenseButton.addListener("click", function (e) {
+                             _this.OffenseButton.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (window.FlunikTools.Main.getInstance().autoUpdateHandleOffense != null) {
                                     _this.off = 0;
                                     window.FlunikTools.Main.getInstance().OstopAutoUpdate();
-                                    OffenseButton.setLabel("Offense OFF");
-                                    OffenseButton.setAppearance("button-text-small");
+                                     _this.OffenseButton.setLabel("Offense OFF");
+                                     _this.OffenseButton.setAppearance("button-text-small");
                                 } else {
                                     _this.off = 1;
                                     window.FlunikTools.Main.getInstance().OffensestartAutoUpdate();
-                                    OffenseButton.setLabel("Offense ON");
-                                    OffenseButton.setAppearance("button-detailview-small");
+                                     _this.OffenseButton.setLabel("Offense ON");
+                                     _this.OffenseButton.setAppearance("button-detailview-small");
                                 }
                             }, this);
 
-                            CommandBuildingChoice.addListener("click", function (e) {
+                             _this.CommandBuildingChoice.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (_this.x != 0) {
                                     _this.x = 0;
                                     window.FlunikTools.Main.getInstance().OffFunction();
-                                    CommandBuildingChoice.setLabel("Only Res OFF");
-                                    CommandBuildingChoice.setAppearance("button-text-small");
+                                     _this.CommandBuildingChoice.setLabel("Only Res OFF");
+                                     _this.CommandBuildingChoice.setAppearance("button-text-small");
                                     console.log(_this.x + " normal mode");
 
                                 } else {
                                     _this.x = 1;
                                     window.FlunikTools.Main.getInstance().OnFunction();
-                                    CommandBuildingChoice.setLabel("Only Res ON");
-                                    CommandBuildingChoice.setAppearance("button-detailview-small");
+                                     _this.CommandBuildingChoice.setLabel("Only Res ON");
+                                     _this.CommandBuildingChoice.setAppearance("button-detailview-small");
                                     console.log(_this.x + " ResOnly mode");
                                 }
                             }, this);
 
-                            worldResBuildingChoice.addListener("click", function (e) {
+                             _this.worldResBuildingChoice.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (window.FlunikTools.Main.getInstance().AautoUpdateHandle != null) {
                                     window.FlunikTools.Main.getInstance().OffFunction();
-                                    worldResBuildingChoice.setLabel("World: NEW");
-                                    worldResBuildingChoice.setAppearance("button-text-small");
+                                     _this.worldResBuildingChoice.setLabel("World NEW");
+                                     _this.worldResBuildingChoice.setAppearance("button-text-small");
                                     _this.y = 1;
                                     _this.z = 0.293;
                                     _this.g = 0;
                                     console.log("_this.y " + _this.y + " _this.z " + _this.z + " new world mode" + "_this.g" + _this.g + "tibcost");
                                 } else {
                                     window.FlunikTools.Main.getInstance().OnFunction();
-                                    worldResBuildingChoice.setLabel("World: OLD");
-                                    worldResBuildingChoice.setAppearance("button-detailview-small");
+                                     _this.worldResBuildingChoice.setLabel("World: OLD");
+                                     _this.worldResBuildingChoice.setAppearance("button-detailview-small");
                                     _this.y = 0.293;
                                     _this.z = 1;
                                     _this.g = 1;
@@ -451,13 +473,13 @@
                                 }
                             }, this);
 
-                            PowerBuildingChoice.addListener("click", function (e) {
+                             _this.PowerBuildingChoice.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (_this.p != 0) {
                                     _this.p = 0;
                                     window.FlunikTools.Main.getInstance().OffFunction();
-                                    PowerBuildingChoice.setLabel("Power OFF");
-                                    PowerBuildingChoice.setValue(false);
+                                     _this.PowerBuildingChoice.setLabel("Power OFF");
+                                     _this.PowerBuildingChoice.setValue(false);
 
                                     console.log(_this.p + " Power off mode");
 
@@ -465,21 +487,21 @@
                                 } else {
                                     _this.p = 1;
                                     window.FlunikTools.Main.getInstance().OnFunction();
-                                    PowerBuildingChoice.setLabel("Power ON");
-                                    PowerBuildingChoice.setValue(true);
+                                     _this.PowerBuildingChoice.setLabel("Power ON");
+                                     _this.PowerBuildingChoice.setValue(true);
 
                                     console.log(_this.p + " Power On mode");
 
                                 }
                             }, this);
 
-                            HarvBuildingChoice.addListener("click", function (e) {
+                             _this.HarvBuildingChoice.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (_this.h != 0) {
                                     _this.h = 0;
                                     window.FlunikTools.Main.getInstance().OffFunction();
-                                    HarvBuildingChoice.setLabel("Tiberium OFF");
-                                    HarvBuildingChoice.setValue(false);
+                                     _this.HarvBuildingChoice.setLabel("Tiberium OFF");
+                                     _this.HarvBuildingChoice.setValue(false);
 
                                     console.log(_this.h + " Green Harvester off mode");
 
@@ -487,8 +509,8 @@
                                 } else {
                                     _this.h = 1;
                                     window.FlunikTools.Main.getInstance().OnFunction();
-                                    HarvBuildingChoice.setLabel("Tiberium ON");
-                                    HarvBuildingChoice.setValue(true);
+                                     _this.HarvBuildingChoice.setLabel("Tiberium ON");
+                                     _this.HarvBuildingChoice.setValue(true);
 
                                     console.log(_this.h + " Green Harvester On mode");
 
@@ -497,13 +519,13 @@
 
 
 
-                            Harv1BuildingChoice.addListener("click", function (e) {
+                             _this.Harv1BuildingChoice.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (_this.h1 != 0) {
                                     _this.h1 = 0;
                                     window.FlunikTools.Main.getInstance().OffFunction();
-                                    Harv1BuildingChoice.setLabel("Crystal OFF");
-                                    Harv1BuildingChoice.setValue(false);
+                                     _this.Harv1BuildingChoice.setLabel("Crystal OFF");
+                                     _this.Harv1BuildingChoice.setValue(false);
 
                                     console.log(_this.h1 + " Blue Harvester off mode");
 
@@ -511,21 +533,21 @@
                                 } else {
                                     _this.h1 = 1;
                                     window.FlunikTools.Main.getInstance().OnFunction();
-                                    Harv1BuildingChoice.setLabel("Crystal ON");
-                                    Harv1BuildingChoice.setValue(true);
+                                     _this.Harv1BuildingChoice.setLabel("Crystal ON");
+                                     _this.Harv1BuildingChoice.setValue(true);
 
                                     console.log(_this.h1 + " Blue Harvester On mode");
 
                                 }
                             }, this);
 
-                            RefBuildingChoice.addListener("click", function (e) {
+                             _this.RefBuildingChoice.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (_this.r != 0) {
                                     _this.r = 0;
                                     window.FlunikTools.Main.getInstance().OffFunction();
-                                    RefBuildingChoice.setLabel("Refins OFF");
-                                    RefBuildingChoice.setValue(false);
+                                     _this.RefBuildingChoice.setLabel("Refins OFF");
+                                     _this.RefBuildingChoice.setValue(false);
 
                                     console.log(_this.r + " Refinery off mode");
 
@@ -533,21 +555,21 @@
                                 } else {
                                     _this.r = 1;
                                     window.FlunikTools.Main.getInstance().OnFunction();
-                                    RefBuildingChoice.setLabel("Refins ON");
-                                    RefBuildingChoice.setValue(true);
+                                     _this.RefBuildingChoice.setLabel("Refins ON");
+                                     _this.RefBuildingChoice.setValue(true);
 
                                     console.log(_this.r + " Refinery On mode");
 
                                 }
                             }, this);
 
-                            SiloBuildingChoice.addListener("click", function (e) {
+                             _this.SiloBuildingChoice.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (_this.s != 0) {
                                     _this.s = 0;
                                     window.FlunikTools.Main.getInstance().OffFunction();
-                                    SiloBuildingChoice.setLabel("Silos OFF");
-                                    SiloBuildingChoice.setValue(false);
+                                     _this.SiloBuildingChoice.setLabel("Silos OFF");
+                                     _this.SiloBuildingChoice.setValue(false);
 
                                     console.log(_this.s + " Silo off mode");
 
@@ -555,21 +577,21 @@
                                 } else {
                                     _this.s = 1;
                                     window.FlunikTools.Main.getInstance().OnFunction();
-                                    SiloBuildingChoice.setLabel("Silos ON");
-                                    SiloBuildingChoice.setValue(true);
+                                     _this.SiloBuildingChoice.setLabel("Silos ON");
+                                     _this.SiloBuildingChoice.setValue(true);
 
                                     console.log(_this.s + " Silo On mode");
 
                                 }
                             }, this);
 
-                            AccBuildingChoice.addListener("click", function (e) {
+                             _this.AccBuildingChoice.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
                                 if (_this.a != 0) {
                                     _this.a = 0;
                                     window.FlunikTools.Main.getInstance().OffFunction();
-                                    AccBuildingChoice.setLabel("Accus OFF");
-                                    AccBuildingChoice.setValue(false);
+                                     _this.AccBuildingChoice.setLabel("Accus OFF");
+                                     _this.AccBuildingChoice.setValue(false);
 
                                     console.log(_this.a + " Accumulator off mode");
 
@@ -577,8 +599,8 @@
                                 } else {
                                     _this.a = 1;
                                     window.FlunikTools.Main.getInstance().OnFunction();
-                                    AccBuildingChoice.setLabel("Accus ON");
-                                    AccBuildingChoice.setValue(true);
+                                     _this.AccBuildingChoice.setLabel("Accus ON");
+                                     _this.AccBuildingChoice.setValue(true);
 
                                     console.log(_this.a + " Accumulator On mode");
 
@@ -588,76 +610,97 @@
 
 
                             //popup.add(AutoUpdateButton, {row: 0, column: 0});
-                            popup.add(button1, {
+
+                            _this.popupcreate = function(){
+
+                            _this.popup.add(_this.button1, {
+                                row: 0,
+                                column: 4
+                            }); 
+                            _this.popup.add(_this.buttonMain, {
                                 row: 1,
-                                column: 3
-                            });
-                            popup.add(worldResBuildingChoice, {
+                                column: 4
+                            }); 
+                            _this.popup.add( _this.worldResBuildingChoice, {
                                 row: 1,
                                 column: 1
                             });
-                            popup.add(CommandBuildingChoice, {
+                            _this.popup.add( _this.CommandBuildingChoice, {
                                 row: 1,
                                 column: 2
                             });
-                            popup.add(BuildingsButton, {
+                            _this.popup.add( _this.BuildingsButton, {
                                 row: 0,
                                 column: 1
                             });
-                            popup.add(DefenseButton, {
+                            _this.popup.add( _this.DefenseButton, {
                                 row: 0,
                                 column: 2
                             });
-                            popup.add(OffenseButton, {
+                            _this.popup.add( _this.OffenseButton, {
                                 row: 0,
                                 column: 3
                             });
-                            popup1.add(PowerBuildingChoice, {
+                            _this.popup1.add( _this.PowerBuildingChoice, {
                                 row: 0,
                                 column: 0
                             });
-                            popup1.add(RefBuildingChoice, {
+                            _this.popup1.add( _this.RefBuildingChoice, {
                                 row: 0,
                                 column: 1
                             });
-                            popup1.add(HarvBuildingChoice, {
+                            _this.popup1.add( _this.HarvBuildingChoice, {
                                 row: 0,
                                 column: 2
                             });
-                            popup1.add(Harv1BuildingChoice, {
+                            _this.popup1.add( _this.Harv1BuildingChoice, {
                                 row: 0,
                                 column: 3
                             });
-                            popup1.add(SiloBuildingChoice, {
+                            _this.popup1.add( _this.SiloBuildingChoice, {
                                 row: 0,
                                 column: 4
                             });
-                            popup1.add(AccBuildingChoice, {
+                            _this.popup1.add( _this.AccBuildingChoice, {
                                 row: 0,
                                 column: 5
                             });
-
-
-                            button.addListener("click", function (e) {
+                        }
+                           // MOD adjust popups and window by Netquik
+                           _this.button.addListener("click", function (e) {
                                 var _this = window.FlunikTools.Main.getInstance();
-                                //popup.placeToMouse(e);
-                                popup.show();
-                                _this.autoUpgradePopupOeffnen();
+                                _this.autoUpgradePopupOeffnen(false);
+                                _this.popupcreate();
+                                var buttonpos = _this.button.getLayoutProperties(); 
+                                _this.popup.setLayoutProperties({bottom: buttonpos.bottom+45, right:buttonpos.right});
+                                _this.popup.show();
+                               
                             }, this);
 
-                            button1.addListener("click", function (e) {
-                                //popup1.placeToMouse(e);
-                                popup1.show();
+                            _this.button1.addListener("click", function (e) {
+                                var _this = window.FlunikTools.Main.getInstance();
+                                var poppos = _this.popup.getLayoutProperties(); 
+                                _this.popup1.setLayoutProperties({bottom: poppos.bottom+75, right:poppos.right});
+                                _this.popup1.show();
                             }, this);
 
+                            
+                                
+                                _this.buttonMain.addListener("click", function (e) {
+                                    var _this = window.FlunikTools.Main.getInstance();
+                                    _this.popup1.exclude();
+                                    _this.popup.exclude();
+                                    _this.autoUpgradePopupOeffnen(true);
+                                }, this);
 
                             var app = qx.core.Init.getApplication();
 
 
-                            app.getDesktop().add(button, {
+                            app.getDesktop().add(_this.button, {
                                 right: 123, //right: 128,
                                 bottom: -3 //top: 3
                             });
+                           
 
                             var counter = 0;
                             var intervall = window.setInterval(RangAbrufen, 1000);
@@ -667,8 +710,8 @@
                                 _this.rangAllyStart = _this.AllianzRang('meinRang');
                                 _this.rangstart = ClientLib.Data.MainData.GetInstance().get_Player().get_OverallRank();
                                 counter++;
-                                console.info("init GLOBAL RANK: " + _this.rangstart + ", bool: " + (_this.rangstart != 0) + ", tries: " + counter);
-                                console.info("init MYALLY RANK: " + _this.rangAllyStart + ", bool: " + (_this.rangAllyStart != 0) + ", tries: " + counter);
+                                //console.info("init GLOBAL RANK: " + _this.rangstart + ", bool: " + (_this.rangstart != 0) + ", tries: " + counter);
+                                //console.info("init MYALLY RANK: " + _this.rangAllyStart + ", bool: " + (_this.rangAllyStart != 0) + ", tries: " + counter);
                                 if (_this.rangstart != 0 && _this.rangAllyStart != 0) {
                                     window.clearInterval(intervall);
                                     console.log("Interval after " + counter + " tries stopped");
@@ -681,10 +724,10 @@
                         //initialize() ENDE
 
 
-                        autoUpgradePopupOeffnen: function () {
+                        autoUpgradePopupOeffnen: function (mode) {
                             var _this = window.FlunikTools.Main.getInstance();
                             _this.timer = true;
-                            button.setEnabled(false);
+                            if(mode===true) _this.button.setEnabled(false);
                             _this.objektcount = 0;
                             _this.autoUpgradePopup.setLayout(new qx.ui.layout.VBox());
                             var allebasen = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
@@ -769,17 +812,17 @@
                                 padding: 0
                             });
 
-                            boxA.add(BuildingsButton);
-                            boxA.add(DefenseButton);
-                            boxA.add(OffenseButton);
-                            boxB.add(worldResBuildingChoice);
-                            boxB.add(CommandBuildingChoice);
-                            boxC.add(PowerBuildingChoice);
-                            boxC.add(RefBuildingChoice);
-                            boxC.add(HarvBuildingChoice);
-                            boxC.add(Harv1BuildingChoice);
-                            boxC.add(SiloBuildingChoice);
-                            boxC.add(AccBuildingChoice);
+                            boxA.add( _this.BuildingsButton);
+                            boxA.add( _this.DefenseButton);
+                            boxA.add( _this.OffenseButton);
+                            boxB.add( _this.worldResBuildingChoice);
+                            boxB.add( _this.CommandBuildingChoice);
+                            boxC.add( _this.PowerBuildingChoice);
+                            boxC.add( _this.RefBuildingChoice);
+                            boxC.add( _this.HarvBuildingChoice);
+                            boxC.add( _this.Harv1BuildingChoice);
+                            boxC.add( _this.SiloBuildingChoice);
+                            boxC.add( _this.AccBuildingChoice);
                             boxD.add(boxA);
                             boxD.add(boxB, {
                                 flex: 1
@@ -1269,8 +1312,10 @@
                             tabPageAUG.add(boxF);
                             tabPageAUG.add(boxE);
                             tabPageAUG.add(boxG);
+                            
                             _this.autoUpgradePopup.add(tabviewHaupt);
                             _this.autoUpgradePopup.moveTo(300, 5);
+                            if(mode===true)
                             _this.autoUpgradePopup.open();
                             _this.autoUpgradePopup.focus();
                         },
@@ -1438,21 +1483,21 @@
 
                             if (kat > 0) {
                                 _this.einaus = 1;
-                                button.setAppearance("button-playarea-mode-frame"); //button-detailview-mode-frame
-                                button.setIcon("https://goo.gl/7eO9gD");
-                                button.set({
+                                _this.button.setAppearance("button-playarea-mode-frame"); //button-detailview-mode-frame
+                                _this.button.setIcon(_this.iconON);
+                                _this. button.set({
                                     toolTipText: ttt
                                 });
-                                button.setUserData("isNotification", true);
+                                _this.button.setUserData("isNotification", true);
                             } else {
                                 _this.einaus = 0;
-                                button.setLabel("Auto-Upgrade: OFF");
-                                button.setAppearance("button-playarea-mode-frame");
-                                button.setIcon("https://goo.gl/Tsst0o");
-                                button.set({
+                                _this.button.setLabel("Auto-Upgrade: OFF");
+                                _this.button.setAppearance("button-playarea-mode-frame");
+                                _this.button.setIcon(_this.iconOFF);
+                                _this.button.set({
                                     toolTipText: ttt
                                 });
-                                button.setUserData("isNotification", false);
+                                _this.button.setUserData("isNotification", false);
                             }
                             console.log("einaus-Status: " + _this.einaus + " (Summe: " + summe + ")" + this.Zeitstempel() + " (Sender: " + sender + ")");
                             //console.log("uglist : " + uglist);
@@ -1504,7 +1549,10 @@
 
                         canUpgradeBuilding: function (building, city) {
                             var _this = FlunikTools.Main.getInstance();
+                            var maxlevelworld = ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap();
                             var nextLevel = (building.get_CurrentLevel() + 1);
+                            //MOD Fix for WorldMaxLevel
+                            if (nextLevel > maxlevelworld) return false;
                             var gameDataTech = building.get_TechGameData_Obj();
                             var hasEnoughResources = city.HasEnoughResources(ClientLib.Base.Util.GetTechLevelResourceRequirements_Obj(nextLevel, gameDataTech));
                             var ressityp = building.get_CollectResourceType();
@@ -1528,7 +1576,10 @@
                         canUpgradeUnit: function (unit, city, kat) {
                             try {
                                 var _this = FlunikTools.Main.getInstance();
+                                var maxlevelworld = ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap();
+                                //MOD Fix for WorldMaxLevel
                                 var nextLevel = unit.get_CurrentLevel() + 1;
+                                if (nextLevel > maxlevelworld) return false;
                                 var gameDataTech = unit.get_UnitGameData_Obj();
                                 var hasEnoughResources = city.HasEnoughResources(ClientLib.Base.Util.GetTechLevelResourceRequirements_Obj(nextLevel, gameDataTech));
                                 var einheitname = unit.get_UnitGameData_Obj().dn;
@@ -1832,7 +1883,7 @@
                             if (city != null && building != null) {
                                 if (type != null) {
                                     var building_obj = {
-                                        base_name: city.m_SupportDedicatedBaseName,
+                                        base_name: city.get_Name(),
                                         building_name: building.get_UnitGameData_Obj().dn,
                                         Ratio: type,
                                         cityid: city.get_Id(),
@@ -1842,7 +1893,7 @@
                                     }
                                 } else {
                                     var building_obj = {
-                                        base_name: city.m_SupportDedicatedBaseName,
+                                        base_name: city.get_Name(),
                                         building_name: building.get_UnitGameData_Obj().dn,
                                         cityid: city.get_Id(),
                                         posX: building.get_CoordX(),
@@ -1869,7 +1920,7 @@
                                 basenum++;
                                 var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[nCity];
 
-                                var baseName = city.m_SupportDedicatedBaseName;
+                                var baseName = city.get_Name();
                                 var Type = ClientLib.Base.EPlacementType.Defense;
 
 
@@ -1929,7 +1980,7 @@
                                     if (unitHealthperCost == defarr[0]) {
                                         var defunit_obj = {
                                             cityid: city.get_Id(),
-                                            basename: city.m_SupportDedicatedBaseName,
+                                            basename: city.get_Name(),
                                             Ratio: unitHealthperCost,
                                             unitname: unit.get_UnitGameData_Obj().dn,
                                             level: unit.get_CurrentLevel(),
@@ -1977,7 +2028,7 @@
                                 basenum++;
                                 var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[nCity];
                                 var buildings = city.get_Buildings();
-                                var baseName = city.m_SupportDedicatedBaseName;
+                                var baseName = city.get_Name();
 
                                 var Type = ClientLib.Base.EPlacementType.Offense;
 
@@ -2035,7 +2086,7 @@
                                     if (unitHealthperCost == offarr[0]) {
                                         var offunit_obj = {
                                             cityid: city.get_Id(),
-                                            basename: city.m_SupportDedicatedBaseName,
+                                            basename: city.get_Name(),
                                             unitname: unit.get_UnitGameData_Obj().dn,
                                             Ratio: unitHealthperCost,
                                             level: unit.get_CurrentLevel(),
@@ -2079,7 +2130,7 @@
                                 basenum++;
                                 var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[nCity];
                                 var buildings = city.get_Buildings();
-                                var baseName = city.m_SupportDedicatedBaseName;
+                                var baseName = city.get_Name();
                                 //console.log("Basis Nr. " + basenum + ", buildings ARRAY: " + buildings);
                                 //console.log(baseName,  _this.x, _this.y, _this.z);
                                 var airRT = city.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false);
@@ -2164,7 +2215,7 @@
                                             var offRT_obj = {
                                                 cityid: city.get_Id(),
                                                 buildingid: building.get_Id(),
-                                                basename: city.m_SupportDedicatedBaseName,
+                                                basename: city.get_Name(),
                                                 buildinglevel: building.get_CurrentLevel(), //test hinzu!
                                                 building: building.get_UnitGameData_Obj().dn,
                                                 buildTibCost: ClientLib.Base.Util.GetUnitLevelResourceRequirements_Obj(buildinglvlup1, building.get_UnitGameData_Obj())[0].Count,
@@ -2183,7 +2234,7 @@
                                             var offRT_obj = {
                                                 cityid: city.get_Id(),
                                                 buildingid: building.get_Id(),
-                                                basename: city.m_SupportDedicatedBaseName,
+                                                basename: city.get_Name(),
                                                 buildinglevel: building.get_CurrentLevel(), //test hinzu!
                                                 building: building.get_UnitGameData_Obj().dn,
                                                 buildTibCost: ClientLib.Base.Util.GetUnitLevelResourceRequirements_Obj(buildinglvlup1, building.get_UnitGameData_Obj())[0].Count,
@@ -2201,7 +2252,7 @@
                                             var offRT_obj = {
                                                 cityid: city.get_Id(),
                                                 buildingid: building.get_Id(),
-                                                basename: city.m_SupportDedicatedBaseName,
+                                                basename: city.get_Name(),
                                                 buildinglevel: building.get_CurrentLevel(), //test hinzu!
                                                 building: building.get_UnitGameData_Obj().dn,
                                                 buildTibCost: ClientLib.Base.Util.GetUnitLevelResourceRequirements_Obj(buildinglvlup1, building.get_UnitGameData_Obj())[0].Count,
@@ -2222,7 +2273,7 @@
                                             var building_obj = {
                                                 cityid: city.get_Id(),
                                                 buildingid: building.get_Id(),
-                                                basename: city.m_SupportDedicatedBaseName,
+                                                basename: city.get_Name(),
                                                 buildinglevel: building.get_CurrentLevel(),
                                                 building: building.get_UnitGameData_Obj().dn,
                                                 posX: building.get_CoordX(),
@@ -2238,7 +2289,7 @@
                                             var building_obj = {
                                                 cityid: city.get_Id(),
                                                 buildingid: building.get_Id(),
-                                                basename: city.m_SupportDedicatedBaseName,
+                                                basename: city.get_Name(),
                                                 buildinglevel: building.get_CurrentLevel(),
                                                 building: building.get_UnitGameData_Obj().dn,
                                                 posX: building.get_CoordX(),
@@ -2254,7 +2305,7 @@
                                             var building_obj = {
                                                 cityid: city.get_Id(),
                                                 buildingid: building.get_Id(),
-                                                basename: city.m_SupportDedicatedBaseName,
+                                                basename: city.get_Name(),
                                                 buildinglevel: building.get_CurrentLevel(),
                                                 building: building.get_UnitGameData_Obj().dn,
                                                 posX: building.get_CoordX(),
@@ -2270,7 +2321,7 @@
                                             var building_obj = {
                                                 cityid: city.get_Id(),
                                                 buildingid: building.get_Id(),
-                                                basename: city.m_SupportDedicatedBaseName,
+                                                basename: city.get_Name(),
                                                 buildinglevel: building.get_CurrentLevel(),
                                                 building: building.get_UnitGameData_Obj().dn,
                                                 posX: building.get_CoordX(),
@@ -2287,7 +2338,7 @@
                                             var support_obj = {
                                                 cityid: city.get_Id(),
                                                 buildingid: building.get_Id(),
-                                                basename: city.m_SupportDedicatedBaseName,
+                                                basename: city.get_Name(),
                                                 building: building.get_UnitGameData_Obj().dn,
                                                 buildinglevel: building.get_CurrentLevel(),
                                                 posX: building.get_CoordX(),
@@ -2311,7 +2362,7 @@
                                                 cityid: city.get_Id(),
                                                 buildingid: building.get_Id(),
                                                 type: "LowResbuilding",
-                                                basename: city.m_SupportDedicatedBaseName,
+                                                basename: city.get_Name(),
                                                 building: building.get_UnitGameData_Obj().dn,
                                                 buildinglevel: building.get_CurrentLevel(),
                                                 posX: building.get_CoordX(),
@@ -2377,7 +2428,7 @@
                                             if ((Math.max(refProRatio) == refarr[0])) {
                                                 var Ref_obj = {
                                                     cityid: city.get_Id(),
-                                                    basename: city.m_SupportDedicatedBaseName,
+                                                    basename: city.get_Name(),
                                                     building: building.get_UnitGameData_Obj().dn,
                                                     buildinglevel: building.get_CurrentLevel(),
                                                     posX: building.get_CoordX(),
@@ -2451,7 +2502,7 @@
                                             if ((Math.max(powProRatio) == powarr[0])) {
                                                 var Pow_obj = {
                                                     cityid: city.get_Id(),
-                                                    basename: city.m_SupportDedicatedBaseName,
+                                                    basename: city.get_Name(),
                                                     building: building.get_UnitGameData_Obj().dn,
                                                     buildinglevel: building.get_CurrentLevel(),
                                                     posX: building.get_CoordX(),
@@ -2512,7 +2563,7 @@
                                                 if ((Math.max(harTibProRatio) == hararr[0])) {
                                                     var Har_obj = {
                                                         cityid: city.get_Id(),
-                                                        basename: city.m_SupportDedicatedBaseName,
+                                                        basename: city.get_Name(),
                                                         building: building.get_UnitGameData_Obj().dn,
                                                         buildinglevel: building.get_CurrentLevel(),
                                                         type: "Tiberium",
@@ -2572,7 +2623,7 @@
                                                 if ((Math.max(harCryProRatio) == hararr1[0])) {
                                                     var Har1_obj = {
                                                         cityid: city.get_Id(),
-                                                        basename: city.m_SupportDedicatedBaseName,
+                                                        basename: city.get_Name(),
                                                         building: building.get_UnitGameData_Obj().dn,
                                                         buildinglevel: building.get_CurrentLevel(),
                                                         type: "Crystal",
@@ -2624,7 +2675,7 @@
                                             if ((Math.max(accProRatio) == accarr[0])) {
                                                 var Acc_obj = {
                                                     cityid: city.get_Id(),
-                                                    basename: city.m_SupportDedicatedBaseName,
+                                                    basename: city.get_Name(),
                                                     building: building.get_UnitGameData_Obj().dn,
                                                     buildinglevel: building.get_CurrentLevel(),
                                                     posX: building.get_CoordX(),
@@ -2687,7 +2738,7 @@
                                             if ((Math.max(silProRatio) == silarr[0])) {
                                                 var Sil_obj = {
                                                     cityid: city.get_Id(),
-                                                    basename: city.m_SupportDedicatedBaseName,
+                                                    basename: city.get_Name(),
                                                     building: building.get_UnitGameData_Obj().dn,
                                                     buildinglevel: building.get_CurrentLevel(),
                                                     posX: building.get_CoordX(),
@@ -2921,7 +2972,7 @@
                         FlunikTools.Main.getInstance().GetUnitMaxHealth = ClientLib.API.Util.GetUnitMaxHealthByLevel;
                         console.log('FlunikTools.Main.getInstance().GetUnitMaxHealth   ', ClientLib.API.Util.GetUnitMaxHealthByLevel);
                     }
-                    // ClientLib.Data.CityUnits.prototype.get_OffenseUnits
+                   /*  // ClientLib.Data.CityUnits.prototype.get_OffenseUnits
                     strFunction = ClientLib.Data.CityUnits.prototype.HasUnitMdbId.toString();
                     var searchString = "for (var b in {d:this.";
                     var startPos = strFunction.indexOf(searchString) + searchString.length;
@@ -2939,7 +2990,7 @@
                     strFunction = "var $createHelper;return this." + fn_name + ";";
                     fn = Function('', strFunction);
                     ClientLib.Data.CityUnits.prototype.get_DefenseUnits = fn;
-                    console.log("ClientLib.Data.CityUnits.prototype.get_DefenseUnits = function(){var $createHelper;return this." + fn_name + ";}");
+                    console.log("ClientLib.Data.CityUnits.prototype.get_DefenseUnits = function(){var $createHelper;return this." + fn_name + ";}"); */
 
 
                     FlunikTools.Main.getInstance();
