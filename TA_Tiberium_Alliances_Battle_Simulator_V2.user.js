@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.11.28
+// @version         21.03.12
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -1346,8 +1346,8 @@ codes by NetquiK
                         //Info
                         this.Menu.add(new qx.ui.menu.Separator());
                         var infoMenu = new qx.ui.menu.Menu(),
-                            infoHomepage = new qx.ui.menu.Button(this.tr("Homepage"), "https://github.global.ssl.fastly.net/favicon.ico", null),
-                            infoFacebook = new qx.ui.menu.Button(this.tr("Facebook"), "https://github.global.ssl.fastly.net/favicon.ico", null);
+                            infoHomepage = new qx.ui.menu.Button(this.tr("Homepage"), "", null),
+                            infoFacebook = new qx.ui.menu.Button(this.tr("Facebook"), "", null);
                         infoHomepage.addListener("execute", function () {
                             qx.core.Init.getApplication().showExternal("http://eistee82.github.io/ta_simv2");
                         }, this);
@@ -2952,7 +2952,8 @@ codes by NetquiK
                                 qx.bom.Element.removeListener(document, "keydown", this.onHotKeyPress, this);
                                 TABS.APISimulation.getInstance().removeListener("OnSimulateBattleFinished", this.OnSimulateBattleFinished, this);
                             }
-                            if ((newMode == ClientLib.Vis.Mode.CombatSetup || newMode == ClientLib.Vis.Mode.Battleground) && TABS.SETTINGS.get("GUI.Window.Stats.open", true) && !TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().open();
+                            // MOD not open stats for replays
+                            if ((newMode == ClientLib.Vis.Mode.CombatSetup || (newMode == ClientLib.Vis.Mode.Battleground && oldMode != ClientLib.Vis.Mode.Region) ) && TABS.SETTINGS.get("GUI.Window.Stats.open", true) && !TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().open();
                         },
                         _updateBtnSimulation: function () {
                             var formation = TABS.UTIL.Formation.Get();
