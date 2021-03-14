@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         21.03.12
+// @version         21.03.14
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -22,6 +22,7 @@ codes by NetquiK
 - MovableBox in Battleground
 - Some Sim Presets Fixes+
 - Fix for Sim View with Autorepair
+- Fix not open stats for replays
 ----------------
 */
 
@@ -2953,7 +2954,8 @@ codes by NetquiK
                                 TABS.APISimulation.getInstance().removeListener("OnSimulateBattleFinished", this.OnSimulateBattleFinished, this);
                             }
                             // MOD not open stats for replays
-                            if ((newMode == ClientLib.Vis.Mode.CombatSetup || (newMode == ClientLib.Vis.Mode.Battleground && oldMode != ClientLib.Vis.Mode.Region) ) && TABS.SETTINGS.get("GUI.Window.Stats.open", true) && !TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().open();
+                            var replay = qx.core.Init.getApplication().getPlayArea().getViewMode() == 10;
+                            if ((newMode == ClientLib.Vis.Mode.CombatSetup || newMode == ClientLib.Vis.Mode.Battleground) && TABS.SETTINGS.get("GUI.Window.Stats.open", true) && !replay && !TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().open();
                         },
                         _updateBtnSimulation: function () {
                             var formation = TABS.UTIL.Formation.Get();
@@ -3561,7 +3563,9 @@ codes by NetquiK
                             }
                         },
                         _onViewChanged: function (oldMode, newMode) {
-                            if (newMode != ClientLib.Vis.Mode.CombatSetup && newMode != ClientLib.Vis.Mode.Battleground && newMode != ClientLib.Vis.Mode.City) this.close();
+                            // MOD not open stats for replays 2
+                            var replay = qx.core.Init.getApplication().getPlayArea().getViewMode() == 10;
+                            if (newMode != ClientLib.Vis.Mode.CombatSetup && newMode != ClientLib.Vis.Mode.Battleground && newMode != ClientLib.Vis.Mode.City || replay) this.close();
                         },
                         makeHeader: function (text) {
                             var Header = new qx.ui.container.Composite(new qx.ui.layout.Grow()).set({
