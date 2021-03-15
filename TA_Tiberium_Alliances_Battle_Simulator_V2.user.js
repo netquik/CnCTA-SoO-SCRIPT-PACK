@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         21.03.14
+// @version         21.03.15
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -22,7 +22,7 @@ codes by NetquiK
 - MovableBox in Battleground
 - Some Sim Presets Fixes+
 - Fix for Sim View with Autorepair
-- Fix not open stats for replays
+- Fix open/close stats for replays
 ----------------
 */
 
@@ -2954,7 +2954,7 @@ codes by NetquiK
                                 TABS.APISimulation.getInstance().removeListener("OnSimulateBattleFinished", this.OnSimulateBattleFinished, this);
                             }
                             // MOD not open stats for replays
-                            var replay = qx.core.Init.getApplication().getPlayArea().getViewMode() == 10;
+                            var replay = this.PlayArea.getViewMode() == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay;
                             if ((newMode == ClientLib.Vis.Mode.CombatSetup || newMode == ClientLib.Vis.Mode.Battleground) && TABS.SETTINGS.get("GUI.Window.Stats.open", true) && !replay && !TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().open();
                         },
                         _updateBtnSimulation: function () {
@@ -3561,10 +3561,12 @@ codes by NetquiK
                                     this.simViews[i].resetStats();
                                 }
                             }
+                            // MOD close stats for replays during a battle
+                            if ( qx.core.Init.getApplication().getPlayArea().getViewMode() == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay) this.close();
                         },
                         _onViewChanged: function (oldMode, newMode) {
                             // MOD not open stats for replays 2
-                            var replay = qx.core.Init.getApplication().getPlayArea().getViewMode() == 10;
+                            var replay =  qx.core.Init.getApplication().getPlayArea().getViewMode() == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay;
                             if (newMode != ClientLib.Vis.Mode.CombatSetup && newMode != ClientLib.Vis.Mode.Battleground && newMode != ClientLib.Vis.Mode.City || replay) this.close();
                         },
                         makeHeader: function (text) {
