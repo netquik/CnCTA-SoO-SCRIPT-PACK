@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         21.03.15
+// @version         21.03.16
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -23,6 +23,7 @@ codes by NetquiK
 - Some Sim Presets Fixes+
 - Fix for Sim View with Autorepair
 - Fix open/close stats for replays
+- Back Button fix for replays
 ----------------
 */
 
@@ -3163,6 +3164,7 @@ codes by NetquiK
                                 appearance: "button-friendlist-scroll"
                             });
                             this.btnBack.addListener("click", this.onClick_btnBack, this);
+                            this.ReportReplayOverlay.addListener("appear", this.onAppear_ReportReplayOverlay, this);
                             this.ReportReplayOverlay.add(this.btnBack, {
                                 top: 20,
                                 right: 642
@@ -3199,6 +3201,20 @@ codes by NetquiK
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error onClick_btnBack", e);
+                                console.groupEnd();
+                            }
+                        },
+                        // MOD Back Button fix for replays and stats close
+                        onAppear_ReportReplayOverlay: function () {
+                            try {
+                                var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity();
+                                if (city === null) {
+                                    this.btnBack.hide();
+                                } else this.btnBack.show();
+                                if (TABS.SETTINGS.get("GUI.Window.Stats.open", true) && TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().close();
+                            } catch (e) {
+                                console.group("Tiberium Alliances Battle Simulator V2");
+                                console.error("Error onAppear_btnBack", e);
                                 console.groupEnd();
                             }
                         },
@@ -3561,13 +3577,9 @@ codes by NetquiK
                                     this.simViews[i].resetStats();
                                 }
                             }
-                            // MOD close stats for replays during a battle
-                            if ( qx.core.Init.getApplication().getPlayArea().getViewMode() == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay) this.close();
                         },
-                        _onViewChanged: function (oldMode, newMode) {
-                            // MOD not open stats for replays 2
-                            var replay =  qx.core.Init.getApplication().getPlayArea().getViewMode() == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay;
-                            if (newMode != ClientLib.Vis.Mode.CombatSetup && newMode != ClientLib.Vis.Mode.Battleground && newMode != ClientLib.Vis.Mode.City || replay) this.close();
+                        _onViewChanged: function (oldMode, newMode) {                  
+                            if (newMode != ClientLib.Vis.Mode.CombatSetup && newMode != ClientLib.Vis.Mode.Battleground && newMode != ClientLib.Vis.Mode.City) this.close();
                         },
                         makeHeader: function (text) {
                             var Header = new qx.ui.container.Composite(new qx.ui.layout.Grow()).set({
