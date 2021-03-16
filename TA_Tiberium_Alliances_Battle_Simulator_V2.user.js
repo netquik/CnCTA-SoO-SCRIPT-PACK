@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         21.03.16
+// @version         21.03.17
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -23,7 +23,7 @@ codes by NetquiK
 - Some Sim Presets Fixes+
 - Fix for Sim View with Autorepair
 - Fix open/close stats for replays
-- Back Button fix for replays
+- Back Button fix also for replays
 ----------------
 */
 
@@ -2013,6 +2013,7 @@ codes by NetquiK
                     members: {
                         __Table: null,
                         cities: null,
+                        lastcity: null,
                         sortByPosition: function (a, b) {
                             return a.x - b.x || a.y - b.y || a.i - b.i; // using id as third because of garrison (both units at same position)
                         },
@@ -2110,6 +2111,7 @@ codes by NetquiK
                                 caches = this.getAll(CityId).caches;
                             caches[data.key] = data.result;
                             caches[data.key].cityid = CityId;
+                            this.lastcity = CityId;
                             caches[data.key].ownid = OwnCityId;
                             if (OwnCity !== null) caches[data.key].recovery = OwnCity.get_hasRecovery();
                             caches[data.key].valid = true;
@@ -2957,6 +2959,11 @@ codes by NetquiK
                             // MOD not open stats for replays
                             var replay = this.PlayArea.getViewMode() == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay;
                             if ((newMode == ClientLib.Vis.Mode.CombatSetup || newMode == ClientLib.Vis.Mode.Battleground) && TABS.SETTINGS.get("GUI.Window.Stats.open", true) && !replay && !TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().open();
+                            var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity();
+                            var btnBack = TABS.GUI.ReportReplayOverlay.getInstance().btnBack;
+                            if (city === null && replay) {
+                                btnBack.hide();
+                            } else btnBack.show();
                         },
                         _updateBtnSimulation: function () {
                             var formation = TABS.UTIL.Formation.Get();
@@ -3157,8 +3164,8 @@ codes by NetquiK
                             this.base(arguments);
                             var qxApp = qx.core.Init.getApplication();
                             this.ReportReplayOverlay = qx.core.Init.getApplication().getReportReplayOverlay();
-                            this.btnBack = new qx.ui.form.Button(qxApp.tr("tnf:back")).set({
-                                toolTipText: qxApp.tr("tnf:back"),
+                            this.btnBack = new qx.ui.form.Button(qxApp.tr("Setup")).set({
+                                toolTipText: qxApp.tr("Back to Setup"),
                                 width: 53,
                                 height: 24,
                                 appearance: "button-friendlist-scroll"
@@ -3192,12 +3199,10 @@ codes by NetquiK
                         btnBack: null,
                         btnSkip: null,
                         onClick_btnBack: function () {
+                            // MOD Back Button fix
                             try {
-                                var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity();
-                                if (city !== null) {
-                                    qx.core.Init.getApplication().getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, city.get_Id(), 0, 0);
-                                    ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().SetPosition(0, qx.core.Init.getApplication().getPlayArea().getHUD().getCombatSetupOffset(ClientLib.Vis.CombatSetup.CombatSetupViewMode.Defense));
-                                }
+                                qx.core.Init.getApplication().getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, TABS.CACHE.getInstance().lastcity, 0, 0);
+                                ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().SetPosition(0, qx.core.Init.getApplication().getPlayArea().getHUD().getCombatSetupOffset(ClientLib.Vis.CombatSetup.CombatSetupViewMode.Defense));
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error onClick_btnBack", e);
@@ -3207,10 +3212,6 @@ codes by NetquiK
                         // MOD Back Button fix for replays and stats close
                         onAppear_ReportReplayOverlay: function () {
                             try {
-                                var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity();
-                                if (city === null) {
-                                    this.btnBack.hide();
-                                } else this.btnBack.show();
                                 if (TABS.SETTINGS.get("GUI.Window.Stats.open", true) && TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().close();
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
@@ -3578,7 +3579,7 @@ codes by NetquiK
                                 }
                             }
                         },
-                        _onViewChanged: function (oldMode, newMode) {                  
+                        _onViewChanged: function (oldMode, newMode) {
                             if (newMode != ClientLib.Vis.Mode.CombatSetup && newMode != ClientLib.Vis.Mode.Battleground && newMode != ClientLib.Vis.Mode.City) this.close();
                         },
                         makeHeader: function (text) {
