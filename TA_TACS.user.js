@@ -3,14 +3,32 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.59c
+// @version        3.60
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
-// @contributor    NetquiK (https://github.com/netquik) - FIX OPTIONS - 20.2 FIX + MAP MOVE - NEW CODE FOR TOP TOOLBAR - OTHER FIXES
+// @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TACS.user.js
 // @grant none
 // ==/UserScript==
 //window.TACS_version = GM_info.script.version;
+
+/* 
+codes by NetquiK
+----------------
+- PlayArea(MainOverlay) positioning to unhide First Line Defense
+- Fixed TACS Options
+- Changed side bars for better view
+- New code for sidebar LEFT/RIGHT placing option
+- New code for detecting Desktop Resize and improve View
+- Other minor GUI fixes
+- Some recode for new functions
+- 20.1|20.2 Patch Ready
+- TopBar display management recoded
+- Fix for statbox and replays + hide setup button
+----------------
+*/
+
+
 (function () {
     'use strict';
     var TASuite_mainFunction = function () {
@@ -616,6 +634,8 @@
                             							});
                             							this.buttons.simulate.skip.addListener("click", this.skipSimulation, this);*/
                             var replayBar = this._Application.getReportReplayOverlay();
+                            //MOD close statbox for simple replays
+                            replayBar.addListener("appear", this.onAppear_replayBar, this);
                             replayBar.add(this.buttons.simulate.back, {
                                 top: 21,
                                 left: 185
@@ -2896,8 +2916,13 @@
                                 break;
                             }
                             //10 Watching a "sim" OR replay
+                            //MOD not open statbox for replay not simulating and hide setup button
                             case ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay: {
-                                if (this.saveObj.checkbox.showStatsDuringSimulation) {
+                                var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity();
+                                if (city === null) {
+                                    this.buttons.simulate.back.hide();
+                                } else this.buttons.simulate.back.show();
+                                if (this.saveObj.checkbox.showStatsDuringSimulation && city !== null) {
                                     console.log("simulation case 10");
                                     this.battleResultsBox.open();
                                 }
@@ -2937,6 +2962,18 @@
                             this._Application.getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, localStorage.ta_sim_last_city, 0, 0);
                         } catch (e) {
                             this._Application.getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, localStorage.ta_sim_last_city, 0, 0);
+                            console.log(e);
+                        }
+                    },
+                    //MOD close statbox for simple replays function
+                    onAppear_replayBar: function () {
+                        try {
+                            var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity();
+                            if (city === null) {
+                                if (this.battleResultsBox.isVisible()) this.battleResultsBox.close();
+                            }
+
+                        } catch (e) {
                             console.log(e);
                         }
                     },
