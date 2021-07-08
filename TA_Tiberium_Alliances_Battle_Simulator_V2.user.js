@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         20.11.28
+// @version         21.03.18
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -22,6 +22,9 @@ codes by NetquiK
 - MovableBox in Battleground
 - Some Sim Presets Fixes+
 - Fix for Sim View with Autorepair
+- Fix open/close stats for replays
+- Back Button fix also for replays
+- Skip Button removed
 ----------------
 */
 
@@ -2011,6 +2014,7 @@ codes by NetquiK
                     members: {
                         __Table: null,
                         cities: null,
+                        lastcity: null,
                         sortByPosition: function (a, b) {
                             return a.x - b.x || a.y - b.y || a.i - b.i; // using id as third because of garrison (both units at same position)
                         },
@@ -2108,6 +2112,7 @@ codes by NetquiK
                                 caches = this.getAll(CityId).caches;
                             caches[data.key] = data.result;
                             caches[data.key].cityid = CityId;
+                            this.lastcity = CityId;
                             caches[data.key].ownid = OwnCityId;
                             if (OwnCity !== null) caches[data.key].recovery = OwnCity.get_hasRecovery();
                             caches[data.key].valid = true;
@@ -2952,7 +2957,14 @@ codes by NetquiK
                                 qx.bom.Element.removeListener(document, "keydown", this.onHotKeyPress, this);
                                 TABS.APISimulation.getInstance().removeListener("OnSimulateBattleFinished", this.OnSimulateBattleFinished, this);
                             }
-                            if ((newMode == ClientLib.Vis.Mode.CombatSetup || newMode == ClientLib.Vis.Mode.Battleground) && TABS.SETTINGS.get("GUI.Window.Stats.open", true) && !TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().open();
+                            // MOD not open stats for replays
+                            var replay = this.PlayArea.getViewMode() == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay;
+                            if ((newMode == ClientLib.Vis.Mode.CombatSetup || newMode == ClientLib.Vis.Mode.Battleground) && TABS.SETTINGS.get("GUI.Window.Stats.open", true) && !replay && !TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().open();
+                            var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity();
+                            var btnBack = TABS.GUI.ReportReplayOverlay.getInstance().btnBack;
+                            if (city === null && replay) {
+                                btnBack.hide();
+                            } else btnBack.show();
                         },
                         _updateBtnSimulation: function () {
                             var formation = TABS.UTIL.Formation.Get();
@@ -3153,27 +3165,17 @@ codes by NetquiK
                             this.base(arguments);
                             var qxApp = qx.core.Init.getApplication();
                             this.ReportReplayOverlay = qx.core.Init.getApplication().getReportReplayOverlay();
-                            this.btnBack = new qx.ui.form.Button(qxApp.tr("tnf:back")).set({
-                                toolTipText: qxApp.tr("tnf:back"),
+                            this.btnBack = new qx.ui.form.Button(qxApp.tr("Setup")).set({
+                                toolTipText: qxApp.tr("Back to Setup"),
                                 width: 53,
                                 height: 24,
                                 appearance: "button-friendlist-scroll"
                             });
                             this.btnBack.addListener("click", this.onClick_btnBack, this);
+                            this.ReportReplayOverlay.addListener("appear", this.onAppear_ReportReplayOverlay, this);
                             this.ReportReplayOverlay.add(this.btnBack, {
                                 top: 20,
                                 right: 642
-                            });
-                            this.btnSkip = new qx.ui.form.Button(qxApp.tr("Skip")).set({
-                                toolTipText: qxApp.tr("Skip"),
-                                width: 52,
-                                height: 24,
-                                appearance: "button-friendlist-scroll"
-                            });
-                            this.btnSkip.addListener("click", this.onClick_btnSkip, this);
-                            this.ReportReplayOverlay.add(this.btnSkip, {
-                                top: 20,
-                                left: 642
                             });
                         } catch (e) {
                             console.group("Tiberium Alliances Battle Simulator V2");
@@ -3185,43 +3187,30 @@ codes by NetquiK
                     members: {
                         ReportReplayOverlay: null,
                         btnBack: null,
-                        btnSkip: null,
                         onClick_btnBack: function () {
+                            // MOD Back Button fix
                             try {
-                                var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity();
-                                if (city !== null) {
-                                    qx.core.Init.getApplication().getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, city.get_Id(), 0, 0);
-                                    ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().SetPosition(0, qx.core.Init.getApplication().getPlayArea().getHUD().getCombatSetupOffset(ClientLib.Vis.CombatSetup.CombatSetupViewMode.Defense));
-                                }
+                                qx.core.Init.getApplication().getPlayArea().setView(ClientLib.Data.PlayerAreaViewMode.pavmCombatSetupDefense, TABS.CACHE.getInstance().lastcity, 0, 0);
+                                ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().SetPosition(0, qx.core.Init.getApplication().getPlayArea().getHUD().getCombatSetupOffset(ClientLib.Vis.CombatSetup.CombatSetupViewMode.Defense));
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error onClick_btnBack", e);
                                 console.groupEnd();
                             }
                         },
-                        onClick_btnSkip: function () {
-                            if (ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_Simulation !== undefined && ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_Simulation().DoStep !== undefined) {
-                                while (ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_Simulation().DoStep(false)) {}
-                                ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
-                            } else {
-                                var BattleDuration = ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_BattleDuration(),
-                                    LastBattleTime = ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_LastBattleTime();
-                                if (LastBattleTime >= BattleDuration) ClientLib.Vis.VisMain.GetInstance().get_Battleground().RestartReplay();
-                                ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(10000);
-                                phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
+                        // MOD Back Button fix for replays and stats close
+                        onAppear_ReportReplayOverlay: function () {
+                            try {
+                                if (TABS.SETTINGS.get("GUI.Window.Stats.open", true) && TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().close();
+                            } catch (e) {
+                                console.group("Tiberium Alliances Battle Simulator V2");
+                                console.error("Error onAppear_btnBack", e);
+                                console.groupEnd();
                             }
                         },
-                        onTick_btnSkip: function () {
-                            var BattleDuration = ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_BattleDuration(),
-                                LastBattleTime = ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_LastBattleTime();
-                            if (LastBattleTime >= BattleDuration) {
-                                phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
-                                ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
-                            }
+                        defer: function () {
+                            TABS.addInit("TABS.GUI.ReportReplayOverlay");
                         }
-                    },
-                    defer: function () {
-                        TABS.addInit("TABS.GUI.ReportReplayOverlay");
                     }
                 });
                 qx.Class.define("TABS.GUI.Window.Stats", { // [singleton]	Stats Window
