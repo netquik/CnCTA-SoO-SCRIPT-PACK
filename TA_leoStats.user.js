@@ -1,6 +1,6 @@
 ﻿// ==UserScript==
 // @name        leoStats
-// @version     2020.09.03
+// @version     2021.05.13
 // @author      leo7044 (https://github.com/leo7044)
 // @homepage    https://cnc.indyserver.info/
 // @downloadURL https://cnc.indyserver.info/js/leostats.user.js
@@ -19,6 +19,7 @@
 // Das Script ist verschlüsselt, da ich Scriptmanipulationen ausschließen möchte. Wer der Sache misstraut: Es steht euch frei, mit mir Kontakt aufzunehmen.
 // Ansonsten bleibt mir nur zu sagen: Viel Spaß!
 
+/* Developer: leo7044 (https://github.com/leo7044) */
 (function () {
     var leoStatsMain = function ()
     {
@@ -27,7 +28,7 @@
             function setButtons()
             {
                 var linkToRoot = "https://cnc.indyserver.info/";
-                var scriptVersionLocal = '2020.09.03';
+                var scriptVersionLocal = '2021.05.13';
                 qx.Class.define('leoStats',
                 {
                     type: 'singleton',
@@ -201,7 +202,7 @@
                         showGui: function()
                         {
                             // Tab 1: Info
-                            var HeaderTableInfoInformation = new qx.ui.container.Composite(new qx.ui.layout.HBox(50).set({alignX: "center"}));                            
+                            var HeaderTableInfoInformation = new qx.ui.container.Composite(new qx.ui.layout.HBox(50).set({alignX: "center"}));
                             var HeadLineInfo = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             // Tabelle: Alliance
                             /*if (this.ObjectData.alliance.AllianceId > 0)
@@ -440,7 +441,7 @@
                             var HeadLinePoiDataPoiLevel = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             HeadLinePoiDataPoiLevel.add(new qx.ui.basic.Label('<big><u><b>POI-Level</b></u></big>').set({rich: true}));
                             HeadLinePoiDataPoiLevel.add(new qx.ui.basic.Label('').set({rich: true}));
-                            var HeadLinePoiDataPoiLevelScroll = new qx.ui.container.Scroll().set({width: 137, height: 560});
+                            var HeadLinePoiDataPoiLevelScroll = new qx.ui.container.Scroll().set({width: 165, height: 560});
                             var TablePoiDataPoiLevel = new qx.ui.container.Composite(new qx.ui.layout.HBox(10).set({alignX: "center"}));
                             var TextPoiLevel = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             TextPoiLevel.add(new qx.ui.basic.Label('<b>Level</b>').set({rich: true}));
@@ -463,7 +464,7 @@
                             var HeadLinePoiDataTier = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             HeadLinePoiDataTier.add(new qx.ui.basic.Label('<big><u><b>POI-Tiers</b></u></big>').set({rich: true}));
                             HeadLinePoiDataTier.add(new qx.ui.basic.Label('').set({rich: true}));
-                            var HeadLinePoiDataTierScroll = new qx.ui.container.Scroll().set({width: 237, height: 560});
+                            var HeadLinePoiDataTierScroll = new qx.ui.container.Scroll().set({width: 243, height: 560});
                             var TablePoiDataTier = new qx.ui.container.Composite(new qx.ui.layout.HBox(10).set({alignX: "center"}));
                             var TextScorePoints = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             TextScorePoints.add(new qx.ui.basic.Label('<b>Points</b>').set({rich: true}));
@@ -678,7 +679,7 @@
                             this.GuiSellBasesVBox.add(HeaderTableResources);
 
                             // Tab 9: Sell special bases
-                            var HeaderTableSellSpecialBase = new qx.ui.container.Composite(new qx.ui.layout.HBox(50).set({alignX: "center"}));                            
+                            var HeaderTableSellSpecialBase = new qx.ui.container.Composite(new qx.ui.layout.HBox(50).set({alignX: "center"}));
                             var HeadLineSellSpecialBase = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             HeadLineSellSpecialBase.add(new qx.ui.basic.Label('<big><u><b>Sell special base</b></u></big>').set({rich: true}));
                             HeadLineSellSpecialBase.add(new qx.ui.basic.Label('').set({rich: true}));
@@ -1057,9 +1058,23 @@
                                         indexArrayPOILevelPointsNextRanking++;
                                     }
                                     TextPrevScore.add(new qx.ui.basic.Label(ArrayScorePoints[indexArrayScorePoints - 1].toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
-                                    TextNextScore.add(new qx.ui.basic.Label(ArrayScorePoints[indexArrayScorePoints].toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
+                                    if (indexArrayScorePoints < ArrayScorePoints.length)
+                                    {
+                                        TextNextScore.add(new qx.ui.basic.Label(ArrayScorePoints[indexArrayScorePoints].toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
+                                    }
+                                    else
+                                    {
+                                        TextNextScore.add(new qx.ui.basic.Label('n.a.').set({rich: true, alignX: 'right', height: 18}));
+                                    }
                                     TextDiffPrev.add(new qx.ui.basic.Label((poiRankScore[i].s - ArrayScorePoints[indexArrayScorePoints - 1]).toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
-                                    TextDiffNext.add(new qx.ui.basic.Label((ArrayScorePoints[indexArrayScorePoints] - poiRankScore[i].s).toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
+                                    if (indexArrayScorePoints < ArrayScorePoints.length)
+                                    {
+                                        TextDiffNext.add(new qx.ui.basic.Label((ArrayScorePoints[indexArrayScorePoints] - poiRankScore[i].s).toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
+                                    }
+                                    else
+                                    {
+                                        TextDiffNext.add(new qx.ui.basic.Label('n.a.').set({rich: true, alignX: 'right', height: 18}));
+                                    }
                                     if (indexArrayPOILevelPointsPrev + 12 < maxPoiLevel && indexArrayPOILevelPointsPrev >= 12)
                                     {
                                         TextPoiLevelDiffPrev.add(new qx.ui.basic.Label((indexArrayPOILevelPointsPrev + 12).toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
@@ -1068,9 +1083,13 @@
                                     {
                                         TextPoiLevelDiffPrev.add(new qx.ui.basic.Label('n.a.').set({rich: true, alignX: 'right', height: 18}));
                                     }
-                                    if (indexArrayPOILevelPointsNext + 12 <= maxPoiLevel)
+                                    if (indexArrayPOILevelPointsNext + 12 <= maxPoiLevel && indexArrayScorePoints < ArrayScorePoints.length)
                                     {
                                         TextPoiLevelDiffNext.add(new qx.ui.basic.Label((indexArrayPOILevelPointsNext + 12).toLocaleString()).set({rich: true, alignX: 'right', height: 18}));
+                                    }
+                                    else if (indexArrayPOILevelPointsNext + 12 <= maxPoiLevel)
+                                    {
+                                        TextPoiLevelDiffNext.add(new qx.ui.basic.Label('n.a.').set({rich: true, alignX: 'right', height: 18}));
                                     }
                                     else
                                     {
@@ -2544,7 +2563,7 @@
                                         {
                                             clearTimeout(timeoutScanClickedBase);
                                         }
-                                        this.ArrayIdsForScan = []; // fraglich, ob es was bringt - macht Sinn, da nicht 
+                                        this.ArrayIdsForScan = []; // fraglich, ob es was bringt - macht Sinn, da nicht
                                         this.ArrayIdsForScan.push(_newId);
                                         this.scanFirstLayout();
                                     }
