@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker
 // @namespace    TAInfoSticker
-// @version      1.11.10.4
+// @version      1.11.10.5
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author       unicode
@@ -39,7 +39,6 @@
                                 this.powIcon = "ui/common/icn_res_power.png";
                                 this.creditIcon = "ui/common/icn_res_dollar.png";
                                 this.repairIcon = "ui/icons/icn_repair_off_points.png";
-
                                 if (typeof phe.cnc.Util.attachNetEvent == 'undefined')
                                     this.attachEvent = webfrontend.gui.Util.attachNetEvent;
                                 else
@@ -326,7 +325,6 @@
                                     }),
                                     alignX: "right"
                                 });
-
                                 var labelStyle = {
                                     font: "bold",
                                     textColor: '#595969'
@@ -334,7 +332,6 @@
                                 titleLabel.set(labelStyle);
 
                                 var hidePane = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
-                                    
                                     alignX: "right"
                                 });
 
@@ -431,13 +428,13 @@
                             return value + unit;
                         },
                         createImage: function (icon, w, p) {
-                            w||(w=20);
+                            w || (w = 20);
                             var image = new qx.ui.basic.Image(icon);
                             image.setScale(true);
                             image.setWidth(20);
                             image.setHeight(20);
-                            p||(p=0);
-                            image.setPadding([0, p, 0, 0,]);
+                            p || (p = 0);
+                            image.setPadding([0, p, 0, 0, ]);
                             return image;
                         },
 
@@ -445,7 +442,7 @@
                             try {
                                 this.mcvInfoLabel = new qx.ui.basic.Label().set({
                                     font: "bold",
-                                    marginLeft:2,
+                                    marginLeft: 2,
                                     alignY: "middle"
                                 });
                                 this.mcvTimerLabel = new qx.ui.basic.Label().set({
@@ -567,7 +564,7 @@
                                     //width: 50,
                                     maxWidth: 37,
                                     alignY: "middle",
-                                    allowGrowY:false
+                                    allowGrowY: false
                                 });
 
                                 this.updatePinButtonDecoration();
@@ -601,7 +598,7 @@
                                     //width: 50,
                                     maxWidth: 37,
                                     alignY: "middle",
-                                    allowGrowY:false
+                                    allowGrowY: false
                                 });
 
                                 this.updateLockButtonDecoration();
@@ -664,7 +661,7 @@
                                 pane3.add(this.createHBox(this.createImage(this.cryIcon, 20), this.resourceLabel2, this.resourceLabel2per));
                                 pane3.add(this.createHBox(this.createImage(this.powIcon, 20, 4), this.resourceLabel3, this.resourceLabel3per));
 
-                                
+
                                 ////////////////////////////----------------------------------------------------------
 
                                 this.productionTitleLabel = new qx.ui.basic.Label();
@@ -804,6 +801,7 @@
                                 var cr = player.get_PlayerResearch();
                                 var cd = cr.GetResearchItemFomMdbId(cj);
 
+
                                 var app = qx.core.Init.getApplication();
                                 var b3 = app.getBaseNavigationBar().getChildren()[0].getChildren()[0];
                                 if (b3.getChildren().length == 0) return;
@@ -863,10 +861,10 @@
                                             backgroundImage: "webfrontend/ui/common/bgr_region_world_select_scaler.png",
                                             backgroundRepeat: "scale",
                                             widthLeft: 1,
-                                            widthRight : 1,
+                                            widthRight: 1,
                                             colorLeft: "#7F0707",
-                                            colorRight : "#7F0707"
-                                            
+                                            colorRight: "#7F0707"
+
                                         })
                                     });
 
@@ -882,16 +880,15 @@
                                     }
 
                                     this.top_image = new qx.ui.basic.Image("ui/common/bgr_messaging_t.png").set({
-                                     zIndex: 12,
-                                     marginRight: 3,
-                                     width:  124
+                                        zIndex: 12,
+                                        marginRight: 3,
+                                        width: 124
 
                                     });
-                                
                                     this.infoSticker.add(this.top_image);
-                                    this.top_image.addListener("appear", function(){
-                                    let flip = this.top_image.getContentElement().getDomElement();
-                                    flip.style.transform = "scale(-1, 1)";
+                                    this.top_image.addListener("appear", function () {
+                                        let flip = this.top_image.getContentElement().getDomElement();
+                                        flip.style.transform = "scale(-1, 1)";
                                     }, this);
                                     this.infoSticker.add(this.stickerBackground);
                                     //this.infoSticker.add(this.mcvPopup);
@@ -899,13 +896,13 @@
                                     this.bot_image = new qx.ui.basic.Image("ui/common/bgr_messaging_b.png").set({
                                         zIndex: 12,
                                         marginRight: 3,
-                                        width:  124
-                                       });;
+                                        width: 124
+                                    });
                                     this.infoSticker.add(this.bot_image);
-                                    this.top_image.addListener("appear", function(){
+                                    this.top_image.addListener("appear", function () {
                                         let flip = this.bot_image.getContentElement().getDomElement();
                                         flip.style.transform = "scale(-1, 1)";
-                                        }, this);
+                                    }, this);
                                     this.runPositionTimer();
 
                                     try {
@@ -925,45 +922,55 @@
                                         this.mcvTimerLabel.setValue("Loading");
                                         this.mcvResearchLabel.setValue("Loading");
                                     }
-                                } else {
-                                    var nextLevelInfo = cd.get_NextLevelInfo_Obj();
-                                    var resourcesNeeded = [];
-                                    for (var i in nextLevelInfo.rr) {
-                                        if (nextLevelInfo.rr[i].t > 0) {
-                                            resourcesNeeded[nextLevelInfo.rr[i].t] = nextLevelInfo.rr[i].c;
-                                        }
-                                    }
-                                    var researchNeeded = resourcesNeeded[ClientLib.Base.EResourceType.ResearchPoints];
-                                    var currentResearchPoints = player.get_ResearchPoints();
-                                    var XY = 100 / researchNeeded;
-                                    var XYX = currentResearchPoints;
-                                    var PercentageOfResearchPoints = XYX * XY;
-                                    var creditsNeeded = resourcesNeeded[ClientLib.Base.EResourceType.Gold];
-                                    var creditsResourceData = player.get_Credits();
-                                    var creditGrowthPerHour = (creditsResourceData.Delta + creditsResourceData.ExtraBonusDelta) * ClientLib.Data.MainData.GetInstance().get_Time().get_StepsPerHour();
-                                    var creditTimeLeftInHours = (creditsNeeded - player.GetCreditsCount()) / creditGrowthPerHour;
-                                    this.mcvInfoLabel.setValue("MCV ($ " + this.formatNumbersCompact(creditsNeeded) + ")");
-                                    //this.mcvInfoLabel.setValue("MCV<br>$" + this.formatNumbersCompact(creditsNeeded));
-                                    this.mcvTimerCreditProdLabel.setValue("at " + this.formatNumbersCompact(creditGrowthPerHour * 24) + "/1d");
-                                    if (creditTimeLeftInHours <= 0) {
-                                        this.mcvTimerLabel.setValue("Ready");
-                                    } else if (creditGrowthPerHour == 0) {
-                                        this.mcvTimerLabel.setValue("No Production");
-                                    } else {
-                                        if (creditTimeLeftInHours >= 24 * 100) {
-                                            this.mcvTimerLabel.setValue("> 99 days");
-                                        } else {
-                                            this.mcvTimerLabel.setValue(this.FormatTimespan(creditTimeLeftInHours * 60 * 60));
-                                        }
-                                    }
 
-                                    if (PercentageOfResearchPoints >= 100) {
-                                        this.mcvResearchLabel.setValue("RP: 100%");
-                                    } else {
-                                        this.mcvResearchLabel.setValue("RP: " + (PercentageOfResearchPoints).toFixed(2) + "%");
+
+                                } else {
+
+                                    var nextLevelInfo = cd.get_NextLevelInfo_Obj();
+                                    //MOD for max bases
+                                    if (ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().c > 30 && nextLevelInfo == null) {
+                                        if (this.mcvPopup) {
+                                            this.mcvInfoLabel.setValue("MCV<br>$???");
+                                            this.mcvTimerLabel.setValue("Max Bases Reached");
+                                        }
+                                    } else if (nextLevelInfo !== null) {
+                                        var resourcesNeeded = [];
+                                        for (var i in nextLevelInfo.rr) {
+                                            if (nextLevelInfo.rr[i].t > 0) {
+                                                resourcesNeeded[nextLevelInfo.rr[i].t] = nextLevelInfo.rr[i].c;
+                                            }
+                                        }
+                                        var researchNeeded = resourcesNeeded[ClientLib.Base.EResourceType.ResearchPoints];
+                                        var currentResearchPoints = player.get_ResearchPoints();
+                                        var XY = 100 / researchNeeded;
+                                        var XYX = currentResearchPoints;
+                                        var PercentageOfResearchPoints = XYX * XY;
+                                        var creditsNeeded = resourcesNeeded[ClientLib.Base.EResourceType.Gold];
+                                        var creditsResourceData = player.get_Credits();
+                                        var creditGrowthPerHour = (creditsResourceData.Delta + creditsResourceData.ExtraBonusDelta) * ClientLib.Data.MainData.GetInstance().get_Time().get_StepsPerHour();
+                                        var creditTimeLeftInHours = (creditsNeeded - player.GetCreditsCount()) / creditGrowthPerHour;
+                                        this.mcvInfoLabel.setValue("MCV ($ " + this.formatNumbersCompact(creditsNeeded) + ")");
+                                        //this.mcvInfoLabel.setValue("MCV<br>$" + this.formatNumbersCompact(creditsNeeded));
+                                        this.mcvTimerCreditProdLabel.setValue("at " + this.formatNumbersCompact(creditGrowthPerHour * 24) + "/1d");
+                                        if (creditTimeLeftInHours <= 0) {
+                                            this.mcvTimerLabel.setValue("Ready");
+                                        } else if (creditGrowthPerHour == 0) {
+                                            this.mcvTimerLabel.setValue("No Production");
+                                        } else {
+                                            if (creditTimeLeftInHours >= 24 * 100) {
+                                                this.mcvTimerLabel.setValue("> 99 days");
+                                            } else {
+                                                this.mcvTimerLabel.setValue(this.FormatTimespan(creditTimeLeftInHours * 60 * 60));
+                                            }
+                                        }
+
+                                        if (PercentageOfResearchPoints >= 100) {
+                                            this.mcvResearchLabel.setValue("RP: 100%");
+                                        } else {
+                                            this.mcvResearchLabel.setValue("RP: " + (PercentageOfResearchPoints).toFixed(2) + "%");
+                                        }
                                     }
                                 }
-
                                 var ncity = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity();
                                 if (ncity == null) {
                                     if (this.mcvPopup) {
