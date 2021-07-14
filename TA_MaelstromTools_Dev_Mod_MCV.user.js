@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.7 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.4.9 Beta2
+// @version     0.1.5.0
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option (see first comments for changelog)
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -46,7 +46,8 @@ codes by NetquiK
 - Close Chat at start option
 - Gain per Hour fix for buildings that have packages <12 level
 - new MCV toggle view function and button with save state
-- Fix for maxlevelworld upgrade in priority list
+- Fix+ for maxlevelworld upgrade in priority list
+- Fix selection under AllianceMarker for UpdateLoot
 ----------------
 */
 
@@ -3322,18 +3323,19 @@ codes by NetquiK
                 };
                 if (MT_Preferences.Settings.showLoot) {
                     // Wrap onCitiesChange method
+                    // MOD to fix selection under AllianceMarker by NetquiK
                     if (!webfrontend.gui.region.RegionNPCCampStatusInfo.prototype.__MTCity_NPCCamp) {
                         webfrontend.gui.region.RegionNPCCampStatusInfo.prototype.__MTCity_NPCCamp = webfrontend.gui.region.RegionNPCCampStatusInfo.prototype.onCitiesChange;
                     }
                     webfrontend.gui.region.RegionNPCCampStatusInfo.prototype.onCitiesChange = function () {
-                        MT_Base.updateLoot(1, ClientLib.Vis.VisMain.GetInstance().get_SelectedObject(), webfrontend.gui.region.RegionNPCCampStatusInfo.getInstance());
+                        MT_Base.updateLoot(1, webfrontend.gui.region.RegionNPCCampStatusInfo.getInstance()._selectedObject, webfrontend.gui.region.RegionNPCCampStatusInfo.getInstance());
                         return this.__MTCity_NPCCamp();
                     };
                     if (!webfrontend.gui.region.RegionNPCBaseStatusInfo.prototype.__MTCity_NPCBase) {
                         webfrontend.gui.region.RegionNPCBaseStatusInfo.prototype.__MTCity_NPCBase = webfrontend.gui.region.RegionNPCBaseStatusInfo.prototype.onCitiesChange;
                     }
                     webfrontend.gui.region.RegionNPCBaseStatusInfo.prototype.onCitiesChange = function () {
-                        MT_Base.updateLoot(2, ClientLib.Vis.VisMain.GetInstance().get_SelectedObject(), webfrontend.gui.region.RegionNPCBaseStatusInfo.getInstance());
+                        MT_Base.updateLoot(2, webfrontend.gui.region.RegionNPCBaseStatusInfo.getInstance()._selectedObject, webfrontend.gui.region.RegionNPCBaseStatusInfo.getInstance());
                         //MT_Base.updateLoot(2, ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity(), webfrontend.gui.region.RegionNPCBaseStatusInfo.getInstance());
                         return this.__MTCity_NPCBase();
                     };
@@ -3341,7 +3343,7 @@ codes by NetquiK
                         webfrontend.gui.region.RegionCityStatusInfoEnemy.prototype.__MTCity_City = webfrontend.gui.region.RegionCityStatusInfoEnemy.prototype.onCitiesChange;
                     }
                     webfrontend.gui.region.RegionCityStatusInfoEnemy.prototype.onCitiesChange = function () {
-                        MT_Base.updateLoot(3, ClientLib.Vis.VisMain.GetInstance().get_SelectedObject(), webfrontend.gui.region.RegionCityStatusInfoEnemy.getInstance());
+                        MT_Base.updateLoot(3, webfrontend.gui.region.RegionCityStatusInfoEnemy.getInstance()._selectedObject, webfrontend.gui.region.RegionCityStatusInfoEnemy.getInstance());
                         //MT_Base.updateLoot(3, ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity(), webfrontend.gui.region.RegionCityStatusInfoEnemy.getInstance());
                         return this.__MTCity_City();
                     };
