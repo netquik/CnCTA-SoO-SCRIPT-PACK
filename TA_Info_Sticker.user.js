@@ -1,13 +1,20 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker
 // @namespace    TAInfoSticker
-// @version      1.11.10.5
+// @version      1.11.10.6
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author       unicode
-// @contributor  NetquiK (https://github.com/netquik) GUI FIX
+// @contributor  NetquiK (https://github.com/netquik) (see first comments for changelog)
 // @updateURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Info_Sticker.user.js
 // ==/UserScript==
+/* 
+codes by NetquiK
+----------------
+- GUI Fix and Optimize
+- Fix for 21.3 Patch ReorderBaseNavigationBar
+----------------
+*/
 (function () {
     var InfoSticker_main = function () {
         try {
@@ -45,6 +52,10 @@
                                     this.attachEvent = phe.cnc.Util.attachNetEvent;
 
                                 this.runMainTimer();
+                                //MOD Fix for 21.3 reorder BaseNavigationBar
+                                let barfix = this.getBaseListBar();
+                                barfix.addListener('dragstart', this.reorderfix, this);
+                                barfix.addListener('drop', this.reorderend, this);
                             } catch (e) {
                                 console.log("InfoSticker.initialize: ", e.toString());
                             }
@@ -53,7 +64,7 @@
                             try {
                                 var self = this;
                                 this.calculateInfoData();
-                                window.setTimeout(function () {
+                                this.MainTimer = window.setTimeout(function () { //Named
                                     self.runMainTimer();
                                 }, this.dataTimerInterval);
                             } catch (e) {
@@ -64,7 +75,7 @@
                             try {
                                 var self = this;
                                 this.repositionSticker();
-                                window.setTimeout(function () {
+                                this.PositionTimer = window.setTimeout(function () { //Named
                                     self.runPositionTimer();
                                 }, this.positionInterval);
                             } catch (e) {
@@ -161,6 +172,40 @@
                             }
                             return null;
                         },
+                        //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
+                        reorderend: function () {
+                            try {
+                                this.calculateInfoData();
+                                this.runMainTimer();
+                                this.runPositionTimer();
+                            } catch (e) {
+                                console.log("InfoSticker Reorderend: ", e.toString());
+                            }
+
+                        },
+                        //MOD Fix for 21.3 reorder BaseNavigationBar reorderfix
+                        reorderfix: function () {
+                            try {
+                                var self = this;
+                                var baseListBar = this.getBaseListBar();
+
+                                if (baseListBar.indexOf(this.mcvPopup) >= 0) {
+                                    baseListBar.remove(this.mcvPopup);
+                                    this.mcvPopup.dispose();
+                                }
+
+                                if (baseListBar.indexOf(this.mcvPane) >= 0) {
+                                    baseListBar.remove(this.mcvPane);
+                                    this.mcvPane.dispose();
+                                }
+                                clearTimeout(this.PositionTimer);
+                                clearTimeout(this.MainTimer);
+                            } catch (e) {
+                                console.log("InfoSticker Reorderfix: ", e.toString());
+                            }
+
+                        },
+
 
                         repositionSticker: function () {
                             try {
