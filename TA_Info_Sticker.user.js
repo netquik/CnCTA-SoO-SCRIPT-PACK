@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker
 // @namespace    TAInfoSticker
-// @version      1.11.10.6
+// @version      1.11.10.7
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author       unicode
@@ -56,6 +56,7 @@ codes by NetquiK
                                 let barfix = this.getBaseListBar();
                                 barfix.addListener('dragstart', this.reorderfix, this);
                                 barfix.addListener('drop', this.reorderend, this);
+                                //PerforceChangelist==477664
                                 var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
                                 var WgbBarConstruct = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar);
                                 var WgbBarReorderFunc = WgbBarConstruct.match( /(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
@@ -793,22 +794,18 @@ codes by NetquiK
                             this.repositionSticker();
                         },
                         disposeRecover: function () {
-
                             try {
-                                if (this.mcvPane.isDisposed()) {
+                                if (this.mcvPane.isDisposed() || this.getBaseListBar().indexOf(this.mcvPane) == -1) {
                                     this.createMCVPane();
                                 }
-
                                 if (this.mcvPopup.isDisposed()) {
                                     this.createMCVPopup();
-
                                     this.repositionSticker();
                                 }
                                 this.waitingRecovery = false;
                             } catch (e) {
                                 console.log("InfoSticker: disposeRecover", e.toString());
                             }
-
                         },
                         waitingRecovery: false,
                         citiesChange: function () {
