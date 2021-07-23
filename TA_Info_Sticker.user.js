@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker
 // @namespace    TAInfoSticker
-// @version      1.11.10.7
+// @version      1.11.10.8
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author       unicode
@@ -56,13 +56,14 @@ codes by NetquiK
                                 let barfix = this.getBaseListBar();
                                 barfix.addListener('dragstart', this.reorderfix, this);
                                 barfix.addListener('drop', this.reorderend, this);
-                                //PerforceChangelist==477664
                                 var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
-                                var WgbBarConstruct = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar);
-                                var WgbBarReorderFunc = WgbBarConstruct.match( /(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
+                                var WgbBarReorderFunc = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar).match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
                                 WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);\}/)[1];
-                                var NewReorderFunc = WgbBar[WgbBarReorderFunc].toString().replace(/function\(\){(.*})([a-zA-Z]+\.push\(\{Id\:([a-zA-Z]+)\.getBaseId)(.*)}/, '$1"function"===typeof $3.getBaseId&&$2$4').replace('!=J','!=""');
-                                WgbBar[WgbBarReorderFunc] = new Function('', NewReorderFunc);
+                                //var NewReorderFunc = WgbBar[WgbBarReorderFunc].toString().replace(/function\(\){(.*})([a-zA-Z]+\.push\(\{Id\:([a-zA-Z]+)\.getBaseId)(.*)}/, '$1"function"===typeof $3.getBaseId&&$2$4').replace('!=J','!=""');
+                                //WgbBar[WgbBarReorderFunc] = new Function('', NewReorderFunc);
+                                this.ButtonResetOrderMethod = WgbBarReorderFunc;
+                                this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
+                                WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
                             } catch (e) {
                                 console.log("InfoSticker.initialize: ", e.toString());
                             }
@@ -178,6 +179,18 @@ codes by NetquiK
                                 }
                             }
                             return null;
+                        },
+                        //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
+                        NewButtonResetOrder: function () {
+                            try {
+                                var _this = InfoSticker.Base.getInstance();
+                                _this.reorderfix();
+                                let callback = _this.OldButtonResetOrder.bind(this);
+                                callback();
+                                _this.reorderend();
+                            } catch (e) {
+                                console.log("InfoSticker ReorderButton: ", e.toString());
+                            }
                         },
                         //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
                         reorderend: function () {
@@ -795,7 +808,7 @@ codes by NetquiK
                         },
                         disposeRecover: function () {
                             try {
-                                if (this.mcvPane.isDisposed() || this.getBaseListBar().indexOf(this.mcvPane) == -1) {
+                                if (this.mcvPane.isDisposed()) {
                                     this.createMCVPane();
                                 }
                                 if (this.mcvPopup.isDisposed()) {
