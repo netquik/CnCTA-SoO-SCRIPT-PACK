@@ -12,7 +12,7 @@
 codes by NetquiK
 ----------------
 - GUI Fix and Optimize
-- Fix for 21.3 Patch ReorderBaseNavigationBar
+- Fix for 21.3 Patch ReorderBaseNavigationBar + ResetButton
 ----------------
 */
 (function () {
@@ -56,6 +56,12 @@ codes by NetquiK
                                 let barfix = this.getBaseListBar();
                                 barfix.addListener('dragstart', this.reorderfix, this);
                                 barfix.addListener('drop', this.reorderend, this);
+                                var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
+                                var WgbBarConstruct = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar);
+                                var WgbBarReorderFunc = WgbBarConstruct.match( /(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
+                                WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);\}/)[1];
+                                var NewReorderFunc = WgbBar[WgbBarReorderFunc].toString().replace(/function\(\){(.*})([a-zA-Z]+\.push\(\{Id\:([a-zA-Z]+)\.getBaseId)(.*)}/, '$1"function"===typeof $3.getBaseId&&$2$4').replace('!=J','!=""');
+                                WgbBar[WgbBarReorderFunc] = new Function('', NewReorderFunc);
                             } catch (e) {
                                 console.log("InfoSticker.initialize: ", e.toString());
                             }
@@ -175,25 +181,21 @@ codes by NetquiK
                         //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
                         reorderend: function () {
                             try {
-                                this.calculateInfoData();
+                                this.disposeRecover();
                                 this.runMainTimer();
                                 this.runPositionTimer();
                             } catch (e) {
                                 console.log("InfoSticker Reorderend: ", e.toString());
                             }
-
                         },
                         //MOD Fix for 21.3 reorder BaseNavigationBar reorderfix
                         reorderfix: function () {
                             try {
-                                var self = this;
                                 var baseListBar = this.getBaseListBar();
-
                                 if (baseListBar.indexOf(this.mcvPopup) >= 0) {
                                     baseListBar.remove(this.mcvPopup);
                                     this.mcvPopup.dispose();
                                 }
-
                                 if (baseListBar.indexOf(this.mcvPane) >= 0) {
                                     baseListBar.remove(this.mcvPane);
                                     this.mcvPane.dispose();
@@ -203,10 +205,7 @@ codes by NetquiK
                             } catch (e) {
                                 console.log("InfoSticker Reorderfix: ", e.toString());
                             }
-
                         },
-
-
                         repositionSticker: function () {
                             try {
                                 var i;
