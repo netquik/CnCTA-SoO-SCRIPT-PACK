@@ -118,13 +118,13 @@
               setTimeout(this.resizeIcon.bind(this), 1000, icon, size);
               return;
             }
-            if (icon._getContentHint().height > icon._getContentHint().width) 
+            if (icon._getContentHint().height > icon._getContentHint().width)
               newWidth = icon._getContentHint().width * (size / icon._getContentHint().height);
-             else{
+            else {
               newWidth = size;
               size = icon._getContentHint().height * (size / icon._getContentHint().width);
-             }
-            
+            }
+
             icon.set({
               scale: true,
               width: parseInt(newWidth, 10),
@@ -170,18 +170,19 @@
                 webfrontend.gui.region.RegionCityMenu.prototype.onTickAttPatch;
             }
             webfrontend.gui.region.RegionCityMenu.prototype.updateAtkBtn = function () {
-              if (typeof this.selectedVisObject === "undefined" || this.selectedVisObject === null) {
+              if (typeof this.selectedVisObject === "undefined" || this.selectedVisObject === null || this.selectedVisObject.get_VisObjectType() !== ClientLib.Vis.VisObject.EObjectType.RegionNPCBase) {
                 return;
               }
               if (typeof this.atkBtn === "undefined") {
                 BaseShare.getInstance().setInfo();
-                this.atkBtn = [];
+                //this.atkBtn = [];
                 for (var i in this) {
                   if (this[i] && this[i].basename == "Composite") {
                     var children = this[i].getChildren();
                     for (var child in children) {
-                      if (children[child].basename == "SoundButton" && children[child].getLabel().indexOf("!") != -1) {
-                        this.atkBtn.push(children[child]);
+                      if (children[child].basename == "SoundButton" && children[child].getLabel().indexOf("!") != -1 && children[child].isSeeable()) {
+                        //this.atkBtn.push(children[child]);
+                        this.atkBtn = children[child];
                         break;
                       }
                     }
@@ -195,7 +196,7 @@
               var scanner = BaseShare.getInstance();
               var cityId = city.get_Id();
               //console.log(city.get_Id() + " " + city.get_OwnerId());
-              if (city.get_OwnerId() === 0 && this.selectedVisObject.get_VisObjectType() === ClientLib.Vis.VisObject.EObjectType.RegionNPCBase && this.selectedVisObject.get_ConditionDefense() === 100 && this.selectedVisObject.get_ConditionBuildings() === 100) {
+              if (city.get_OwnerId() === 0 && this.selectedVisObject.get_ConditionDefense() === 100 && this.selectedVisObject.get_ConditionBuildings() === 100) {
                 var minDistance = -1;
                 var cities = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
                 for (var id in cities) {
@@ -242,10 +243,13 @@
                 return;
               }
               if (city.get_OwnerId() === 0 && (typeof scanner.requested[cityId] === "undefined" || scanner.requested[cityId] === null)) return;
-              for (var i = 0; i < this.atkBtn.length; i++) {
-                if (this.atkBtn[i].isVisible()) {
-                  this.atkBtn[i].setEnabled(true);
-                }
+              /*  for (var i = 0; i < this.atkBtn.length; i++) {
+                 if (this.atkBtn[i].isVisible() && !this.atkBtn[i].isEnabled()) {
+                   this.atkBtn[i].setEnabled(true);
+                 }
+               } */
+              if (this.atkBtn.isVisible() && !this.atkBtn.isEnabled()) {
+                this.atkBtn.setEnabled(true);
               }
             };
             webfrontend.gui.region.RegionCityMenu.prototype.showMenuAttPatch =
