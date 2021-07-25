@@ -56,14 +56,18 @@ codes by NetquiK
                                 let barfix = this.getBaseListBar();
                                 barfix.addListener('dragstart', this.reorderfix, this);
                                 barfix.addListener('drop', this.reorderend, this);
-                                var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
-                                var WgbBarReorderFunc = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar).match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
-                                WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);\}/)[1];
-                                //var NewReorderFunc = WgbBar[WgbBarReorderFunc].toString().replace(/function\(\){(.*})([a-zA-Z]+\.push\(\{Id\:([a-zA-Z]+)\.getBaseId)(.*)}/, '$1"function"===typeof $3.getBaseId&&$2$4').replace('!=J','!=""');
-                                //WgbBar[WgbBarReorderFunc] = new Function('', NewReorderFunc);
-                                this.ButtonResetOrderMethod = WgbBarReorderFunc;
-                                this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
-                                WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
+                                if (PerforceChangelist >= 477664) {
+                                    try {
+                                        var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
+                                        var WgbBarReorderFunc = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar).match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
+                                        WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);\}/)[1];
+                                        this.ButtonResetOrderMethod = WgbBarReorderFunc;
+                                        this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
+                                        WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
+                                    } catch (w) {
+                                        console.log("InfoSticker.initialize: Patch 21.3", e.toString());
+                                    }
+                                }
                             } catch (e) {
                                 console.log("InfoSticker.initialize: ", e.toString());
                             }
@@ -195,6 +199,9 @@ codes by NetquiK
                         //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
                         reorderend: function () {
                             try {
+                                if (typeof localStorage["infoSticker-mcvHide"] !== "undefined") {
+                                    this.mcvHide = localStorage["infoSticker-mcvHide"] == "true";
+                                }
                                 this.disposeRecover();
                                 this.runMainTimer();
                                 this.runPositionTimer();
