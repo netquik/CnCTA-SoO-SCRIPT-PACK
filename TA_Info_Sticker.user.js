@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker
 // @namespace    TAInfoSticker
-// @version      1.11.10.8
+// @version      1.11.10.9
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author       unicode
@@ -53,10 +53,12 @@ codes by NetquiK
 
                                 this.runMainTimer();
                                 //MOD Fix for 21.3 reorder BaseNavigationBar
+                                if (PerforceChangelist >= 477664) { // >=21.3
                                 let barfix = this.getBaseListBar();
-                                barfix.addListener('dragstart', this.reorderfix, this);
-                                barfix.addListener('drop', this.reorderend, this);
-                                if (PerforceChangelist >= 477664) {
+                                if (barfix.hasListener('drop')) {
+                                    barfix.addListener('dragstart', this.reorderfix, this);
+                                    barfix.addListener('drop', this.reorderend, this);
+                                }                   
                                     try {
                                         var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
                                         var WgbBarReorderFunc = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar).match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
