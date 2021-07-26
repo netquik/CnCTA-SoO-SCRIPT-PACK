@@ -1,13 +1,20 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker
 // @namespace    TAInfoSticker
-// @version      1.11.10.5
+// @version      1.11.10.9
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author       unicode
-// @contributor  NetquiK (https://github.com/netquik) GUI FIX
+// @contributor  NetquiK (https://github.com/netquik) (see first comments for changelog)
 // @updateURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Info_Sticker.user.js
 // ==/UserScript==
+/* 
+codes by NetquiK
+----------------
+- GUI Fix and Optimize
+- Fix for 21.3 Patch ReorderBaseNavigationBar + ResetButton
+----------------
+*/
 (function () {
     var InfoSticker_main = function () {
         try {
@@ -45,6 +52,24 @@
                                     this.attachEvent = phe.cnc.Util.attachNetEvent;
 
                                 this.runMainTimer();
+                                //MOD Fix for 21.3 reorder BaseNavigationBar
+                                if (PerforceChangelist >= 477664) { // >=21.3
+                                let barfix = this.getBaseListBar();
+                                if (barfix.hasListener('drop')) {
+                                    barfix.addListener('dragstart', this.reorderfix, this);
+                                    barfix.addListener('drop', this.reorderend, this);
+                                }                   
+                                    try {
+                                        var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
+                                        var WgbBarReorderFunc = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar).match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
+                                        WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);\}/)[1];
+                                        this.ButtonResetOrderMethod = WgbBarReorderFunc;
+                                        this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
+                                        WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
+                                    } catch (w) {
+                                        console.log("InfoSticker.initialize: Patch 21.3", e.toString());
+                                    }
+                                }
                             } catch (e) {
                                 console.log("InfoSticker.initialize: ", e.toString());
                             }
@@ -53,7 +78,7 @@
                             try {
                                 var self = this;
                                 this.calculateInfoData();
-                                window.setTimeout(function () {
+                                this.MainTimer = window.setTimeout(function () { //Named
                                     self.runMainTimer();
                                 }, this.dataTimerInterval);
                             } catch (e) {
@@ -64,7 +89,7 @@
                             try {
                                 var self = this;
                                 this.repositionSticker();
-                                window.setTimeout(function () {
+                                this.PositionTimer = window.setTimeout(function () { //Named
                                     self.runPositionTimer();
                                 }, this.positionInterval);
                             } catch (e) {
@@ -161,7 +186,49 @@
                             }
                             return null;
                         },
-
+                        //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
+                        NewButtonResetOrder: function () {
+                            try {
+                                var _this = InfoSticker.Base.getInstance();
+                                _this.reorderfix();
+                                let callback = _this.OldButtonResetOrder.bind(this);
+                                callback();
+                                _this.reorderend();
+                            } catch (e) {
+                                console.log("InfoSticker ReorderButton: ", e.toString());
+                            }
+                        },
+                        //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
+                        reorderend: function () {
+                            try {
+                                if (typeof localStorage["infoSticker-mcvHide"] !== "undefined") {
+                                    this.mcvHide = localStorage["infoSticker-mcvHide"] == "true";
+                                }
+                                this.disposeRecover();
+                                this.runMainTimer();
+                                this.runPositionTimer();
+                            } catch (e) {
+                                console.log("InfoSticker Reorderend: ", e.toString());
+                            }
+                        },
+                        //MOD Fix for 21.3 reorder BaseNavigationBar reorderfix
+                        reorderfix: function () {
+                            try {
+                                var baseListBar = this.getBaseListBar();
+                                if (baseListBar.indexOf(this.mcvPopup) >= 0) {
+                                    baseListBar.remove(this.mcvPopup);
+                                    this.mcvPopup.dispose();
+                                }
+                                if (baseListBar.indexOf(this.mcvPane) >= 0) {
+                                    baseListBar.remove(this.mcvPane);
+                                    this.mcvPane.dispose();
+                                }
+                                clearTimeout(this.PositionTimer);
+                                clearTimeout(this.MainTimer);
+                            } catch (e) {
+                                console.log("InfoSticker Reorderfix: ", e.toString());
+                            }
+                        },
                         repositionSticker: function () {
                             try {
                                 var i;
@@ -749,22 +816,18 @@
                             this.repositionSticker();
                         },
                         disposeRecover: function () {
-
                             try {
                                 if (this.mcvPane.isDisposed()) {
                                     this.createMCVPane();
                                 }
-
                                 if (this.mcvPopup.isDisposed()) {
                                     this.createMCVPopup();
-
                                     this.repositionSticker();
                                 }
                                 this.waitingRecovery = false;
                             } catch (e) {
                                 console.log("InfoSticker: disposeRecover", e.toString());
                             }
-
                         },
                         waitingRecovery: false,
                         citiesChange: function () {
