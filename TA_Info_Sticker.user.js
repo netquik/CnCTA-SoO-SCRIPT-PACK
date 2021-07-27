@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker
 // @namespace    TAInfoSticker
-// @version      1.11.10.9
+// @version      1.11.11
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author       unicode
@@ -54,11 +54,11 @@ codes by NetquiK
                                 this.runMainTimer();
                                 //MOD Fix for 21.3 reorder BaseNavigationBar
                                 if (PerforceChangelist >= 477664) { // >=21.3
-                                let barfix = this.getBaseListBar();
-                                if (barfix.hasListener('drop')) {
-                                    barfix.addListener('dragstart', this.reorderfix, this);
-                                    barfix.addListener('drop', this.reorderend, this);
-                                }                   
+                                    let barfix = this.getBaseListBar();
+                                    if (barfix.hasListener('drop')) {
+                                        barfix.addListener('dragstart', this.reorderfix, this);
+                                        barfix.addListener('drop', this.reorderend, this);
+                                    }
                                     try {
                                         var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
                                         var WgbBarReorderFunc = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar).match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
@@ -201,9 +201,12 @@ codes by NetquiK
                         //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
                         reorderend: function () {
                             try {
-                                if (typeof localStorage["infoSticker-mcvHide"] !== "undefined") {
-                                    this.mcvHide = localStorage["infoSticker-mcvHide"] == "true";
-                                }
+                                this.mcvHide = localStorage.getItem("infoSticker-mcvHide") == "true";
+                                this.repairHide = localStorage.getItem("infoSticker-repairHide") == "true";
+                                this.rtHide = localStorage.getItem("infoSticker-repairHide") == "true";
+                                this.resourceHide = localStorage.getItem("infoSticker-resourceHide") == "true";
+                                this.productionHide = localStorage.getItem("infoSticker-productionHide") == "true";
+                                this.contProductionHide = localStorage.getItem("infoSticker-contProductionHide") == "true";
                                 this.disposeRecover();
                                 this.runMainTimer();
                                 this.runPositionTimer();

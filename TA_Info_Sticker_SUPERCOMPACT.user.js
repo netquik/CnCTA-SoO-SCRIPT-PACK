@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker (SUPERCompact)
 // @namespace    TAInfoSticker
-// @version      1.11.10.9
+// @version      1.11.11
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author       unicode
@@ -53,26 +53,23 @@ codes by NetquiK
 
                                 this.runMainTimer();
                                 //MOD Fix for 21.3 reorder BaseNavigationBar
-                                let barfix = this.getBaseListBar();
-                                barfix.addListener('dragstart', this.reorderfix, this);
-                                barfix.addListener('drop', this.reorderend, this);
                                 if (PerforceChangelist >= 477664) { // >=21.3
                                     let barfix = this.getBaseListBar();
                                     if (barfix.hasListener('drop')) {
                                         barfix.addListener('dragstart', this.reorderfix, this);
                                         barfix.addListener('drop', this.reorderend, this);
-                                    }                   
-                                        try {
-                                            var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
-                                            var WgbBarReorderFunc = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar).match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
-                                            WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);\}/)[1];
-                                            this.ButtonResetOrderMethod = WgbBarReorderFunc;
-                                            this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
-                                            WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
-                                        } catch (w) {
-                                            console.log("InfoSticker.initialize: Patch 21.3", e.toString());
-                                        }
                                     }
+                                    try {
+                                        var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
+                                        var WgbBarReorderFunc = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar).match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
+                                        WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);\}/)[1];
+                                        this.ButtonResetOrderMethod = WgbBarReorderFunc;
+                                        this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
+                                        WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
+                                    } catch (w) {
+                                        console.log("InfoSticker.initialize: Patch 21.3", e.toString());
+                                    }
+                                }
                             } catch (e) {
                                 console.log("InfoSticker.initialize: ", e.toString());
                             }
@@ -204,7 +201,10 @@ codes by NetquiK
                         //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
                         reorderend: function () {
                             try {
-                                this.repositionSticker();
+                                this.repairHide = localStorage.getItem("infoSticker-repairHide") == "true";
+                                this.rtHide = localStorage.getItem("infoSticker-repairHide") == "true";
+                                this.resourceHide = localStorage.getItem("infoSticker-resourceHide") == "true";
+                                this.disposeRecover();
                                 this.runMainTimer();
                                 this.runPositionTimer();
                             } catch (e) {
@@ -214,13 +214,10 @@ codes by NetquiK
                         //MOD Fix for 21.3 reorder BaseNavigationBar reorderfix
                         reorderfix: function () {
                             try {
-                                var self = this;
                                 var baseListBar = this.getBaseListBar();
                                 if (baseListBar.indexOf(this.mcvPopup) >= 0) {
                                     baseListBar.remove(this.mcvPopup);
-                                }
-                                if (baseListBar.indexOf(this.mcvPane) >= 0) {
-                                    baseListBar.remove(this.mcvPane);
+                                    this.mcvPopup.dispose();
                                 }
                                 clearTimeout(this.PositionTimer);
                                 clearTimeout(this.MainTimer);
@@ -818,10 +815,10 @@ codes by NetquiK
                                 /*if(this.mcvPane.isDisposed()) {
                                     this.createMCVPane();
                                 }
-                                
-                                if(this.mcvPopup.isDisposed()) {
+                                */
+                                if (this.mcvPopup.isDisposed()) {
                                     this.createMCVPopup();
-                                 }*/
+                                }
                                 this.repositionSticker();
 
                                 this.waitingRecovery = false;
