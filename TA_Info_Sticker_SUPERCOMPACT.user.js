@@ -53,7 +53,7 @@ codes by NetquiK
 
                                 this.runMainTimer();
                                 //MOD Fix for 21.3 reorder BaseNavigationBar
-                                if (PerforceChangelist >= 477664) { // >=21.3
+                                if (parseFloat(GameVersion) >= 21.3) { // 21.3 Check
                                     let barfix = this.getBaseListBar();
                                     if (barfix.hasListener('drop')) {
                                         barfix.addListener('dragstart', this.reorderfix, this);
