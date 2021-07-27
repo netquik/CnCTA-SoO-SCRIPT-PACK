@@ -38,7 +38,7 @@
 			// Use 3 for Bottom-Right (Left from the ServerInfo Area)
 			// Use 4 for Bottom-Left (Top of the Chat)
 			//
-			var BIBUTTONPOSITION = 1; // <- Change only the Number
+			var BIBUTTONPOSITION = 3; // <- Change only the Number
 			//
 			// ########################################### //
 			// ####### E N D  O F  S E T T I N G S ####### //
