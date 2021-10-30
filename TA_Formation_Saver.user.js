@@ -3,9 +3,19 @@
 // @description    Allows you to save attack formations
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version        2.3
+// @version        2.3.1
 // @author         Panavia, KRS_L, DebitoSphere
+// @contributor  NetquiK (https://github.com/netquik) (see first comments for changelog)
+// @updateURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Formation_Saver.user.js
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- Fix for 21.4 topPOIInfoLayout
+----------------
+*/
+
 (function () {
   var tafs_main = function () {
     var windowSaver;
@@ -343,8 +353,13 @@
 
       windowSaver = new webfrontend.gui.PlayArea.FormationSaver();
       windowSaver.hide();
+      let top_pos;
+      //MOD Fix for 21.4 topPOIInfoLayout
+      if (parseFloat(GameVersion) >= 21.4) { // 21.4 Check
+        top_pos = 125;
+      } else top_pos = 55;
       qx.core.Init.getApplication().getPlayArea().add(windowSaver, {
-        top: 55,
+        top: top_pos,
         right: -2
       });
 
