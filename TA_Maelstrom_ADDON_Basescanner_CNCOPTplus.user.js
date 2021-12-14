@@ -1,24 +1,31 @@
 // ==UserScript==
 // @name        Maelstrom ADDON Basescanner + cncoptplus growth rate
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-
-
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner
-// @version     1.8.10.1
-// @author      BlinDManX + chertosha + Netquik(fix for server update)
-
-
-
+// @version     1.8.11
+// @author      BlinDManX + chertosha + Netquik
+// @contributor Netquik (https://github.com/netquik)
+// @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_CNCOPTplus.user.js
 // @grant       none
 // @copyright   2012+, Claus Neumann
 // @license     CC BY-NC-ND 3.0 - http://creativecommons.org/licenses/by-nc-nd/3.0/
 // @downloadURL https://chertosha.com/maelstrombasescanplus.js
 // ==/UserScript==
+
+
+/* 
+codes by NetquiK
+----------------
+- Fix for server update
+- Fix needcp when cached city
+----------------
+*/
+
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.0 Basic";
+        window.__msbs_version = "1.8.11";
 
         function createMaelstromTools_Basescanner() {
             qx.Class.define("Addons.BaseScannerGUI", {
@@ -668,6 +675,8 @@
                                                     // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
                                                     // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
                                                     var d = this.FL(object.getID(), 0);
+                                                    //MOD Fix needcp when cached city by Netquik
+                                                    null != d && d[13] !== needcp && (d[13] = needcp);
                                                     var e = this.FL(object.getID(), 1);
                                                     if (e != null) {
                                                         this.ZM[object.getID()] = e;
