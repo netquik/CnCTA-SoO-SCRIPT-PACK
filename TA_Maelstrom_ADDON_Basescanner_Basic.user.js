@@ -1,22 +1,30 @@
 // ==UserScript==
 // @name        Maelstrom ADDON Basescanner
 // @description Maelstrom ADDON Basescanner
-// @downloadURL https://raw.githubusercontent.com/leo7044/CnC_TA/master/Maelstrom_ADDON_Basescanner_41CP_Mod.user.js
-// @updateURL   https://raw.githubusercontent.com/leo7044/CnC_TA/master/Maelstrom_ADDON_Basescanner_41CP_Mod.user.js
+// @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_Basic.user.js
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.8.10.1
+// @version     1.8.11
 // @author      BlinDManX
 // @contributor leo7044 (https://github.com/leo7044)
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
+// @contributor Netquik (https://github.com/netquik)
 // @grant       none
 // @copyright   2012+, Claus Neumann
 // @license     CC BY-NC-ND 3.0 - http://creativecommons.org/licenses/by-nc-nd/3.0/
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- Fix needcp when cached city
+- Sort after scan for Level
+----------------
+*/
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.8.8";
+        window.__msbs_version = "1.8.11";
 
         function createMaelstromTools_Basescanner() {
             qx.Class.define("Addons.BaseScannerGUI", {
@@ -663,6 +671,8 @@
                                                     // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
                                                     // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
                                                     var d = this.FL(object.getID(), 0);
+                                                    //MOD Fix needcp when cached city by Netquik
+                                                    null != d && d[13] !== needcp && (d[13] = needcp);                                                   
                                                     var e = this.FL(object.getID(), 1);
                                                     if (e != null) {
                                                         this.ZM[object.getID()] = e;
@@ -871,6 +881,7 @@
                                                             this.FK(this.ZE[i], this.ZM[id], id);
                                                             //update table
                                                             this.ZL.setData(this.ZE);
+                                                            this.ZL.sortByColumn(4, false); //MOD Sort after scan for Level
                                                         }
                                                     } else {
                                                         if (this.ZA > 250) {
