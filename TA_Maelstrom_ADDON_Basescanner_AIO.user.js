@@ -3,7 +3,7 @@
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.11
+// @version     1.8.12
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -23,12 +23,13 @@ codes by NetquiK
 - Save window pos and dimension
 - Fix needcp when cached city
 - Sort for Growrate
+- All Layouts selection
 ----------------
 */
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.8.11 Plus Infected Camps";
+        window.__msbs_version = "1.8.11 AIO";
 
         function createMaelstromTools_Basescanner() {
             qx.Class.define("Addons.BaseScannerGUI", {
@@ -159,7 +160,7 @@ codes by NetquiK
                             var c = 0;
                             var tcm = this.ZN.getTableColumnModel();
                             // MOD coloring layout filtering
-                            
+
                             var high5 = new qx.ui.table.cellrenderer.Conditional();
                             var high4 = new qx.ui.table.cellrenderer.Conditional();
                             var highPow = new qx.ui.table.cellrenderer.Conditional();
@@ -293,7 +294,7 @@ codes by NetquiK
                     // console.debug("Addons.BaseScannerGUI.setWidgetLabels: ", e);
                     // }
                     // },
-                    FH: function () { 
+                    FH: function () {
                         // FIXME buttons positions
                         //mod GUI by Netquik
                         try {
@@ -465,7 +466,9 @@ codes by NetquiK
                             this.ZJ.setWidth(150);
                             this.ZJ.setHeight(25);
                             this.ZJ.setMargin(5);
-                            var item = new qx.ui.form.ListItem("7 " + this.T.get(MaelstromTools.Statics.Tiberium) + " 5 " + this.T.get(MaelstromTools.Statics.Crystal), null, 7);
+                            var item = new qx.ui.form.ListItem(this.T.get("All Layouts"), null, 0);
+                            this.ZJ.add(item);
+                            item = new qx.ui.form.ListItem("7 " + this.T.get(MaelstromTools.Statics.Tiberium) + " 5 " + this.T.get(MaelstromTools.Statics.Crystal), null, 7);
                             this.ZJ.add(item);
                             item = new qx.ui.form.ListItem("6 " + this.T.get(MaelstromTools.Statics.Tiberium) + " 6 " + this.T.get(MaelstromTools.Statics.Crystal), null, 6);
                             this.ZJ.add(item);
@@ -488,7 +491,7 @@ codes by NetquiK
 
                             var columnsel = new qx.ui.layout.Flow();
                             this.ZB = new qx.ui.container.Composite(columnsel);
-                            this.ZB.setWidth(this.getWidth()-44);
+                            this.ZB.setWidth(this.getWidth() - 44);
                             //oOptions.add(this.ZB, {flex:1});
                             var J = webfrontend.gui.layout.Loader.getInstance();
                             //var L = J.getLayout("playerbar", this);
@@ -520,7 +523,7 @@ codes by NetquiK
                             this.ZO.addListener("execute", function () {
                                 if (this.ZI) {
                                     oOptions.addAfter(this.ZB, this.ZO);
-                                    this.ZB.setWidth(this.getWidth()-44);
+                                    this.ZB.setWidth(this.getWidth() - 44);
                                     this.ZO.setLabel("-");
                                 } else {
                                     oOptions.remove(this.ZB);
@@ -4173,9 +4176,9 @@ codes by NetquiK
                                 if (selectedtype != rowDataLine[10]) {
                                     continue;
                                 }
-                            } else {
+                            } /* else {
                                 continue;
-                            }
+                            } */
                             posData = rowDataLine[3];
                             if (posData != null && posData.split(':').length == 2) {
                                 posX = parseInt(posData.split(':')[0]);
@@ -4594,6 +4597,13 @@ codes by NetquiK
                 pt: "Investigação",
                 fr: "Recherche",
                 es: "Investigación"
+            });
+            T.addtranslateobj({
+                main: "All Layouts",
+                de: "Alle Layouts",
+                pt: "Todos Layouts",
+                fr: "Toutes Layouts",
+                es: "Todos Layouts"
             });
             T.addtranslateobj({
                 main: "-----",
