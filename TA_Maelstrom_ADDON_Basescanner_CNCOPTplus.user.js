@@ -4,7 +4,7 @@
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner
-// @version     1.8.11
+// @version     1.8.12
 // @author      BlinDManX + chertosha + Netquik
 // @contributor Netquik (https://github.com/netquik)
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_CNCOPTplus.user.js
@@ -20,6 +20,7 @@ codes by NetquiK
 ----------------
 - Fix for server update
 - Fix needcp when cached city
+- All Layouts selection
 ----------------
 */
 
@@ -424,7 +425,9 @@ codes by NetquiK
                             this.ZJ.setWidth(150);
                             this.ZJ.setHeight(25);
                             this.ZJ.setMargin(5);
-                            var item = new qx.ui.form.ListItem("7 " + this.T.get(MaelstromTools.Statics.Tiberium) + " 5 " + this.T.get(MaelstromTools.Statics.Crystal), null, 7);
+                            var item = new qx.ui.form.ListItem(this.T.get("All Layouts"), null, 0);
+                            this.ZJ.add(item);
+                            item = new qx.ui.form.ListItem("7 " + this.T.get(MaelstromTools.Statics.Tiberium) + " 5 " + this.T.get(MaelstromTools.Statics.Crystal), null, 7);
                             this.ZJ.add(item);
                             item = new qx.ui.form.ListItem("6 " + this.T.get(MaelstromTools.Statics.Tiberium) + " 6 " + this.T.get(MaelstromTools.Statics.Crystal), null, 6);
                             this.ZJ.add(item);
@@ -3916,9 +3919,9 @@ codes by NetquiK
                                 if (selectedtype != rowDataLine[10]) {
                                     continue;
                                 }
-                            } else {
+                            } /* else {
                                 continue;
-                            }
+                            } */
                             posData = rowDataLine[3];
                             if (posData != null && posData.split(':').length == 2) {
                                 posX = parseInt(posData.split(':')[0]);
@@ -4337,6 +4340,13 @@ codes by NetquiK
                 pt: "Investigação",
                 fr: "Recherche",
                 es: "Investigación"
+            });
+            T.addtranslateobj({
+                main: "All Layouts",
+                de: "Alle Layouts",
+                pt: "Todos Layouts",
+                fr: "Toutes Layouts",
+                es: "Todos Layouts"
             });
             T.addtranslateobj({
                 main: "-----",

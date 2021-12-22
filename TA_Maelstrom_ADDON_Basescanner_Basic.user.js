@@ -4,7 +4,7 @@
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_Basic.user.js
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.8.11
+// @version     1.8.12
 // @author      BlinDManX
 // @contributor leo7044 (https://github.com/leo7044)
 // @contributor AlkalyneD4 Patch 19.3 fix
@@ -20,6 +20,7 @@ codes by NetquiK
 ----------------
 - Fix needcp when cached city
 - Sort after scan for Level
+- All Layouts selection
 ----------------
 */
 (function () {
@@ -422,7 +423,9 @@ codes by NetquiK
                             this.ZJ.setWidth(150);
                             this.ZJ.setHeight(25);
                             this.ZJ.setMargin(5);
-                            var item = new qx.ui.form.ListItem("7 " + this.T.get(MaelstromTools.Statics.Tiberium) + " 5 " + this.T.get(MaelstromTools.Statics.Crystal), null, 7);
+                            var item = new qx.ui.form.ListItem(this.T.get("All Layouts"), null, 0);
+                            this.ZJ.add(item);
+                            item = new qx.ui.form.ListItem("7 " + this.T.get(MaelstromTools.Statics.Tiberium) + " 5 " + this.T.get(MaelstromTools.Statics.Crystal), null, 7);
                             this.ZJ.add(item);
                             item = new qx.ui.form.ListItem("6 " + this.T.get(MaelstromTools.Statics.Tiberium) + " 6 " + this.T.get(MaelstromTools.Statics.Crystal), null, 6);
                             this.ZJ.add(item);
@@ -1042,9 +1045,9 @@ codes by NetquiK
                                 if (selectedtype != rowDataLine[10]) {
                                     continue;
                                 }
-                            } else {
+                            } /* else {
                                 continue;
-                            }
+                            } */
                             posData = rowDataLine[3];
                             if (posData != null && posData.split(':').length == 2) {
                                 posX = parseInt(posData.split(':')[0]);
@@ -1463,6 +1466,13 @@ codes by NetquiK
                 pt: "Investigação",
                 fr: "Recherche",
                 es: "Investigación"
+            });
+            T.addtranslateobj({
+                main: "All Layouts",
+                de: "Alle Layouts",
+                pt: "Todos Layouts",
+                fr: "Toutes Layouts",
+                es: "Todos Layouts"
             });
             T.addtranslateobj({
                 main: "-----",
