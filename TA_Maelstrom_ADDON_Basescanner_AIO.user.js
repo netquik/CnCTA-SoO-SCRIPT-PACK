@@ -23,7 +23,7 @@ codes by NetquiK
 - Save window pos and dimension
 - Fix needcp when cached city
 - Sort for Growrate
-- All Layouts selection
+- All Layouts selection + Highlight
 ----------------
 */
 
@@ -4176,17 +4176,21 @@ codes by NetquiK
                                 if (selectedtype != rowDataLine[10]) {
                                     continue;
                                 }
-                            } /* else {
-                                continue;
-                            } */
+                            }
+                            /* else {
+                                                           continue;
+                                                       } */
                             posData = rowDataLine[3];
                             if (posData != null && posData.split(':').length == 2) {
                                 posX = parseInt(posData.split(':')[0]);
                                 posY = parseInt(posData.split(':')[1]);
                             }
-                            var st = '<table border="2" cellspacing="0" cellpadding="0">';
+                            var highGrow = rowDataLine[14] > 3 ? "#f48115" : "#FFF";
+                            var borderGrow = rowDataLine[14] > 3 ? "#f4811591" : "#808080";
+                            var st = '<table border="2" cellspacing="0" cellpadding="0" style="border-color: ' + borderGrow + ' ;">';
                             var link = rowDataLine[2] + " - " + rowDataLine[3];
-                            st = st + '<tr><td colspan="9"><font color="#FFF">' + link + '</font></td></tr>';
+
+                            st = st + '<tr><td colspan="9" style="text-align: center"><font color="' + highGrow + '">' + link + '</font></td></tr>';
                             for (y = 0; y < 8; y++) {
                                 st = st + "<tr>";
                                 for (x = 0; x < 9; x++) {
