@@ -2,7 +2,7 @@
 // @name            MovableMenuOverlay
 // @description     Make Overlay Menu Windows Movable including Forum and Mail
 // @author          Netquik [SoO] (https://github.com/netquik)
-// @version         1.0.4
+// @version         1.0.5
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_MovableMenuOverlay.user.js
@@ -16,6 +16,8 @@ codes by NetquiK
 ----------------
 - Original code
 - Bug Fix for Paste Coords
+- Rewritten Inject Functions
+- Patch for 22.2
 ----------------
 */
 
@@ -66,13 +68,14 @@ codes by NetquiK
             var qxA = qx.core.Init.getApplication();
             var MOW = webfrontend.gui.MenuOverlayWidget.prototype;
             var oOMethod = qxA.switchMenuOverlay.toString().match(/deactivate\(\)\;this\.([A-Za-z_]+)\(/)[1];
-            var source = qxA[oOMethod].toString();
-            // MOD injecting MMOverlay in switchMenuOverlay->oO
+            var source = qxA[oOMethod].toString().replace(/[\r\n]/g, "");
+            // MOD injecting MMOverlay in switchMenuOverlay->oOMethod
             var oOArg = source.match(/function\(([a-zA-Z]+)\)/)[1];
-            var oOMod = source.replace(/function\([a-zA-Z]+\){(if.+setActive\(false\);}})(this\.[_a-zA-Z]+\.focus.+open\(\);}else{).+\.(add.+0}\);)(.+)}/, '$1if(this.__nN.getLayoutParent()instanceof MMOverlay){var t=MMOverlay.getInstance().MMO;this.__nN._deactivate();-1!=t.indexOf(this.__nN)&&t.remove(this.__nN);t.exclude();}$2var MM=MMOverlay.getInstance();m=MM.createMM();m.$3MM.activateMM();m.fadeIn(250);this.__nN.setMinHeight(625);this.__nN.addListener("move",function(e){this.setLayoutProperties({top:0,left:0})});this.__nN.addListener("appear",function(e){this.setLayoutProperties({top:0,left:0})});$4');
+            var oOEl = 'this.' + source.match(/if\(this.([_a-zA-Z]+)\){/)[1];
+            var oOMod = source.replace(/function\([a-zA-Z]+\){(if.+setActive\(false\);};{0,1}}{0,1})(this\.[_a-zA-Z]+\.focus.+open\(\);}{0,1}else {0,1}{).+\.(add.+0}\);)(.+)}/, '$1if('+oOEl+'.getLayoutParent()instanceof MMOverlay){var t=MMOverlay.getInstance().MMO;'+oOEl+'._deactivate();-1!=t.indexOf(this.__nN)&&t.remove('+oOEl+');t.exclude();}$2var MM=MMOverlay.getInstance();m=MM.createMM();m.$3MM.activateMM();m.fadeIn(250);'+oOEl+'.setMinHeight(625);'+oOEl+'.addListener("move",function(e){this.setLayoutProperties({top:0,left:0})});'+oOEl+'.addListener("appear",function(e){this.setLayoutProperties({top:0,left:0})});$4'); 
             qxA[oOMethod] = new Function(oOArg, oOMod);
             // MOD for centerposition function - should not center what is already centered
-            var centerMod = MOW.centerPosition.toString().replace(/function\(\){(var.+;})}/, 'if (this.getLayoutParent() instanceof MMOverlay === false){$1}');
+            var centerMod = MOW.centerPosition.toString().replace(/function\(\){(var.+)}/, 'if (this.getLayoutParent() instanceof MMOverlay === false){$1}');
             MOW.centerPosition = new Function('', centerMod);
         }
 
