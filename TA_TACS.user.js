@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.60
+// @version        3.70
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -25,6 +25,7 @@ codes by NetquiK
 - 20.1|20.2 Patch Ready
 - TopBar display management recoded
 - Fix for statbox and replays + hide setup button
+- Patch for 22.2
 ----------------
 */
 
@@ -563,7 +564,8 @@ codes by NetquiK
 
                             // MOD NEW PATCH for moving Map (adjusted for 20.1 Patch)
                             var source = ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().get_MinYPosition.toString();
-                            var CombatMinY = source.match(/return\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
+                            // MOD Fix1 for 22.2 Patch
+                            var CombatMinY = source.match(/return {0,1}\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
                             if (typeof $I[CombatMinY[1]] === "function") $I[CombatMinY[1]][CombatMinY[2]] = -178;
 
                             if (PerforceChangelist >= 472233) { // NOTE  20.2 patch RETRO
