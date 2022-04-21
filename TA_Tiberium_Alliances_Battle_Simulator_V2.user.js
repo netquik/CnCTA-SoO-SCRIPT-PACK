@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         21.03.17
+// @version         22.04.21
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -24,6 +24,8 @@ codes by NetquiK
 - Fix for Sim View with Autorepair
 - Fix open/close stats for replays
 - Back Button fix also for replays
+- Skip Button removed
+- Patch for 22.2
 ----------------
 */
 
@@ -2517,7 +2519,8 @@ codes by NetquiK
                             }
                             // MOD NEW PATCH for moving Map (adjusted for 20.1 Patch)
                             var source = ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().get_MinYPosition.toString();
-                            var CombatMinY = source.match(/return\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
+                            // MOD Fix1 for 22.2 Patch
+                            var CombatMinY = source.match(/return {0,1}\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
                             if (typeof $I[CombatMinY[1]] === "function") $I[CombatMinY[1]][CombatMinY[2]] = -178;
 
 
@@ -3176,17 +3179,6 @@ codes by NetquiK
                                 top: 20,
                                 right: 642
                             });
-                            this.btnSkip = new qx.ui.form.Button(qxApp.tr("Skip")).set({
-                                toolTipText: qxApp.tr("Skip"),
-                                width: 52,
-                                height: 24,
-                                appearance: "button-friendlist-scroll"
-                            });
-                            this.btnSkip.addListener("click", this.onClick_btnSkip, this);
-                            this.ReportReplayOverlay.add(this.btnSkip, {
-                                top: 20,
-                                left: 642
-                            });
                         } catch (e) {
                             console.group("Tiberium Alliances Battle Simulator V2");
                             console.error("Error setting up GUI.ReportReplayOverlay constructor", e);
@@ -3197,7 +3189,6 @@ codes by NetquiK
                     members: {
                         ReportReplayOverlay: null,
                         btnBack: null,
-                        btnSkip: null,
                         onClick_btnBack: function () {
                             // MOD Back Button fix
                             try {
@@ -3219,29 +3210,9 @@ codes by NetquiK
                                 console.groupEnd();
                             }
                         },
-                        onClick_btnSkip: function () {
-                            if (ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_Simulation !== undefined && ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_Simulation().DoStep !== undefined) {
-                                while (ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_Simulation().DoStep(false)) {}
-                                ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
-                            } else {
-                                var BattleDuration = ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_BattleDuration(),
-                                    LastBattleTime = ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_LastBattleTime();
-                                if (LastBattleTime >= BattleDuration) ClientLib.Vis.VisMain.GetInstance().get_Battleground().RestartReplay();
-                                ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(10000);
-                                phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
-                            }
-                        },
-                        onTick_btnSkip: function () {
-                            var BattleDuration = ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_BattleDuration(),
-                                LastBattleTime = ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_LastBattleTime();
-                            if (LastBattleTime >= BattleDuration) {
-                                phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
-                                ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
-                            }
+                        defer: function () {
+                            TABS.addInit("TABS.GUI.ReportReplayOverlay");
                         }
-                    },
-                    defer: function () {
-                        TABS.addInit("TABS.GUI.ReportReplayOverlay");
                     }
                 });
                 qx.Class.define("TABS.GUI.Window.Stats", { // [singleton]	Stats Window
