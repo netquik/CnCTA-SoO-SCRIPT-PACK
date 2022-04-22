@@ -3,19 +3,21 @@
 // @description Some modifications to make the *improved shop feature* in the April patch a little bit more bearable.
 // @namespace supplies_mod
 // @include https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.41
+// @version 1.42
 // @author KRS_L
-// @updateURL https://userscripts.org/scripts/source/166220.meta.js
-// @downloadURL https://userscripts.org/scripts/source/166220.user.js
+// @contributor    Netquik (22.2 FIX)
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Supplies_Mod.user.js
 // ==/UserScript==
 (function () {
 	var SuppliesMod_main = function () {
 		function createSuppliesMod() {
 			try {
 				var strFunction = webfrontend.gui.monetization.ShopOverlay.getInstance()._activate.toString();
-				var re = /this\.\_\_..\.setModelSelection/;
-				strFunction = strFunction.match(re).toString();
-				var baseSelectionList = strFunction.slice(5,9);
+				//MOD Fix for 22.2 by NetquiK
+				//var re = /this\.\_\_..\.setModelSelection/;
+				//strFunction = strFunction.match(re).toString();
+				//var baseSelectionList = strFunction.slice(5, 9);
+				var baseSelectionList = strFunction.match(/this\.([A-Za-z0-9_]+)\.setModelSelection/)[1]; 
 				var functionBody = "return webfrontend.gui.monetization.ShopOverlay.getInstance()." + baseSelectionList + ";";
 				var fn = Function('', functionBody);
 				webfrontend.gui.monetization.ShopOverlay.getInstance().baseSelectionList = fn();
@@ -24,17 +26,27 @@
 						webfrontend.gui.monetization.ShopOverlay.getInstance().set_SwitchTabByChildIndex(1);
 					}, 1);
 				}, this);
-				
+
 				var strFunction2 = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCityId.toString();
 				var re2 = /this\.[A-Z]{6}/;
 				strFunction2 = strFunction2.match(re2).toString();
 				var functionBody2 = "var $createHelper;return parseInt(" + strFunction2 + ");";
 				var fn2 = Function('', functionBody2);
 				ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCityId = fn2;
-				
+
 				phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, setSelection);
 
-				var disableFundsCheckBox = new qx.ui.form.CheckBox().set({allowGrowY:false,height:26,marginLeft:5,marginTop:5,marginRight:7,label:"Disable Funds *",toolTipText:"* Only applies while in the Supplies interface.",maxWidth:145,alignX:"center"});
+				var disableFundsCheckBox = new qx.ui.form.CheckBox().set({
+					allowGrowY: false,
+					height: 26,
+					marginLeft: 5,
+					marginTop: 5,
+					marginRight: 7,
+					label: "Disable Funds *",
+					toolTipText: "* Only applies while in the Supplies interface.",
+					maxWidth: 145,
+					alignX: "center"
+				});
 				disableFundsCheckBox.setValue(JSON.parse(localStorage.getItem("TA_Supplies_Mod_Disable_Funds")));
 				disableFundsCheckBox.addListener("click", function () {
 					localStorage.setItem("TA_Supplies_Mod_Disable_Funds", disableFundsCheckBox.getValue());
@@ -66,18 +78,18 @@
 				console.log("createSuppliesMod: ", e);
 			}
 		}
-		
+
 		function setSelection() {
 			try {
 				webfrontend.gui.monetization.ShopOverlay.getInstance().baseSelectionList.setModelSelection([ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCityId()]);
 			} catch (e) {
 				console.log("setSelection: ", e);
-			}			
+			}
 		}
-	
+
 		function SuppliesMod_checkIfLoaded() {
 			try {
-				if (typeof qx !== 'undefined' && qx.core.Init.getApplication() &&  qx.core.Init.getApplication().getMainOverlay()) {
+				if (typeof qx !== 'undefined' && qx.core.Init.getApplication() && qx.core.Init.getApplication().getMainOverlay()) {
 					if (PerforceChangelist >= 400907) createSuppliesMod();
 				} else {
 					window.setTimeout(SuppliesMod_checkIfLoaded, 1000);
