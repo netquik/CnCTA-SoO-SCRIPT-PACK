@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name           Tiberium Alliances The Movement
-// @version        1.0.3.7
+// @version        1.0.3.9
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    Xdaast (19.4 FIX)
-// @contributor    Netquik (19.3||19.4 FIX) + remove eval use
+// @contributor    Netquik (19.3||19.4||20.3//22.2 FIX) + remove eval use
 // @description    Strategical territory simulator
 // @include        http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -212,7 +212,10 @@
                                 twoStepMenu.add(menuButton);
                             }
                         } else {
+                            // MOD 20.3 by Netquik
+                            var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCityId();
                             qx.core.Init.getApplication().getBackgroundArea().closeCityInfo();
+                            ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentCityId(city);
                         }
                     },
                     /**
@@ -773,14 +776,13 @@
                     var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
                     var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
                     this.GetTerritoryTypeByCoordinatesPatched = new Function(args, fnBody);
-                    //this.GetTerritoryTypeByCoordinatesPatched = eval('(' + rewrittenFunctionBody + ')');
                     this.CheckMoveBaseMethodName = ClientLib.Vis.MouseTool.MoveBaseTool.prototype.VisUpdate.toString().match(/var [A-Za-z]+=[A-Za-z]+\.([A-Z]{6})\([A-Za-z]+,[A-Za-z]+,this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\);/)[1];
                     // The second replace takes care of landing on a ruin and the third one landing next to a ruin
-                    rewrittenFunctionBody = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\((n\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\$I\.[A-Z]{6}\.FailFieldOccupied;)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\((w\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\(\$I\.[A-Z]{6}\.FailNeighborRuin)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5');
+                    // MOD fixed regex by Netquik
+                    rewrittenFunctionBody = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\((n\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\$I\.[A-Z]{6}\.FailFieldOccupied;)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\(([A-Za-z]\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\(\$I\.[A-Z]{6}\.FailNeighborRuin)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5');
                     fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
                     args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
                     this.CheckMoveBasePatched = new Function(args, fnBody);
-                    //this.CheckMoveBasePatched = eval('(' + rewrittenFunctionBody + ')');
                 },
                 members: {
                     playerId: null,
@@ -921,7 +923,23 @@
                     this.worldManipulator = worldManipulator;
                     this.regionManipulator = regionManipulator;
                     this.territoryIdentity = territoryIdentity;
-                    this.moveInfoOnMouseUpMethodName = Function.prototype.toString.call(webfrontend.gui.region.RegionCityMoveInfo.constructor).match(/attachNetEvent\(this\.[A-Za-z0-9_]+,[A-Za-z]+,ClientLib\.Vis\.MouseTool\.OnMouseUp,this,this\.([A-Za-z0-9_]+)\);/)[1];
+                    //MOD New way to find moveInfoOnMouseUpMethodName by NetquiK (should be better) (Patch for 22.2)
+                    /* this.moveInfoOnMouseUpMethodName = Function.prototype.toString.call(webfrontend.gui.region.RegionCityMoveInfo.constructor).match(/attachNetEvent\(this\.[A-Za-z0-9_]+,[A-Za-z]+,ClientLib\.Vis\.MouseTool\.OnMouseUp,this,this\.([A-Za-z0-9_]+)\);/)[1]; */
+                    //this.moveInfoOnMouseUpMethodName = '__qy';
+                    this.moveInfoOnMouseUpMethodName = null;
+                    let MoveInfo = webfrontend.gui.region.RegionCityMoveInfo.getInstance(),
+                        i;
+                    for (i in MoveInfo) {
+                        if (typeof MoveInfo[i] == "function" && MoveInfo[i].length == 3 && i.startsWith("__") && MoveInfo[i].toString().length > 1000) {
+                            if (/VisMain\.GetInstance\(\)\.get_Region\(\)\.get_GridWidth\(\)/.test(MoveInfo[i].toString())) {
+                                this.moveInfoOnMouseUpMethodName = i;
+                                console.log('TheMovement: Found moveInfoOnMouseUpMethodName =' + i);
+                                break;
+                            }
+                        }
+                    }
+                    if (this.moveInfoOnMouseUpMethodName == null) throw 'TheMovement: Cannot find moveInfoOnMouseUpMethodName!! TheMovement not loaded!';
+                    //MOD End (Patch for 22.2)
                 },
                 members: {
                     worldManipulator: null,
