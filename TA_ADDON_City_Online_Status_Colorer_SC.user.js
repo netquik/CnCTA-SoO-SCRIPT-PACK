@@ -3,7 +3,7 @@
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description change the color of cities according to online state of the player
-// @version     0.7
+// @version     0.7.1
 // @author      White X Dragon / Debitosphere / NetquiK
 // @author      Der_Flake
 // @contributor NetquiK (https://github.com/netquik) - REMOVED USELESS CODES - NOEVIL
@@ -61,7 +61,7 @@
             regionCityPrototype.SetCanvasValue_BODY = setCanvasValueFunctionBody;
 
             //var setCanvasValueFunctionBodyFixed = setCanvasValueFunctionBody.replace(/true;.{0,3}\}.{0,3}this/im, "true; } g=this.CityTextcolor(g); this");
-            var M = setCanvasValueFunctionBody.match(/var [a-zA-Z]=\$I\.([a-zA-Z]+)\.([a-zA-Z]+)\(\)\.([a-zA-Z]+).+\.([a-zA-Z]+)\(this\.([a-zA-Z]+)\.([a-zA-Z]+)\).+\.([a-zA-Z]+)\(this\.([a-zA-Z]+)\(\),this\.([a-zA-Z]+)\(.+\.([a-zA-Z]+)\(\)==\$I\.([a-zA-Z]+).+var [a-zA-Z]=this\.([a-zA-Z]+)\+.+\.([a-zA-Z]+)\.t.+[a-zA-Z]=[a-zA-Z]\.([a-zA-Z]+);.+[a-zA-Z]=[a-zA-Z]\.([a-zA-Z]+);if \(\$I\.([a-zA-Z]+)\.([a-zA-Z]+)\(\)\.([a-zA-Z]+).+{this\.([a-zA-Z]+)\.T.+this\.([a-zA-Z]+)\.T.+this\.([a-zA-Z]+)\.T.+&&\(this\.([a-zA-Z]+).+if\(this\.([a-zA-Z]+).+\.([a-zA-Z]+)\(this\.([a-zA-Z]+).+\.([a-zA-Z]+)\(.+\.([a-zA-Z]+)\(/);
+            var M = setCanvasValueFunctionBody.match(/var [a-zA-Z]=\$I\.([a-zA-Z]+)\.([a-zA-Z]+)\(\)\.([a-zA-Z]+).+\.([a-zA-Z]+)\(this\.([a-zA-Z]+)\.([a-zA-Z]+)\).+\.([a-zA-Z]+)\(this\.([a-zA-Z]+)\(\),this\.([a-zA-Z]+)\(.+\.([a-zA-Z]+)\(\)==\$I\.([a-zA-Z]+).+var [a-zA-Z]=this\.([a-zA-Z]+)\+.+\.([a-zA-Z]+)\.t.+[a-zA-Z]=[a-zA-Z]\.([a-zA-Z]+);.+[a-zA-Z]=[a-zA-Z]\.([a-zA-Z]+);if {0,1}\(\$I\.([a-zA-Z]+)\.([a-zA-Z]+)\(\)\.([a-zA-Z]+).+{this\.([a-zA-Z]+)\.T.+this\.([a-zA-Z]+)\.T.+this\.([a-zA-Z]+)\.T.+&&\(this\.([a-zA-Z]+).+if\(this\.([a-zA-Z]+).+\.([a-zA-Z]+)\(this\.([a-zA-Z]+).+\.([a-zA-Z]+)\(.+\.([a-zA-Z]+)\(/);
             /* var setCanvasValueFunctionBodyFixed = setCanvasValueFunctionBody.replace(
                 /\{g="#000000";\}/im,
                 "{g=\"#000000\";}else{g=this.CityTextcolor(g);}"); */
