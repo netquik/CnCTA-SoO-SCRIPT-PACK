@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name           Tiberium Alliances The Movement
-// @version        1.0.3.9
+// @version        1.0.5
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    Xdaast (19.4 FIX)
-// @contributor    Netquik (19.3||19.4||20.3//22.2 FIX) + remove eval use
+// @contributor    Netquik (19.3||19.4||20.3||22.2 FIX) + !!NOEVIL!!
 // @description    Strategical territory simulator
 // @include        http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -772,17 +772,30 @@
                 extend: Object,
                 construct: function () { // try remove eval use by Netquik MOD 
                     this.GetTerritoryTypeByCoordinatesMethodName = ClientLib.Data.World.prototype.CheckFoundBase.toString().match(/switch\s?\(this\.([A-Z]{6})\([a-z],[a-z]\)\)/)[1];
-                    var rewrittenFunctionBody = ClientLib.Data.World.prototype.GetTerritoryTypeByCoordinates.toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/var ([a-z])=(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\))\.[A-Z]{6}\(\);var ([a-z])=\2\.[A-Z]{6}\(\);/, 'var $1=territoryIdentity.playerId;var $3=territoryIdentity.allianceId;');
-                    var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
-                    var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
-                    this.GetTerritoryTypeByCoordinatesPatched = new Function(args, fnBody);
+                    /*  var rewrittenFunctionBody = ClientLib.Data.World.prototype.GetTerritoryTypeByCoordinates.toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/var ([a-z])=(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\))\.[A-Z]{6}\(\);var ([a-z])=\2\.[A-Z]{6}\(\);/, 'var $1=territoryIdentity.playerId;var $3=territoryIdentity.allianceId;');
+                     var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
+                     var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
+                     this.GetTerritoryTypeByCoordinatesPatched = new Evil(args, fnBody); */
+                    /* var GTTM = ClientLib.Data.World.prototype.GetTerritoryTypeByCoordinates.toString().match(/var \$.+this\.([a-zA-Z]+).+{case \$\I.([a-zA-Z]+).+{return \$\I.([a-zA-Z]+)/); */
+                    this.GetTerritoryTypeByCoordinatesPatched=function(territoryIdentity,a,b){var $createHelper;var c=this.GetOwner(a,b);var d=territoryIdentity.playerId;var e=territoryIdentity.allianceId;var f=c>>29;var g=c&536870911;switch(f){case ClientLib.Data.EOwnerType.Player:if(g==0||g!=d){if(g==0)return ClientLib.Data.ETerritoryType.Neutral;break}return ClientLib.Data.ETerritoryType.Own;case ClientLib.Data.EOwnerType.Alliance:if(g!=e)break;return ClientLib.Data.ETerritoryType.Alliance;case ClientLib.Data.EOwnerType.StartSlot:return ClientLib.Data.ETerritoryType.SpawnZone;
+case ClientLib.Data.EOwnerType.NPC:if(g!=1)break;return ClientLib.Data.ETerritoryType.Restricted}return ClientLib.Data.ETerritoryType.Enemy};
+
                     this.CheckMoveBaseMethodName = ClientLib.Vis.MouseTool.MoveBaseTool.prototype.VisUpdate.toString().match(/var [A-Za-z]+=[A-Za-z]+\.([A-Z]{6})\([A-Za-z]+,[A-Za-z]+,this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\);/)[1];
                     // The second replace takes care of landing on a ruin and the third one landing next to a ruin
                     // MOD fixed regex by Netquik
-                    rewrittenFunctionBody = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\((n\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\$I\.[A-Z]{6}\.FailFieldOccupied;)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\(([A-Za-z]\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\(\$I\.[A-Z]{6}\.FailNeighborRuin)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5');
-                    fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
-                    args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
-                    this.CheckMoveBasePatched = new Function(args, fnBody);
+                    /* var rewrittenFunctionBody = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\(([A-Za-z]\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\$I\.[A-Z]{6}\.FailFieldOccupied;)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\(([A-Za-z]\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\(\$I\.[A-Z]{6}\.FailNeighborRuin)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5');
+                    var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
+                    var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
+                    this.CheckMoveBasePatched = new Evil(args, fnBody); */
+
+                    var CMBM = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().match(/this\.([A-Z]{6})\(.,.,.,.\);.+if\(\(.\.([A-Z]{6})!.+\.([A-Z]{6})>.+\(.\.([A-Z]{6})\(.,.\)\).+[A-Z]{6}\(.\.([A-Z]{6})\).+([A-Z]{6})\[.\].+\.([A-Z]{6})!=.+([A-Z]{6})\.len/);
+                    this.CheckMoveBasePatched=function(territoryIdentity,a,b,c,d,e){var $createHelper;var xx=ClientLib.Data.EMoveBaseResult;var f=xx.OK;var g=ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity();var h=a-g.get_X();var i=b-g.get_Y();var j=h*h+i*i;var k=ClientLib.Data.MainData.GetInstance().get_Server().get_MaxBaseMoveDistance();if(g.get_IsGhostMode())k=ClientLib.Data.MainData.GetInstance().get_Server().get_MaxMaterializeMoveDistance();if(j>k*k)f|=xx.FailDistance;f|=this.CheckMoveBaseRestrictions(a,
+                        b,g);var l=this[CMBM[1]](g,a,b,e);if(l!=0){var m=this.GetObjectFromPosition(a,b);if((l&8192)==8192)f|=xx.FailReservedTerritory;else if((l&4096)==4096)f|=xx.FailNotOwned;else if((l&2)==2)f|=xx.FailBlocked;else if((l&4)==4)if(a==g.get_X()&&b==g.get_Y())f|=xx.FailOldBasePosition;else f|=xx.FailFieldOccupied;else if((l&1024)==1024||(l&512)==512||((l&2048)==2048||(l&32)==32))f|=xx.FailFieldOccupied;else if((l&16)==16){var n=m;if(n[CMBM[2]]!=ClientLib.Data.WorldSector.WorldObjectNPCCamp.ECampType.Destroyed&&
+                        n[CMBM[3]]>ClientLib.Data.MainData.GetInstance().get_Time().GetServerStep())f|=xx.FailCampIsAttacked}else if((l&256)==256){var o=ClientLib.Data.MainData.GetInstance().get_EndGame().GetObjectFromPosition(a,b);if(o!=null&&o.get_Type()==ClientLib.Data.EndGame.EHubType.Server)if(g.get_IsGhostMode())f|=xx.FailGhostSatellite;else if(o[CMBM[4]](a,b))f|=xx.FailSatellite;var p=ClientLib.Data.MainData.GetInstance().get_EndGame().GetServer(a,b);if(p!=null&&(p.get_ServerState()==ClientLib.Data.EndGame.EHubState.Crater||
+                        p.get_ServerState()==ClientLib.Data.EndGame.EHubState.Impact)&&ClientLib.Data.MainData.GetInstance().get_Player().get_HasControlHubCode())f|=xx.FailSatellitePlayerHasCode}else if((l&128)==128)f|=this.CheckMoveBaseControlHub(a,b,g);else if((l&8)==8){var q=m;var r=this.GetWorldSectorByCoords(a,b);if(r!=null){var s=r.GetPlayerId(q[CMBM[5]]);if(s!=ClientLib.Data.MainData.GetInstance().get_Player().get_Id()&&r.GetPlayerAllianceId(q[CMBM[5]])!=territoryIdentity.allianceId)f|=xx.FailFieldOccupied;else f|=
+                        this.CheckMoveBaseControlHub(a,b,g)}}else if((l&1)==1)f|=xx.FailBlocked}if(f==xx.OK){for(var t=0;t<ClientLib.Data.World[CMBM[6]].length;t++){var u=a+ClientLib.Data.World[CMBM[6]][t][0];var v=b+ClientLib.Data.World[CMBM[6]][t][1];l=this[CMBM[1]](g,u,v,e);if(l!=0){var w=this.GetObjectFromPosition(u,v);if((l&8)==8){var x=w;var y=this.GetWorldSectorByCoords(u,v);if(y!=null){var z=y.GetPlayerId(x[CMBM[5]]);if(z!=ClientLib.Data.MainData.GetInstance().get_Player().get_Id()&&y.GetPlayerAllianceId(x[CMBM[5]])!=
+                        territoryIdentity.allianceId)f|=xx.FailNeighborRuin|xx.FailNeighbor}}else if((l&4)==4||(l&16384)==16384){var ab=w;if(ab[CMBM[7]]!=g.get_Id())f|=xx.FailNeighborCity|xx.FailNeighbor}else if((l&2048)==2048)f|=xx.FailNeighborNewPlayerSlot|xx.FailNeighbor;else if((l&32)==32)f|=xx.FailNeighborBase|xx.FailNeighbor;else if((l&64)==64)f|=xx.FailNeighborHubCenter|xx.FailNeighbor;if(g.get_IsGhostMode()){if((l&1024)==1024)f|=xx.FailGhostNeighbor|xx.FailNeighborPOI;if((l&128)==128)f|=xx.FailGhostNeighbor|xx.FailNeighborHub;
+                        else if((l&256)==256)f|=xx.FailGhostNeighbor|xx.FailNeighborHubServer}}if(f!=xx.OK)return f}if(!g.get_IsGhostMode())return f;for(var bb=0;bb<ClientLib.Data.World[CMBM[8]].length;bb++){var cb=a+ClientLib.Data.World[CMBM[8]][bb][0];var db=b+ClientLib.Data.World[CMBM[8]][bb][1];l=this[CMBM[1]](g,cb,db,e);if(l!=0)if((l&1024)==1024)f|=xx.FailGhostNeighbor|xx.FailNeighborPOI;else if((l&64)==64)f|=xx.FailGhostNeighbor|xx.FailNeighborHubCenter;if(f!=xx.OK)return f}}return f};
                 },
                 members: {
                     playerId: null,
@@ -923,11 +936,14 @@
                     this.worldManipulator = worldManipulator;
                     this.regionManipulator = regionManipulator;
                     this.territoryIdentity = territoryIdentity;
-                    //MOD New way to find moveInfoOnMouseUpMethodName by NetquiK (should be better) (Patch for 22.2)
+                    //MOD New way to find moveInfoOnMouseUpMethodName by NetquiK (Patch for 22.2)
                     /* this.moveInfoOnMouseUpMethodName = Function.prototype.toString.call(webfrontend.gui.region.RegionCityMoveInfo.constructor).match(/attachNetEvent\(this\.[A-Za-z0-9_]+,[A-Za-z]+,ClientLib\.Vis\.MouseTool\.OnMouseUp,this,this\.([A-Za-z0-9_]+)\);/)[1]; */
-                    //this.moveInfoOnMouseUpMethodName = '__qy';
                     this.moveInfoOnMouseUpMethodName = null;
-                    let MoveInfo = webfrontend.gui.region.RegionCityMoveInfo.getInstance(),
+                    let MoveInfo = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.region.RegionCityMoveInfo.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.region.RegionCityMoveInfo.constructor);
+                    this.moveInfoOnMouseUpMethodName = MoveInfo.match(/attachNetEvent\(this\.[A-Za-z0-9_]+,[A-Za-z]+,ClientLib\.Vis\.MouseTool\.OnMouseUp,this,this\.([A-Za-z0-9_]+)\);/)[1];
+
+                    //Alternative way by NetquiK
+                    /* let MoveInfo = webfrontend.gui.region.RegionCityMoveInfo.prototype,
                         i;
                     for (i in MoveInfo) {
                         if (typeof MoveInfo[i] == "function" && MoveInfo[i].length == 3 && i.startsWith("__") && MoveInfo[i].toString().length > 1000) {
@@ -937,7 +953,7 @@
                                 break;
                             }
                         }
-                    }
+                    } */
                     if (this.moveInfoOnMouseUpMethodName == null) throw 'TheMovement: Cannot find moveInfoOnMouseUpMethodName!! TheMovement not loaded!';
                     //MOD End (Patch for 22.2)
                 },
