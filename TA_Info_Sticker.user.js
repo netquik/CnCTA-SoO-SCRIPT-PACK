@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker
 // @namespace    TAInfoSticker
-// @version      1.11.10.9
+// @version      1.12
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @author       unicode
-// @contributor  NetquiK (https://github.com/netquik) (see first comments for changelog)
+// @author       NetquiK (https://github.com/netquik) (see first comments for changelog) (original author unicode)
 // @updateURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Info_Sticker.user.js
 // ==/UserScript==
 /* 
@@ -13,6 +12,7 @@ codes by NetquiK
 ----------------
 - GUI Fix and Optimize
 - Fix for 21.3 Patch ReorderBaseNavigationBar + ResetButton
+- Fix for 22.2
 ----------------
 */
 (function () {
@@ -53,21 +53,24 @@ codes by NetquiK
 
                                 this.runMainTimer();
                                 //MOD Fix for 21.3 reorder BaseNavigationBar
-                                if (PerforceChangelist >= 477664) { // >=21.3
-                                let barfix = this.getBaseListBar();
-                                if (barfix.hasListener('drop')) {
-                                    barfix.addListener('dragstart', this.reorderfix, this);
-                                    barfix.addListener('drop', this.reorderend, this);
-                                }                   
+                                if (parseFloat(GameVersion) >= 21.3) { // 21.3 Check
+                                    let barfix = this.getBaseListBar();
+                                    if (barfix.hasListener('drop')) {
+                                        barfix.addListener('dragstart', this.reorderfix, this);
+                                        barfix.addListener('drop', this.reorderend, this);
+                                    }
                                     try {
                                         var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
-                                        var WgbBarReorderFunc = Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar).match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
+                                        //MOD Fix for 22.2
+                                        let BarReorder = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.bars.BaseNavigationBar.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar);
+                                        var WgbBarReorderFunc = BarReorder.match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
                                         WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);\}/)[1];
                                         this.ButtonResetOrderMethod = WgbBarReorderFunc;
+                                        console.log('InfoSticker.initialize: ButtonResetOrderMethod = webfrontend.gui.bars.BaseNavigationBar.prototype.'+ this.ButtonResetOrderMethod);
                                         this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
                                         WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
-                                    } catch (w) {
-                                        console.log("InfoSticker.initialize: Patch 21.3", e.toString());
+                                    } catch (e) {
+                                        console.log("InfoSticker.initialize: ", e.toString());
                                     }
                                 }
                             } catch (e) {
@@ -201,9 +204,12 @@ codes by NetquiK
                         //MOD Fix for 21.3 reorder BaseNavigationBar reorderend
                         reorderend: function () {
                             try {
-                                if (typeof localStorage["infoSticker-mcvHide"] !== "undefined") {
-                                    this.mcvHide = localStorage["infoSticker-mcvHide"] == "true";
-                                }
+                                this.mcvHide = localStorage.getItem("infoSticker-mcvHide") == "true";
+                                this.repairHide = localStorage.getItem("infoSticker-repairHide") == "true";
+                                this.rtHide = localStorage.getItem("infoSticker-repairHide") == "true";
+                                this.resourceHide = localStorage.getItem("infoSticker-resourceHide") == "true";
+                                this.productionHide = localStorage.getItem("infoSticker-productionHide") == "true";
+                                this.contProductionHide = localStorage.getItem("infoSticker-contProductionHide") == "true";
                                 this.disposeRecover();
                                 this.runMainTimer();
                                 this.runPositionTimer();
