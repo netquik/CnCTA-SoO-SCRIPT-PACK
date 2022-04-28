@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.71
+// @version        3.72
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -3777,7 +3777,7 @@ codes by NetquiK
                                         }
                                     }
                                 } */
-                                var currentOwnCity = ClientLib.Data.Cities.prototype.get_CurrentOwnCity.toString();
+                                /* var currentOwnCity = ClientLib.Data.Cities.prototype.get_CurrentOwnCity.toString();
                                 for (var y in ClientLib.Data.Cities.prototype) {
                                     if (ClientLib.Data.Cities.prototype.hasOwnProperty(y) && typeof (ClientLib.Data.Cities.prototype[y]) === 'function') {
                                         var strOwnCityFunction = ClientLib.Data.Cities.prototype[y].toString();
@@ -3788,7 +3788,7 @@ codes by NetquiK
                                             }
                                         }
                                     }
-                                }
+                                } */
                                 /* var strFunction = ClientLib.API.Util.GetUnitRepairCosts.toString();
                                 strFunction = strFunction.replace(currentCity, currentOwnCity);
                                 var functionBody = strFunction.substring(strFunction.indexOf("{") + 1, strFunction.lastIndexOf("}"));
@@ -3797,7 +3797,7 @@ codes by NetquiK
                                 //$I[CAUGRCM[1]][CAUGRCM[2]] 
                                 ClientLib.API.Util.GetUnitRepairCosts = function (a, b, c) {
                                     var $createHelper;
-                                    return ClientLib.API.Util.GetUnitRepairCostsForCity(ClientLib.Data.MainData.GetInstance().get_Cities()[currentOwnCity](), a, b, c);
+                                    return ClientLib.API.Util.GetUnitRepairCostsForCity(ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity(), a, b, c);
                                 }
                             }
                             //MOD TEMPORARY FOR 22.2 PTE //REMOVE
