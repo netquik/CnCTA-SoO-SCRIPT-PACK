@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         22.04.28
+// @version         22.04.29
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -2420,6 +2420,7 @@ codes by NetquiK
                                  body = body + "TABS.PreArmyUnits.getInstance().__CityPreArmyUnitsChanged();"; 
                                  ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled = Evil(args, body);  */
                                 //MOD NO EVIL 2
+                                ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled_Original = ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled;
                                 ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled = function (a) {
                                     this.set_Enabled_Original(a);
                                     TABS.PreArmyUnits.getInstance().__CityPreArmyUnitsChanged();
