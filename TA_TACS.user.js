@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.72
+// @version        3.72.1
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -255,7 +255,7 @@ codes by NetquiK
                         simulate: {
                             back: null,
                             // buttonReturnSetup
-                            //skip : null // buttonSkipSimulation
+                            skip : null // buttonSkipSimulation
                         },
                         shiftFormationUp: null,
                         shiftFormationDown: null,
@@ -647,15 +647,15 @@ codes by NetquiK
                             });
                             this.buttons.simulate.back.addListener("click", this.returnSetup, this);
                             // Skip to end Button
-                            /*this.buttons.simulate.skip = new qx.ui.form.Button();
+                            this.buttons.simulate.skip = new qx.ui.form.Button();
                             							this.buttons.simulate.skip.set({
                             								width : 35,
                             								height : 24,
                             								appearance : "button-addpoints",
                             								icon : "FactionUI/icons/icon_replay_skip.png",
-                            								toolTipText : lang("Skip to end")
+                            								toolTipText : lang("Skip to End")
                             							});
-                            							this.buttons.simulate.skip.addListener("click", this.skipSimulation, this);*/
+                            							this.buttons.simulate.skip.addListener("click", this.skipSimulation, this);
                             var replayBar = this._Application.getReportReplayOverlay();
                             //MOD close statbox for simple replays
                             replayBar.addListener("appear", this.onAppear_replayBar, this);
@@ -663,12 +663,12 @@ codes by NetquiK
                                 top: 21,
                                 left: 185
                             });
-                            /*if (typeof(CCTAWrapper_IsInstalled) != 'undefined' && CCTAWrapper_IsInstalled) {
+                            if (typeof(CCTAWrapper_IsInstalled) != 'undefined' && CCTAWrapper_IsInstalled) {
                             								replayBar.add(this.buttons.simulate.skip, {
                             									top : 21,
                             									left : 735
                             								});
-                            							}*/
+                            							}
                             // Unlock Button
                             this.buttons.attack.unlock = new qx.ui.form.Button(lang("Unlock"));
                             this.buttons.attack.unlock.set({
