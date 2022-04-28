@@ -120,10 +120,10 @@
                 //ClientLib.Vis.Battleground.Battleground.prototype.get_Simulation = fn;
                 ClientLib.Vis.Battleground.Battleground.prototype.get_Simulation = function () {
                     var $createHelper;
-                    return this[subM[2]];
+                    return this[subM[1]];
                 };
                 //console.log("ClientLib.Vis.Battleground.Battleground.prototype.get_Simulation = function(){return this." + fn_name + ";}");
-                console.log("ClientLib.Vis.Battleground.Battleground.prototype.get_Simulation = function(){return this." + subM[2] + ";}");
+                console.log("ClientLib.Vis.Battleground.Battleground.prototype.get_Simulation = function(){return this." + subM[1] + ";}");
                 // GetNerfBoostModifier
                 if (typeof ClientLib.Vis.Battleground.Battleground.prototype.GetNerfAndBoostModifier == 'undefined') ClientLib.Vis.Battleground.Battleground.prototype.GetNerfAndBoostModifier = ClientLib.Base.Util.GetNerfAndBoostModifier;
 
