@@ -3,8 +3,8 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.70
-// @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de
+// @version        3.71
+// @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TACS.user.js
@@ -26,6 +26,8 @@ codes by NetquiK
 - TopBar display management recoded
 - Fix for statbox and replays + hide setup button
 - Patch for 22.2
+- NOEVIL for all code
+- New Fixes for simulation + ReplayBar + Date hidden
 ----------------
 */
 
@@ -520,6 +522,15 @@ codes by NetquiK
                             this._playAreaChildren = this._PlayArea.getChildren();
                             this.MainOverlay = this._Application.getMainOverlay();
 
+                            //MOD New Play Button Icon Selector
+                            this.ReplayBar = this._Application.getReportReplayOverlay();
+                            var PBIS_S = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.reports.ReportReplayOverlay.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.reports.ReportReplayOverlay.constructor);
+
+                            var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this/);
+                            this.PBIS = PBIS_M[1];
+                            PBIS_M = webfrontend.gui.reports.ReportReplayOverlay.prototype[PBIS_M[2]].toString().match(/if\(this\.([_a-zA-Z]+)\){this\.[_a-zA-Z]+\(false\).+this\.([_a-zA-Z]+)\.setValue/);
+                            this.PBIS_S = PBIS_M[1];
+                            this.PBIS_L = PBIS_M[2];
 
                             if (PerforceChangelist >= 443425) { // 16.1 patch
                                 for (var i in this.ArmySetupAttackBar) {
@@ -545,17 +556,25 @@ codes by NetquiK
                                 }
                             }
                             // Fix Defense Bonus Rounding
-                            for (var key in ClientLib.Data.City.prototype) {
+                            // MOD NOEVIL 2 by NetquiK
+                            /* for (var key in ClientLib.Data.City.prototype) {
                                 if (typeof ClientLib.Data.City.prototype[key] === 'function') {
                                     var strFunction = ClientLib.Data.City.prototype[key].toString();
                                     if (strFunction.indexOf("Math.floor(a.adb)") > -1) {
-                                        ClientLib.Data.City.prototype[key] = this.fixBonusRounding(ClientLib.Data.City.prototype[key], "a");
+                                        //ClientLib.Data.City.prototype[key] = this.fixBonusRounding(ClientLib.Data.City.prototype[key], "a");
+                                        var UCMa = key;
                                         break;
                                     }
                                 }
+                            } */
+                            var updatecitys = ClientLib.Data.Cities.prototype.UpdateCity.toString();
+                            var UCM = updatecitys.match(/}}[a-z]\.([A-Z]{6})\([a-z]\);/);
+                            var UCMe = ClientLib.Data.City.prototype[UCM[1]].toString().match(/this\.([A-Z]{6})=Math.floor/);
+                            ClientLib.Data.City.prototype['_' + UCM[1]] = ClientLib.Data.City.prototype[UCM[1]]
+                            ClientLib.Data.City.prototype[UCM[1]] = function (a) {
+                                this['_' + UCM[1]](a);
+                                this[UCMe[1]] = Math.round(a.adb);
                             }
-
-
 
                             this.ArmySetupAttackBarMainChildren[0].setMarginTop(40); // NOTE Resizing ArmySetup for topbuttons remove
                             //this.ArmySetupAttackBarChildren[1].setOpacity(0.4); //  setting opacity to next setup
@@ -581,11 +600,13 @@ codes by NetquiK
                                         break;
 
                                     }
-                                    var patch211body = "{return;}"
                                     //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
                                     var source = this.ArmySetupAttackBar.showSetup.toString();
                                     var extendsetupF = source.match(/\;this\.([A-Za-z_]+)\(\)\;this\.show/)[1];
-                                    this.ArmySetupAttackBar[extendsetupF] = new Function('', patch211body);
+                                    // MOD NOEVIL 1 by NetquiK
+                                    this.ArmySetupAttackBar[extendsetupF] = function () {
+                                        return;
+                                    }
                                     ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
                                     this.ArmySetupAttackBar.showSetup(false);
 
@@ -858,18 +879,18 @@ codes by NetquiK
                         }
                     },
 
-                    fixBonusRounding: function (bonus, data) {
+                    /* fixBonusRounding: function (bonus, data) {
                         try {
                             if (data == null) data = "";
                             var strFunction = bonus.toString();
                             strFunction = strFunction.replace("floor", "round");
                             var functionBody = strFunction.substring(strFunction.indexOf("{") + 1, strFunction.lastIndexOf("}"));
-                            var fn = Function(data, functionBody);
+                            var fn = Evil(data, functionBody);
                             return fn;
                         } catch (e) {
                             console.log("fixBonusRounding error: ", e);
                         }
-                    },
+                    }, */
                     initializeStats: function (tabView) {
                         try {
                             ////////////////// Stats ////////////////////
@@ -3061,7 +3082,16 @@ codes by NetquiK
                             if (!this.statsOnly) {
                                 this.enterSimulationView();
                                 setTimeout(function () {
-                                    ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
+                                    //MOD FIX PLAY BUTTON+
+                                    _this = TACS.getInstance();
+                                    _this._VisMain.get_Battleground().RestartReplay();
+                                    _this.ReplayBar[_this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
+                                    _this.ReplayBar[_this.PBIS_S]= false;
+                                    _this.ReplayBar[_this.PBIS_L].setValue('x1.0');
+                                    _this._VisMain.get_Battleground().set_ReplaySpeed(1);
+                                    if (typeof _this._playAreaChildren[11].getChildren =='function' && Date.parse(_this._playAreaChildren[11].getChildren()[0].getValue()) == 0) {
+                                    _this._playAreaChildren[11].exclude();
+                                    }
                                 }, 1);
                             }
                             var total_hp = 0;
@@ -3734,7 +3764,8 @@ codes by NetquiK
                             								}
                             							}*/
                             if (PerforceChangelist >= 392583) { //endgame patch - repair costs fix
-                                var currentCity = ClientLib.Data.Cities.prototype.get_CurrentCity.toString();
+                                //MOD NOEVIL 5 by NetquiK
+                                /* var currentCity = ClientLib.Data.Cities.prototype.get_CurrentCity.toString();
                                 for (var i in ClientLib.Data.Cities.prototype) {
                                     if (ClientLib.Data.Cities.prototype.hasOwnProperty(i) && typeof (ClientLib.Data.Cities.prototype[i]) === 'function') {
                                         var strCityFunction = ClientLib.Data.Cities.prototype[i].toString();
@@ -3745,7 +3776,7 @@ codes by NetquiK
                                             }
                                         }
                                     }
-                                }
+                                } */
                                 var currentOwnCity = ClientLib.Data.Cities.prototype.get_CurrentOwnCity.toString();
                                 for (var y in ClientLib.Data.Cities.prototype) {
                                     if (ClientLib.Data.Cities.prototype.hasOwnProperty(y) && typeof (ClientLib.Data.Cities.prototype[y]) === 'function') {
@@ -3758,14 +3789,24 @@ codes by NetquiK
                                         }
                                     }
                                 }
-                                var strFunction = ClientLib.API.Util.GetUnitRepairCosts.toString();
+                                /* var strFunction = ClientLib.API.Util.GetUnitRepairCosts.toString();
                                 strFunction = strFunction.replace(currentCity, currentOwnCity);
                                 var functionBody = strFunction.substring(strFunction.indexOf("{") + 1, strFunction.lastIndexOf("}"));
-                                var fn = Function('a,b,c', functionBody);
-                                ClientLib.API.Util.GetUnitRepairCosts = fn;
+                                var fn = Evil('a,b,c', functionBody); */
+                                /*  var CAUGRCM = ClientLib.API.Battleground.legacy_GetLootFromCurrentCity.toString().match(/\$I\.([A-Z]{6})\.([A-Z]{6})\([a-z]\.[a-z]\.[A-Z]{6}\(\),/); */
+                                //$I[CAUGRCM[1]][CAUGRCM[2]] 
+                                ClientLib.API.Util.GetUnitRepairCosts = function (a, b, c) {
+                                    var $createHelper;
+                                    return ClientLib.API.Util.GetUnitRepairCostsForCity(ClientLib.Data.MainData.GetInstance().get_Cities()[currentOwnCity](), a, b, c);
+                                }
                             }
+                            //MOD TEMPORARY FOR 22.2 PTE //REMOVE
+                            if (parseFloat(GameVersion) >= 22.2 && typeof qx.core.Init.getApplication().getBarSimResult().setHidden != 'function'){
+                                qx.core.Init.getApplication().getBarSimResult().setHidden = function() {return;}
+                            }
+                            //MOD NO EVIL 4
                             // Solution for OnSimulateBattleFinishedEvent issue
-                            for (var key in ClientLib.API.Battleground.prototype) {
+                            /* for (var key in ClientLib.API.Battleground.prototype) {
                                 if (typeof ClientLib.API.Battleground.prototype[key] === 'function') {
                                     strFunction = ClientLib.API.Battleground.prototype[key].toString();
                                     if (strFunction.indexOf(",-1,0,0,0);") > -1) {
@@ -3780,28 +3821,37 @@ codes by NetquiK
                                         strFunction = strFunction.replace(re2, "");
                                         strFunction = strFunction.replace("}}", "}}" + temp);
                                         //strFunction = strFunction.replace("var $createHelper;", "var $createHelper;var offenseData = b.d.a;var baseData = b.d.s;var defenseData = b.d.d;var simResults = b.e;for (var i in offenseData) {simResults[offenseData[i].ci-1].Value.x = offenseData[i].x;simResults[offenseData[i].ci-1].Value.y = offenseData[i].y;}for (var u in baseData) {simResults[baseData[u].ci-1].Value.x = baseData[u].x;simResults[baseData[u].ci-1].Value.y = baseData[u].y;}for (var e in defenseData) {simResults[defenseData[e].ci-1].Value.x = defenseData[e].x;simResults[defenseData[e].ci-1].Value.y = defenseData[e].y;}"); // Add Coords
-                                        var fn = Function('a,b', strFunction);
+                                        var fn = Evil('a,b', strFunction);
                                         ClientLib.API.Battleground.prototype[key] = fn;
                                         break;
                                     }
                                 }
-                            }
-                            for (var key in ClientLib.Vis.BaseView.BaseView.prototype) {
+                            } */
+                            //MOD NOEVIL 3 by NetquiK
+                            /* for (var key in ClientLib.Vis.BaseView.BaseView.prototype) {
                                 if (typeof ClientLib.Vis.BaseView.BaseView.prototype[key] === 'function') {
                                     strFunction = ClientLib.Vis.BaseView.BaseView.prototype[key].toString();
-                                    if (strFunction.indexOf(ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip.toString()) > -1) {
-                                        console.log("ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype." + key);
-                                        var showToolTip_Original = "ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype." + key;
-                                        var stto = Function('', showToolTip_Original);
-                                        stto();
-                                        var showToolTip_New = "ClientLib.Vis.BaseView.BaseView.prototype." + key + "=function (a){if(ClientLib.Vis.VisMain.GetInstance().get_Mode()==7&&window.TACS.getInstance().saveObj.checkbox.disableAttackPreparationTooltips){return;}else{this.ShowToolTip_Original(a);}}";
-                                        var sttn = Function('', showToolTip_New);
-                                        sttn();
-                                        console.log(showToolTip_New);
-                                        break;
-                                    }
+                                    if (strFunction.indexOf(ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip.toString()) > -1) { */
+                            var TTM = ClientLib.Vis.ArmySetup.ArmyUnit.prototype.MouseOver.toString().match(/Helper;this\.[A-Z]{6}\.([A-Z]{6})\(this\);/);
+                            console.log("ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype." + TTM[1]);
+                            ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype[TTM[1]];
+                            // var stto = Evil('', showToolTip_Original);
+                            // stto();
+                            ClientLib.Vis.BaseView.BaseView.prototype[TTM[1]] = function (a) {
+                                if (ClientLib.Vis.VisMain.GetInstance().get_Mode() == 7 && TACS.getInstance().saveObj.checkbox.disableAttackPreparationTooltips) {
+                                    return;
+                                } else {
+                                    this.ShowToolTip_Original(a);
                                 }
+
                             }
+                            //var sttn = Evil('', showToolTip_New);
+                            //sttn();
+                            //console.log(showToolTip_New);
+                            //break;
+                            //}
+                            //}
+                            //}
                             qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility_Original = qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility;
                             qx.core.Init.getApplication().getArmyUnitTooltipOverlay().setVisibility = function (a) {
                                 if (window.TACS.getInstance().saveObj.checkbox.disableArmyFormationManagerTooltips) {
