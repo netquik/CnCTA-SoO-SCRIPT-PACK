@@ -3,10 +3,19 @@
 // @description    	Allows you to zoom out further
 // @namespace   	  https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include       	https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version        	1.0.2
+// @version        	1.0.3
 // @author         	Original: Panavia -- Updated By: Gryphon -- New code by NetquiK (https://github.com/netquik)
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Zoom.user.js
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- New Code
+- !!NOEVIL!! from 1.0.3
+----------------
+*/
+
 
 (function () {
   var tazoom_main = function () {
@@ -26,18 +35,37 @@
       backgroundArea.activeSceneView[getMaxZoomMethod] = zoomMin;
       ClientLib.Vis.Region.Region[getMinZoomMethod] = zoomMax;
 
-
-      var onHotKeyPressMod = webfrontend.gui.BackgroundArea.prototype.onHotKeyPress.toString().replace(/(?<=,Math\.max\()(\d*\.?\d*)(?=,)/g, zoomMax).replace(/(?<=Math\.min\()(\d*\.?\d*)(?=,)/g, zoomMin).replace(/(?<=\(\))(([+|-])\d\.\d)(?=;)/g, '$2' + zoomInc);
-      var fnBody = onHotKeyPressMod.substring(onHotKeyPressMod.indexOf('{') + 1, onHotKeyPressMod.lastIndexOf('}'));
-      var args = onHotKeyPressMod.substring(onHotKeyPressMod.indexOf("(") + 1, onHotKeyPressMod.indexOf(")"));
-      webfrontend.gui.BackgroundArea.prototype.onHotKeyPress = new Function(args, fnBody);
-
-      var onMouseWheelMod = webfrontend.gui.BackgroundArea.prototype._onMouseWheel.toString().replace(/(?<=get_ZoomFactor\(\);.*\<)(\d.*\d)(?=\);)/, Math.round((zoomMin / 3) * 2 * 100) / 100 + '?' + zoomIncLarge + ':' + zoomInc);
-      fnBody = onMouseWheelMod.substring(onMouseWheelMod.indexOf('{') + 1, onMouseWheelMod.lastIndexOf('}'));
-      args = onMouseWheelMod.substring(onMouseWheelMod.indexOf("(") + 1, onMouseWheelMod.indexOf(")"));
+      //MOD NOEVIL 1
+      webfrontend.gui.BackgroundArea.prototype.onHotKeyPress = function (a) {
+        var b = ClientLib.Vis.VisMain.GetInstance();
+        if (!b.get_LockMove() && this.active) {
+          var c = !1;
+          switch (a.getKeyIdentifier()) {
+            case webfrontend.gui.ShortkeyMapper.keys.zoomIn:
+              a = b.get_Region().get_ZoomFactor() + zoomInc;
+              b.get_Region().set_ZoomFactor(Math.min(zoomMin, Math.max(.6, a)));
+              c = !0;
+              break;
+            case webfrontend.gui.ShortkeyMapper.keys.zoomOut:
+              a = b.get_Region().get_ZoomFactor() - zoomInc, b.get_Region().set_ZoomFactor(Math.min(zoomMin, Math.max(.6, a))),
+                c = !0
+          }
+          c && (this.closeCityInfo(), this.closeCityList())
+        }
+      };
+      //MOD NOEVIL 2
       qx.bom.Element.removeListener(backgroundArea.mapContainer, "mousewheel", backgroundArea._onMouseWheel, backgroundArea);
       qx.bom.Element.removeListener(backgroundArea.mapBlocker, "mousewheel", backgroundArea._onMouseWheel, backgroundArea);
-      webfrontend.gui.BackgroundArea.prototype._onMouseWheel = new Function(args, fnBody);
+      webfrontend.gui.BackgroundArea.prototype._onMouseWheel = function (b) {
+        if (!ClientLib.Vis.VisMain.GetInstance().get_LockMove() && null != this.activeSceneView) {
+          var c = b.getWheelDelta(),
+            a = this.activeSceneView.get_ZoomFactor();
+          a += -c * (a < Math.round(zoomMin / 3 * 200) / 100 ? zoomIncLarge : zoomInc);
+          a = Math.min(this.activeSceneView.get_MaxZoomFactor(), Math.max(this.activeSceneView.get_MinZoomFactor(), a));
+          this.activeSceneView.set_ZoomFactor(a);
+          b.stop()
+        }
+      };
       qx.bom.Element.addListener(backgroundArea.mapContainer, "mousewheel", backgroundArea._onMouseWheel, backgroundArea);
       qx.bom.Element.addListener(backgroundArea.mapBlocker, "mousewheel", backgroundArea._onMouseWheel, backgroundArea);
 
