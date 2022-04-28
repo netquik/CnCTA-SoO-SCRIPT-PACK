@@ -1,16 +1,26 @@
 // ==UserScript==
 // @name CityMoveInfoExtend
-// @version 14.06.17
+// @version 22.04.28
 // @description Extended move info.
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author Nogrod
+// @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
+// @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_CityMoveInfoExtend.user.js
 // ==/UserScript==
 
-(function() {
+/* 
+codes by NetquiK
+----------------
+- !!NOEVIL!! code
+----------------
+*/
+
+(function () {
 	var c = document.createElement("script");
-	c.innerHTML = "(" + function() {
+	c.innerHTML = "(" + function () {
 		function c() {
+			console.log('CityMoveInfoExtend Loaded')
 			if ("undefined" == typeof webfrontend.gui.region.RegionCityMoveInfo.prototype.updateBases) {
 				var a = null,
 					b = webfrontend.gui.region.RegionCityMoveInfo.prototype,
@@ -20,7 +30,7 @@
 						a = d;
 						break
 					}
-				null !== a && (webfrontend.gui.region.RegionCityMoveInfo.prototype[a + "Orig"] = webfrontend.gui.region.RegionCityMoveInfo.prototype[a], webfrontend.gui.region.RegionCityMoveInfo.prototype.updateBases = function(a, b) {
+				null !== a && (webfrontend.gui.region.RegionCityMoveInfo.prototype[a + "Orig"] = webfrontend.gui.region.RegionCityMoveInfo.prototype[a], webfrontend.gui.region.RegionCityMoveInfo.prototype.updateBases = function (a, b) {
 					if ("undefined" === typeof this.basesCount) {
 						var e = new qx.ui.container.Composite(new qx.ui.layout.HBox(6)),
 							c = (new qx.ui.basic.Label(this.tr("tnf:bases:") + " ")).set({
@@ -109,7 +119,7 @@
 					}
 					//console.log(count + ' - ' + output.join(', '));
 					this.basesCount.setValue(count + ' - ' + output.join(', ') + waves)
-					
+
 					//for (
 					//		 var e = 0,
 					//		     c = ClientLib.Data.MainData.GetInstance().get_World(),
@@ -123,8 +133,15 @@
 					//	}
 
 
-				}, b = /this\.(__\w{3})\.setValue\(phe\.cnc\.Util\.getTimespanString\(\w\.GetTimeSpan\(\w\)\)/.exec(webfrontend.gui.region.RegionCityMoveInfo.prototype[a]), webfrontend.gui.region.RegionCityMoveInfo.prototype[a] = (new Function("return function (x,y){this." +
-					a + "Orig(x,y);var time=ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().GetCityMoveCooldownTime(x,y);this." + b[1] + ".setValue(this." + b[1] + ".getValue()+' ('+phe.cnc.Util.getDateTimeString(new Date(Date.now()+(time*1000)))+')');this.updateBases(x,y);}"))())
+				}, b = /this\.(__\w{3})\.setValue\(phe\.cnc\.Util\.getTimespanString\(\w\.GetTimeSpan\(\w\)\)/.exec(webfrontend.gui.region.RegionCityMoveInfo.prototype[a]), /* webfrontend.gui.region.RegionCityMoveInfo.prototype[a] = (new Evil("return function (x,y){this." +
+					a + "Orig(x,y);var time=ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().GetCityMoveCooldownTime(x,y);this." + b[1] + ".setValue(this." + b[1] + ".getValue()+' ('+phe.cnc.Util.getDateTimeString(new Date(Date.now()+(time*1000)))+')');this.updateBases(x,y);}"))()) */
+					//MOD NOEVIL
+					webfrontend.gui.region.RegionCityMoveInfo.prototype[a] = function (x, y) {
+						this[a + "Orig"](x, y);
+						var time = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().GetCityMoveCooldownTime(x, y);
+						this[b[1]].setValue(this[b[1]].getValue() + ' (' + phe.cnc.Util.getDateTimeString(new Date(Date.now() + (time * 1000))) + ')');
+						this.updateBases(x, y);
+					})
 			}
 		}
 
