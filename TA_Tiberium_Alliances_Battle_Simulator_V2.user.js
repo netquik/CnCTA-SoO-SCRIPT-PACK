@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         22.04.21
+// @version         28.04.21
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -26,6 +26,8 @@ codes by NetquiK
 - Back Button fix also for replays
 - Skip Button removed
 - Patch for 22.2
+- NOEVIL for all code
+- New Fixes for simulation + ReplayBar + Date hidden
 ----------------
 */
 
@@ -831,13 +833,18 @@ codes by NetquiK
                         },
                         patchGetUnitRepairCosts: function () {
                             try {
-                                for (var i in ClientLib.Data.Cities.prototype) {
-                                    if (typeof ClientLib.Data.Cities.prototype[i] === "function" && ClientLib.Data.Cities.prototype[i] == ClientLib.Data.Cities.prototype.get_CurrentCity && i !== "get_CurrentCity") break;
+                                /*  for (var i in ClientLib.Data.Cities.prototype) {
+                                     if (typeof ClientLib.Data.Cities.prototype[i] === "function" && ClientLib.Data.Cities.prototype[i] == ClientLib.Data.Cities.prototype.get_CurrentCity && i !== "get_CurrentCity") break;
+                                 }
+                                 var GetOwnUnitRepairCosts = ClientLib.API.Util.GetUnitRepairCosts.toString().replace(i, "get_CurrentOwnCity"),
+                                     args = GetOwnUnitRepairCosts.substring(GetOwnUnitRepairCosts.indexOf("(") + 1, GetOwnUnitRepairCosts.indexOf(")")),
+                                     body = GetOwnUnitRepairCosts.substring(GetOwnUnitRepairCosts.indexOf("{") + 1, GetOwnUnitRepairCosts.lastIndexOf("}")); /*jslint evil: true */
+                                //ClientLib.API.Util.GetOwnUnitRepairCosts = Evil(args, body); /*jslint evil: false */ 
+                                //MOD NOEVIL 1
+                                ClientLib.API.Util.GetOwnGetUnitRepairCosts = function (a, b, c) {
+                                    var $createHelper;
+                                    return ClientLib.API.Util.GetUnitRepairCostsForCity(ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity(), a, b, c);
                                 }
-                                var GetOwnUnitRepairCosts = ClientLib.API.Util.GetUnitRepairCosts.toString().replace(i, "get_CurrentOwnCity"),
-                                    args = GetOwnUnitRepairCosts.substring(GetOwnUnitRepairCosts.indexOf("(") + 1, GetOwnUnitRepairCosts.indexOf(")")),
-                                    body = GetOwnUnitRepairCosts.substring(GetOwnUnitRepairCosts.indexOf("{") + 1, GetOwnUnitRepairCosts.lastIndexOf("}")); /*jslint evil: true */
-                                ClientLib.API.Util.GetOwnUnitRepairCosts = Function(args, body); /*jslint evil: false */
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error setting up ClientLib.API.Util.GetOwnUnitRepairCosts", e);
@@ -864,6 +871,11 @@ codes by NetquiK
                             ClientLib.Vis.VisMain.GetInstance().get_Battleground().LoadCombatDirect(combat);
                             qx.event.Timer.once(function () {
                                 ClientLib.Vis.VisMain.GetInstance().get_Battleground().RestartReplay();
+                                //MOD FIX DATE APPEAR
+                                _this = TABS.GUI.PlayArea.getInstance();
+                                if (typeof _this._playAreaChildren[11].getChildren == 'function' && Date.parse(_this._playAreaChildren[11].getChildren()[0].getValue()) == 0) {
+                                    _this._playAreaChildren[11].exclude();
+                                }
                                 ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
                             }, this, 0);
                         }
@@ -2402,11 +2414,16 @@ codes by NetquiK
                         },
                         patchSetEnabled: function () {
                             try {
-                                var set_Enabled = ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled.toString(),
-                                    args = set_Enabled.substring(set_Enabled.indexOf("(") + 1, set_Enabled.indexOf(")")),
-                                    body = set_Enabled.substring(set_Enabled.indexOf("{") + 1, set_Enabled.lastIndexOf("}"));
-                                body = body + "TABS.PreArmyUnits.getInstance().__CityPreArmyUnitsChanged();"; /*jslint evil: true */
-                                ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled = Function(args, body); /*jslint evil: false */
+                                /*  var set_Enabled = ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled.toString(),
+                                     args = set_Enabled.substring(set_Enabled.indexOf("(") + 1, set_Enabled.indexOf(")")),
+                                     body = set_Enabled.substring(set_Enabled.indexOf("{") + 1, set_Enabled.lastIndexOf("}"));
+                                 body = body + "TABS.PreArmyUnits.getInstance().__CityPreArmyUnitsChanged();"; 
+                                 ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled = Evil(args, body);  */
+                                //MOD NO EVIL 2
+                                ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled = function (a) {
+                                    this.set_Enabled_Original(a);
+                                    TABS.PreArmyUnits.getInstance().__CityPreArmyUnitsChanged();
+                                };
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error setting up ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled", e);
@@ -2623,11 +2640,13 @@ codes by NetquiK
 
                             }
                             if (PerforceChangelist >= 472233) { // MOD: 20.2 patch 2 RETRO
-                                var patch211body = "{return;}"
                                 //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
                                 var source = this.ArmySetupAttackBar.showSetup.toString();
                                 var extendsetupF = source.match(/\;this\.([A-Za-z_]+)\(\)\;this\.show/)[1];
-                                this.ArmySetupAttackBar[extendsetupF] = new Function('', patch211body);
+                                // MOD NOEVIL 3 by NetquiK
+                                this.ArmySetupAttackBar[extendsetupF] = function () {
+                                    return;
+                                }
                                 ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
                                 this.ArmySetupAttackBar.showSetup(false);
                             }
@@ -2722,6 +2741,7 @@ codes by NetquiK
                         try {
                             this.base(arguments);
                             this.PlayArea = qx.core.Init.getApplication().getPlayArea();
+                            this._playAreaChildren = this.PlayArea.getChildren();
                             this.ArmySetupAttackBar = qx.core.Init.getApplication().getArmySetupAttackBar();
                             this.HUD = this.PlayArea.getHUD();
                             var WDG_COMBATSWAPVIEW = this.HUD.getUIItem(ClientLib.Data.Missions.PATH.WDG_COMBATSWAPVIEW);
@@ -3166,6 +3186,15 @@ codes by NetquiK
                         try {
                             this.base(arguments);
                             var qxApp = qx.core.Init.getApplication();
+                            //MOD New Play Button Icon Selector
+                            var PBIS_S = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.reports.ReportReplayOverlay.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.reports.ReportReplayOverlay.constructor);
+
+                            var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this/);
+                            this.PBIS = PBIS_M[1];
+                            PBIS_M = webfrontend.gui.reports.ReportReplayOverlay.prototype[PBIS_M[2]].toString().match(/if\(this\.([_a-zA-Z]+)\){this\.[_a-zA-Z]+\(false\).+this\.([_a-zA-Z]+)\.setValue/);
+                            this.PBIS_S = PBIS_M[1];
+                            this.PBIS_L = PBIS_M[2];
+
                             this.ReportReplayOverlay = qx.core.Init.getApplication().getReportReplayOverlay();
                             this.btnBack = new qx.ui.form.Button(qxApp.tr("Setup")).set({
                                 toolTipText: qxApp.tr("Back to Setup"),
@@ -3204,6 +3233,10 @@ codes by NetquiK
                         onAppear_ReportReplayOverlay: function () {
                             try {
                                 if (TABS.SETTINGS.get("GUI.Window.Stats.open", true) && TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().close();
+                                //MOD FIX PLAY BUTTON
+                                this.ReportReplayOverlay[this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
+                                this.ReportReplayOverlay[this.PBIS_S] = false;
+                                this.ReportReplayOverlay[this.PBIS_L].setValue('x1.0');
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error onAppear_btnBack", e);
@@ -4475,6 +4508,12 @@ codes by NetquiK
                                     var methodLoadDirect = lCString.match(/\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.([A-Z]{6})\(b\.d\);/)[1];
                                     console.log(methodLoadDirect);
                                     ClientLib.Vis.Battleground.Battleground.prototype.LoadCombatDirect = ClientLib.Vis.Battleground.Battleground.prototype[methodLoadDirect];
+                                }
+                                //MOD TEMPORARY FOR 22.2 PTE //REMOVE
+                                if (parseFloat(GameVersion) >= 22.2 && typeof qx.core.Init.getApplication().getBarSimResult().setHidden != 'function') {
+                                    qx.core.Init.getApplication().getBarSimResult().setHidden = function () {
+                                        return;
+                                    }
                                 }
                                 translation();
                                 createClasses();
