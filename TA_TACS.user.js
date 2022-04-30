@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.72.2
+// @version        3.72.3
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -521,6 +521,7 @@ codes by NetquiK
                             this._VisMain = ClientLib.Vis.VisMain.GetInstance();
                             this._ActiveView = this._VisMain.GetActiveView();
                             this._PlayArea = this._Application.getPlayArea();
+                            this._PlayAreaHUD = this._Application.getPlayArea().getHUD();
                             this.ArmySetupAttackBar = this._Application.getArmySetupAttackBar();
                             this._armyBar = this._Application.getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
                             // Just some shortcuts by Netquik
@@ -533,12 +534,15 @@ codes by NetquiK
                             this.ReplayBar = this._Application.getReportReplayOverlay();
                             var PBIS_S = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.reports.ReportReplayOverlay.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.reports.ReportReplayOverlay.constructor);
                             var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this\.([_a-zA-Z]+)\.addListener\([a-z]/);
-                            "object" == typeof this.ReplayBar[PBIS_M[1]] && "btn_play" == this.ReplayBar[PBIS_M[1]].objid && (this.PBIS = [PBIS_M[1]]);
-                            "object" == typeof this.ReplayBar[PBIS_M[3]] && "btn_skip" == this.ReplayBar[PBIS_M[3]].objid && (this.PBIS_SK = [PBIS_M[3]]);
+                            "object" == typeof this.ReplayBar[PBIS_M[1]] && "btn_play" == this.ReplayBar[PBIS_M[1]].objid && (this.PBIS = PBIS_M[1]);
+                            "object" == typeof this.ReplayBar[PBIS_M[3]] && "btn_skip" == this.ReplayBar[PBIS_M[3]].objid && (this.PBIS_SK = PBIS_M[3]);
                             PBIS_M = webfrontend.gui.reports.ReportReplayOverlay.prototype[PBIS_M[2]].toString().match(/if\(this\.([_a-zA-Z]+)\){this\.[_a-zA-Z]+\(false\).+this\.([_a-zA-Z]+)\.setValue/);
-                            "boolean" == typeof this.ReplayBar[PBIS_M[1]] && (this.PBIS_S = [PBIS_M[1]]);
-                            "object" == typeof this.ReplayBar[PBIS_M[2]] && "lbl_speed" == this.ReplayBar[PBIS_M[2]].objid && (this.PBIS_L = [PBIS_M[2]]);
-
+                            "boolean" == typeof this.ReplayBar[PBIS_M[1]] && (this.PBIS_S = PBIS_M[1]);
+                            "object" == typeof this.ReplayBar[PBIS_M[2]] && "lbl_speed" == this.ReplayBar[PBIS_M[2]].objid && (this.PBIS_L = PBIS_M[2]);
+                            //MOD New Autoscroll Button Selector
+                            var ABS_S = parseFloat(GameVersion) >= 22.1 ? webfrontend.gui.PlayArea.PlayAreaHUD.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.PlayArea.PlayAreaHUD.constructor);
+                            var ABS_M = ABS_S.match(/COMBATAUTOSCROLL\),10\)==1;this\.([_a-zA-Z]+)=/);
+                            "object" == typeof this._PlayAreaHUD[ABS_M[1]] && (this.ABS_B = ABS_M[1]);
 
                             if (PerforceChangelist >= 443425) { // 16.1 patch
                                 for (var i in this.ArmySetupAttackBar) {
@@ -672,10 +676,12 @@ codes by NetquiK
                                 left: 185
                             });
 
-                            replayBar.add(this.buttons.simulate.skip, {
-                                top: 21,
-                                left: 735
-                            });
+                            if (typeof (CCTAWrapper_IsInstalled) != 'undefined' && CCTAWrapper_IsInstalled) {
+                                replayBar.add(this.buttons.simulate.skip, {
+                                    top: 21,
+                                    left: 735
+                                });
+                            }
 
                             // Unlock Button
                             this.buttons.attack.unlock = new qx.ui.form.Button(lang("Unlock"));
@@ -3034,14 +3040,25 @@ codes by NetquiK
                     onTick_btnSkip: function () {
                         var bA = ClientLib.Vis.VisMain.GetInstance();
                         var bG = this._VisMain.get_Battleground();
+                        if (this.curPAVM != ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay || bG.get_LastFrameTime() == 0) {
+                            phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
+                            this.SkippingSim = null;
+                        }
+
                         //  console.log(bG.get_TopAttackerPos());
                         if (bA.get_PositionY() != bG.get_MinYPosition() && this.TopAttackerPos > bG.get_TopAttackerPos()) {
                             if (bG.get_TopAttackerPos() < bA.get_PositionY()) {
-                                this.TopAttackerPos = bG.get_TopAttackerPos() - 300;
+                                this.TopAttackerPos = bG.get_TopAttackerPos() - 400;
                             }
                             bA.SetPosition(0, this.TopAttackerPos < 100 ? bG.get_MinYPosition() : this.TopAttackerPos);
                         }
-                        if (bG.get_CombatComplete() == true || this.curPAVM != ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay) {
+                        if (bG.get_CombatComplete() == true) {
+                            bG.SkipToEnd()
+                            //ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, this.Autoscroll);
+                            if (this.ResetAutoscroll) {
+                                this._PlayAreaHUD[this.ABS_B].execute()
+                                this.ResetAutoscroll = 0;
+                            }
                             phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
                             this.SkippingSim = null;
                         }
@@ -3055,13 +3072,19 @@ codes by NetquiK
                                 var bG = this._VisMain.get_Battleground();
                                 var bA = ClientLib.Vis.VisMain.GetInstance();
                                 if (bG.get_CombatComplete() == true) bG.RestartReplay();
-                                this.TopAttackerPos = bA.get_PositionY() - 300;
+                                this.TopAttackerPos = bA.get_PositionY() - 400;
                                 bA.SetPosition(0, this.TopAttackerPos);
                                 phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
                                 //bG.RHHIAT = true CAN DO ONLY THIS BUT
-                                //while (this._VisMain.get_Battleground().get_Simulation().DoStep(false)) {} LIKE 
-                                //ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(10000); AUTOCAM FAIL
-                                ClientLib.Vis.VisMain.GetInstance().get_Battleground().SkipToEnd();
+                                if (this._PlayArea.getPlayerAutoScrollPreference()) {
+                                    this._PlayAreaHUD[this.ABS_B].execute();
+                                    this.ResetAutoscroll = 1;
+                                }
+                                //ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, 0);
+                                while (bG.get_Simulation().DoStep(false)) {} //LIKE 
+                                bG.set_ReplaySpeed(1);
+                                //ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(10000); // AUTOCAMFAIL
+                                //ClientLib.Vis.VisMain.GetInstance().get_Battleground().SkipToEnd();
                             }
 
                         } catch (e) {
