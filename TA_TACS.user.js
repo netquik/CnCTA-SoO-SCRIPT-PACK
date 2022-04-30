@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.72.1
+// @version        3.72.2
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -28,6 +28,7 @@ codes by NetquiK
 - Patch for 22.2
 - NOEVIL for all code
 - New Fixes for simulation + ReplayBar + Date hidden
+- New SkipSimulation Function
 ----------------
 */
 
@@ -255,7 +256,7 @@ codes by NetquiK
                         simulate: {
                             back: null,
                             // buttonReturnSetup
-                            skip : null // buttonSkipSimulation
+                            skip: null // buttonSkipSimulation
                         },
                         shiftFormationUp: null,
                         shiftFormationDown: null,
@@ -430,6 +431,12 @@ codes by NetquiK
                     _PlayArea: null,
                     _armyBarContainer: null,
                     _armyBar: null,
+                    PBIS: null,
+                    PBIS_L: null,
+                    PBIS_S: null,
+                    PBIS_SK: null,
+                    TopAttackerPos: null,
+                    SkippingSim: null,
                     attacker_modules: null,
                     defender_modules: null,
                     resourceSummaryVerticalBox: null,
@@ -525,12 +532,13 @@ codes by NetquiK
                             //MOD New Play Button Icon Selector
                             this.ReplayBar = this._Application.getReportReplayOverlay();
                             var PBIS_S = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.reports.ReportReplayOverlay.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.reports.ReportReplayOverlay.constructor);
-
-                            var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this/);
-                            this.PBIS = PBIS_M[1];
+                            var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this\.([_a-zA-Z]+)\.addListener\([a-z]/);
+                            "object" == typeof this.ReplayBar[PBIS_M[1]] && "btn_play" == this.ReplayBar[PBIS_M[1]].objid && (this.PBIS = [PBIS_M[1]]);
+                            "object" == typeof this.ReplayBar[PBIS_M[3]] && "btn_skip" == this.ReplayBar[PBIS_M[3]].objid && (this.PBIS_SK = [PBIS_M[3]]);
                             PBIS_M = webfrontend.gui.reports.ReportReplayOverlay.prototype[PBIS_M[2]].toString().match(/if\(this\.([_a-zA-Z]+)\){this\.[_a-zA-Z]+\(false\).+this\.([_a-zA-Z]+)\.setValue/);
-                            this.PBIS_S = PBIS_M[1];
-                            this.PBIS_L = PBIS_M[2];
+                            "boolean" == typeof this.ReplayBar[PBIS_M[1]] && (this.PBIS_S = [PBIS_M[1]]);
+                            "object" == typeof this.ReplayBar[PBIS_M[2]] && "lbl_speed" == this.ReplayBar[PBIS_M[2]].objid && (this.PBIS_L = [PBIS_M[2]]);
+
 
                             if (PerforceChangelist >= 443425) { // 16.1 patch
                                 for (var i in this.ArmySetupAttackBar) {
@@ -648,14 +656,14 @@ codes by NetquiK
                             this.buttons.simulate.back.addListener("click", this.returnSetup, this);
                             // Skip to end Button
                             this.buttons.simulate.skip = new qx.ui.form.Button();
-                            							this.buttons.simulate.skip.set({
-                            								width : 35,
-                            								height : 24,
-                            								appearance : "button-addpoints",
-                            								icon : "FactionUI/icons/icon_replay_skip.png",
-                            								toolTipText : lang("Skip to End")
-                            							});
-                            							this.buttons.simulate.skip.addListener("click", this.skipSimulation, this);
+                            this.buttons.simulate.skip.set({
+                                width: 35,
+                                height: 24,
+                                appearance: "button-addpoints",
+                                icon: "FactionUI/icons/icon_replay_skip.png",
+                                toolTipText: lang("Skip to End")
+                            });
+                            this.buttons.simulate.skip.addListener("click", this.skipSimulation, this);
                             var replayBar = this._Application.getReportReplayOverlay();
                             //MOD close statbox for simple replays
                             replayBar.addListener("appear", this.onAppear_replayBar, this);
@@ -663,12 +671,12 @@ codes by NetquiK
                                 top: 21,
                                 left: 185
                             });
-                            if (typeof(CCTAWrapper_IsInstalled) != 'undefined' && CCTAWrapper_IsInstalled) {
-                            								replayBar.add(this.buttons.simulate.skip, {
-                            									top : 21,
-                            									left : 735
-                            								});
-                            							}
+                            if (typeof (CCTAWrapper_IsInstalled) != 'undefined' && CCTAWrapper_IsInstalled) {
+                                replayBar.add(this.buttons.simulate.skip, {
+                                    top: 21,
+                                    left: 735
+                                });
+                            }
                             // Unlock Button
                             this.buttons.attack.unlock = new qx.ui.form.Button(lang("Unlock"));
                             this.buttons.attack.unlock.set({
@@ -3022,10 +3030,40 @@ codes by NetquiK
                             console.log(e);
                         }
                     },
+                    //MOD New SKIP SIMULATION 1 by NetquiK
+                    onTick_btnSkip: function () {
+                        var bA = ClientLib.Vis.VisMain.GetInstance();
+                        var bG = this._VisMain.get_Battleground();
+                        //  console.log(bG.get_TopAttackerPos());
+                        if (bA.get_PositionY() != bG.get_MinYPosition() && this.TopAttackerPos > bG.get_TopAttackerPos()) {
+                            if (bG.get_TopAttackerPos() < bA.get_PositionY()) {
+                                this.TopAttackerPos = bG.get_TopAttackerPos() - 300;
+                            }
+                            bA.SetPosition(0, this.TopAttackerPos < 100 ? bG.get_MinYPosition() : this.TopAttackerPos);
+                        }
+                        if (bG.get_CombatComplete() == true || this.curPAVM != ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay) {
+                            phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
+                            this.SkippingSim = null;
+                        }
+                    },
+
+                    //MOD New SKIP SIMULATION 2 by NetquiK
                     skipSimulation: function () {
                         try {
-                            while (this._VisMain.get_Battleground().get_Simulation().DoStep(false)) {}
-                            this._VisMain.get_Battleground().set_ReplaySpeed(1);
+                            if (!this.SkippingSim) {
+                                this.SkippingSim = true;
+                                var bG = this._VisMain.get_Battleground();
+                                var bA = ClientLib.Vis.VisMain.GetInstance();
+                                if (bG.get_CombatComplete() == true) bG.RestartReplay();
+                                this.TopAttackerPos = bA.get_PositionY() - 300;
+                                bA.SetPosition(0, this.TopAttackerPos);
+                                phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
+                                //bG.RHHIAT = true CAN DO ONLY THIS BUT
+                                //while (this._VisMain.get_Battleground().get_Simulation().DoStep(false)) {} LIKE 
+                                //ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(10000); AUTOCAM FAIL
+                                ClientLib.Vis.VisMain.GetInstance().get_Battleground().SkipToEnd();
+                            }
+
                         } catch (e) {
                             console.log(e);
                         }
@@ -3082,15 +3120,17 @@ codes by NetquiK
                             if (!this.statsOnly) {
                                 this.enterSimulationView();
                                 setTimeout(function () {
-                                    //MOD FIX PLAY BUTTON+
+                                    //MOD FIX PLAY BUTTON + Date
                                     _this = TACS.getInstance();
                                     _this._VisMain.get_Battleground().RestartReplay();
-                                    _this.ReplayBar[_this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
-                                    _this.ReplayBar[_this.PBIS_S]= false;
-                                    _this.ReplayBar[_this.PBIS_L].setValue('x1.0');
+                                    let r = _this.ReplayBar;
+                                    null != r[_this.PBIS] && r[_this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
+                                    null != r[_this.PBIS_S] && (r[_this.PBIS_S] = !1);
+                                    null != r[_this.PBIS_L] && r[_this.PBIS_L].setValue('x1.0');
+                                    null != r[_this.PBIS_SK] && r[_this.PBIS_SK].exclude();
                                     _this._VisMain.get_Battleground().set_ReplaySpeed(1);
-                                    if (typeof _this._playAreaChildren[11].getChildren =='function' && Date.parse(_this._playAreaChildren[11].getChildren()[0].getValue()) == 0) {
-                                    _this._playAreaChildren[11].exclude();
+                                    if (typeof _this._playAreaChildren[11].getChildren == 'function' && typeof Date.parse(_this._playAreaChildren[11].getChildren()[0].getValue()) == 'number') {
+                                        _this._playAreaChildren[11].exclude();
                                     }
                                 }, 1);
                             }
@@ -3801,8 +3841,10 @@ codes by NetquiK
                                 }
                             }
                             //MOD TEMPORARY FOR 22.2 PTE //REMOVE
-                            if (parseFloat(GameVersion) >= 22.2 && typeof qx.core.Init.getApplication().getBarSimResult().setHidden != 'function'){
-                                qx.core.Init.getApplication().getBarSimResult().setHidden = function() {return;}
+                            if (parseFloat(GameVersion) >= 22.2 && typeof qx.core.Init.getApplication().getBarSimResult().setHidden != 'function') {
+                                qx.core.Init.getApplication().getBarSimResult().setHidden = function () {
+                                    return;
+                                }
                             }
                             //MOD NO EVIL 4
                             // Solution for OnSimulateBattleFinishedEvent issue
