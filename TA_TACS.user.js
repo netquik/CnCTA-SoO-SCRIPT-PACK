@@ -671,12 +671,12 @@ codes by NetquiK
                                 top: 21,
                                 left: 185
                             });
-                            if (typeof (CCTAWrapper_IsInstalled) != 'undefined' && CCTAWrapper_IsInstalled) {
-                                replayBar.add(this.buttons.simulate.skip, {
-                                    top: 21,
-                                    left: 735
-                                });
-                            }
+
+                            replayBar.add(this.buttons.simulate.skip, {
+                                top: 21,
+                                left: 735
+                            });
+
                             // Unlock Button
                             this.buttons.attack.unlock = new qx.ui.form.Button(lang("Unlock"));
                             this.buttons.attack.unlock.set({
