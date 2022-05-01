@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.72.4
+// @version        3.72.5
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -3047,24 +3047,27 @@ codes by NetquiK
                         }
 
                         //  console.log(bG.get_TopAttackerPos());
-                        if (bA.get_PositionY() != bG.get_MinYPosition() && this.TopAttackerPos > bG.get_TopAttackerPos()) {
+                        /* if (bA.get_PositionY() != bG.get_MinYPosition() && this.TopAttackerPos > bG.get_TopAttackerPos()) {
                             if (bG.get_TopAttackerPos() < bA.get_PositionY()) {
                                 this.TopAttackerPos = bG.get_TopAttackerPos() - 400;
-                            }
-                            bA.SetPosition(0, this.TopAttackerPos < 100 ? bG.get_MinYPosition() : this.TopAttackerPos);
+                            } */
+                        //bA.SetPosition(0, this.TopAttackerPos < 100 ? bG.get_MinYPosition() : this.TopAttackerPos);
+                        if (this.TopAttackerPos > bG.get_TopAttackerPos()) {
+                            this.TopAttackerPos = bG.get_TopAttackerPos() - 400;
                         }
+
                         if (bG.get_CombatComplete() == true && this.curPAVM == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay) {
                             bG.SkipToEnd()
                             if (this.ResetAutoscroll) {
                                 ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, 1);
                                 ClientLib.Config.Main.GetInstance().SaveToDB();
                                 this.ResetAutoscroll = 0;
-                                qx.event.Timer.once(function () {
-                                    //MOD FIX PLAY BUTTON + Date
-                                    _this = TACS.getInstance();
-                                    _this._PlayArea.autoScroll = 1
-                                }, 100);
                             }
+                            bA.SetPosition(0, this.TopAttackerPos < 100 ? bG.get_MinYPosition() : this.TopAttackerPos);
+                            qx.event.Timer.once(function () {
+                                _this = TACS.getInstance();
+                                _this._PlayArea.autoScroll = 1
+                            }, 40);
                             this.ReplayBar.setEnabled(true)
                             this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().show();
                             phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
@@ -3081,7 +3084,7 @@ codes by NetquiK
                                 var bA = ClientLib.Vis.VisMain.GetInstance();
                                 if (bG.get_CombatComplete() == true) bG.RestartReplay();
                                 this.TopAttackerPos = bA.get_PositionY() - 400;
-                                bA.SetPosition(0, this.TopAttackerPos);
+                                //bA.SetPosition(0, this.TopAttackerPos);
                                 phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
                                 this.ResetAutoscroll = this._PlayArea.getPlayerAutoScrollPreference();
                                 this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().hide();
