@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.72.3
+// @version        3.72.4
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -3042,6 +3042,7 @@ codes by NetquiK
                         var bG = this._VisMain.get_Battleground();
                         if (this.curPAVM != ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay || bG.get_LastFrameTime() == 0) {
                             phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
+                            this.ReplayBar.setEnabled(true)
                             this.SkippingSim = null;
                         }
 
@@ -3052,13 +3053,20 @@ codes by NetquiK
                             }
                             bA.SetPosition(0, this.TopAttackerPos < 100 ? bG.get_MinYPosition() : this.TopAttackerPos);
                         }
-                        if (bG.get_CombatComplete() == true) {
+                        if (bG.get_CombatComplete() == true && this.curPAVM == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay) {
                             bG.SkipToEnd()
-                            //ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, this.Autoscroll);
                             if (this.ResetAutoscroll) {
-                                this._PlayAreaHUD[this.ABS_B].execute()
+                                ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, 1);
+                                ClientLib.Config.Main.GetInstance().SaveToDB();
                                 this.ResetAutoscroll = 0;
+                                qx.event.Timer.once(function () {
+                                    //MOD FIX PLAY BUTTON + Date
+                                    _this = TACS.getInstance();
+                                    _this._PlayArea.autoScroll = 1
+                                }, 100);
                             }
+                            this.ReplayBar.setEnabled(true)
+                            this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().show();
                             phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
                             this.SkippingSim = null;
                         }
@@ -3075,16 +3083,16 @@ codes by NetquiK
                                 this.TopAttackerPos = bA.get_PositionY() - 400;
                                 bA.SetPosition(0, this.TopAttackerPos);
                                 phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
-                                //bG.RHHIAT = true CAN DO ONLY THIS BUT
-                                if (this._PlayArea.getPlayerAutoScrollPreference()) {
-                                    this._PlayAreaHUD[this.ABS_B].execute();
-                                    this.ResetAutoscroll = 1;
-                                }
-                                //ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, 0);
+                                this.ResetAutoscroll = this._PlayArea.getPlayerAutoScrollPreference();
+                                this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().hide();
+                                this.ReplayBar.setEnabled(false);
+                                this.buttons.simulate.back.setEnabled(true);
+                                ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, 0);
+                                ClientLib.Config.Main.GetInstance().SaveToDB();
                                 while (bG.get_Simulation().DoStep(false)) {} //LIKE 
-                                bG.set_ReplaySpeed(1);
+                                this._PlayArea.autoScroll = 0
+                                bG.set_ReplaySpeed(10);
                                 //ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(10000); // AUTOCAMFAIL
-                                //ClientLib.Vis.VisMain.GetInstance().get_Battleground().SkipToEnd();
                             }
 
                         } catch (e) {
@@ -3142,7 +3150,7 @@ codes by NetquiK
                         try {
                             if (!this.statsOnly) {
                                 this.enterSimulationView();
-                                setTimeout(function () {
+                                qx.event.Timer.once(function () {
                                     //MOD FIX PLAY BUTTON + Date
                                     _this = TACS.getInstance();
                                     _this._VisMain.get_Battleground().RestartReplay();
