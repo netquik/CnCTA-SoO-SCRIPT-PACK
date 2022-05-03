@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.72.6
+// @version        3.72.7
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -3874,12 +3874,6 @@ codes by NetquiK
                                 ClientLib.API.Util.GetUnitRepairCosts = function (a, b, c) {
                                     var $createHelper;
                                     return ClientLib.API.Util.GetUnitRepairCostsForCity(ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity(), a, b, c);
-                                }
-                            }
-                            //MOD TEMPORARY FOR 22.2 PTE //REMOVE
-                            if (parseFloat(GameVersion) >= 22.2 && typeof qx.core.Init.getApplication().getBarSimResult().setHidden != 'function') {
-                                qx.core.Init.getApplication().getBarSimResult().setHidden = function () {
-                                    return;
                                 }
                             }
                             //MOD NO EVIL 4

@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         22.05.03
+// @version         22.05.04
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -4618,12 +4618,6 @@ codes by NetquiK
                                     var methodLoadDirect = lCString.match(/\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.([A-Z]{6})\(b\.d\);/)[1];
                                     console.log(methodLoadDirect);
                                     ClientLib.Vis.Battleground.Battleground.prototype.LoadCombatDirect = ClientLib.Vis.Battleground.Battleground.prototype[methodLoadDirect];
-                                }
-                                //MOD TEMPORARY FOR 22.2 PTE //REMOVE
-                                if (parseFloat(GameVersion) >= 22.2 && typeof qx.core.Init.getApplication().getBarSimResult().setHidden != 'function') {
-                                    qx.core.Init.getApplication().getBarSimResult().setHidden = function () {
-                                        return;
-                                    }
                                 }
                                 translation();
                                 createClasses();
