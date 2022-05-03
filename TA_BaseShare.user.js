@@ -5,11 +5,18 @@
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @icon        data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAqCAMAAADyHTlpAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAADYUExURQAAAP/YZf/SXv/ebeLi4sSLOf/MV6WlpczMzOHh4f/GUP/rfP/icv/md97e3v/DTP+/SP/VYmEpAKGhof77rnE+AmYwA//PW6N/OPq0Pv/bav+8Q66ursvLy8unSrW1tfDllNycOVEdAIJSFsWrYP30nf/+tf/wi9HR0f//wv/5o5hwLf/ETdnFdv76qYteHcy1aLudU6+ORMapgcbGxnlHEtqyUeLQfdS8avXto72gdsqfQuzOZfXrmP//y6CgoOnBWOvbiP7xlvjdcL6hd8WpgJycnPvXaAl6Tu4AAAAKdFJOUwD///84//84Nzjgp7DKAAACz0lEQVQ4y4XV6VriMBQG4FoGdVhsiW0oFLV2Cbalq5YWBWTRmfu/ozlZWKwMfn/C8j4nSUkOkgT5dfNDriWR3zdPz80zeb67uz7Ix4FpqqqiTFpHmSiKqprm4HFnhVSVVuvyW1otRd1bLgFeXvb7ci39PmhFFXYv+3Kvd1FLryf3d/ZFevoUEtxw2PiS4RC0sJ8P0lNzYIKUexfgOoc0EseZg77oyWDNQZNSU2U1Kewesk38zNh2Gg1WVzU5VZgUsC3SoXTehfLUKpxCURlm7xwYTeX4eTLvdjuwBliCKigr+kVuHWMdL7KCWSgrKJ2fFm23x/sU1TL2gqWF57QsXYGgMD8tGlgRxNKqyDCWLiwg9Ktky1dA6V1zApTNT3IbITs1MMazBYZt2ZXvFInzBnTCaEvQMUmQrqM0IZoWeJrmxZoHA7GcFezrmLbHcaHrOi6dKq3iRVrG63StlW6ZOtM63QQzmjjKsyLSMPYN25rpeRg2v9G4LBxIYDlh4ZBZpqXrZZhZ09VKrlOS2bAhrEU21lE48z0C+7S8KTzYGh2TEMNSC1IhumQnJ5WOUKqdoJtYRxgjx3ehOEIlPFcb2yGptpyODtQLLJpF4LHBSpZ5NoO35fwbDSyXJoLnQ1MWlmGkrustpnXaJi78Vsg2lgYbowzTddjr+L5Ox8Sg20GZz8d0SXep0339FfRF0I2WsK9c3/gy5qSc7yk/LsEMpkUYTkhiYxhz+gAQRoVmTdlxoZQdQjiBoQEJ11pGX4QpidgHhufds0PIKRztMT1ENN4mZmOwCdgYe95U7gvKL8zq7e3+RN5oVvTCcHrqGvIcXUNKT19uyiCHy82oyppLrWXsYIO1F5XT042Id6OjRgT0A9rbhNnT7Q3kBNrbx0h6eHjl9v9Nk8rX0a10NWL2h1b8Onq/koQ93+C53Nszfxs7ye25P6ODBHt7Nu9/mPwHuCKM2LRl3icAAAAASUVORK5CYII=
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_BaseShare.js
-// @version     21.07.17
+// @version     22.05.03
 // @author      TheStriker
-// @contributor NetquiK (https://github.com/netquik)
+// @contributor NetquiK (https://github.com/netquik) (see first comments for changelog)
 // ==/UserScript==
-
+/* 
+codes by NetquiK
+----------------
+- Fix for potential icon overlaps
+- First Try to speed up Attack buttons enabling
+- NOEVIL
+----------------
+*/
 'use strict';
 (function () {
   var b = function () {
@@ -91,7 +98,9 @@
           },
           QuickWrapProperty: function (_target, _fromName, _regexp, _funcName) {
             var tempName = this.FindRegexSubStr(_target[_fromName], _regexp, 1);
-            _target[_funcName] = new Function("return function () {return this." + tempName + ";}")();
+            _target[_funcName] = function () {
+              return this[tempName];
+            };
           },
           FindRegexSubStr: function (_funcStr, _regex, _pos) {
             _funcStr = typeof _funcStr === "function" ? _funcStr.toString() : _funcStr;
@@ -131,12 +140,29 @@
               height: parseInt(size, 10),
             });
           },
-          addButtonToDesktop: function (button) {
+          addButtonToDesktop: function (button) { // MOD Fix for potential icon overlaps
             var app = qx.core.Init.getApplication();
             var topy = 0;
-            if (typeof leoStats !== "undefined") {
-              let leo = BaseScanner.getInstance().GuiButtonBaseScanner.getBounds();
-              topy = leo.top + leo.height + 2;
+            try {
+              let nospace = false,
+                leo, BIB;
+              if (typeof leoStats !== "undefined") {
+                nospace = true;
+                leo = BaseScanner.getInstance().GuiButtonBaseScanner.getBounds();
+                topy = leo.top + leo.height + 1;
+              }
+              if (typeof BaseInfo !== "undefined") {
+                let BI = BaseInfo.getInstance().BaseinfoButton
+                if (BI.getLayoutProperties().right == 125) {
+                  BIB = BI.getBounds();
+                  topy = topy + BIB.top + BIB.height + 1;
+                  if (nospace) BI.setLayoutProperties({
+                    top: leo.top + leo.height + 1
+                  });
+                }
+              }
+            } catch (e) {
+              console.log("addButtonToDesktop: ", e.toString());
             }
             app.getDesktop().add(button, {
               top: topy,
@@ -175,12 +201,12 @@
               }
               if (typeof this.atkBtn === "undefined") {
                 BaseShare.getInstance().setInfo();
-                //this.atkBtn = [];
+                //this.atkBtn = []; 
                 for (var i in this) {
                   if (this[i] && this[i].basename == "Composite") {
                     var children = this[i].getChildren();
                     for (var child in children) {
-                      if (children[child].basename == "SoundButton" && children[child].getLabel().indexOf("!") != -1 && children[child].isSeeable()) {
+                      if (children[child].basename == "SoundButton" && children[child].getLabel().indexOf("!") != -1 && children[child].isSeeable()) { //MOD TRY SPEED UP ATTACK BUTTON ENABLING by Netquik
                         //this.atkBtn.push(children[child]);
                         this.atkBtn = children[child];
                         break;
@@ -248,7 +274,7 @@
                    this.atkBtn[i].setEnabled(true);
                  }
                } */
-              if (this.atkBtn.isVisible() && !this.atkBtn.isEnabled()) {
+              if (this.atkBtn.isVisible() && !this.atkBtn.isEnabled()) { //MOD TRY SPEED UP ATTACK BUTTON ENABLING by Netquik
                 this.atkBtn.setEnabled(true);
               }
             };
