@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.72.7
+// @version        3.73
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -650,36 +650,40 @@ codes by NetquiK
                             phe.cnc.Util.attachNetEvent(this._VisMain, "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this.viewChangeHandler);
                             phe.cnc.Util.attachNetEvent(this._MainData.get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.ownCityChangeHandler);
                             // Setup Button
-                            this.buttons.simulate.back = new qx.ui.form.Button(lang("Setup"));
+                            //MOD Original Style Buttons
+                            this.buttons.simulate.back = new qx.ui.form.Button();
                             this.buttons.simulate.back.set({
-                                width: 80,
-                                height: 24,
+                                width: 48,
+                                height: 48,
                                 appearance: "button-addpoints",
-                                toolTipText: lang("Return to Combat Setup")
+                                toolTipText: lang("Return to Attack Preparation"),
+                                icon: "FactionUI/icons/icon_return.png",
+                                appearance: "button-friendlist-scroll"
                             });
                             this.buttons.simulate.back.addListener("click", this.returnSetup, this);
-                            // Skip to end Button
+                            // Skip to end Button 
                             this.buttons.simulate.skip = new qx.ui.form.Button();
                             this.buttons.simulate.skip.set({
                                 width: 35,
                                 height: 24,
                                 appearance: "button-addpoints",
                                 icon: "FactionUI/icons/icon_replay_skip.png",
-                                toolTipText: lang("Skip to End")
+                                toolTipText: lang("Skip to End"),
+                                appearance: "button-friendlist-scroll"
                             });
                             this.buttons.simulate.skip.addListener("click", this.skipSimulation, this);
                             var replayBar = this._Application.getReportReplayOverlay();
-                            //MOD close statbox for simple replays
+                            //MOD close statbox for simple replays 
                             replayBar.addListener("appear", this.onAppear_replayBar, this);
                             replayBar.add(this.buttons.simulate.back, {
-                                top: 21,
-                                left: 185
+                                top: 11,
+                                left: 346
                             });
 
                             if (typeof (CCTAWrapper_IsInstalled) != 'undefined' && CCTAWrapper_IsInstalled) {
                                 replayBar.add(this.buttons.simulate.skip, {
                                     top: 21,
-                                    left: 735
+                                    left: 665
                                 });
                             }
 
@@ -3009,7 +3013,8 @@ codes by NetquiK
                             if (city === null) {
                                 if (this.battleResultsBox.isVisible()) this.battleResultsBox.close();
                             }
-
+                            //MOD REMOVE ORIGINAL SKIP BUTTON
+                            null != this.ReplayBar[this.PBIS_SK] && this.ReplayBar[this.PBIS_SK].exclude();
                         } catch (e) {
                             console.log(e);
                         }
@@ -3163,7 +3168,7 @@ codes by NetquiK
                                     null != r[_this.PBIS] && r[_this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
                                     null != r[_this.PBIS_S] && (r[_this.PBIS_S] = !1);
                                     null != r[_this.PBIS_L] && r[_this.PBIS_L].setValue('x1.0');
-                                    null != r[_this.PBIS_SK] && r[_this.PBIS_SK].exclude();
+                                    
                                     _this._VisMain.get_Battleground().set_ReplaySpeed(1);
                                     if (typeof _this._playAreaChildren[11].getChildren == 'function' && typeof Date.parse(_this._playAreaChildren[11].getChildren()[0].getValue()) == 'number') {
                                         _this._playAreaChildren[11].exclude();
@@ -3953,7 +3958,7 @@ codes by NetquiK
     // injecting, because there seem to be problems when creating game interface with unsafeWindow
     var TASuiteScript = document.createElement("script");
     var txt = TASuite_mainFunction.toString();
-    TASuiteScript.innerHTML = "(" + txt + ")();";
+    TASuiteScript.textContent = "(" + txt + ")();";
     TASuiteScript.type = "text/javascript";
     if (/commandandconquer\.com/i.test(document.domain)) document.getElementsByTagName("head")[0].appendChild(TASuiteScript);
 
