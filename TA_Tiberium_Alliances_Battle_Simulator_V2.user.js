@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         22.05.04
+// @version         22.05.05
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -34,7 +34,7 @@ codes by NetquiK
 
 (function () {
     var script = document.createElement("script");
-    script.innerHTML = "(" +
+    script.textContent = "(" +
         function () {
             function createClasses() {
                 qx.Class.define("qx.ui.form.ModelButton", { //				qx.ui.form.Button with model property
@@ -883,7 +883,7 @@ codes by NetquiK
                                 null != r[_this.PBIS] && r[_this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
                                 null != r[_this.PBIS_S] && (r[_this.PBIS_S] = !1);
                                 null != r[_this.PBIS_L] && r[_this.PBIS_L].setValue('x1.0');
-                                null != r[_this.PBIS_SK] && r[_this.PBIS_SK].exclude();
+
                                 ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
                             }, this, 0);
                         }
@@ -3209,29 +3209,33 @@ codes by NetquiK
                             var ABS_S = parseFloat(GameVersion) >= 22.1 ? webfrontend.gui.PlayArea.PlayAreaHUD.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.PlayArea.PlayAreaHUD.constructor);
                             var ABS_M = ABS_S.match(/COMBATAUTOSCROLL\),10\)==1;this\.([_a-zA-Z]+)=/);
                             "object" == typeof this._PlayAreaHUD[ABS_M[1]] && (this.ABS_B = ABS_M[1]);
-
-                            this.btnBack = new qx.ui.form.Button(this.qxApp.tr("Setup")).set({
-                                toolTipText: this.qxApp.tr("Back to Setup"),
-                                width: 53,
-                                height: 24,
+                            //MOD Original Style Buttons
+                            this.btnBack = new qx.ui.form.Button().set({
+                                width: 48,
+                                height: 48,
+                                appearance: "button-addpoints",
+                                toolTipText: this.qxApp.tr("Return to Attack Preparation"),
+                                icon: "FactionUI/icons/icon_return.png",
                                 appearance: "button-friendlist-scroll"
                             });
                             this.btnBack.addListener("click", this.onClick_btnBack, this);
                             this.ReportReplayOverlay.addListener("appear", this.onAppear_ReportReplayOverlay, this);
                             this.ReportReplayOverlay.add(this.btnBack, {
-                                top: 20,
-                                right: 642
+                                top: 11,
+                                left: 346
                             });
-                            this.btnSkip = new qx.ui.form.Button(this.qxApp.tr("Skip")).set({
-                                toolTipText: this.qxApp.tr("Skip"),
-                                width: 52,
+                            this.btnSkip = new qx.ui.form.Button().set({
+                                width: 35,
                                 height: 24,
+                                appearance: "button-addpoints",
+                                icon: "FactionUI/icons/icon_replay_skip.png",
+                                toolTipText: this.qxApp.tr("Skip to End"),
                                 appearance: "button-friendlist-scroll"
                             });
                             this.btnSkip.addListener("click", this.onClick_btnSkip, this);
                             this.ReportReplayOverlay.add(this.btnSkip, {
-                                top: 20,
-                                left: 700
+                                top: 21,
+                                left: 665
                             });
                         } catch (e) {
                             console.group("Tiberium Alliances Battle Simulator V2");
@@ -3260,6 +3264,8 @@ codes by NetquiK
                         onAppear_ReportReplayOverlay: function () {
                             try {
                                 if (TABS.SETTINGS.get("GUI.Window.Stats.open", true) && TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().close();
+                                //MOD REMOVE ORIGINAL SKIP BUTTON
+                                null != this.ReportReplayOverlay[this.PBIS_SK] && this.ReportReplayOverlay[this.PBIS_SK].exclude();
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error onAppear_btnBack", e);
