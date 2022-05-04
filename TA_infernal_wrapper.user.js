@@ -4,14 +4,13 @@
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 0.4
+// @version 1.42
 // @author NetquiK (original code from infernal_me, KRS_L, krisan)
 // @contributor NetquiK (Recoded all for NOEVIL and removed iterations)
 // ==/UserScript==
 
 (function () {
     var CCTAWrapper_main = function () {
-
         window.navigator.pointerEnabled = "PointerEvent" in window;
         try {
             _log = function () {
@@ -135,7 +134,7 @@
 
         function CCTAWrapper_checkIfLoaded() {
             try {
-                if (typeof qx != 'undefined' && typeof qx.core != 'undfined' && typeof qx.core.Init != 'undefined') {
+                if (typeof qx != 'undefined') {
                     createCCTAWrapper();
                 } else {
                     window.setTimeout(CCTAWrapper_checkIfLoaded, 1000);
@@ -153,7 +152,7 @@
 
     try {
         var CCTAWrapper = document.createElement("script");
-        CCTAWrapper.innerHTML = "var CCTAWrapper_IsInstalled = true; (" + CCTAWrapper_main.toString() + ")();";
+        CCTAWrapper.textContent = "var CCTAWrapper_IsInstalled = true; (" + CCTAWrapper_main.toString() + ")();";
         CCTAWrapper.type = "text/javascript";
         if (/commandandconquer\.com/i.test(document.domain)) {
             document.getElementsByTagName("head")[0].appendChild(CCTAWrapper);
