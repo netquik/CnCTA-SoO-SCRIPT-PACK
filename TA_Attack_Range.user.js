@@ -3,7 +3,7 @@
 // @description Helps to see what bases come in attack range when you select to "move base".The bases in range will become highlighted... Forgotten bases in green colour and player bases in orange colour
 // @namespace TAAT
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version 2.3
+// @version 2.31
 // @author Napali, XDaast
 // @contributor    NetquiK (https://github.com/netquik) 20.2 FIX
 // ==/UserScript==
@@ -271,7 +271,7 @@
 
 	try {
 		var TATI = document.createElement("script");
-		TATI.innerHTML = "(" + TATI_main.toString() + ")();";
+		TATI.textContent = "(" + TATI_main.toString() + ")();";
 		TATI.type = "text/javascript";
 		if (/commandandconquer\.com/i.test(document.domain)) {
 			document.getElementsByTagName("head")[0].appendChild(TATI);
