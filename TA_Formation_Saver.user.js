@@ -3,7 +3,7 @@
 // @description    Allows you to save attack formations
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version        2.3.1
+// @version        2.3.2
 // @author         Panavia, KRS_L, DebitoSphere
 // @contributor  NetquiK (https://github.com/netquik) (see first comments for changelog)
 // @updateURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Formation_Saver.user.js
@@ -430,7 +430,7 @@ codes by NetquiK
 
   // injecting, because there seem to be problems when creating game interface with unsafeWindow
   var tafsScript = document.createElement("script");
-  tafsScript.innerHTML = "(" + tafs_main.toString() + ")();";
+  tafsScript.textContent = "(" + tafs_main.toString() + ")();";
   tafsScript.type = "text/javascript";
   if (/commandandconquer\.com/i.test(document.domain)) {
     document.getElementsByTagName("head")[0].appendChild(tafsScript);
