@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         21.03.18
+// @version         22.05.05
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -25,12 +25,16 @@ codes by NetquiK
 - Fix open/close stats for replays
 - Back Button fix also for replays
 - Skip Button removed
+- Patch for 22.2
+- NOEVIL for all code
+- New Fixes for simulation + ReplayBar + Date hidden
+- New SkipSimulation Function
 ----------------
 */
 
 (function () {
     var script = document.createElement("script");
-    script.innerHTML = "(" +
+    script.textContent = "(" +
         function () {
             function createClasses() {
                 qx.Class.define("qx.ui.form.ModelButton", { //				qx.ui.form.Button with model property
@@ -830,13 +834,18 @@ codes by NetquiK
                         },
                         patchGetUnitRepairCosts: function () {
                             try {
-                                for (var i in ClientLib.Data.Cities.prototype) {
-                                    if (typeof ClientLib.Data.Cities.prototype[i] === "function" && ClientLib.Data.Cities.prototype[i] == ClientLib.Data.Cities.prototype.get_CurrentCity && i !== "get_CurrentCity") break;
+                                /*  for (var i in ClientLib.Data.Cities.prototype) {
+                                     if (typeof ClientLib.Data.Cities.prototype[i] === "function" && ClientLib.Data.Cities.prototype[i] == ClientLib.Data.Cities.prototype.get_CurrentCity && i !== "get_CurrentCity") break;
+                                 }
+                                 var GetOwnUnitRepairCosts = ClientLib.API.Util.GetUnitRepairCosts.toString().replace(i, "get_CurrentOwnCity"),
+                                     args = GetOwnUnitRepairCosts.substring(GetOwnUnitRepairCosts.indexOf("(") + 1, GetOwnUnitRepairCosts.indexOf(")")),
+                                     body = GetOwnUnitRepairCosts.substring(GetOwnUnitRepairCosts.indexOf("{") + 1, GetOwnUnitRepairCosts.lastIndexOf("}")); /*jslint evil: true */
+                                //ClientLib.API.Util.GetOwnUnitRepairCosts = Evil(args, body); /*jslint evil: false */ 
+                                //MOD NOEVIL 1
+                                ClientLib.API.Util.GetOwnGetUnitRepairCosts = function (a, b, c) {
+                                    var $createHelper;
+                                    return ClientLib.API.Util.GetUnitRepairCostsForCity(ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity(), a, b, c);
                                 }
-                                var GetOwnUnitRepairCosts = ClientLib.API.Util.GetUnitRepairCosts.toString().replace(i, "get_CurrentOwnCity"),
-                                    args = GetOwnUnitRepairCosts.substring(GetOwnUnitRepairCosts.indexOf("(") + 1, GetOwnUnitRepairCosts.indexOf(")")),
-                                    body = GetOwnUnitRepairCosts.substring(GetOwnUnitRepairCosts.indexOf("{") + 1, GetOwnUnitRepairCosts.lastIndexOf("}")); /*jslint evil: true */
-                                ClientLib.API.Util.GetOwnUnitRepairCosts = Function(args, body); /*jslint evil: false */
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error setting up ClientLib.API.Util.GetOwnUnitRepairCosts", e);
@@ -863,6 +872,18 @@ codes by NetquiK
                             ClientLib.Vis.VisMain.GetInstance().get_Battleground().LoadCombatDirect(combat);
                             qx.event.Timer.once(function () {
                                 ClientLib.Vis.VisMain.GetInstance().get_Battleground().RestartReplay();
+                                //MOD FIX DATE APPEAR
+                                _this = TABS.GUI.PlayArea.getInstance();
+                                if (typeof _this._playAreaChildren[11].getChildren == 'function' && typeof Date.parse(_this._playAreaChildren[11].getChildren()[0].getValue()) == 'number') {
+                                    _this._playAreaChildren[11].exclude();
+                                }
+                                //MOD FIX PLAY BUTTON
+                                _this = TABS.GUI.ReportReplayOverlay.getInstance();
+                                let r = _this.ReportReplayOverlay;
+                                null != r[_this.PBIS] && r[_this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
+                                null != r[_this.PBIS_S] && (r[_this.PBIS_S] = !1);
+                                null != r[_this.PBIS_L] && r[_this.PBIS_L].setValue('x1.0');
+
                                 ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
                             }, this, 0);
                         }
@@ -2401,11 +2422,17 @@ codes by NetquiK
                         },
                         patchSetEnabled: function () {
                             try {
-                                var set_Enabled = ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled.toString(),
-                                    args = set_Enabled.substring(set_Enabled.indexOf("(") + 1, set_Enabled.indexOf(")")),
-                                    body = set_Enabled.substring(set_Enabled.indexOf("{") + 1, set_Enabled.lastIndexOf("}"));
-                                body = body + "TABS.PreArmyUnits.getInstance().__CityPreArmyUnitsChanged();"; /*jslint evil: true */
-                                ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled = Function(args, body); /*jslint evil: false */
+                                /*  var set_Enabled = ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled.toString(),
+                                     args = set_Enabled.substring(set_Enabled.indexOf("(") + 1, set_Enabled.indexOf(")")),
+                                     body = set_Enabled.substring(set_Enabled.indexOf("{") + 1, set_Enabled.lastIndexOf("}"));
+                                 body = body + "TABS.PreArmyUnits.getInstance().__CityPreArmyUnitsChanged();"; 
+                                 ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled = Evil(args, body);  */
+                                //MOD NO EVIL 2
+                                ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled_Original = ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled;
+                                ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled = function (a) {
+                                    this.set_Enabled_Original(a);
+                                    TABS.PreArmyUnits.getInstance().__CityPreArmyUnitsChanged();
+                                };
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error setting up ClientLib.Data.CityPreArmyUnit.prototype.set_Enabled", e);
@@ -2518,7 +2545,8 @@ codes by NetquiK
                             }
                             // MOD NEW PATCH for moving Map (adjusted for 20.1 Patch)
                             var source = ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().get_MinYPosition.toString();
-                            var CombatMinY = source.match(/return\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
+                            // MOD Fix1 for 22.2 Patch
+                            var CombatMinY = source.match(/return {0,1}\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
                             if (typeof $I[CombatMinY[1]] === "function") $I[CombatMinY[1]][CombatMinY[2]] = -178;
 
 
@@ -2621,11 +2649,13 @@ codes by NetquiK
 
                             }
                             if (PerforceChangelist >= 472233) { // MOD: 20.2 patch 2 RETRO
-                                var patch211body = "{return;}"
                                 //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
                                 var source = this.ArmySetupAttackBar.showSetup.toString();
                                 var extendsetupF = source.match(/\;this\.([A-Za-z_]+)\(\)\;this\.show/)[1];
-                                this.ArmySetupAttackBar[extendsetupF] = new Function('', patch211body);
+                                // MOD NOEVIL 3 by NetquiK
+                                this.ArmySetupAttackBar[extendsetupF] = function () {
+                                    return;
+                                }
                                 ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, this.COMBATEXTENDEDSETUP);
                                 this.ArmySetupAttackBar.showSetup(false);
                             }
@@ -2720,6 +2750,7 @@ codes by NetquiK
                         try {
                             this.base(arguments);
                             this.PlayArea = qx.core.Init.getApplication().getPlayArea();
+                            this._playAreaChildren = this.PlayArea.getChildren();
                             this.ArmySetupAttackBar = qx.core.Init.getApplication().getArmySetupAttackBar();
                             this.HUD = this.PlayArea.getHUD();
                             var WDG_COMBATSWAPVIEW = this.HUD.getUIItem(ClientLib.Data.Missions.PATH.WDG_COMBATSWAPVIEW);
@@ -3163,19 +3194,48 @@ codes by NetquiK
                     construct: function () {
                         try {
                             this.base(arguments);
-                            var qxApp = qx.core.Init.getApplication();
+                            this.qxApp = qx.core.Init.getApplication();
                             this.ReportReplayOverlay = qx.core.Init.getApplication().getReportReplayOverlay();
-                            this.btnBack = new qx.ui.form.Button(qxApp.tr("Setup")).set({
-                                toolTipText: qxApp.tr("Back to Setup"),
-                                width: 53,
-                                height: 24,
+                            //MOD New Play Button Icon Selector
+                            this._PlayAreaHUD = this.qxApp.getPlayArea().getHUD();
+                            var PBIS_S = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.reports.ReportReplayOverlay.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.reports.ReportReplayOverlay.constructor);
+                            var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this\.([_a-zA-Z]+)\.addListener\([a-z]/);
+                            "object" == typeof this.ReportReplayOverlay[PBIS_M[1]] && "btn_play" == this.ReportReplayOverlay[PBIS_M[1]].objid && (this.PBIS = PBIS_M[1]);
+                            "object" == typeof this.ReportReplayOverlay[PBIS_M[3]] && "btn_skip" == this.ReportReplayOverlay[PBIS_M[3]].objid && (this.PBIS_SK = PBIS_M[3]);
+                            PBIS_M = webfrontend.gui.reports.ReportReplayOverlay.prototype[PBIS_M[2]].toString().match(/if\(this\.([_a-zA-Z]+)\){this\.[_a-zA-Z]+\(false\).+this\.([_a-zA-Z]+)\.setValue/);
+                            "boolean" == typeof this.ReportReplayOverlay[PBIS_M[1]] && (this.PBIS_S = PBIS_M[1]);
+                            "object" == typeof this.ReportReplayOverlay[PBIS_M[2]] && "lbl_speed" == this.ReportReplayOverlay[PBIS_M[2]].objid && (this.PBIS_L = PBIS_M[2]);
+                            //MOD New Autoscroll Button Selector
+                            var ABS_S = parseFloat(GameVersion) >= 22.1 ? webfrontend.gui.PlayArea.PlayAreaHUD.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.PlayArea.PlayAreaHUD.constructor);
+                            var ABS_M = ABS_S.match(/COMBATAUTOSCROLL\),10\)==1;this\.([_a-zA-Z]+)=/);
+                            "object" == typeof this._PlayAreaHUD[ABS_M[1]] && (this.ABS_B = ABS_M[1]);
+                            //MOD Original Style Buttons
+                            this.btnBack = new qx.ui.form.Button().set({
+                                width: 48,
+                                height: 48,
+                                appearance: "button-addpoints",
+                                toolTipText: this.qxApp.tr("Return to Attack Preparation"),
+                                icon: "FactionUI/icons/icon_return.png",
                                 appearance: "button-friendlist-scroll"
                             });
                             this.btnBack.addListener("click", this.onClick_btnBack, this);
                             this.ReportReplayOverlay.addListener("appear", this.onAppear_ReportReplayOverlay, this);
                             this.ReportReplayOverlay.add(this.btnBack, {
-                                top: 20,
-                                right: 642
+                                top: 11,
+                                left: 346
+                            });
+                            this.btnSkip = new qx.ui.form.Button().set({
+                                width: 35,
+                                height: 24,
+                                appearance: "button-addpoints",
+                                icon: "FactionUI/icons/icon_replay_skip.png",
+                                toolTipText: this.qxApp.tr("Skip to End"),
+                                appearance: "button-friendlist-scroll"
+                            });
+                            this.btnSkip.addListener("click", this.onClick_btnSkip, this);
+                            this.ReportReplayOverlay.add(this.btnSkip, {
+                                top: 21,
+                                left: 665
                             });
                         } catch (e) {
                             console.group("Tiberium Alliances Battle Simulator V2");
@@ -3187,6 +3247,8 @@ codes by NetquiK
                     members: {
                         ReportReplayOverlay: null,
                         btnBack: null,
+                        btnSkip: null,
+                        LastSIM_R: null,
                         onClick_btnBack: function () {
                             // MOD Back Button fix
                             try {
@@ -3202,16 +3264,101 @@ codes by NetquiK
                         onAppear_ReportReplayOverlay: function () {
                             try {
                                 if (TABS.SETTINGS.get("GUI.Window.Stats.open", true) && TABS.GUI.Window.Stats.getInstance().isVisible()) TABS.GUI.Window.Stats.getInstance().close();
+                                //MOD REMOVE ORIGINAL SKIP BUTTON
+                                null != this.ReportReplayOverlay[this.PBIS_SK] && this.ReportReplayOverlay[this.PBIS_SK].exclude();
                             } catch (e) {
                                 console.group("Tiberium Alliances Battle Simulator V2");
                                 console.error("Error onAppear_btnBack", e);
                                 console.groupEnd();
                             }
+
+
+
+
                         },
-                        defer: function () {
-                            TABS.addInit("TABS.GUI.ReportReplayOverlay");
+                        onClick_btnSkip: function () {
+                            //MOD New SKIP SIMULATION 1 by NetquiK
+                            try {
+                                var bA = ClientLib.Vis.VisMain.GetInstance();
+                                var bG = bA.get_Battleground();
+                                var pA = this.qxApp.getPlayArea();
+                                if (bG.get_Simulation !== undefined && bG.get_Simulation().DoStep !== undefined) {
+                                    if (!this.SkippingSim) {
+                                        this.SkippingSim = true;
+                                        if (bG.get_CombatComplete() == true) bG.RestartReplay();
+                                        //this.TopAttackerPos = bA.get_PositionY() - 500;
+                                        /* var pos1 = (this.LastSIM_R.Defense / 100) * ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_ViewHeight() */
+                                        var overall = (this.LastSIM_R / 100) * bG.get_ViewHeight();
+                                        this.TopAttackerPos = this.LastSIM_R < 25 ? bG.get_MinYPosition() : bG.get_MinYPosition() + overall;
+                                        phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
+                                        this.ResetAutoscroll = pA.getPlayerAutoScrollPreference();
+                                        this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().hide();
+                                        this.ReportReplayOverlay.setEnabled(false);
+                                        this.btnBack.setEnabled(true);
+                                        ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, 0);
+                                        ClientLib.Config.Main.GetInstance().SaveToDB();
+                                        while (bG.get_Simulation().DoStep(false)) {} //LIKE 
+                                        pA.autoScroll = 0
+                                        bG.set_ReplaySpeed(10);
+                                        //ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(10000); // AUTOCAMFAIL
+                                    }
+                                } else {
+
+                                    bG.SkipToEnd();
+
+                                }
+                            } catch (e) {
+                                console.log(e);
+                            }
+
+
+
+                        },
+                        onTick_btnSkip: function () {
+                            //MOD New SKIP SIMULATION 2 by NetquiK
+                            var bA = ClientLib.Vis.VisMain.GetInstance();
+                            var bG = bA.get_Battleground();
+                            var pA = this.qxApp.getPlayArea();
+                            if (pA.getViewMode() != ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay || bG.get_LastFrameTime() == 0) {
+                                phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
+                                this.ReportReplayOverlay.setEnabled(true);
+                                this.SkippingSim = null;
+                                if (this.ResetAutoscroll) {
+                                    ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, 1);
+                                    ClientLib.Config.Main.GetInstance().SaveToDB();
+                                    this.ResetAutoscroll = 0;
+                                }
+                                return
+                            }
+                            /* console.log(this.TopAttackerPos);
+                            console.log(bG.get_PosY());
+                            console.log(bG.get_TopAttackerPos());
+                            if (this.TopAttackerPos > bG.get_TopAttackerPos() - 500) {
+                                this.TopAttackerPos = bG.get_TopAttackerPos() - 500;
+                            } */
+
+                            if (bG.get_CombatComplete() == true && pA.getViewMode() == ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay) {
+                                bG.SkipToEnd();
+                                if (this.ResetAutoscroll) {
+                                    ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATAUTOSCROLL, 1);
+                                    ClientLib.Config.Main.GetInstance().SaveToDB();
+                                    this.ResetAutoscroll = 0;
+                                }
+                                bA.SetPosition(0, this.TopAttackerPos);
+                                qx.event.Timer.once(function () {
+                                    qx.core.Init.getApplication().getPlayArea().autoScroll = 1
+                                }, 500);
+                                this.ReportReplayOverlay.setEnabled(true)
+                                this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().show();
+                                phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
+                                this.SkippingSim = null;
+                            }
                         }
+                    },
+                    defer: function () {
+                        TABS.addInit("TABS.GUI.ReportReplayOverlay");
                     }
+
                 });
                 qx.Class.define("TABS.GUI.Window.Stats", { // [singleton]	Stats Window
                     type: "singleton",
@@ -4171,6 +4318,10 @@ codes by NetquiK
                                 this.StatsChanged = false;
                                 for (var i in this.Label.Enemy) {
                                     this.Label.Enemy[i].__update();
+                                    //MOD Save Last Result for Simulation
+                                    if (i == "Overall" && (v = this.Label.Enemy[i].getValue())) {
+                                        TABS.GUI.ReportReplayOverlay.getInstance().LastSIM_R = parseFloat(v);
+                                    }
                                 }
                                 for (i in this.Label.Repair) {
                                     this.Label.Repair[i].__update();
