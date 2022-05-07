@@ -3,7 +3,7 @@
 // @include        http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description Automates the use of chat and message BB-Codes: [coords][url][player][alliance][b][i][s][u] - Contact list for whispering.
-// @version     3.2.2
+// @version     3.2.3
 // @contributor    Netquik (various fixes)
 // @icon        https://sites.google.com/site/titlemod/home/favicon.png
 // @grant       none
@@ -51,7 +51,7 @@
 
 
                 function getCaretPos(obj) {
-                    // getCaretPos from: http://userscripts.org/scripts/show/151099
+                    
                     obj.focus();
 
                     if (obj.selectionStart) {
@@ -70,7 +70,7 @@
                 }
 
                 function moveCaret(inputObject, pos) {
-                    // moveCaretPos from: http://userscripts.org/scripts/show/151099
+                    
                     if (inputObject.selectionStart) {
                         inputObject.setSelectionRange(pos, pos);
                         inputObject.focus();
@@ -572,7 +572,7 @@
     };
     try {
         var chatHelper = document.createElement("script");
-        chatHelper.innerHTML = "(" + chatHelper_main.toString() + ")();";
+        chatHelper.textContent = "(" + chatHelper_main.toString() + ")();";
         chatHelper.type = "text/javascript";
         document.getElementsByTagName("head")[0].appendChild(chatHelper);
     } catch (err) {
