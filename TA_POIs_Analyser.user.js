@@ -3,7 +3,7 @@
 // @description Display alliance's POIs scores and next tier requirements.
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     2.0.5
+// @version     2.0.7
 // @contributor NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @grant none
 // @author zdoom
@@ -15,6 +15,7 @@ codes by NetquiK
 ----------------
 - PoiGlobalBonus FIX
 - Deep Fix for AllianceOverlay Tabs
+- NOEVIL
 ----------------
 */
 
@@ -64,7 +65,6 @@ codes by NetquiK
 						var newFont = defaultFont.clone();
 						newFont.setSize(32);
 						abr.setFont(newFont);
-						//var deco = new qx.ui.decoration.Decorator().set({backgroundImage: "https://www.allyourbasesbelong2us.com/poi.ana.png"});
 						var imgCont = new qx.ui.container.Composite(new qx.ui.layout.VBox());
 						imgCont.set({
 							minWidth: 363,
@@ -611,13 +611,42 @@ codes by NetquiK
 						this.AllianceOverlayTabViewPopulateMethod = AllianceOverlay._activate.toString().match(/function\(\)\{this\.([_a-zA-Z]+)\(\);this\.[_a-zA-Z]+/)[1];
 						var TabViewPopulateMethodString = AllianceOverlay[this.AllianceOverlayTabViewPopulateMethod].toString();
 						this.AllianceOverlayTabViewMethod = TabViewPopulateMethodString.match(/this\.([_a-zA-Z]+)\.remove\(this\.[_a-zA-Z]+\);/)[1];
-						var rewrittenFunctionBody = TabViewPopulateMethodString.replace(/(?!if\()this\.[_a-zA-Z]+(!|=)=(this\.[_a-zA-Z]+)(?=\){(this\.[_a-zA-Z]+)\.(?:add|remove))/g, function (match, g1, g2, g3) {
+						/* var rewrittenFunctionBody = TabViewPopulateMethodString.replace(/(?!if\()this\.[_a-zA-Z]+(!|=)=(this\.[_a-zA-Z]+)(?=\){(this\.[_a-zA-Z]+)\.(?:add|remove))/g, function (match, g1, g2, g3) {
 							return '-1' + ("="==g1?"!":"=") + '==' + g3 + '.indexOf(' + g2 + ')';
-						});
+						}); */
+						// MOD NOEVIL by Netquik
+						var AOM = TabViewPopulateMethodString.match(/{if\(this\.[_a-zA-Z]+==this\.([_a-zA-Z]+)\){this\.([_a-zA-Z]+)\.remove.+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\(this\.[_a-zA-Z]+!=this\.\1/);
 
-						var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
-						var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
-						this.AllianceOverlayPatched = new Function(args, fnBody);
+						/* var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
+						var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")")); */
+						//this.AllianceOverlayPatched = new Evil(args, fnBody);
+						this.AllianceOverlayPatched = function() {
+							if (ClientLib.Data.MainData.GetInstance().get_Alliance().get_Exists() && ClientLib.Data.MainData.GetInstance().get_Player().get_AllianceId() > 0) {
+								if (-1 !== this[AOM[2]].indexOf(this[AOM[1]])) {
+									this[AOM[2]].remove(this[AOM[1]]);
+									this[AOM[2]].add(this[AOM[3]]);
+									this[AOM[2]].add(this[AOM[4]]);
+									this[AOM[2]].add(this[AOM[5]]);
+									this[AOM[2]].add(this[AOM[6]]);
+									this[AOM[2]].add(this[AOM[7]]);
+									if (this[AOM[8]] != null) {
+										this[AOM[2]].add(this[AOM[8]]);
+									}
+								}
+							} else {
+								if (-1 === this[AOM[2]].indexOf(this[AOM[1]])) {
+									this[AOM[2]].add(this[AOM[1]]);
+									this[AOM[2]].remove(this[AOM[3]]);
+									this[AOM[2]].remove(this[AOM[4]]);
+									this[AOM[2]].remove(this[AOM[5]]);
+									this[AOM[2]].remove(this[AOM[6]]);
+									this[AOM[3]].remove(this[AOM[7]]);
+									if (this[AOM[8]] != null) {
+										this[AOM[2]].remove(this[AOM[8]]);
+									}
+								}
+							}
+						} 
 						AllianceOverlay[this.AllianceOverlayTabViewPopulateMethod] = this.AllianceOverlayPatched.bind(AllianceOverlay);
 						this.AllianceOverlayMainTabview = AllianceOverlay[this.AllianceOverlayTabViewMethod];
 						this.AllianceOverlayMainTabview.addAt(this, 0);
@@ -1227,7 +1256,7 @@ codes by NetquiK
 
 	function inject() {
 		var script = document.createElement("script");
-		script.innerHTML = "(" + injectScript.toString() + ")();";
+		script.textContent = "(" + injectScript.toString() + ")();";
 		script.type = "text/javascript";
 		if (/commandandconquer\.com/i.test(document.domain)) {
 			document.getElementsByTagName("head")[0].appendChild(script);
