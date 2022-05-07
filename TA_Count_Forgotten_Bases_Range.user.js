@@ -4,7 +4,7 @@
 // @description Display the number of forgotten bases in range of selected world object and paste it to chat message
 // @description im not the author of the code - this script is based on Paste Coords Button and Shockr's BaseScanner sripts
 // @include     https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.1.1
+// @version     1.1.2
 // @info        https://greasyfork.org/scripts/3343-c-c-ta-count-forgotten-bases-in-range
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Count_Forgotten_Bases_Range.user.js
 // @author      DrunphO --- Updated by NetquiK   
@@ -242,7 +242,7 @@
     };
     try {
         var CNCTACountBases = document.createElement('script');
-        CNCTACountBases.innerHTML = '(' + CNCTACountBases_main.toString() + ')();';
+        CNCTACountBases.textContent = '(' + CNCTACountBases_main.toString() + ')();';
         CNCTACountBases.type = 'text/javascript';
         document.getElementsByTagName('head')[0].appendChild(CNCTACountBases);
     } catch (e) {
