@@ -1,10 +1,21 @@
 // ==UserScript==
-// @name            Shockr - Tiberium Alliances Tools - reMod 1.3
+// @name            Shockr - Tiberium Alliances Tools - reMod 1.4
 // @author          EHz
 // @description     Tools to work with Tiberium alliances - mod by EHz - remod by Netquik
+// @contributor     Netquik (https://github.com/netquik) reMod 1.4
 // @include         http*://*.alliances.commandandconquer.com/*/index.aspx*
-// @version         2.7.2.30
+// @version         2.8
+// @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Shockr_Tools_Basescanner_Mailversion_reMod.user.js
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- New Layout Filtering reMod 1.4
+- FIX WorldSector RE by NetquiK + patch if not already by other scanners
+- NOEVIL
+----------------
+*/
 (function () {
     /* globals qx, ClientLib */
     var setupShockrTools = function () {
@@ -157,12 +168,12 @@
                             continue;
                         }
                         // Cached
-                        var offlineBase = BaseScanner.getOfflineBase(scanX, scanY);
+                        /* var offlineBase = BaseScanner.getOfflineBase(scanX, scanY);
                         if (offlineBase !== null && offlineBase.id === object.getID()) {
                             delete offlineBase.obj;
                             BaseScanner._bases.push(offlineBase);
                             continue;
-                        }
+                        } */
                         var scanBase = {
                             x: scanX,
                             y: scanY,
@@ -290,9 +301,12 @@
                     var mail = ClientLib.Data.Mail.prototype;
                     var dt = new Date();
                     var ts = (dt.getTime() - dt.getMilliseconds()) / 1000;
-                    var body = "<cnc><cncs>" + PlayerName + "</cncs><cncd>" + ts + "</cncd><cnct>" + BaseScanner._msg.join('\n') + "</cnct></cnc>";
+                    //MOD Fix No result msg
+                    if (BaseScanner._msg.length == 0) BaseScanner._msg.push('[b]No Interesting Layouts Around![/b]');
+                    var body = "<cnc><cncs>" + PlayerName + "</cncs><cncd>" + ts + "</cncd><cnct>"  + BaseScanner._msg.join('\n') + "</cnct></cnc>";
+
                     console.log(PlayerName, AllianzName, 'scanning results', body);
-                    mail.SendMail(PlayerName, '', 'scanning results', body);
+                    mail.SendMail(PlayerName, '', 'Mail BaseScanner Scan Results', body);
                 } catch (e) {
                     console.error(e);
                 }
@@ -327,6 +341,7 @@
                 var mix6 = 0;
                 var mix7 = 0;
                 var mix8 = 0;
+                var pow7 = 0;
                 var pow8 = 0;
                 var powL = {};
                 var totT = 0; // count total tib
@@ -500,6 +515,9 @@
                                     if (cntM === 8) {
                                         mix8++;
                                     }
+                                    if (cntP === 7) {
+                                        pow7++;
+                                    }
                                     if (cntP === 8) {
                                         pow8++;
                                         powL[aKey] = 1;
@@ -518,28 +536,15 @@
                         }
                     }
 
-                    //   Removed See Below.
-                    //  if (tib4 > 2 || tib5 > 0 || tib6 > 0 || tib7 > 0 ||  mix5 > 0 || mix6 > 0 || mix7 > 0 || mix8 > 0) {
-
-                    //   Edit by Netquik. Try a better function for scan result.		
-                    /*if (					
-				(tib5 > 0 || tib6 > 0 || tib7 > 0) || 
-				(tib4 > 0 && (cry5 > 0 || cry6 > 0 || cry7 > 0 ) ) || 
-				(tib4 > 1 && ((cry4 > 0 || cry5 > 0 || cry6 > 0  || cry7 > 0 ) || (mix5 > 0 || mix6 > 0 || mix7 > 0 || mix8 > 0)) ) || 
-				(pow8 > 0 && tib4 > 1 ) || 
-				(pow8 > 1 && ((tib4 > 0) || ((cry4 > 0 || cry5 > 0 || cry6 > 0  ||cry7 > 0 ) && (mix5 > 0 || mix6 > 0 || mix7 > 0 || mix8 > 0)) ) )				
-				    ) {*/
 
 
-
-
-                    //   NEW FILTERING by Netquik
+                    //   MOD NEW FILTERING by Netquik
                     var tibup = (tib5 + tib6 + tib7) > 0;
                     var cryup = (cry5 + cry6 + cry7) > 0;
                     var crydw = (cry4 + cryup) > 0;
                     var mixup = (mix5 + mix6 + mix7 + mix8) > 0;
                     if (
-                        (tibup || (tib4 > 0 && cryup) || (tib4 > 1 && (crydw || mixup)) || (pow8 > 0 && tib4 > 1) || (pow8 > 1 && tib4 > 0 && crydw))
+                        (tibup || (tib4 > 0 && cryup) || (tib4 > 1 && (crydw || mixup)) || (pow7 > 0 && tib4 > 1) || (pow8 > 1 && tib4 > 0 && crydw))
 
 
                     ) {
@@ -554,17 +559,9 @@
                         out = out + ' mix(4-8): ' + BaseScanner.formatRes(mix4) + '|' + BaseScanner.formatRes(mix5) + '|' + BaseScanner.formatRes(mix6) + '|' + BaseScanner.formatRes(mix7) + '|' + BaseScanner.formatRes(mix8);
                         out = out + ' pow(8): ' + BaseScanner.formatRes(pow8);
                         console.log(out);
+                        // TODO Watches! integration
                         BaseScanner._msg.push(out);
-                        //input.setValue('[coords]' + base.x + ':' + base.y + '[/coords] ' + tib4, '|', tib5, '|', tib6, '|', tib7 + ' - ');
-                        //var input = qx.core.Init.getApplication().getChat().getChatWidget().getEditable();
-                        //var dom = input.getContentElement().getDomElement();
-                        //
-                        //var output = [];
-                        //output.push(dom.value.substring(0, dom.selectionStart));
-                        //output.push('[coords]' + tmp.x + ':' + tmp.y + '[/coords] tib(4-7): ' + tib4 + '|' + tib5 + '|' + tib6 + '|' + tib7 + ' cry(4-7): ' + cry4 + '|' + cry5 + '|' + cry6 + '|' + cry7 + ' mix(5-8): ' + mix5 + '|' + mix6 + '|' + mix7 + '|' + mix8 + ' pow(6-8): ' + pow6 + '|' + pow7 + '|' + pow8 + ' - ');
-                        //output.push(dom.value.substring(dom.selectionEnd, dom.value.length));
-                        //
-                        //input.setValue(output.join(' '));
+
                     }
                     layout.push(' ', tib4, '|', tib5, '|', tib6, '|', tib7)
                 } catch (e) {
@@ -589,14 +586,14 @@
                 ClientLib.Vis.VisMain.GetInstance().ViewUpdate();
                 BaseScanner._lastBaseID = baseID;
             },
-            getOfflineBase: function (x, y) {
+            /* getOfflineBase: function (x, y) {
                 return null;
                 var base = localStorage.getItem('scan-' + x + ':' + y);
                 if (base !== null) {
                     return JSON.parse(base);
                 }
                 return null;
-            }
+            } */
 
         };
 
@@ -628,62 +625,70 @@
                     return;
                 }
                 var t = ClientLib.Data.WorldSector.WorldObjectCity.prototype;
-                var re = /this\.(.{6})=\(?\(?g>>8\)?\&.*d\+=f;this\.(.{6})=\(/;
-                var y = PatchClientLib._g(t.$ctor, re, ClientLib.Data.WorldSector.WorldObjectCity, 2);
-                if (y !== null && y[1].length === 6) {
-                    t.getLevel = function () {
-                        return this[y[1]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectCity.Level undefined');
-                }
-                if (y !== null && y[2].length === 6) {
-                    t.getID = function () {
-                        return this[y[2]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectCity.ID undefined');
+                // MOD FIX WorldSector RE by NetquiK + patch if not already by other scanners
+                if (typeof t.getLevel != 'function' || typeof t.getID != 'function') {
+                    var re = /this\.(.{6})=\(?\(?\(?g>>8\)?\&.*d\+=f;this\.(.{6})=\(/;
+                    var y = PatchClientLib._g(t.$ctor, re, ClientLib.Data.WorldSector.WorldObjectCity, 2);
+                    if (y !== null && y[1].length === 6) {
+                        t.getLevel = function () {
+                            return this[y[1]];
+                        };
+                    } else {
+                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectCity.Level undefined');
+                    }
+                    if (y !== null && y[2].length === 6) {
+                        t.getID = function () {
+                            return this[y[2]];
+                        };
+                    } else {
+                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectCity.ID undefined');
+                    }
                 }
                 t = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
-                re = /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/;
-                var x = PatchClientLib._g(t.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCBase', 2);
-                if (x !== null && x[1].length === 6) {
-                    t.getLevel = function () {
-                        return this[x[1]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined');
-                }
-                if (x !== null && x[2].length === 6) {
-                    t.getID = function () {
-                        return this[x[2]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.ID undefined');
+                if (typeof t.getLevel != 'function' || typeof t.getID != 'function') {
+                    // MOD FIX RE by NetquiK
+                    re = /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/;
+                    var x = PatchClientLib._g(t.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCBase', 2);
+                    if (x !== null && x[1].length === 6) {
+                        t.getLevel = function () {
+                            return this[x[1]];
+                        };
+                    } else {
+                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined');
+                    }
+                    if (x !== null && x[2].length === 6) {
+                        t.getID = function () {
+                            return this[x[2]];
+                        };
+                    } else {
+                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.ID undefined');
+                    }
                 }
                 t = ClientLib.Data.WorldSector.WorldObjectNPCCamp.prototype;
-                re = /100\){0,1};this\.(.{6})=Math.floor.*this\.(.{6})=\(*g\>\>(22|0x16)\)*\&.*=-1;\}this\.(.{6})=\(/;
-                var w = PatchClientLib._g(t.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCCamp', 4);
-                if (w !== null && w[1].length === 6) {
-                    t.getLevel = function () {
-                        return this[w[1]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.Level undefined');
-                }
-                if (w !== null && w[2].length === 6) {
-                    t.getCampType = function () {
-                        return this[w[2]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.CampType undefined');
-                }
-                if (w !== null && w[4].length === 6) {
-                    t.getID = function () {
-                        return this[w[4]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.ID undefined');
+                if (typeof t.getLevel != 'function' || typeof t.getCampType != 'function' || typeof t.getID != 'function') {
+                    re = /100\){0,1};this\.(.{6})=Math.floor.*this\.(.{6})=\(*g\>\>(22|0x16)\)*\&.*=-1;\}this\.(.{6})=\(/;
+                    var w = PatchClientLib._g(t.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCCamp', 4);
+                    if (w !== null && w[1].length === 6) {
+                        t.getLevel = function () {
+                            return this[w[1]];
+                        };
+                    } else {
+                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.Level undefined');
+                    }
+                    if (w !== null && w[2].length === 6) {
+                        t.getCampType = function () {
+                            return this[w[2]];
+                        };
+                    } else {
+                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.CampType undefined');
+                    }
+                    if (w !== null && w[4].length === 6) {
+                        t.getID = function () {
+                            return this[w[4]];
+                        };
+                    } else {
+                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.ID undefined');
+                    }
                 }
                 BaseScanner._patched = true;
             }
@@ -716,19 +721,19 @@
                                 }
                             }
                         }
-                       
+
                         mainBar.getChildren()[1].add(this.buttonScan);
                         childs = mainBar.getChildren()[1].getChildren();
                         for (var i in childs) {
-                            if (typeof childs[i].setAppearance === "function" && childs[i].isVisible()) {                           
-                                Barsize += childs[i].getWidth();                   
-                        }
+                            if (typeof childs[i].setAppearance === "function" && childs[i].isVisible()) {
+                                Barsize += childs[i].getWidth();
+                            }
                         }
                         mainBar.getChildren()[1].setMarginLeft(4);
                         mainBar.getChildren()[0].setScale(true);
                         mainBar.setMarginLeft(-50);
                         //ScriptsButton = mainBar.getScriptsButton().isVisible() ? 1 : 0;
-                        mainBar.getChildren()[0].setWidth(Barsize+10);
+                        mainBar.getChildren()[0].setWidth(Barsize + 10);
                         //mainBar.getChildren()[1].setWidth(Barsize+94);
                         console.log('Scan Button added');
                     },
@@ -938,7 +943,7 @@
     }
     if (window.location.pathname !== ('/login/auth')) {
         var script = document.createElement('script');
-        script.innerHTML = innerHTML(ST_MODULES);
+        script.textContent = innerHTML(ST_MODULES);
         script.type = 'text/javascript';
         document.getElementsByTagName('head')[0].appendChild(script);
     }
