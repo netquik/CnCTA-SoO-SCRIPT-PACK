@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Tiberium Alliances Wavy
-// @version        0.5.6
+// @version        0.5.7
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
@@ -430,7 +430,7 @@
 	};
 
 	var script = document.createElement('script');
-	script.innerHTML = '(' + main.toString() + ')();';
+	script.textContent = '(' + main.toString() + ')();';
 	script.type = 'text/javascript';
 	document.getElementsByTagName('head')[0].appendChild(script);
 })();

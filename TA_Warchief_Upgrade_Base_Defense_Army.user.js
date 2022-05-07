@@ -2,7 +2,7 @@
 // @name            WarChiefs - Tiberium Alliances Upgrade Base/Defense/Army
 // @description     Upgrade your Base,Defense Army to a specific Level.
 // @author          Eistee
-// @version         13.11.11
+// @version         22.05.04
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
@@ -22,9 +22,6 @@
 				construct: function () {
 					try {
 						var qxApp = qx.core.Init.getApplication();
-
-						//var stats = document.createElement('img');
-						//stats.src = "http://goo.gl/BuvwKs"; // http://goo.gl/#analytics/goo.gl/BuvwKs/all_time
 
 						var btnUpgrade = new qx.ui.form.Button(qxApp.tr("tnf:toggle upgrade mode"), "FactionUI/icons/icon_building_detail_upgrade.png").set({
 							toolTipText: qxApp.tr("tnf:toggle upgrade mode"),
@@ -1018,7 +1015,7 @@
 
 	var script = document.createElement("script");
 	var txt = injectFunction.toString();
-	script.innerHTML = "(" + txt + ")();";
+	script.textContent = "(" + txt + ")();";
 	script.type = "text/javascript";
 
 	document.getElementsByTagName("head")[0].appendChild(script);
