@@ -3,14 +3,22 @@
 // @description Tunnel info
 // @namespace TATI
 // @include http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @version 2.2.1.2
-// @downloadURL    https://raw.githubusercontent.com/leo7044/CnC_TA/master/TunnelInfo.user.js
-// @updateURL      https://raw.githubusercontent.com/leo7044/CnC_TA/master/TunnelInfo.user.js
+// @version 2.2.1.4
+// @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Tunnel_Info.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Tunnel_Info.user.js
 // @include        http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @author KRS_L
 // @contributor    leo7044 (https://github.com/leo7044)
+// @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // ==/UserScript==
+/* 
+codes by NetquiK
+----------------
+- Fix get_POIActivationLevelDifference thanks to leo7044 (https://github.com/leo7044)
+- NOEVIL
+----------------
+*/
 (function () {
 	var TATI_main = function () {
 		console.log('Tunnel Info loaded');
@@ -47,7 +55,7 @@
 							this._App = qx.core.Init.getApplication();
 							this._MainData = ClientLib.Data.MainData.GetInstance();
 							this._VisMain = ClientLib.Vis.VisMain.GetInstance();
-
+							this.PALD = this._MainData.get_Server().get_POIActivationLevelDifference();
 							this.tunnelMarkerList = [];
 
 							phe.cnc.Util.attachNetEvent(this._VisMain.GetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase), "OnCellChange", ClientLib.Vis.MouseTool.OnCellChange, this, this.baseMoveToolCellChange);
@@ -173,10 +181,10 @@
 													var tunnelLevel = visObject.get_Level();
 													var distanceToTunnel = ClientLib.Base.Util.CalculateDistance(startX, startY, tunnelX, tunnelY);
 													if (distanceToTunnel <= this.tunnelInfluenceRange) {
-														if (this.currentCityOffenseLevel < tunnelLevel - 6) { // Blocking Tunnel
+														if (this.currentCityOffenseLevel < tunnelLevel - this.PALD) { // Blocking Tunnel
 															this.regionCityMoveInfoAddonExists = true;
-															if (this.requiredOffenseLevel < tunnelLevel - 6)
-																this.requiredOffenseLevel = tunnelLevel - 6;
+															if (this.requiredOffenseLevel < tunnelLevel - this.PALD)
+																this.requiredOffenseLevel = tunnelLevel - this.PALD;
 															this.addTunnelMarker(tunnelX, tunnelY, "#ff3600");
 														} else { // Activating Tunnel
 															this.addTunnelMarker(tunnelX, tunnelY, "#06ff00");
@@ -309,7 +317,7 @@
 
 	try {
 		var TATI = document.createElement("script");
-		TATI.innerHTML = "(" + TATI_main.toString() + ")();";
+		TATI.textContent = "(" + TATI_main.toString() + ")();";
 		TATI.type = "text/javascript";
 		if (/commandandconquer\.com/i.test(document.domain)) {
 			document.getElementsByTagName("head")[0].appendChild(TATI);
