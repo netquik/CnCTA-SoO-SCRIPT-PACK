@@ -4,15 +4,16 @@
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.4
+// @version 1.43
 // @author NetquiK (original code from infernal_me, KRS_L, krisan)
-// @contributor NetquiK (Recoded all for NOEVIL and removed iterations)
+// @contributor NetquiK (Recoded all for NOEVIL and removed iterations - 22.2 New Framework Update)
 // ==/UserScript==
 
 (function () {
     var CCTAWrapper_main = function () {
-
-        window.navigator.pointerEnabled = "PointerEvent" in window;
+        // 22.2 New Framework Fixes issue #9182: new unified pointer input model since Chrome 55
+        if (parseFloat(GameVersion) < 22.2) window.navigator.pointerEnabled = "PointerEvent" in window;
+        // see https://github.com/qooxdoo/qooxdoo/issues/9182
         try {
             _log = function () {
                 if (typeof console != 'undefined') console.log(arguments);
@@ -135,7 +136,7 @@
 
         function CCTAWrapper_checkIfLoaded() {
             try {
-                if (typeof qx != 'undefined' && typeof qx.core != 'undfined' && typeof qx.core.Init != 'undefined') {
+                if (typeof qx != 'undefined') {
                     createCCTAWrapper();
                 } else {
                     window.setTimeout(CCTAWrapper_checkIfLoaded, 1000);
@@ -153,7 +154,7 @@
 
     try {
         var CCTAWrapper = document.createElement("script");
-        CCTAWrapper.innerHTML = "var CCTAWrapper_IsInstalled = true; (" + CCTAWrapper_main.toString() + ")();";
+        CCTAWrapper.textContent = "var CCTAWrapper_IsInstalled = true; (" + CCTAWrapper_main.toString() + ")();";
         CCTAWrapper.type = "text/javascript";
         if (/commandandconquer\.com/i.test(document.domain)) {
             document.getElementsByTagName("head")[0].appendChild(CCTAWrapper);
