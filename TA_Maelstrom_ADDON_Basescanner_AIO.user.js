@@ -3,7 +3,7 @@
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.12
+// @version     1.8.13
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -24,6 +24,7 @@ codes by NetquiK
 - Fix needcp when cached city
 - Sort for Growrate
 - All Layouts selection + Highlight
+- NOEVIL
 ----------------
 */
 
@@ -621,7 +622,9 @@ codes by NetquiK
                             this.ZH = false;
                             this.ZG.setLabel("Pause");
                             this.ZD.setEnabled(false);
-                            window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FJ()", 1000);
+                            qx.event.Timer.once(function () {
+                                window.Addons.BaseScannerGUI.getInstance().FJ()
+                            }, 1000);
                             return;
                         }
                         //After Pause
@@ -636,11 +639,15 @@ codes by NetquiK
                             this.ZD.setEnabled(false);
                             if (c > 0) {
                                 this.ZH = true;
-                                window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FG()", 1000);
+                                qx.event.Timer.once(function () {
+                                    window.Addons.BaseScannerGUI.getInstance().FG()
+                                }, 1000);
                                 return;
                             } else {
                                 this.ZH = false;
-                                window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FJ()", 1000);
+                                qx.event.Timer.once(function () {
+                                    window.Addons.BaseScannerGUI.getInstance().FJ()
+                                }, 1000);
                             }
                         } else {
                             this.ZH = false;
@@ -778,7 +785,9 @@ codes by NetquiK
                             this.ZL.setData(this.ZE);
                             this.FP(0, this.ZE.length, 200);
                             this.ZL.sortByColumn(14, false); //Sort form Highlevel to Lowlevel
-                            if (this.YY.name != "DR01D") window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FG()", 50);
+                            if (this.YY.name != "DR01D") qx.event.Timer.once(function () {
+                                window.Addons.BaseScannerGUI.getInstance().FG()
+                            }, 50);
                         } catch (ex) {
                             console.debug("Maelstrom_Basescanner FJ error: ", ex);
                         }
@@ -1193,7 +1202,9 @@ codes by NetquiK
                             //console.log("this.ZH", this.ZH);
                             if (this.ZH && Addons.BaseScannerGUI.getInstance().isVisible()) {
                                 //console.log("loop");
-                                window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FG()", sleeptime);
+                                qx.event.Timer.once(function () {
+                                    window.Addons.BaseScannerGUI.getInstance().FG()
+                                }, sleeptime);
                             } else {
                                 this.ZG.setLabel(this.T.get("Scan"));
                                 this.ZH = false;
@@ -4729,7 +4740,7 @@ codes by NetquiK
     };
     try {
         var MaelstromScript_Basescanner = document.createElement("script");
-        MaelstromScript_Basescanner.innerHTML = "(" + MaelstromTools_Basescanner.toString() + ")();";
+        MaelstromScript_Basescanner.textContent = "(" + MaelstromTools_Basescanner.toString() + ")();";
         MaelstromScript_Basescanner.type = "text/javascript";
         if (/commandandconquer\.com/i.test(document.domain)) {
             document.getElementsByTagName("head")[0].appendChild(MaelstromScript_Basescanner);

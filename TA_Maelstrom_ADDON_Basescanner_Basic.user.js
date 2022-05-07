@@ -4,7 +4,7 @@
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_Basic.user.js
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.8.12
+// @version     1.8.13
 // @author      BlinDManX
 // @contributor leo7044 (https://github.com/leo7044)
 // @contributor AlkalyneD4 Patch 19.3 fix
@@ -21,6 +21,7 @@ codes by NetquiK
 - Fix needcp when cached city
 - Sort after scan for Level
 - All Layouts selection
+- NOEVIL
 ----------------
 */
 (function () {
@@ -574,7 +575,9 @@ codes by NetquiK
                             this.ZH = false;
                             this.ZG.setLabel("Pause");
                             this.ZD.setEnabled(false);
-                            window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FJ()", 1000);
+                            qx.event.Timer.once(function () {
+                                window.Addons.BaseScannerGUI.getInstance().FJ()
+                            }, 1000);
                             return;
                         }
                         //After Pause
@@ -589,11 +592,15 @@ codes by NetquiK
                             this.ZD.setEnabled(false);
                             if (c > 0) {
                                 this.ZH = true;
-                                window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FG()", 1000);
+                                qx.event.Timer.once(function () {
+                                    window.Addons.BaseScannerGUI.getInstance().FG()
+                                }, 1000);
                                 return;
                             } else {
                                 this.ZH = false;
-                                window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FJ()", 1000);
+                                qx.event.Timer.once(function () {
+                                    window.Addons.BaseScannerGUI.getInstance().FJ()
+                                }, 1000);
                             }
                         } else {
                             this.ZH = false;
@@ -675,7 +682,7 @@ codes by NetquiK
                                                     // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
                                                     var d = this.FL(object.getID(), 0);
                                                     //MOD Fix needcp when cached city by Netquik
-                                                    null != d && d[13] !== needcp && (d[13] = needcp);                                                   
+                                                    null != d && d[13] !== needcp && (d[13] = needcp);
                                                     var e = this.FL(object.getID(), 1);
                                                     if (e != null) {
                                                         this.ZM[object.getID()] = e;
@@ -725,7 +732,9 @@ codes by NetquiK
                             this.ZL.setData(this.ZE);
                             this.FP(0, this.ZE.length, 200);
                             this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
-                            if (this.YY.name != "DR01D") window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FG()", 50);
+                            if (this.YY.name != "DR01D") qx.event.Timer.once(function () {
+                                window.Addons.BaseScannerGUI.getInstance().FG()
+                            }, 50);
                         } catch (ex) {
                             console.debug("Maelstrom_Basescanner FJ error: ", ex);
                         }
@@ -931,7 +940,9 @@ codes by NetquiK
                             //console.log("this.ZH", this.ZH);
                             if (this.ZH && Addons.BaseScannerGUI.getInstance().isVisible()) {
                                 //console.log("loop");
-                                window.setTimeout("window.Addons.BaseScannerGUI.getInstance().FG()", sleeptime);
+                                qx.event.Timer.once(function () {
+                                    window.Addons.BaseScannerGUI.getInstance().FG()
+                                }, sleeptime);
                             } else {
                                 this.ZG.setLabel(this.T.get("Scan"));
                                 this.ZH = false;
@@ -1045,9 +1056,10 @@ codes by NetquiK
                                 if (selectedtype != rowDataLine[10]) {
                                     continue;
                                 }
-                            } /* else {
-                                continue;
-                            } */
+                            }
+                            /* else {
+                                                           continue;
+                                                       } */
                             posData = rowDataLine[3];
                             if (posData != null && posData.split(':').length == 2) {
                                 posX = parseInt(posData.split(':')[0]);
@@ -1578,7 +1590,7 @@ codes by NetquiK
     };
     try {
         var MaelstromScript_Basescanner = document.createElement("script");
-        MaelstromScript_Basescanner.innerHTML = "(" + MaelstromTools_Basescanner.toString() + ")();";
+        MaelstromScript_Basescanner.textContent = "(" + MaelstromTools_Basescanner.toString() + ")();";
         MaelstromScript_Basescanner.type = "text/javascript";
         if (/commandandconquer\.com/i.test(document.domain)) {
             document.getElementsByTagName("head")[0].appendChild(MaelstromScript_Basescanner);
