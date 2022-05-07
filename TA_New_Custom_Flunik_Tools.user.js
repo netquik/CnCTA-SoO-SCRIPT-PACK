@@ -2,10 +2,11 @@
 // @name        New Custom Flunik Tools
 // @namespace   FlunikTools
 // @description Upgrades Offense or Defense or Buildings but not RT CY CC DEFFac or DefHQ. 
-// @version     SaberTooths-Fix-for-Awesome 1.3.3.3 
+// @version     SaberTooths-Fix-for-Awesome 1.3.3.5
 // @author      dbendure
 // @contributor NetquiK  (fixes)
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_New_Custom_Flunik_Tools.user.js
 //@grant none
 // ==/UserScript==
 (function () {
@@ -1538,7 +1539,7 @@
                     var startPos = strFunction.indexOf(searchString) + searchString.length;
                     var fn_name = strFunction.slice(startPos, startPos + 6);
                     strFunction = "var $createHelper;return this." + fn_name + ";";
-                    var fn = Function('', strFunction);
+                    var fn = Evil('', strFunction);
                     ClientLib.Data.CityUnits.prototype.get_OffenseUnits = fn;
                     console.log("ClientLib.Data.CityUnits.prototype.get_OffenseUnits = function(){var $createHelper;return this." + fn_name + ";}");
                     // ClientLib.Data.CityUnits.prototype.get_DefenseUnits
@@ -1547,7 +1548,7 @@
                     startPos = strFunction.indexOf(searchString) + searchString.length;
                     fn_name = strFunction.slice(startPos, startPos + 6);
                     strFunction = "var $createHelper;return this." + fn_name + ";";
-                    fn = Function('', strFunction);
+                    fn = Evil('', strFunction);
                     ClientLib.Data.CityUnits.prototype.get_DefenseUnits = fn;
                     console.log("ClientLib.Data.CityUnits.prototype.get_DefenseUnits = function(){var $createHelper;return this." + fn_name + ";}");
                     FlunikTools.Main.getInstance();*/
@@ -1566,7 +1567,7 @@
 
     try {
         var FlunikScript = document.createElement("script");
-        FlunikScript.innerHTML = "(" + FlunikTools_main.toString() + ")();";
+        FlunikScript.textContent = "(" + FlunikTools_main.toString() + ")();";
         FlunikScript.type = "text/javascript";
         if (/commandandconquer\.com/i.test(document.domain)) {
             document.getElementsByTagName("head")[0].appendChild(FlunikScript);
