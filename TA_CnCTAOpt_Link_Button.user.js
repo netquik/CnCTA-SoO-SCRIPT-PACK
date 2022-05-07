@@ -1,5 +1,5 @@
 // ==UserScript==
-// @version       1.0.7.6
+// @version       1.0.7.7
 // @name          CnC:TA CnCTAOpt Link
 // @namespace     https://cnctaopt.com/
 // @icon          https://cnctaopt.com/favicon.ico
@@ -727,7 +727,7 @@
 
     let cnctaoptLinkScript = document.createElement("script");
     cnctaoptLinkScript.type = "text/javascript";
-    cnctaoptLinkScript.innerHTML = "(" + cnctaoptLink.toString() + ")();";
+    cnctaoptLinkScript.textContent = "(" + cnctaoptLink.toString() + ")();";
     if (/commandandconquer\.com/i.test(document.domain)) {
         document.getElementsByTagName("head")[0].appendChild(cnctaoptLinkScript);
     }
