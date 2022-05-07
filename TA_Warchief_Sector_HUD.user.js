@@ -2,10 +2,12 @@
 // @name            WarChiefs - Tiberium Alliances Sector HUD
 // @description     Displays a tiny HUD with the Sector you are viewing.
 // @author          Eistee
-// @version         13.12.18.1
+// @version         22.05.04
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
+// @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Warchief_Sector_HUD.user.js
+// @contributor     NetquiK (https://github.com/netquik) - FIX Right Click
 // ==/UserScript==
 /**
  *  License: CC-BY-NC-SA 3.0
@@ -31,7 +33,7 @@
 						opacity: 0.8
 					});
 					HUD.add(this.SectorText);
-					HUD.addListener("mousedown", function (e) {
+					HUD.addListener("mousedown", function (e) { //fix for right click by Netquik
 						if (e.getButton() == "left") this.paste_Coords();
 						if (e.getButton() == "right") this.jump_Coords();
 					}, this);
@@ -159,7 +161,7 @@
 	};
 	var script = document.createElement("script");
 	var txt = injectFunction.toString();
-	script.innerHTML = "(" + txt + ")();";
+	script.textContent = "(" + txt + ")();";
 	script.type = "text/javascript";
 	document.getElementsByTagName("head")[0].appendChild(script);
 })();
