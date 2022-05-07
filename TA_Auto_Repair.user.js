@@ -2,10 +2,10 @@
 // @name        TA Autorepair
 // @description Repair buildings in a specific order
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.0.1b
+// @version     1.0.3
 // @author      petui
 // @contributor    AlkalyneD4 (https://github.com/SebHeuze) Patch 19.3 Fix
-// @contributor    Netquik (https://github.com/SebHeuze) Patch 19.4 Fix
+// @contributor    Netquik (https://github.com/SebHeuze) Patch 19.4 Fix + NOEVIL
 // @downloadURL    https://raw.githubusercontent.com/SebHeuze/CnC_TA/master/TA_Autorepair.user.js
 // @updateURL      https://raw.githubusercontent.com/SebHeuze/CnC_TA/master/TA_Autorepair.user.js
 // ==/UserScript==
@@ -69,7 +69,7 @@
                             if (ClientLib.API.Util.GetUnitRepairCostsForCity === undefined) {
                                /*  a = ClientLib.API.Util.GetUnitRepairCosts.toString();
                                 var f = a.replace(/^function (?:anonymous)?\((a,b,c\n?)(?:\s\/\*\*\/)?\)\s?\{/, 'function (city,$1) {').replace(/(var [a-z])=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.([A-Z]{6}\(\))/, '$1=city.$2');
-                                AutoRepair.prototype.GetUnitRepairCosts = eval('(' + f + ')') */
+                                AutoRepair.prototype.GetUnitRepairCosts = Evil('(' + f + ')') */
                             } else {
                                 AutoRepair.prototype.GetUnitRepairCosts = ClientLib.API.Util.GetUnitRepairCostsForCity
                             }
@@ -508,7 +508,7 @@
         setTimeout(waitForGame, 1000)
     };
     var o = document.createElement('script');
-    o.innerHTML = '(' + n.toString() + ')();';
+    o.textContent = '(' + n.toString() + ')();';
     o.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(o)
 })();
