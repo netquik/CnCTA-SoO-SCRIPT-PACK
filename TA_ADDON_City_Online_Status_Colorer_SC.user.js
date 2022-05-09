@@ -3,13 +3,22 @@
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description change the color of cities according to online state of the player
-// @version     0.7.3
+// @version     0.7.4
 // @author      White X Dragon / Debitosphere / NetquiK
 // @author      Der_Flake
-// @contributor NetquiK (https://github.com/netquik) - REMOVED USELESS CODES - !!NOEVIL!! - RECODED
+// @contributor NetquiK (https://github.com/netquik) - (see first comments for changelog)
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_ADDON_City_Online_Status_Colorer_SC.user.js
 // ==/UserScript==
-/*global PerforceChangelist,window,localStorage, console, ClientLib, MaelstromTools*/
+
+/* 
+codes by NetquiK
+----------------
+- REMOVED USELESS CODES
+- !!NOEVIL!!
+- RECODED
+- Compatibility with PlayerTag Script
+----------------
+*/
 (function () {
     function OnlineStatusCityColor_Main() {
         var localStorageKey = "CCTA_MaelstromTools_CC_OnlineStateColorer";
@@ -57,40 +66,74 @@
                 return;
             }
             regionCityPrototype.SetCanvasValue_ORG = regionCityPrototype[setCanvasValue_Name];
-            var M = regionCityPrototype[setCanvasValue_Name].toString().match(/\([a-z],([a-z])\).+this\.[A-Z]{6}\.([A-Z]{6}).+\+\1\.([A-Z]{6}).+\1\.([A-Z]{6}).+[a-z]\.([A-Z]{6});.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.([A-Z]{6}).+this\.\9\.([A-Z]{6}).+this\.([A-Z]{6})\(\);}}/);
+            //MOD FIX for other manipulator scripts
+            var M = regionCityPrototype[setCanvasValue_Name].toString().replace(/[\r\n]/g, "").match(/\([a-z],([a-z])\).+this\.([A-Z]{6})\.([A-Z]{6}).+\+\1\.([A-Z]{6}).+\1\.([A-Z]{6}).+[a-z]\.([A-Z]{6});.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.([A-Z]{6}).+this\.\10\.([A-Z]{6}).+this\.([A-Z]{6})\(\);}}/);
             /* var setCanvasValueFunctionBodyFixed = setCanvasValueFunctionBody.replace(
                 /\{g="#000000";\}/im,
                 "{g=\"#000000\";}else{g=this.CityTextcolor(g);}"); */
-            setCanvasValueFunctionBodyFixed = function (g, d) {
-                ClientLib.Data.MainData.GetInstance().get_BaseColors();
-                var c = !1;
-                var b = g.GetPlayer(this[cityinfo][M[2]]);
-                if (null != b) {
-                    var a = ClientLib.Data.MainData.GetInstance().get_BaseColors().GetBaseColor(this.get_PlayerId(), this.get_AllianceId());
-                    a = this.get_Type() == ClientLib.Vis.Region.RegionCity.ERegionCityType.Own ? "#000000" : this.CityTextcolor(a);
-                    var e = "Lvl " + d[M[3]].toString(),
-                        f = d[M[4]];
-                    b = b[M[5]];
-                    ClientLib.Vis.VisMain.GetInstance().get_HideRegionPlayerNames() && (b =
-                        "            ");
-                    if (this[M[6]].Text != e || this[M[6]].Color != a) c = !0, this[M[6]].Text = e, this[M[6]].Color = a;
-                    if (this[M[7]].Text != f || this[M[7]].Color != a) c = !0, this[M[7]].Text = f, this[M[7]].Color = a;
-                    if (this[M[8]].Text != b || this[M[8]].Color != a) c = !0, this[M[8]].Text = b, this[M[8]].Color = a
-                } else this[M[6]].Text = "", this[M[7]].Text = "", this[M[8]].Text = "";
-                if (c && null != this[M[9]]) {
-                    if (this.get_Type() != ClientLib.Vis.Region.RegionCity.ERegionCityType.Own) this[M[9]][M[10]](this.get_AllianceId());
-                    this[M[9]][M[11]]()
+            setCanvasValueFunctionBodyFixed = function (a, b) {
+                var $createHelper;
+                var c = ClientLib.Data.MainData.GetInstance().get_BaseColors();
+                var d = true;
+                var e = null;
+                if (d) {
+                    var f = false;
+                    e = a.GetPlayer(this[M[2]][M[3]]);
+                    if (e != null) {
+                        var g = c.GetBaseColor(this.get_PlayerId(), this.get_AllianceId());
+                        if (this.get_Type() == ClientLib.Vis.Region.RegionCity.ERegionCityType.Own) {
+                            g = "#000000";
+                        } else {
+                            g = this.CityTextcolor(g);
+                        }
+                        var h = "Lvl " + b[M[4]].toString();
+                        //MOD Fix for PalyerTag script
+                        var i = typeof this.BaseNameTag == 'function' ? this.BaseNameTag(b[M[5]]) : b[M[5]];
+                        var j = e[M[6]];
+                        if (ClientLib.Vis.VisMain.GetInstance().get_HideRegionPlayerNames()) {
+                            j = "            ";
+                        }
+                        if ((this[M[7]].Text != h) || (this[M[7]].Color != g)) {
+                            f = true;
+                            this[M[7]].Text = h;
+                            this[M[7]].Color = g;
+                        }
+                        if ((this[M[8]].Text != i) || (this[M[8]].Color != g)) {
+                            f = true;
+                            this[M[8]].Text = i;
+                            this[M[8]].Color = g;
+                        }
+                        if ((this[M[9]].Text != j) || (this[M[9]].Color != g)) {
+                            f = true;
+                            this[M[9]].Text = j;
+                            this[M[9]].Color = g;
+                        }
+                    } else {
+                        this[M[7]].Text = "";
+                        this[M[8]].Text = "";
+                        this[M[9]].Text = "";
+                    }
+                    if (f && (this[M[10]] != null)) {
+                        if (this.get_Type() != ClientLib.Vis.Region.RegionCity.ERegionCityType.Own) {
+                            this[M[10]][M[11]](this.get_AllianceId());
+                        }
+                        this[M[10]][M[12]]();
+                    }
+                } else {
+                    this[M[13]]();
                 }
-            };
+            }
             regionCityPrototype[setCanvasValue_Name] = setCanvasValueFunctionBodyFixed;
             regionCityPrototype.SetCanvasValue_FIXED = setCanvasValueFunctionBodyFixed;
         }
+
         function requestOnlineStatusUpdate() {
             console.log("XXX City Color: requesting online status update..Checks every 5 minutes..)");
             var mainData = ClientLib.Data.MainData.GetInstance();
             var alliance = mainData.get_Alliance();
             alliance.RefreshMemberData();
         }
+
         function MaelstromTools_CityOnlineStateColorerInclude_checkIfLoaded() {
             try {
                 if (typeof ClientLib !== "undefined" && ClientLib.Vis !== undefined && ClientLib.Vis.Region !== undefined && ClientLib.Vis.Region.RegionCity !== undefined) {
