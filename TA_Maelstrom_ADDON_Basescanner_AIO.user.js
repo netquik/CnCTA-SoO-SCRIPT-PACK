@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.14
+// @version     1.8.15
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -26,6 +26,7 @@ codes by NetquiK
 - NOEVIL
 - Disable GrowRate Opt
 - New Rule Out check for base list
+- Reorder Columns Save State
 ----------------
 */
 
@@ -833,7 +834,7 @@ codes by NetquiK
                                                         if (d != null) {
                                                             this.ZE.push(d);
                                                         } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                            this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                         }
                                                     }
                                                     if (object.Type == 2 && c2) { //basen
@@ -841,7 +842,7 @@ codes by NetquiK
                                                         if (d != null) {
                                                             this.ZE.push(d);
                                                         } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                            this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                         }
                                                     }
                                                     if (object.Type == 3 && (c3 || c4)) { //Lager Vposten
@@ -856,13 +857,13 @@ codes by NetquiK
                                                             }
                                                         } else {
                                                             if ((object.getCampType() == 7 || object.getCampType() == 2 || object.getCampType() == 1) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
                                                             if ((object.getCampType() == 7) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
                                                             if (object.getCampType() == 3 && c3) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
                                                         }
                                                     }
@@ -1009,196 +1010,41 @@ codes by NetquiK
                                                                 this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
                                                                 this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
                                                             }
-                                                            for (var y = 0; y < 8; y++) {
-                                                                for (var x = 0; x < 9; x++) {
-                                                                    var aKey = x + ',' + y;
-                                                                    switch (ncity.GetResourceType(x, y)) {
-                                                                        case 0:
-
-                                                                            // count tib/cry around
-                                                                            var cntT = 0;
-                                                                            var cntC = 0;
-                                                                            var cntM = 0;
-                                                                            var cntP = 0;
-                                                                            if (y > 0 && y < 7 && x > 0 && x < 8) {
-                                                                                // tib
-                                                                                if (ncity.GetResourceType(x - 1, y - 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y - 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y - 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y + 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y + 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y + 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                // cry
-                                                                                if (ncity.GetResourceType(x - 1, y - 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y - 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y - 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y + 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y + 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y + 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                // power
-                                                                                if (ncity.GetResourceType(x - 1, y - 1) === 0) {
-                                                                                    if (this.checkFieldFree(x - 1, y - 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y - 1) === 0) {
-                                                                                    if (this.checkFieldFree(x, y - 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y - 1) === 0) {
-                                                                                    if (this.checkFieldFree(x + 1, y - 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y) === 0) {
-                                                                                    if (this.checkFieldFree(x - 1, y, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y) === 0) {
-                                                                                    if (this.checkFieldFree(x + 1, y, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y + 1) === 0) {
-                                                                                    if (this.checkFieldFree(x - 1, y + 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y + 1) === 0) {
-                                                                                    if (this.checkFieldFree(x, y + 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y + 1) === 0) {
-                                                                                    if (this.checkFieldFree(x + 1, y + 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                            if (cntC === 4) {
-                                                                                tib4++;
-                                                                                mix4--;
-                                                                            }
-                                                                            if (cntC === 5) {
-                                                                                tib5++;
-                                                                                mix5--;
-                                                                            }
-                                                                            if (cntC === 6) {
-                                                                                tib6++;
-                                                                                mix6--;
-                                                                            }
-                                                                            if (cntC === 7) {
-                                                                                tib7++;
-                                                                                mix7--;
-                                                                            }
-                                                                            if (cntT === 4) {
-                                                                                cry4++;
-                                                                                mix4--;
-                                                                            }
-                                                                            if (cntT === 5) {
-                                                                                cry5++;
-                                                                                mix5--;
-                                                                            }
-                                                                            if (cntT === 6) {
-                                                                                cry6++;
-                                                                                mix6--;
-                                                                            }
-                                                                            if (cntT === 7) {
-                                                                                cry7++;
-                                                                                mix7--;
-                                                                            }
-                                                                            if (cntM === 4) {
-                                                                                mix4++;
-                                                                            }
-                                                                            if (cntM === 5) {
-                                                                                mix5++;
-                                                                            }
-                                                                            if (cntM === 6) {
-                                                                                mix6++;
-                                                                            }
-                                                                            if (cntM === 7) {
-                                                                                mix7++;
-                                                                            }
-                                                                            if (cntM === 8) {
-                                                                                mix8++;
-                                                                            }
-                                                                            if (cntP === 8) {
-                                                                                pow8++;
-                                                                                powL[aKey] = 1;
-                                                                            }
-                                                                            break;
-                                                                        case 1:
-                                                                            /* Crystal */
-
-                                                                            totC++;
-                                                                            this.ZM[id][x][y] = 1;
-                                                                            break;
-                                                                        case 2:
-                                                                            /* Tiberium */
-                                                                            this.ZM[id][x][y] = 2;
-
-                                                                            totT++;
-                                                                            break;
-                                                                        default:
-                                                                            //none
-                                                                            break;
-                                                                    }
+                                                            for (var y = 0; 8 > y; y++) {
+                                                                for (var x = 0; 9 > x; x++) {
+                                                                  var aKey = x + "," + y;
+                                                                  switch(ncity.GetResourceType(x, y)) {
+                                                                    case 0:
+                                                                      var cntT = 0, cntC = 0, cntM = 0, cntP = 0;
+                                                                      0 < y && 7 > y && 0 < x && 8 > x && (2 === ncity.GetResourceType(x - 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 
+                                                                      1, y + 1) && (cntC++, cntM++), 1 === ncity.GetResourceType(x - 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y + 
+                                                                      1) && (cntT++, cntM++), 0 === ncity.GetResourceType(x - 1, y - 1) && this.checkFieldFree(x - 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y - 1) && this.checkFieldFree(x, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y - 1) && this.checkFieldFree(x + 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x - 1, y) && this.checkFieldFree(x - 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y) && this.checkFieldFree(x + 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x - 
+                                                                      1, y + 1) && this.checkFieldFree(x - 1, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y + 1) && this.checkFieldFree(x, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y + 1) && this.checkFieldFree(x + 1, y + 1, powL) && cntP++);
+                                                                      4 === cntC && (tib4++, mix4--);
+                                                                      5 === cntC && (tib5++, mix5--);
+                                                                      6 === cntC && (tib6++, mix6--);
+                                                                      7 === cntC && (tib7++, mix7--);
+                                                                      4 === cntT && (cry4++, mix4--);
+                                                                      5 === cntT && (cry5++, mix5--);
+                                                                      6 === cntT && (cry6++, mix6--);
+                                                                      7 === cntT && (cry7++, mix7--);
+                                                                      4 === cntM && mix4++;
+                                                                      5 === cntM && mix5++;
+                                                                      6 === cntM && mix6++;
+                                                                      7 === cntM && mix7++;
+                                                                      8 === cntM && mix8++;
+                                                                      8 === cntP && (pow8++, powL[aKey] = 1);
+                                                                      break;
+                                                                    case 1:
+                                                                      totC++;
+                                                                      this.ZM[id][x][y] = 1;
+                                                                      break;
+                                                                    case 2:
+                                                                      this.ZM[id][x][y] = 2, totT++;
+                                                                  }
                                                                 }
-                                                            }
+                                                              }
+                                                              
                                                             this.ZE[i][9] = totC;
                                                             this.ZE[i][10] = totT;
                                                             this.ZE[i][11] = ncity.GetBuildingsConditionInPercent();
