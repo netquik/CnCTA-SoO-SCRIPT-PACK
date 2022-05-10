@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.15
+// @version     1.8.16
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -27,6 +27,7 @@ codes by NetquiK
 - Disable GrowRate Opt
 - New Rule Out check for base list
 - Reorder Columns Save State
+- Sorting Columns fixed
 ----------------
 */
 
@@ -544,7 +545,7 @@ codes by NetquiK
                             this.ZK[5].setValue(Addons.LocalStorage.getserver("Basescanner_ShowGrow", false));
                             //MOD Disable GrowRate Opt
                             this.ZK[5].addListener("changeValue", function (e) {
-                                if (e.getData() == false){
+                                if (e.getData() == false) {
                                     this.ZZ = this.ZZ.filter(g => g[14] !== '-');
                                 }
                                 this.ZE = [];
@@ -875,12 +876,17 @@ codes by NetquiK
                                 }
                             }
                             this.ZH = true;
-                            this.ZL.setData(this.ZE);
+                            let colsort = this.ZL.getSortColumnIndex();
+                            this.ZL.setData(this.ZE); 
                             this.FP(0, this.ZE.length, 200);
-                            if (!this.ZK[5].getValue()) {
-                                this.ZL.sortByColumn(14, false); //Sort for Growth Rate
+                            if (colsort == -1) {
+                                if (!this.ZK[5].getValue()) {
+                                    this.ZL.sortByColumn(14, false); //Sort for Growth Rate
+                                } else {
+                                    this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                                }
                             } else {
-                                this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                                this.ZL.sortByColumn(colsort, false); //Sort User Choice
                             }
                             if (this.YY.name != "DR01D") qx.event.Timer.once(function () {
                                 window.Addons.BaseScannerGUI.getInstance().FG()
@@ -1012,39 +1018,42 @@ codes by NetquiK
                                                             }
                                                             for (var y = 0; 8 > y; y++) {
                                                                 for (var x = 0; 9 > x; x++) {
-                                                                  var aKey = x + "," + y;
-                                                                  switch(ncity.GetResourceType(x, y)) {
-                                                                    case 0:
-                                                                      var cntT = 0, cntC = 0, cntM = 0, cntP = 0;
-                                                                      0 < y && 7 > y && 0 < x && 8 > x && (2 === ncity.GetResourceType(x - 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 
-                                                                      1, y + 1) && (cntC++, cntM++), 1 === ncity.GetResourceType(x - 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y + 
-                                                                      1) && (cntT++, cntM++), 0 === ncity.GetResourceType(x - 1, y - 1) && this.checkFieldFree(x - 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y - 1) && this.checkFieldFree(x, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y - 1) && this.checkFieldFree(x + 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x - 1, y) && this.checkFieldFree(x - 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y) && this.checkFieldFree(x + 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x - 
-                                                                      1, y + 1) && this.checkFieldFree(x - 1, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y + 1) && this.checkFieldFree(x, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y + 1) && this.checkFieldFree(x + 1, y + 1, powL) && cntP++);
-                                                                      4 === cntC && (tib4++, mix4--);
-                                                                      5 === cntC && (tib5++, mix5--);
-                                                                      6 === cntC && (tib6++, mix6--);
-                                                                      7 === cntC && (tib7++, mix7--);
-                                                                      4 === cntT && (cry4++, mix4--);
-                                                                      5 === cntT && (cry5++, mix5--);
-                                                                      6 === cntT && (cry6++, mix6--);
-                                                                      7 === cntT && (cry7++, mix7--);
-                                                                      4 === cntM && mix4++;
-                                                                      5 === cntM && mix5++;
-                                                                      6 === cntM && mix6++;
-                                                                      7 === cntM && mix7++;
-                                                                      8 === cntM && mix8++;
-                                                                      8 === cntP && (pow8++, powL[aKey] = 1);
-                                                                      break;
-                                                                    case 1:
-                                                                      totC++;
-                                                                      this.ZM[id][x][y] = 1;
-                                                                      break;
-                                                                    case 2:
-                                                                      this.ZM[id][x][y] = 2, totT++;
-                                                                  }
+                                                                    var aKey = x + "," + y;
+                                                                    switch (ncity.GetResourceType(x, y)) {
+                                                                        case 0:
+                                                                            var cntT = 0,
+                                                                                cntC = 0,
+                                                                                cntM = 0,
+                                                                                cntP = 0;
+                                                                            0 < y && 7 > y && 0 < x && 8 > x && (2 === ncity.GetResourceType(x - 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x +
+                                                                                1, y + 1) && (cntC++, cntM++), 1 === ncity.GetResourceType(x - 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y +
+                                                                                1) && (cntT++, cntM++), 0 === ncity.GetResourceType(x - 1, y - 1) && this.checkFieldFree(x - 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y - 1) && this.checkFieldFree(x, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y - 1) && this.checkFieldFree(x + 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x - 1, y) && this.checkFieldFree(x - 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y) && this.checkFieldFree(x + 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x -
+                                                                                1, y + 1) && this.checkFieldFree(x - 1, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y + 1) && this.checkFieldFree(x, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y + 1) && this.checkFieldFree(x + 1, y + 1, powL) && cntP++);
+                                                                            4 === cntC && (tib4++, mix4--);
+                                                                            5 === cntC && (tib5++, mix5--);
+                                                                            6 === cntC && (tib6++, mix6--);
+                                                                            7 === cntC && (tib7++, mix7--);
+                                                                            4 === cntT && (cry4++, mix4--);
+                                                                            5 === cntT && (cry5++, mix5--);
+                                                                            6 === cntT && (cry6++, mix6--);
+                                                                            7 === cntT && (cry7++, mix7--);
+                                                                            4 === cntM && mix4++;
+                                                                            5 === cntM && mix5++;
+                                                                            6 === cntM && mix6++;
+                                                                            7 === cntM && mix7++;
+                                                                            8 === cntM && mix8++;
+                                                                            8 === cntP && (pow8++, powL[aKey] = 1);
+                                                                            break;
+                                                                        case 1:
+                                                                            totC++;
+                                                                            this.ZM[id][x][y] = 1;
+                                                                            break;
+                                                                        case 2:
+                                                                            this.ZM[id][x][y] = 2, totT++;
+                                                                    }
                                                                 }
-                                                              }
-                                                              
+                                                            }
+
                                                             this.ZE[i][9] = totC;
                                                             this.ZE[i][10] = totT;
                                                             this.ZE[i][11] = ncity.GetBuildingsConditionInPercent();
@@ -1096,10 +1105,18 @@ codes by NetquiK
                                                             this.countlastidchecked = 0;
                                                             //console.log(this.ZE[i],this.ZM[id],id);
                                                             this.FK(this.ZE[i], this.ZM[id], id);
-                                                            //update table
+                                                            //update table + retain sorting 
+                                                            let colsort = this.ZL.getSortColumnIndex();
                                                             this.ZL.setData(this.ZE);
-                                                            if (!this.ZK[5].getValue())
-                                                                this.ZL.sortByColumn(14, false); //MOD Sort for Growrate
+                                                            if (colsort == -1) {
+                                                                if (!this.ZK[5].getValue()) {
+                                                                    this.ZL.sortByColumn(14, false); //Sort for Growth Rate
+                                                                } else {
+                                                                    this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                                                                }
+                                                            } else {
+                                                                this.ZL.sortByColumn(colsort, false); //Sort User Choice
+                                                            }
                                                         }
                                                     } else {
                                                         if (this.ZA > 250) {
