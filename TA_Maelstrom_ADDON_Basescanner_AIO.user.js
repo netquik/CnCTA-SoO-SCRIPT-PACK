@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.17
+// @version     1.8.18
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -28,6 +28,7 @@ codes by NetquiK
 - New Rule Out check for base list
 - Reorder Columns Save State
 - Sorting Columns fixed
+- SpeedUP1
 ----------------
 */
 
@@ -545,9 +546,6 @@ codes by NetquiK
                             this.ZK[5].setValue(Addons.LocalStorage.getserver("Basescanner_ShowGrow", false));
                             //MOD Disable GrowRate Opt
                             this.ZK[5].addListener("changeValue", function (e) {
-                                if (e.getData() == false) {
-                                    this.ZZ = this.ZZ.filter(g => g[14] !== '-');
-                                }
                                 this.ZE = [];
                                 this.ZH = false;
                                 this.ZG.setLabel(this.T.get("Scan"));
@@ -878,7 +876,7 @@ codes by NetquiK
                             this.ZH = true;
                             let colsort = this.ZL.getSortColumnIndex();
                             let colsort_ASC = this.ZL.isSortAscending();
-                            this.ZL.setData(this.ZE); 
+                            this.ZL.setData(this.ZE);
                             this.FP(0, this.ZE.length, 200);
                             if (colsort == -1) {
                                 if (!this.ZK[5].getValue()) {
@@ -1184,6 +1182,11 @@ codes by NetquiK
                         if (t == 0) {
                             for (var i = 0; i < this.ZZ.length; i++) {
                                 if (this.ZZ[i][0] == id) {
+                                    //MOD GR only calculation
+                                    if (this.ZK[5].getValue() == false && this.ZZ[i][14] == "-" && this.ZS[id]) {
+                                        this.ZM[id] = this.ZS[id];
+                                        this.ZZ[i][14] = this.maaain(id);
+                                    }
                                     return this.ZZ[i];
                                 }
                             }
