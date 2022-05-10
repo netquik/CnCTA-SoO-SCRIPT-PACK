@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Maelstrom ADDON Basescanner AIO
-// @match     https://*.alliances.commandandconquer.com/*/index.aspx
+// @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
 // @version     1.8.15
 // @author      BlinDManX + chertosha + Netquik
