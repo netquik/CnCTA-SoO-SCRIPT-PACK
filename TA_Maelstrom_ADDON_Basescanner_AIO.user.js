@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.16
+// @version     1.8.17
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -877,6 +877,7 @@ codes by NetquiK
                             }
                             this.ZH = true;
                             let colsort = this.ZL.getSortColumnIndex();
+                            let colsort_ASC = this.ZL.isSortAscending();
                             this.ZL.setData(this.ZE); 
                             this.FP(0, this.ZE.length, 200);
                             if (colsort == -1) {
@@ -886,7 +887,7 @@ codes by NetquiK
                                     this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
                                 }
                             } else {
-                                this.ZL.sortByColumn(colsort, false); //Sort User Choice
+                                this.ZL.sortByColumn(colsort, colsort_ASC); //Sort User Choice
                             }
                             if (this.YY.name != "DR01D") qx.event.Timer.once(function () {
                                 window.Addons.BaseScannerGUI.getInstance().FG()
@@ -1107,6 +1108,7 @@ codes by NetquiK
                                                             this.FK(this.ZE[i], this.ZM[id], id);
                                                             //update table + retain sorting 
                                                             let colsort = this.ZL.getSortColumnIndex();
+                                                            let colsort_ASC = this.ZL.isSortAscending();
                                                             this.ZL.setData(this.ZE);
                                                             if (colsort == -1) {
                                                                 if (!this.ZK[5].getValue()) {
@@ -1115,7 +1117,7 @@ codes by NetquiK
                                                                     this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
                                                                 }
                                                             } else {
-                                                                this.ZL.sortByColumn(colsort, false); //Sort User Choice
+                                                                this.ZL.sortByColumn(colsort, colsort_ASC); //Sort User Choice
                                                             }
                                                         }
                                                     } else {
