@@ -302,48 +302,49 @@ codes by NetquiK
                                 regionObject[key] = new Evil("a", "b", "c", "d", "e", initBaseFunctionFixed);
                                 */
                                 // MOD NOEVIL 2 by NetquiK
-                                var ROM = strFunction.match(/\);this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+\.([A-Z]{6})\.toS.+this\.([A-Z]{6})=.+new \$I\.([A-Z]{6})\)\.([A-Z]{6})\(this\.([A-Z]{6})\(\),this\.\7,this\.\8.+this\.([A-Z]{6})\.([A-Z]{6}).+\14\.[A-Z]{6}.+\14\.[A-Z]{6}.+this\.([A-Z]{6})=.+\14\.\15\(\)\.([A-Z]{6}).+this\.\16\.([A-Z]{6})\(\d+\).+\16\.([A-Z]{6})\(\$I.([A-Z]{6})\.([A-Z]{6}).+\16\.([A-Z]{6})\(\$I\.\20\.([A-Z]{6}).+this\.([A-Z]{6})=.+this\.([A-Z]{6})=this\.\5\.([A-Z]{6}).+this\.([A-Z]{6})=this\.\5\.([A-Z]{6}).+this\.([A-Z]{6})=.+this\.([A-Z]{6})=\(\(this\.\5\.([A-Z]{6}).+this\.([A-Z]{6})\([a-z],[a-z]\).+\.([A-Z]{6})\(.+this\.([A-Z]{6})\)\)/);
-                                regionObject[key] = function (a, b, c, d, e) {
-                                    var $createHelper;
-                                    ClientLib.Vis.Region.RegionObject.prototype.$ctor.call(this, a, b, c);
-                                    this[ROM[1]] = -1;
-                                    this[ROM[2]] = -1;
-                                    this[ROM[3]] = e.SequenceId;
-                                    this[ROM[4]] = d;
-                                    this[ROM[5]] = e;
-                                    this[ROM[6]] = phe.cnc.ClientLibTNF.translate("tnf:lvl");
-                                    //MOD ClientLib.Vis.Region.RegionNPCBase 1
-                                    //var f = phe.cnc.ClientLibTNF.translate("tnf:mutants base");
-                                    var f = this.BaseName(phe.cnc.ClientLibTNF.translate("tnf:mutants base"));
-                                    if (this.get_IsHubBase()) {
-                                        f = phe.cnc.ClientLibTNF.translate("tnf:mutants hub");
-                                    }
-                                    //MOD ClientLib.Vis.Region.RegionNPCBase 2
-                                    //var g = ClientLib.Data.MainData.GetInstance().get_BaseColors().GetStandardColor(ClientLib.Data.BaseColors.ColorType.NPCBase);
-                                    var g = this.BaseColor(ClientLib.Data.MainData.GetInstance().get_BaseColors().GetStandardColor(ClientLib.Data.BaseColors.ColorType.NPCBase));
-                                    this[ROM[7]] = (new ClientLib.Vis.Region.RegionTextInfo).$ctor(f, "region_city_name", g);
-                                    this[ROM[8]] = (new ClientLib.Vis.Region.RegionTextInfo).$ctor(this[ROM[6]] + " " + e[ROM[9]].toString(), "region_city_owner", g);
-                                    this[ROM[10]] = (new $I[ROM[11]])[ROM[12]](this[ROM[13]](), this[ROM[7]], this[ROM[8]], true);
-                                    var h = this[ROM[14]][ROM[15]]();
-                                    var i = this[ROM[14]].get_GridWidth();
-                                    var j = this[ROM[14]].get_GridHeight();
-                                    this[ROM[16]] = this[ROM[14]][ROM[15]]()[ROM[17]]("image", null);
-                                    this[ROM[16]][ROM[18]](98);
-                                    this[ROM[16]][ROM[19]]($I[ROM[20]][ROM[21]]);
-                                    this[ROM[16]][ROM[22]]($I[ROM[20]][ROM[23]]);
-                                    this[ROM[24]] = ClientLib.Data.MainData.GetInstance().get_Cities().GetBaseEffectIndexFromMainBuildingLevel(this[ROM[5]][ROM[9]], ClientLib.Base.EFactionType.NPCBase);
-                                    var k = ClientLib.Data.MainData.GetInstance().get_Time().GetServerStep();
-                                    this[ROM[25]] = this[ROM[5]][ROM[26]];
-                                    this[ROM[27]] = this[ROM[5]][ROM[28]];
-                                    this.CalculateBuildingAndDefenseCondition(k);
-                                    this[ROM[29]] = this[ROM[14]].GetDamageStateByBuildingAndDefenseConditions(this[ROM[25]], ((this[ROM[5]][ROM[28]] != -1) ? this[ROM[27]] : this[ROM[5]][ROM[28]]));
-                                    this[ROM[30]] = ((this[ROM[5]][ROM[31]] - ClientLib.Data.MainData.GetInstance().get_Server().get_PostCombatBlockedForAllSteps()) > k);
-                                    this[ROM[32]](d, e);
-                                    this.UpdateMoralDecal(ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity());
-                                    ClientLib.Data.MainData.GetInstance().get_Cities().add_CurrentChange((new ClientLib.Data.CurrentCityChange)[ROM[33]](this, this[ROM[34]]));
-                                    return this;
-                                };
-
+                                var ROM = strFunction.match(/\);this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+this\.([A-Z]{6})=.+\.([A-Z]{6})\.toS.+this\.([A-Z]{6})=.+new \$I\.([A-Z]{6})\)\.([A-Z]{6})\(this\.([A-Z]{6})\(\), ?this\.\7, ?this\.\8.+this\.([A-Z]{6})\.([A-Z]{6}).+\14\.[A-Z]{6}.+\14\.[A-Z]{6}.+this\.([A-Z]{6})=.+\14\.\15\(\)\.([A-Z]{6}).+this\.\16\.([A-Z]{6})\([0-9x]+\).+\16\.([A-Z]{6})\(\$I.([A-Z]{6})\.([A-Z]{6}).+\16\.([A-Z]{6})\(\$I\.\20\.([A-Z]{6}).+this\.([A-Z]{6})=.+this\.([A-Z]{6})=this\.\5\.([A-Z]{6}).+this\.([A-Z]{6})=this\.\5\.([A-Z]{6}).+this\.([A-Z]{6})=.+this\.([A-Z]{6})=\(\(this\.\5\.([A-Z]{6}).+this\.([A-Z]{6})\([a-z],[a-z]\).+\.([A-Z]{6})\(.+this\.([A-Z]{6})\)\)/);
+                                if (ROM != null) {
+                                    regionObject[key] = function (a, b, c, d, e) {
+                                        var $createHelper;
+                                        ClientLib.Vis.Region.RegionObject.prototype.$ctor.call(this, a, b, c);
+                                        this[ROM[1]] = -1;
+                                        this[ROM[2]] = -1;
+                                        this[ROM[3]] = e.SequenceId;
+                                        this[ROM[4]] = d;
+                                        this[ROM[5]] = e;
+                                        this[ROM[6]] = phe.cnc.ClientLibTNF.translate("tnf:lvl");
+                                        //MOD ClientLib.Vis.Region.RegionNPCBase 1
+                                        //var f = phe.cnc.ClientLibTNF.translate("tnf:mutants base");
+                                        var f = this.BaseName(phe.cnc.ClientLibTNF.translate("tnf:mutants base"));
+                                        if (this.get_IsHubBase()) {
+                                            f = phe.cnc.ClientLibTNF.translate("tnf:mutants hub");
+                                        }
+                                        //MOD ClientLib.Vis.Region.RegionNPCBase 2
+                                        //var g = ClientLib.Data.MainData.GetInstance().get_BaseColors().GetStandardColor(ClientLib.Data.BaseColors.ColorType.NPCBase);
+                                        var g = this.BaseColor(ClientLib.Data.MainData.GetInstance().get_BaseColors().GetStandardColor(ClientLib.Data.BaseColors.ColorType.NPCBase));
+                                        this[ROM[7]] = (new ClientLib.Vis.Region.RegionTextInfo).$ctor(f, "region_city_name", g);
+                                        this[ROM[8]] = (new ClientLib.Vis.Region.RegionTextInfo).$ctor(this[ROM[6]] + " " + e[ROM[9]].toString(), "region_city_owner", g);
+                                        this[ROM[10]] = (new $I[ROM[11]])[ROM[12]](this[ROM[13]](), this[ROM[7]], this[ROM[8]], true);
+                                        var h = this[ROM[14]][ROM[15]]();
+                                        var i = this[ROM[14]].get_GridWidth();
+                                        var j = this[ROM[14]].get_GridHeight();
+                                        this[ROM[16]] = this[ROM[14]][ROM[15]]()[ROM[17]]("image", null);
+                                        this[ROM[16]][ROM[18]](98);
+                                        this[ROM[16]][ROM[19]]($I[ROM[20]][ROM[21]]);
+                                        this[ROM[16]][ROM[22]]($I[ROM[20]][ROM[23]]);
+                                        this[ROM[24]] = ClientLib.Data.MainData.GetInstance().get_Cities().GetBaseEffectIndexFromMainBuildingLevel(this[ROM[5]][ROM[9]], ClientLib.Base.EFactionType.NPCBase);
+                                        var k = ClientLib.Data.MainData.GetInstance().get_Time().GetServerStep();
+                                        this[ROM[25]] = this[ROM[5]][ROM[26]];
+                                        this[ROM[27]] = this[ROM[5]][ROM[28]];
+                                        this.CalculateBuildingAndDefenseCondition(k);
+                                        this[ROM[29]] = this[ROM[14]].GetDamageStateByBuildingAndDefenseConditions(this[ROM[25]], ((this[ROM[5]][ROM[28]] != -1) ? this[ROM[27]] : this[ROM[5]][ROM[28]]));
+                                        this[ROM[30]] = ((this[ROM[5]][ROM[31]] - ClientLib.Data.MainData.GetInstance().get_Server().get_PostCombatBlockedForAllSteps()) > k);
+                                        this[ROM[32]](d, e);
+                                        this.UpdateMoralDecal(ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity());
+                                        ClientLib.Data.MainData.GetInstance().get_Cities().add_CurrentChange((new ClientLib.Data.CurrentCityChange)[ROM[33]](this, this[ROM[34]]));
+                                        return this;
+                                    };
+                                }
 
 
                                 break;
