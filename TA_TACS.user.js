@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.73
+// @version        3.74
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -3064,9 +3064,9 @@ codes by NetquiK
                                 this.ResetAutoscroll = 0;
                             }
                             bA.SetPosition(0, this.TopAttackerPos);
-                            qx.event.Timer.once(function () {
+                            window.setTimeout(function () {
                                 qx.core.Init.getApplication().getPlayArea().autoScroll = 1
-                            }, 500);
+                            }, 1000);
                             this.ReplayBar.setEnabled(true)
                             this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().show();
                             phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
@@ -3162,18 +3162,18 @@ codes by NetquiK
                                 this.enterSimulationView();
                                 qx.event.Timer.once(function () {
                                     //MOD FIX PLAY BUTTON + Date
-                                    _this = TACS.getInstance();
-                                    _this._VisMain.get_Battleground().RestartReplay();
-                                    let r = _this.ReplayBar;
-                                    null != r[_this.PBIS] && r[_this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
-                                    null != r[_this.PBIS_S] && (r[_this.PBIS_S] = !1);
-                                    null != r[_this.PBIS_L] && r[_this.PBIS_L].setValue('x1.0');
+                                   // _this = TACS.getInstance();
+                                    this._VisMain.get_Battleground().RestartReplay();
+                                    let r = this.ReplayBar;
+                                    null != r[this.PBIS] && r[this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
+                                    null != r[this.PBIS_S] && (r[this.PBIS_S] = !1);
+                                    null != r[this.PBIS_L] && r[this.PBIS_L].setValue('x1.0');
                                     
-                                    _this._VisMain.get_Battleground().set_ReplaySpeed(1);
-                                    if (typeof _this._playAreaChildren[11].getChildren == 'function' && typeof Date.parse(_this._playAreaChildren[11].getChildren()[0].getValue()) == 'number') {
-                                        _this._playAreaChildren[11].exclude();
+                                    this._VisMain.get_Battleground().set_ReplaySpeed(1);
+                                    if (typeof this._playAreaChildren[11].getChildren == 'function' && typeof Date.parse(this._playAreaChildren[11].getChildren()[0].getValue()) == 'number') {
+                                        this._playAreaChildren[11].exclude();
                                     }
-                                }, 1);
+                                }, this, 1);
                             }
                             var total_hp = 0;
                             var end_hp = 0;

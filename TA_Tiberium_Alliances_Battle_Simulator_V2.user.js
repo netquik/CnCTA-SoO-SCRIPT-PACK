@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         22.05.05
+// @version         22.05.11
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -878,14 +878,14 @@ codes by NetquiK
                                     _this._playAreaChildren[11].exclude();
                                 }
                                 //MOD FIX PLAY BUTTON
-                                _this = TABS.GUI.ReportReplayOverlay.getInstance();
-                                let r = _this.ReportReplayOverlay;
-                                null != r[_this.PBIS] && r[_this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
-                                null != r[_this.PBIS_S] && (r[_this.PBIS_S] = !1);
-                                null != r[_this.PBIS_L] && r[_this.PBIS_L].setValue('x1.0');
+                                //_this = TABS.GUI.ReportReplayOverlay.getInstance();
+                                let r = this.ReportReplayOverlay;
+                                null != r[this.PBIS] && r[this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
+                                null != r[this.PBIS_S] && (r[this.PBIS_S] = !1);
+                                null != r[this.PBIS_L] && r[this.PBIS_L].setValue('x1.0');
 
                                 ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
-                            }, this, 0);
+                            }, TABS.GUI.ReportReplayOverlay.getInstance(), 0);
                         }
                     }
                 });
@@ -3345,9 +3345,9 @@ codes by NetquiK
                                     this.ResetAutoscroll = 0;
                                 }
                                 bA.SetPosition(0, this.TopAttackerPos);
-                                qx.event.Timer.once(function () {
+                                window.setTimeout(function () {
                                     qx.core.Init.getApplication().getPlayArea().autoScroll = 1
-                                }, 500);
+                                }, 1000);
                                 this.ReportReplayOverlay.setEnabled(true)
                                 this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().show();
                                 phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
