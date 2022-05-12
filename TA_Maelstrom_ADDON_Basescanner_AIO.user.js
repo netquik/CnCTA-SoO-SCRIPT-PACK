@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.18
+// @version     1.8.19
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -28,13 +28,13 @@ codes by NetquiK
 - New Rule Out check for base list
 - Reorder Columns Save State
 - Sorting Columns fixed
-- SpeedUP1
+- SpeedUP+
 ----------------
 */
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.8.14 AIO";
+        window.__msbs_version = "1.8.19 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -178,6 +178,7 @@ codes by NetquiK
                             this.ZL.setColumns(["ID", "LoadState", this.T.get("City"), this.T.get("Location"), this.T.get("Level"), this.T.get("Tiberium"), this.T.get("Crystal"), this.T.get("Dollar"), this.T.get("Research"), "Crystalfields", "Tiberiumfields", this.T.get("Building state"), this.T.get("Defense state"), this.T.get("CP"), "Growth Rate", "Sum Tib+Cry+Cre", "(Tib+Cry+Cre)/CP", "CY", "DF", this.T.get("base set up at"), "Power8", "7 | 6 | 5 | 4 Tib", "7 | 6 | 5 | 4 Cry", "7 | 6 | 5 | 4 Mix", "Rule OUT"]);
                             this.YY = ClientLib.Data.MainData.GetInstance().get_Player();
                             this.ZN = new qx.ui.table.Table(this.ZL);
+                            //this.ZN.setAlwaysUpdateCells(true);
                             this.ZN.setColumnVisibilityButtonVisible(false);
                             this.ZN.setDataRowRenderer(new AIORowR(this.ZN));
                             this.ZN.setColumnWidth(0, 0);
@@ -546,7 +547,7 @@ codes by NetquiK
                             this.ZK[5].setValue(Addons.LocalStorage.getserver("Basescanner_ShowGrow", false));
                             //MOD Disable GrowRate Opt
                             this.ZK[5].addListener("changeValue", function (e) {
-                                this.ZE = [];
+                                this.GR_Fill = !e.getData();
                                 this.ZH = false;
                                 this.ZG.setLabel(this.T.get("Scan"));
                             }, this);
@@ -713,16 +714,27 @@ codes by NetquiK
                             this.ZG.setLabel("Pause");
                             this.ZD.setEnabled(false);
                             qx.event.Timer.once(function () {
-                                window.Addons.BaseScannerGUI.getInstance().FJ()
-                            }, 1000);
+                                this.FJ()
+                            }, window.Addons.BaseScannerGUI.getInstance(), 1000);
                             return;
                         }
                         //After Pause
                         var c = 0;
+                        var g = 0;
                         for (i = 0; i < this.ZE.length; i++) {
                             if (this.ZE[i][1] == -1) {
                                 c++;
                             }
+                            if (this.ZE[i][14] == "-") {
+                                g++;
+                            }
+                        }
+                        // GR only setvalues
+                        if (this.GR_Fill && g > 0) {
+                            qx.event.Timer.once(function () {
+                                this.GR()
+                            }, window.Addons.BaseScannerGUI.getInstance(), 1000);
+                            return;
                         }
                         if (!this.ZH) {
                             this.ZG.setLabel("Pause");
@@ -730,14 +742,15 @@ codes by NetquiK
                             if (c > 0) {
                                 this.ZH = true;
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FG()
-                                }, 1000);
+                                    this.FG()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 1000);
                                 return;
                             } else {
                                 this.ZH = false;
+                                //this.ZL.setData(this.ZE);
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FJ()
-                                }, 1000);
+                                    this.FJ()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 1000);
                             }
                         } else {
                             this.ZH = false;
@@ -749,6 +762,47 @@ codes by NetquiK
                             this.ZU.setWidth(parseInt(value / max * maxwidth, 10));
                             this.ZX.setValue(value + "/" + max);
                         }
+                    },
+                    GR: function () { //MOD GR only fill
+                        if (!this.GR_to_Fill) {
+                            this.GR_to_Fill = []
+                            for (i = 0; i < this.ZE.length; i++) {
+                                if (this.ZE[i][1] == -1) {
+                                    break;
+                                }
+                                if (this.ZE[i][14] == "-") {
+                                    this.GR_to_Fill.push({
+                                        "index": i,
+                                        "id": this.ZE[i][0]
+                                    });
+                                }
+
+                            }
+                        }
+
+                        let index = this.GR_to_Fill[0]['index'];
+                        let id = this.GR_to_Fill[0]['id'];
+                        if (this.ZS[id]) {
+                            this.FP(index + 1, this.ZE.length, 200); //Progressbar
+                            this.ZM[id] = this.ZS[id];
+                            //this.ZZ[index][14] = this.maaain(id);
+                            this.ZL.setValue(14, index, this.maaain(id));
+                            this.ZN.updateContent();
+                        }
+                        this.GR_to_Fill.shift();
+                        if (this.GR_to_Fill.length > 0) {
+                            qx.event.Timer.once(function () {
+                                this.GR()
+                            }, window.Addons.BaseScannerGUI.getInstance(), 200);
+                        } else {
+                            this.GR_Fill = false;
+                            this.GR_to_Fill = null;
+                            this.FE();
+                        }
+
+
+
+
                     },
                     FJ: function () {
                         try {
@@ -785,6 +839,8 @@ codes by NetquiK
                             var t2 = true;
                             var t3 = true;
                             var maxAttackDistance = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance();
+                            let colsort = this.ZL.getSortColumnIndex();
+                            let colsort_ASC = this.ZL.isSortAscending();
                             for (scanY = posY - Math.floor(maxAttackDistance + 1); scanY <= posY + Math.floor(maxAttackDistance + 1); scanY++) {
                                 for (scanX = posX - Math.floor(maxAttackDistance + 1); scanX <= posX + Math.floor(maxAttackDistance + 1); scanX++) {
                                     var distX = Math.abs(posX - scanX);
@@ -874,10 +930,7 @@ codes by NetquiK
                                 }
                             }
                             this.ZH = true;
-                            let colsort = this.ZL.getSortColumnIndex();
-                            let colsort_ASC = this.ZL.isSortAscending();
                             this.ZL.setData(this.ZE);
-                            this.FP(0, this.ZE.length, 200);
                             if (colsort == -1) {
                                 if (!this.ZK[5].getValue()) {
                                     this.ZL.sortByColumn(14, false); //Sort for Growth Rate
@@ -887,6 +940,8 @@ codes by NetquiK
                             } else {
                                 this.ZL.sortByColumn(colsort, colsort_ASC); //Sort User Choice
                             }
+                            this.FP(0, this.ZE.length, 200);
+
                             if (this.YY.name != "DR01D") qx.event.Timer.once(function () {
                                 window.Addons.BaseScannerGUI.getInstance().FG()
                             }, 50);
@@ -1164,8 +1219,8 @@ codes by NetquiK
                             if (this.ZH && Addons.BaseScannerGUI.getInstance().isVisible()) {
                                 //console.log("loop");
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FG()
-                                }, sleeptime);
+                                    this.FG()
+                                }, window.Addons.BaseScannerGUI.getInstance(), sleeptime);
                             } else {
                                 this.ZG.setLabel(this.T.get("Scan"));
                                 this.ZH = false;
@@ -1182,11 +1237,6 @@ codes by NetquiK
                         if (t == 0) {
                             for (var i = 0; i < this.ZZ.length; i++) {
                                 if (this.ZZ[i][0] == id) {
-                                    //MOD GR only calculation
-                                    if (this.ZK[5].getValue() == false && this.ZZ[i][14] == "-" && this.ZS[id]) {
-                                        this.ZM[id] = this.ZS[id];
-                                        this.ZZ[i][14] = this.maaain(id);
-                                    }
                                     return this.ZZ[i];
                                 }
                             }
