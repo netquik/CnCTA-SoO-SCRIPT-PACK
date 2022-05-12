@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.74
+// @version        3.75
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -3063,7 +3063,7 @@ codes by NetquiK
                                 ClientLib.Config.Main.GetInstance().SaveToDB();
                                 this.ResetAutoscroll = 0;
                             }
-                            bA.SetPosition(0, this.TopAttackerPos);
+                            if (this.TopAttackerPos) bA.SetPosition(0, this.TopAttackerPos);
                             window.setTimeout(function () {
                                 qx.core.Init.getApplication().getPlayArea().autoScroll = 1
                             }, 1000);
@@ -3085,8 +3085,12 @@ codes by NetquiK
                                     this.SkippingSim = true;
                                     if (bG.get_CombatComplete() == true) bG.RestartReplay();
                                     //this.TopAttackerPos = bA.get_PositionY() - 400;
-                                    var overall = (this.stats.damage.overall / 100) * bG.get_ViewHeight();
-                                    this.TopAttackerPos = this.stats.damage.overall < 25 ? bG.get_MinYPosition() : bG.get_MinYPosition() + overall;
+                                    if (!this._playAreaChildren[11].isVisible()) {
+                                        var overall = (this.stats.damage.overall / 100) * bG.get_ViewHeight();
+                                        this.TopAttackerPos = this.stats.damage.overall < 25 ? bG.get_MinYPosition() : bG.get_MinYPosition() + overall;
+                                    } else {
+                                        this.TopAttackerPos = null;
+                                    }
                                     phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
                                     this.ResetAutoscroll = this._PlayArea.getPlayerAutoScrollPreference();
                                     this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().hide();
@@ -3162,13 +3166,13 @@ codes by NetquiK
                                 this.enterSimulationView();
                                 qx.event.Timer.once(function () {
                                     //MOD FIX PLAY BUTTON + Date
-                                   // _this = TACS.getInstance();
+                                    // _this = TACS.getInstance();
                                     this._VisMain.get_Battleground().RestartReplay();
                                     let r = this.ReplayBar;
                                     null != r[this.PBIS] && r[this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
                                     null != r[this.PBIS_S] && (r[this.PBIS_S] = !1);
                                     null != r[this.PBIS_L] && r[this.PBIS_L].setValue('x1.0');
-                                    
+
                                     this._VisMain.get_Battleground().set_ReplaySpeed(1);
                                     if (typeof this._playAreaChildren[11].getChildren == 'function' && typeof Date.parse(this._playAreaChildren[11].getChildren()[0].getValue()) == 'number') {
                                         this._playAreaChildren[11].exclude();
