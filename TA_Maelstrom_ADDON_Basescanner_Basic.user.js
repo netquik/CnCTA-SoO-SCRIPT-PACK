@@ -941,8 +941,8 @@ codes by NetquiK
                             if (this.ZH && Addons.BaseScannerGUI.getInstance().isVisible()) {
                                 //console.log("loop");
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FG()
-                                }, sleeptime);
+                                    this.FG()
+                                }, window.Addons.BaseScannerGUI.getInstance(), sleeptime);
                             } else {
                                 this.ZG.setLabel(this.T.get("Scan"));
                                 this.ZH = false;
