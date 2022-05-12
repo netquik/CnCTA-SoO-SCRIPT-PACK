@@ -1,14 +1,15 @@
 // ==UserScript==
 // @name           Tiberium Alliances Report Stats
-// @version        0.5.3.3
+// @version        0.5.4
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    leo7044 (https://github.com/leo7044)
 // @contributor    AlkalyneD4 (https://github.com/SebHeuze)
-// @downloadURL    https://raw.githubusercontent.com/SebHeuze/CnC_TA/master/Tiberium_Alliances_Report_Stats_sumPerCp.user.js
-// @updateURL      https://raw.githubusercontent.com/SebHeuze/CnC_TA/master/Tiberium_Alliances_Report_Stats_sumPerCp.user.js
+// @contributor    NetquiK (https://github.com/netquik) 22.2 FIX
+// @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Report_Stats.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Report_Stats.user.js
 // @description    Calculates combined RT and CP costs and loot of multiple combat reports
-// @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // ==/UserScript==
 'use strict';
 
@@ -111,7 +112,8 @@
 						}
 
 						if (typeof webfrontend.gui.info.BaseInfoWindow.prototype.onCellClick !== 'function') {
-							source = Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor);
+							// MOD 22.2 FIX
+							source = (parseFloat(GameVersion) >= 22.2) ? Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor.$$original) : Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor);
 							var createOutgoingTabMethodName = source.match(/;[A-Za-z]+\.add\(this\.([A-Za-z_]+)\(\)\);this\.[A-Za-z_]+=new webfrontend\.gui\.widgets\.confirmationWidgets\.ProtectionConfirmationWidget\(\);/)[1];
 							source = webfrontend.gui.info.BaseInfoWindow.prototype[createOutgoingTabMethodName].toString();
 							var onCellClickMethodName = source.match(/([A-Za-z]+)\.set\(\{statusBarVisible:false,columnVisibilityButtonVisible:false\}\);\1\.addListener\([A-Za-z]+,this\.([A-Za-z_]+),this\.[A-Za-z_]+\);/)[2];
@@ -131,8 +133,9 @@
 
 						/* Detect and fix bug described in https://forum.alliances.commandandconquer.com/showthread.php?tid=30346 */
 						{
+							// MOD 22.2 FIX
 							source = ClientLib.Data.Reports.Reports.prototype.AddReport.toString();
-							var initMethodName = source.match(/break;\}[a-z]\.([A-Z]{6})\([a-z]\);if/)[1];
+							var initMethodName = source.match(/break;\}\}?[a-z]\.([A-Z]{6})\([a-z]\);if/)[1];
 
 							source = ClientLib.Data.Reports.CombatReport.prototype[initMethodName].toString();
 							var setDataMethodName = source.match(/this\.([A-Z]{6})\([A-Za-z]+\);/)[1];
