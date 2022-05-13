@@ -1,14 +1,13 @@
 // ==UserScript==
 // @name          PluginsLib - mhLoot - Tiberium Alliances
 // @description   CROSS SERVERS Loot & troops & bases & distance info.
-// @version       2.08
+// @version       2.09
 // @author        MrHIDEn (in game: PEEU) based on Yaeger & Panavia code.
 // @contributor   NetquiK (https://github.com/netquik) - FIX for MENU REGISTERING
 // @namespace     PluginsLib.mhLoot
-// @include       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @grant         none
-// @downloadURL   https://userscripts.org/scripts/source/160800.user.js
-// @updateURL     https://userscripts.org/scripts/source/160800.meta.js
+// @downloadURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_PluginsLib_mhLoot.user.js
 // @updateURL     https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_PluginsLib_mhLoot.user.js
 // ==/UserScript==
 /*TODO list
@@ -205,7 +204,7 @@
               }));
             }
             for (var k in this.troopPaths) {
-              this.troopImages.push(new qx.ui.basic.Image("https://eaassets-a.akamaihd.net/cncalliancesgame/cdn/data/" + this.troopPaths[k]).set({
+              this.troopImages.push(new qx.ui.basic.Image(this.troopPaths[k]).set({
                 Scale: true,
                 Width: 16,
                 Height: 16
@@ -415,10 +414,10 @@
             ],
             resImages: [],
             troopPaths: [
-              "d8d4e71d9de051135a7f5baf1f799d77.png", //inf
-              "af8d7527e441e1721ee8953d73287e9e.png", //veh
-              "5f889719f06aad76f06d51863f8eb524.png", //stu
-              "6962b667bd797fc2e9e74267e1b3e7c3.png" //air
+              "FactionUI/icons/icon_arsnl_off_squad.png", //inf
+              "FactionUI/icons/icon_arsnl_off_vehicle.png", //veh
+              "FactionUI/icons/icon_arsnl_def_building.png", //stu
+              "FactionUI/icons/icon_arsnl_off_plane.png" //air
             ],
             troopImages: [],
             // store v3
