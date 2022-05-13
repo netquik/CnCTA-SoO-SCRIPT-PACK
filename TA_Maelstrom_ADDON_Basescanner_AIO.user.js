@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.19
+// @version     1.8.20
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -34,7 +34,7 @@ codes by NetquiK
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.8.19 AIO";
+        window.__msbs_version = "1.8.20 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -57,7 +57,7 @@ codes by NetquiK
                     createRowStyle: function (rowInfo) {
                         var rowStyle = [];
                         rowStyle.push(";");
-                        rowStyle.push("font-family:'Segoe UI',Tahoma,'Liberation Sans',Arial;font-size:12px;line-height:1.4;");
+                        rowStyle.push(this._fontStyleString);
                         rowStyle.push("background-color:");
                         if (rowInfo.focusedRow && this.getHighlightFocusRow()) {
                             rowStyle.push(rowInfo.selected ? this._colors.bgcolFocusedSelected : this._colors.bgcolFocused);
