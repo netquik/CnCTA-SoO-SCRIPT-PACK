@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name           Tiberium Alliances Repair Time Of Death
-// @version        1.0.2
+// @version        1.0.3
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @description    Displays how much offense repair time a dead base had at the time of death
-// @include        http*://*.alliances.commandandconquer.com/*/index.aspx*
+// @match        https://*.alliances.commandandconquer.com/*/index.aspx*
 // ==/UserScript==
 'use strict';
 
@@ -32,7 +32,8 @@
 					initializeHacks: function () {
 						if (typeof webfrontend.gui.region.RegionGhostStatusInfo.prototype.getObject !== 'function') {
 							var source = webfrontend.gui.region.RegionGhostStatusInfo.prototype.setObject.toString();
-							var objectMemberName = source.match(/^function \(([A-Za-z]+)\)\{.*this\.([A-Za-z_]+)=\1;/)[2];
+							// MOD 22.2 FIX
+							var objectMemberName = source.match(/^function ?\(([A-Za-z]+)\)\{this\.([A-Za-z_]+)=\1;/)[2];
 
 							/**
 							 * @returns {ClientLib.Vis.Region.RegionGhostCity}
