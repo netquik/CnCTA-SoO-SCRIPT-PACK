@@ -1,9 +1,8 @@
 // ==UserScript==
 // @name        Maelstrom ADDON Basescanner AIO
-// @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.13
+// @version     1.8.20
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -25,14 +24,64 @@ codes by NetquiK
 - Sort for Growrate
 - All Layouts selection + Highlight
 - NOEVIL
+- Disable GrowRate Opt
+- New Rule Out check for base list
+- Reorder Columns Save State
+- Sorting Columns fixed
+- SpeedUP+
 ----------------
 */
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.8.11 AIO";
+        window.__msbs_version = "1.8.20 AIO";
 
         function createMaelstromTools_Basescanner() {
+            // MOD new rowrender for new rule out
+            qx.Class.define("AIORowR", {
+                extend: qx.ui.table.rowrenderer.Default,
+                implement: qx.ui.table.IRowRenderer,
+                members: {
+
+                    /** Overridden to handle our custom logic for row colouring */
+                    updateDataRowElement: function (rowInfo, rowElem) {
+                        this.base(arguments, rowInfo, rowElem);
+                        var style = rowElem.style;
+                        // Don't overwrite the style on the focused / selected row
+                        if (!(rowInfo.focusedRow && this.getHighlightFocusRow()) && !rowInfo.selected) {
+                            style.backgroundColor = (rowInfo.rowData[24] == !0) ? '#999' : this._colors.bgcolOdd;
+                        }
+                    },
+
+                    /** Overridden to handle our custom logic for row colouring */
+                    createRowStyle: function (rowInfo) {
+                        var rowStyle = [];
+                        rowStyle.push(";");
+                        if (this._fontStyleString) {
+                            rowStyle.push(this._fontStyleString);
+                        } else {
+                            rowStyle.push(qx.bom.element.Style.compile(qx.theme.manager.Font.getInstance().resolve('default').getStyles()).replace(/"/g, "'"));
+                        }
+                        rowStyle.push("background-color:");
+                        if (rowInfo.focusedRow && this.getHighlightFocusRow()) {
+                            rowStyle.push(rowInfo.selected ? this._colors.bgcolFocusedSelected : this._colors.bgcolFocused);
+                        } else {
+                            if (rowInfo.selected) {
+                                rowStyle.push(this._colors.bgcolSelected);
+                            } else {
+                                rowStyle.push((rowInfo.rowData[24] == !0) ? '#999' : this._colors.bgcolOdd);
+                            }
+                        }
+                        // Finish off the style string
+                        rowStyle.push(';color:');
+                        rowStyle.push(rowInfo.selected ? this._colors.colSelected : this._colors.colNormal);
+                        rowStyle.push(';border-bottom: 1px solid ', this._colors.horLine);
+                        return rowStyle.join("");
+
+                    }
+                }
+
+            });
             qx.Class.define("Addons.BaseScannerGUI", {
                 type: "singleton",
                 extend: qx.ui.window.Window,
@@ -130,10 +179,12 @@ codes by NetquiK
                     FI: function () {
                         try {
                             this.ZL = new qx.ui.table.model.Simple();
-                            this.ZL.setColumns(["ID", "LoadState", this.T.get("City"), this.T.get("Location"), this.T.get("Level"), this.T.get("Tiberium"), this.T.get("Crystal"), this.T.get("Dollar"), this.T.get("Research"), "Crystalfields", "Tiberiumfields", this.T.get("Building state"), this.T.get("Defense state"), this.T.get("CP"), "Growth Rate", "Sum Tib+Cry+Cre", "(Tib+Cry+Cre)/CP", "CY", "DF", this.T.get("base set up at"), "Power8", "7 | 6 | 5 | 4 Tib", "7 | 6 | 5 | 4 Cry", "7 | 6 | 5 | 4 Mix"]);
+                            this.ZL.setColumns(["ID", "LoadState", this.T.get("City"), this.T.get("Location"), this.T.get("Level"), this.T.get("Tiberium"), this.T.get("Crystal"), this.T.get("Dollar"), this.T.get("Research"), "Crystalfields", "Tiberiumfields", this.T.get("Building state"), this.T.get("Defense state"), this.T.get("CP"), "Growth Rate", "Sum Tib+Cry+Cre", "(Tib+Cry+Cre)/CP", "CY", "DF", this.T.get("base set up at"), "Power8", "7 | 6 | 5 | 4 Tib", "7 | 6 | 5 | 4 Cry", "7 | 6 | 5 | 4 Mix", "Rule OUT"]);
                             this.YY = ClientLib.Data.MainData.GetInstance().get_Player();
                             this.ZN = new qx.ui.table.Table(this.ZL);
+                            //this.ZN.setAlwaysUpdateCells(true);
                             this.ZN.setColumnVisibilityButtonVisible(false);
+                            this.ZN.setDataRowRenderer(new AIORowR(this.ZN));
                             this.ZN.setColumnWidth(0, 0);
                             this.ZN.setColumnWidth(1, 0);
                             this.ZN.setColumnWidth(2, Addons.LocalStorage.getserver("Basescanner_ColWidth_2", 120));
@@ -157,7 +208,8 @@ codes by NetquiK
                             this.ZN.setColumnWidth(20, Addons.LocalStorage.getserver("Basescanner_ColWidth_20", 60));
                             this.ZN.setColumnWidth(21, Addons.LocalStorage.getserver("Basescanner_ColWidth_21", 100));
                             this.ZN.setColumnWidth(22, Addons.LocalStorage.getserver("Basescanner_ColWidth_22", 100));
-                            this.ZN.setColumnWidth(23, Addons.LocalStorage.getserver("Basescanner_ColWidth_22", 150));
+                            this.ZN.setColumnWidth(23, Addons.LocalStorage.getserver("Basescanner_ColWidth_23", 150));
+                            this.ZN.setColumnWidth(24, Addons.LocalStorage.getserver("Basescanner_ColWidth_24", 64));
                             var c = 0;
                             var tcm = this.ZN.getTableColumnModel();
                             // MOD coloring layout filtering
@@ -181,14 +233,19 @@ codes by NetquiK
                             tcm.setDataCellRenderer(22, high4);
                             tcm.setDataCellRenderer(23, high4);
                             tcm.setDataCellRenderer(14, highGrow);
+                            // MOD new colorder save for new rule out
+                            var col_order = Addons.LocalStorage.getserver("Basescanner_Col_Order", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 24, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]);
                             for (c = 0; c < this.ZL.getColumnCount(); c++) {
-                                if (c == 0 || c == 1 || c == 11 || c == 12) {
+                                if (c == 11 || c == 12) {
                                     tcm.setColumnVisible(c, Addons.LocalStorage.getserver("Basescanner_Column_" + c, false));
                                 } else {
                                     tcm.setColumnVisible(c, Addons.LocalStorage.getserver("Basescanner_Column_" + c, true));
                                 }
                             }
+                            tcm.setColumnVisible(0, false);
                             tcm.setColumnVisible(1, false);
+                            tcm.setColumnsOrder(col_order);
+
                             tcm.setHeaderCellRenderer(9, new qx.ui.table.headerrenderer.Icon(MT_Base.images[MaelstromTools.Statics.Crystal]), "Crystalfields");
                             tcm.setHeaderCellRenderer(10, new qx.ui.table.headerrenderer.Icon(MT_Base.images[MaelstromTools.Statics.Tiberium], "Tiberiumfields"));
                             tcm.setDataCellRenderer(5, new qx.ui.table.cellrenderer.Replace().set({
@@ -210,6 +267,7 @@ codes by NetquiK
                                 ReplaceFunction: this.FA
                             }));
                             tcm.setDataCellRenderer(19, new qx.ui.table.cellrenderer.Boolean());
+                            tcm.setDataCellRenderer(24, new qx.ui.table.cellrenderer.Boolean());
                             if (PerforceChangelist >= 436669) { // 15.3 patch
                                 var eventType = "cellDbltap";
                             } else { //old
@@ -218,11 +276,34 @@ codes by NetquiK
                             this.ZN.addListener(eventType, function (e) {
                                 Addons.BaseScannerGUI.getInstance().FB(e);
                             }, this);
+                            this.ZN.addListener("cellTap",
+                                function (cellEvent) {
+                                    var col = cellEvent.getColumn();
+                                    var row = cellEvent.getRow();
+                                    if (col == 24) {
+                                        var t = Addons.BaseScannerGUI.getInstance();
+                                        oldValue = t.ZL.getValue(col, row);
+                                        t.ZL.setValue(col, row, !oldValue);
+                                        t.ZN.getSelectionModel().resetSelection();
+                                        t.ZN.clearFocusedRowHighlight();
+                                    }
+                                });
                             tcm.addListener("widthChanged", function (e) {
                                 //console.log(e, e.getData());
                                 var col = e.getData().col;
                                 var width = e.getData().newWidth;
                                 Addons.LocalStorage.setserver("Basescanner_ColWidth_" + col, width);
+                            }, tcm);
+                            tcm.addListener("orderChanged", function (e) {
+                                var neworder = Addons.LocalStorage.getserver("Basescanner_Col_Order", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 24, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]);
+
+                                let a = typeof e.getData() != 'undefined' ? e.getData().fromOverXPos : null
+                                let b = typeof e.getData() != 'undefined' ? e.getData().toOverXPos : null
+                                if (a && b) {
+                                    neworder.splice(b, 0, neworder.splice(a, 1)[0]);
+                                    Addons.LocalStorage.setserver("Basescanner_Col_Order", neworder);
+                                }
+                                //tcm.setColumnsOrder(neworder);
                             }, tcm);
                         } catch (e) {
                             console.debug("Addons.BaseScannerGUI.FI: ", e);
@@ -461,6 +542,20 @@ codes by NetquiK
                             this.ZK[4].setGap(2);
                             this.ZK[4].setTextColor("white");
                             oOptions.add(this.ZK[4], {
+                                lineBreak: false
+                            });
+                            this.ZK[5] = new qx.ui.form.CheckBox(this.T.get("Disable Growth Rate"));
+                            this.ZK[5].setMargin(5);
+                            this.ZK[5].setGap(2);
+                            this.ZK[5].setTextColor("white");
+                            this.ZK[5].setValue(Addons.LocalStorage.getserver("Basescanner_ShowGrow", false));
+                            //MOD Disable GrowRate Opt
+                            this.ZK[5].addListener("changeValue", function (e) {
+                                this.GR_Fill = !e.getData();
+                                this.ZH = false;
+                                this.ZG.setLabel(this.T.get("Scan"));
+                            }, this);
+                            oOptions.add(this.ZK[5], {
                                 lineBreak: true
                             });
                             this.ZJ = new qx.ui.form.SelectBox();
@@ -494,7 +589,7 @@ codes by NetquiK
                             this.ZB = new qx.ui.container.Composite(columnsel);
                             this.ZB.setWidth(this.getWidth() - 44);
                             //oOptions.add(this.ZB, {flex:1});
-                            var J = webfrontend.gui.layout.Loader.getInstance();
+                            //var J = webfrontend.gui.layout.Loader.getInstance();
                             //var L = J.getLayout("playerbar", this);
                             //this._ZZ = J.getElement(L, "objid", 'lblplayer');
                             //this.tableSettings = new qx.ui.groupbox.GroupBox("Visable Columns");
@@ -623,16 +718,27 @@ codes by NetquiK
                             this.ZG.setLabel("Pause");
                             this.ZD.setEnabled(false);
                             qx.event.Timer.once(function () {
-                                window.Addons.BaseScannerGUI.getInstance().FJ()
-                            }, 1000);
+                                this.FJ()
+                            }, window.Addons.BaseScannerGUI.getInstance(), 1000);
                             return;
                         }
                         //After Pause
                         var c = 0;
+                        var g = 0;
                         for (i = 0; i < this.ZE.length; i++) {
                             if (this.ZE[i][1] == -1) {
                                 c++;
                             }
+                            if (this.ZE[i][14] == "-") {
+                                g++;
+                            }
+                        }
+                        // GR only setvalues
+                        if (this.GR_Fill && g > 0) {
+                            qx.event.Timer.once(function () {
+                                this.GR()
+                            }, window.Addons.BaseScannerGUI.getInstance(), 1000);
+                            return;
                         }
                         if (!this.ZH) {
                             this.ZG.setLabel("Pause");
@@ -640,14 +746,15 @@ codes by NetquiK
                             if (c > 0) {
                                 this.ZH = true;
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FG()
-                                }, 1000);
+                                    this.FG()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 1000);
                                 return;
                             } else {
                                 this.ZH = false;
+                                //this.ZL.setData(this.ZE);
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FJ()
-                                }, 1000);
+                                    this.FJ()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 1000);
                             }
                         } else {
                             this.ZH = false;
@@ -659,6 +766,47 @@ codes by NetquiK
                             this.ZU.setWidth(parseInt(value / max * maxwidth, 10));
                             this.ZX.setValue(value + "/" + max);
                         }
+                    },
+                    GR: function () { //MOD GR only fill
+                        if (!this.GR_to_Fill) {
+                            this.GR_to_Fill = []
+                            for (i = 0; i < this.ZE.length; i++) {
+                                if (this.ZE[i][1] == -1) {
+                                    break;
+                                }
+                                if (this.ZE[i][14] == "-") {
+                                    this.GR_to_Fill.push({
+                                        "index": i,
+                                        "id": this.ZE[i][0]
+                                    });
+                                }
+
+                            }
+                        }
+
+                        let index = this.GR_to_Fill[0]['index'];
+                        let id = this.GR_to_Fill[0]['id'];
+                        if (this.ZS[id]) {
+                            this.FP(index + 1, this.ZE.length, 200); //Progressbar
+                            this.ZM[id] = this.ZS[id];
+                            //this.ZZ[index][14] = this.maaain(id);
+                            this.ZL.setValue(14, index, this.maaain(id));
+                            this.ZN.updateContent();
+                        }
+                        this.GR_to_Fill.shift();
+                        if (this.GR_to_Fill.length > 0) {
+                            qx.event.Timer.once(function () {
+                                this.GR()
+                            }, window.Addons.BaseScannerGUI.getInstance(), 200);
+                        } else {
+                            this.GR_Fill = false;
+                            this.GR_to_Fill = null;
+                            this.FE();
+                        }
+
+
+
+
                     },
                     FJ: function () {
                         try {
@@ -676,11 +824,13 @@ codes by NetquiK
                             var c3 = this.ZK[2].getValue();
                             var c4 = this.ZK[3].getValue();
                             var c5 = parseInt(this.ZY.getValue(), 10);
+                            var c6 = this.ZK[5].getValue();
                             //console.log("Select", c1, c2, c3,c4,c5);
                             Addons.LocalStorage.setserver("Basescanner_Show0", c1);
                             Addons.LocalStorage.setserver("Basescanner_Show1", c2);
                             Addons.LocalStorage.setserver("Basescanner_Show2", c3);
                             Addons.LocalStorage.setserver("Basescanner_Show3", c4);
+                            Addons.LocalStorage.setserver("Basescanner_ShowGrow", c6);
                             var posX = selectedBase.get_PosX();
                             var posY = selectedBase.get_PosY();
                             var scanX = 0;
@@ -693,6 +843,8 @@ codes by NetquiK
                             var t2 = true;
                             var t3 = true;
                             var maxAttackDistance = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance();
+                            let colsort = this.ZL.getSortColumnIndex();
+                            let colsort_ASC = this.ZL.isSortAscending();
                             for (scanY = posY - Math.floor(maxAttackDistance + 1); scanY <= posY + Math.floor(maxAttackDistance + 1); scanY++) {
                                 for (scanX = posX - Math.floor(maxAttackDistance + 1); scanX <= posX + Math.floor(maxAttackDistance + 1); scanX++) {
                                     var distX = Math.abs(posX - scanX);
@@ -741,7 +893,7 @@ codes by NetquiK
                                                         if (d != null) {
                                                             this.ZE.push(d);
                                                         } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                            this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                         }
                                                     }
                                                     if (object.Type == 2 && c2) { //basen
@@ -749,7 +901,7 @@ codes by NetquiK
                                                         if (d != null) {
                                                             this.ZE.push(d);
                                                         } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                            this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                         }
                                                     }
                                                     if (object.Type == 3 && (c3 || c4)) { //Lager Vposten
@@ -764,13 +916,13 @@ codes by NetquiK
                                                             }
                                                         } else {
                                                             if ((object.getCampType() == 7 || object.getCampType() == 2 || object.getCampType() == 1) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
                                                             if ((object.getCampType() == 7) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
                                                             if (object.getCampType() == 3 && c3) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, 0, 0, 0, 0, 0, 0, 0]);
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
                                                         }
                                                     }
@@ -783,8 +935,17 @@ codes by NetquiK
                             }
                             this.ZH = true;
                             this.ZL.setData(this.ZE);
+                            if (colsort == -1) {
+                                if (!this.ZK[5].getValue()) {
+                                    this.ZL.sortByColumn(14, false); //Sort for Growth Rate
+                                } else {
+                                    this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                                }
+                            } else {
+                                this.ZL.sortByColumn(colsort, colsort_ASC); //Sort User Choice
+                            }
                             this.FP(0, this.ZE.length, 200);
-                            this.ZL.sortByColumn(14, false); //Sort form Highlevel to Lowlevel
+
                             if (this.YY.name != "DR01D") qx.event.Timer.once(function () {
                                 window.Addons.BaseScannerGUI.getInstance().FG()
                             }, 50);
@@ -913,196 +1074,44 @@ codes by NetquiK
                                                                 this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
                                                                 this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
                                                             }
-                                                            for (var y = 0; y < 8; y++) {
-                                                                for (var x = 0; x < 9; x++) {
-                                                                    var aKey = x + ',' + y;
+                                                            for (var y = 0; 8 > y; y++) {
+                                                                for (var x = 0; 9 > x; x++) {
+                                                                    var aKey = x + "," + y;
                                                                     switch (ncity.GetResourceType(x, y)) {
                                                                         case 0:
-
-                                                                            // count tib/cry around
-                                                                            var cntT = 0;
-                                                                            var cntC = 0;
-                                                                            var cntM = 0;
-                                                                            var cntP = 0;
-                                                                            if (y > 0 && y < 7 && x > 0 && x < 8) {
-                                                                                // tib
-                                                                                if (ncity.GetResourceType(x - 1, y - 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y - 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y - 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y + 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y + 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y + 1) === 2) {
-                                                                                    cntC++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                // cry
-                                                                                if (ncity.GetResourceType(x - 1, y - 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y - 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y - 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y + 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y + 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y + 1) === 1) {
-                                                                                    cntT++;
-                                                                                    cntM++;
-                                                                                }
-                                                                                // power
-                                                                                if (ncity.GetResourceType(x - 1, y - 1) === 0) {
-                                                                                    if (this.checkFieldFree(x - 1, y - 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y - 1) === 0) {
-                                                                                    if (this.checkFieldFree(x, y - 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y - 1) === 0) {
-                                                                                    if (this.checkFieldFree(x + 1, y - 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y) === 0) {
-                                                                                    if (this.checkFieldFree(x - 1, y, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y) === 0) {
-                                                                                    if (this.checkFieldFree(x + 1, y, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x - 1, y + 1) === 0) {
-                                                                                    if (this.checkFieldFree(x - 1, y + 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x, y + 1) === 0) {
-                                                                                    if (this.checkFieldFree(x, y + 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                                if (ncity.GetResourceType(x + 1, y + 1) === 0) {
-                                                                                    if (this.checkFieldFree(x + 1, y + 1, powL)) {
-                                                                                        cntP++;
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                            if (cntC === 4) {
-                                                                                tib4++;
-                                                                                mix4--;
-                                                                            }
-                                                                            if (cntC === 5) {
-                                                                                tib5++;
-                                                                                mix5--;
-                                                                            }
-                                                                            if (cntC === 6) {
-                                                                                tib6++;
-                                                                                mix6--;
-                                                                            }
-                                                                            if (cntC === 7) {
-                                                                                tib7++;
-                                                                                mix7--;
-                                                                            }
-                                                                            if (cntT === 4) {
-                                                                                cry4++;
-                                                                                mix4--;
-                                                                            }
-                                                                            if (cntT === 5) {
-                                                                                cry5++;
-                                                                                mix5--;
-                                                                            }
-                                                                            if (cntT === 6) {
-                                                                                cry6++;
-                                                                                mix6--;
-                                                                            }
-                                                                            if (cntT === 7) {
-                                                                                cry7++;
-                                                                                mix7--;
-                                                                            }
-                                                                            if (cntM === 4) {
-                                                                                mix4++;
-                                                                            }
-                                                                            if (cntM === 5) {
-                                                                                mix5++;
-                                                                            }
-                                                                            if (cntM === 6) {
-                                                                                mix6++;
-                                                                            }
-                                                                            if (cntM === 7) {
-                                                                                mix7++;
-                                                                            }
-                                                                            if (cntM === 8) {
-                                                                                mix8++;
-                                                                            }
-                                                                            if (cntP === 8) {
-                                                                                pow8++;
-                                                                                powL[aKey] = 1;
-                                                                            }
+                                                                            var cntT = 0,
+                                                                                cntC = 0,
+                                                                                cntM = 0,
+                                                                                cntP = 0;
+                                                                            0 < y && 7 > y && 0 < x && 8 > x && (2 === ncity.GetResourceType(x - 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x +
+                                                                                1, y + 1) && (cntC++, cntM++), 1 === ncity.GetResourceType(x - 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y +
+                                                                                1) && (cntT++, cntM++), 0 === ncity.GetResourceType(x - 1, y - 1) && this.checkFieldFree(x - 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y - 1) && this.checkFieldFree(x, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y - 1) && this.checkFieldFree(x + 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x - 1, y) && this.checkFieldFree(x - 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y) && this.checkFieldFree(x + 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x -
+                                                                                1, y + 1) && this.checkFieldFree(x - 1, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y + 1) && this.checkFieldFree(x, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y + 1) && this.checkFieldFree(x + 1, y + 1, powL) && cntP++);
+                                                                            4 === cntC && (tib4++, mix4--);
+                                                                            5 === cntC && (tib5++, mix5--);
+                                                                            6 === cntC && (tib6++, mix6--);
+                                                                            7 === cntC && (tib7++, mix7--);
+                                                                            4 === cntT && (cry4++, mix4--);
+                                                                            5 === cntT && (cry5++, mix5--);
+                                                                            6 === cntT && (cry6++, mix6--);
+                                                                            7 === cntT && (cry7++, mix7--);
+                                                                            4 === cntM && mix4++;
+                                                                            5 === cntM && mix5++;
+                                                                            6 === cntM && mix6++;
+                                                                            7 === cntM && mix7++;
+                                                                            8 === cntM && mix8++;
+                                                                            8 === cntP && (pow8++, powL[aKey] = 1);
                                                                             break;
                                                                         case 1:
-                                                                            /* Crystal */
-
                                                                             totC++;
                                                                             this.ZM[id][x][y] = 1;
                                                                             break;
                                                                         case 2:
-                                                                            /* Tiberium */
-                                                                            this.ZM[id][x][y] = 2;
-
-                                                                            totT++;
-                                                                            break;
-                                                                        default:
-                                                                            //none
-                                                                            break;
+                                                                            this.ZM[id][x][y] = 2, totT++;
                                                                     }
                                                                 }
                                                             }
+
                                                             this.ZE[i][9] = totC;
                                                             this.ZE[i][10] = totT;
                                                             this.ZE[i][11] = ncity.GetBuildingsConditionInPercent();
@@ -1143,19 +1152,30 @@ codes by NetquiK
                                                             } catch (x) {
                                                                 console.debug("HPRecord", x);
                                                             }
-                                                            this.ZE[i][14] = this.maaain(id);
+                                                            this.ZE[i][14] = this.ZK[5].getValue() ? "-" : this.maaain(id);
                                                             this.ZE[i][15] = this.ZE[i][5] + this.ZE[i][6] + this.ZE[i][7];
                                                             this.ZE[i][16] = this.ZE[i][15] / this.ZE[i][13];
                                                             this.ZE[i][1] = 0;
+                                                            this.ZE[i][24] = !1;
                                                             retry = true;
                                                             console.info(ncity.get_Name(), " finish");
                                                             this.ZA = 0;
                                                             this.countlastidchecked = 0;
                                                             //console.log(this.ZE[i],this.ZM[id],id);
                                                             this.FK(this.ZE[i], this.ZM[id], id);
-                                                            //update table
+                                                            //update table + retain sorting 
+                                                            let colsort = this.ZL.getSortColumnIndex();
+                                                            let colsort_ASC = this.ZL.isSortAscending();
                                                             this.ZL.setData(this.ZE);
-                                                            this.ZL.sortByColumn(14, false); //MOD Sort for Growrate
+                                                            if (colsort == -1) {
+                                                                if (!this.ZK[5].getValue()) {
+                                                                    this.ZL.sortByColumn(14, false); //Sort for Growth Rate
+                                                                } else {
+                                                                    this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                                                                }
+                                                            } else {
+                                                                this.ZL.sortByColumn(colsort, colsort_ASC); //Sort User Choice
+                                                            }
                                                         }
                                                     } else {
                                                         if (this.ZA > 250) {
@@ -1203,8 +1223,8 @@ codes by NetquiK
                             if (this.ZH && Addons.BaseScannerGUI.getInstance().isVisible()) {
                                 //console.log("loop");
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FG()
-                                }, sleeptime);
+                                    this.FG()
+                                }, window.Addons.BaseScannerGUI.getInstance(), sleeptime);
                             } else {
                                 this.ZG.setLabel(this.T.get("Scan"));
                                 this.ZH = false;
@@ -1231,331 +1251,115 @@ codes by NetquiK
                         }
                         return null;
                     },
-                    maaain: function (ied) {
-                        var fixbld = 0;
-                        var opty = 1; //-mySlider.conf.value;//document.getElementById("cylvl").value;
-                        var optd = 5; //-mySlider2.conf.value;//document.getElementById("dflvl").value;
-                        var reflag = 1; //-mySlider3.conf.value;//document.getElementById("reflvl").value;
-                        var recovery = 0.5; //mySlider0.conf.value;//document.getElementById("mvrec").value;
-                        //var cncoptt = document.getElementById("cncopt").value;
-                        var alliancerank = 20; //mySlider4.conf.value;//document.getElementById("mvrec").value;
-                        //console.log(mySlider.conf.value);
-                        var globaa = this.initializ(); //have silo harv plnt accu defined etc
-                        var addref = 1; //whether to add refineries at all
-                        var grid = [1, 1.25, 2.5];
-                        var grdln = grid.length; //grid search for power weight
-                        var gridc = [1, 1.15];
-                        var grdcln = gridc.length; //grid search for crystal weight
-                        //optimize over
-                        var acnum = 2; //number of accumulators to place
-                        var opta = 0.8; //weight on slots when placing accumulators: 0 for max power, 0.8 to account for slots used
-                        var optt = 3.5; //how many touches in silos to tolerate (3, 3.5, 4)
-                        var refwghb = 1.09594661; //weight on refineries   1.32 is 3 levels
-                        //refwghb=1.32^0.33; %weight on refineries   1.32 is 3 levels
-                        var refwgh = Math.pow(refwghb, (2 - reflag));
-                        //roi weights
-                        //    t p cry cre
-                        var wgh = [1, 1, 1, refwgh];
-                        var parms = [optt, opta, opty, optd, recovery, acnum, addref, alliancerank];
-                        //// list of optimization options combinations
-                        ////optt acnum opta
-                        if (fixbld === 1) {
-                            var optns = [
-                                [3.5, 1, 0.8]
-                            ];
-                        } else {
-                            var optns = [
-                                [3, 1, 0.8],
-                                [3.5, 1, 0.8],
-                                [4, 1, 0.8],
-                                [4, 2, 0.3]
-                            ];
-                        }
-                        //cncoptt=get(handles.edit1,'String');
+                    maaain: function (l) {
+                        var u = this.initializ(),
+                            r = [1, 1.25, 2.5],
+                            t = [1, 1.15],
+                            v = Math.pow(1.09594661, 1),
+                            e;
+                        var g = [3.5, .8, 1, 5, .5, 2, 1, 20];
+                        var p = [
+                            [3, 1, .8],
+                            [3.5, 1, .8],
+                            [4, 1, .8],
+                            [4, 2, .3]
+                        ];
                         iqll = 0;
-                        var map = [
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."]
-                        ];
-                        for (jj2 = 0; jj2 < 8; jj2++) {
-                            for (kk2 = 0; kk2 < 9; kk2++) {
-                                if (this.ZM[ied][kk2][jj2] === 2) {
-                                    map[jj2][kk2] = "t";
-                                }
-                                if (this.ZM[ied][kk2][jj2] === 1) {
-                                    map[jj2][kk2] = "c";
-                                }
-                            }
-                        }
-                        var tmp = this.fillin_v2(map, parms);
-                        var bld = tmp[0];
-                        var lvl = tmp[1];
-                        //progressbar(0);
-                        var map0_ = new Array();
-                        var lvl0_ = new Array();
-                        var grrt0_ = new Array();
-                        var wgh_ = new Array();
-                        var stats0_ = new Array();
-                        var opts0_ = new Array();
-                        var bss__0 = new Array();
-                        var off__0 = new Array();
-                        var bll__0 = new Array();
-                        var ttm__0 = new Array();
-                        var hrv__0 = new Array();
-                        for (var iql = 0; iql < optns.length; iql++) //MAIN LOOP
-                        { //// main loop
-                            var optt = optns[iql][0]; //how many touches in silos to tolerate (3, 3.5, 4)
-                            var acnum = optns[iql][1]; //number of accumulators to place
-                            var opta = optns[iql][2]; //weight on slots when placing accumulators: 0 for max power, 0.8 to account for slots used
-                            var parms = [optt, opta, opty, optd, recovery, acnum, addref, alliancerank];
-                            var tmp = this.fillin_v2(map, parms);
-                            var bld = tmp[0];
-                            var lvl = tmp[1];
-                            //do not repeat if already done the simulation
+                        var h = [".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split("")];
+                        for (jj2 = 0; 8 > jj2; jj2++)
+                            for (kk2 = 0; 9 > kk2; kk2++) 2 === this.ZM[l][kk2][jj2] && (h[jj2][kk2] = "t"), 1 === this.ZM[l][kk2][jj2] && (h[jj2][kk2] = "c");
+                        this.fillin_v2(h,
+                            g);
+                        l = [];
+                        for (var m = [], n = 0; n < p.length; n++) {
+                            var k = p[n][0];
+                            g = p[n][1];
+                            var f = p[n][2];
+                            g = [k, f, 1, 5, .5, g, 1, 20];
+                            var b = this.fillin_v2(h, g);
+                            f = b[0];
+                            k = b[1];
                             mmin = 10;
-                            if (iqll > 0) {
-                                for (var wex = 0; wex < iqll; wex++) {
-                                    var ccnntt = 0;
-                                    for (jj2 = 0; jj2 < 8; jj2++) {
-                                        for (kk2 = 0; kk2 < 9; kk2++) {
-                                            if (bld[jj2][kk2] !== map0_[wex]) {
-                                                ccnntt++;
-                                            }
-                                        }
-                                    }
-                                    if (ccnntt === 0) {
-                                        mmin = 0;
-                                    }
+                            if (0 < iqll)
+                                for (e = 0; e < iqll; e++) {
+                                    var d = 0;
+                                    for (jj2 = 0; 8 > jj2; jj2++)
+                                        for (kk2 = 0; 9 > kk2; kk2++) f[jj2][kk2] !== l[e] && d++;
+                                    0 === d && (mmin = 0)
                                 }
-                            }
-                            if (mmin > 0) {
-                                var wgh = [1, 1, 1, refwgh];
-                                var grrt_ = new Array();
-                                var map__ = new Array();
-                                var lvl__ = new Array();
-                                var stats_ = new Array();
-                                var bss___ = new Array();
-                                var off___ = new Array();
-                                var bll___ = new Array();
-                                var ttm___ = new Array();
-                                var hrv___ = new Array();
-                                for (var pwl = 0; pwl < grid.length; pwl++) {
-                                    wgh[1] = grid[pwl];
-                                    for (jj2 = 0; jj2 < 8; jj2++) {
-                                        for (kk2 = 0; kk2 < 9; kk2++) {
-                                            if (bld[jj2][kk2] === "." || bld[jj2][kk2] === "t" || bld[jj2][kk2] === "c") {
-                                                lvl[jj2][kk2] = 0;
-                                            } else {
-                                                lvl[jj2][kk2] = 12;
-                                            }
-                                        }
-                                    }
-                                    var tmp = this.operate_v2(bld, lvl, map, wgh, globaa, parms);
-                                    //[bld, lvl, [bss00, bll00, off00], grrt, grrt0, str, T, ttm, ttime,bss_,off_,bll_,ttm,harvlvl]
-                                    grrt_[pwl] = [tmp[3] * 100, tmp[8] / 24];
-                                    map__[pwl] = tmp[0];
-                                    lvl__[pwl] = tmp[1];
-                                    stats_[pwl] = tmp[2];
-                                    bss___[pwl] = tmp[9];
-                                    off___[pwl] = tmp[10];
-                                    bll___[pwl] = tmp[11];
-                                    ttm___[pwl] = tmp[12];
-                                    hrv___[pwl] = tmp[13];
-                                    //progressbar((pwl+(iql-1)*(grdln+grdcln))/(1+(grdln+grdcln)*size(optns,1)));
+                            if (0 < mmin) {
+                                e = [1, 1, 1, v];
+                                d = [];
+                                for (var q = [], a = 0; a < r.length; a++) {
+                                    e[1] = r[a];
+                                    for (jj2 = 0; 8 > jj2; jj2++)
+                                        for (kk2 = 0; 9 > kk2; kk2++) k[jj2][kk2] = "." === f[jj2][kk2] || "t" === f[jj2][kk2] || "c" === f[jj2][kk2] ? 0 : 12;
+                                    b = this.operate_v2(f, k, h, e, u, g);
+                                    d[a] = [100 * b[3],
+                                        b[8] / 24
+                                    ];
+                                    q[a] = b[0]
                                 }
-                                var g0r = 0;
-                                var m = 0;
-                                for (var ox = 0; ox < grrt_.length; ox++) {
-                                    if (grrt_[ox][0] > g0r) {
-                                        g0r = grrt_[ox][0];
-                                        var m = ox;
-                                    }
+                                for (var c = a = b = 0; c < d.length; c++) d[c][0] > b && (b = d[c][0], a = c);
+                                e[1] = r[a];
+                                d = [];
+                                q = [];
+                                for (a = 0; a < t.length; a++) {
+                                    e[2] = t[a];
+                                    for (jj2 = 0; 8 > jj2; jj2++)
+                                        for (kk2 = 0; 9 > kk2; kk2++) k[jj2][kk2] = "." === f[jj2][kk2] || "t" === f[jj2][kk2] || "c" === f[jj2][kk2] ? 0 : 12;
+                                    b = this.operate_v2(f, k, h, e, u, g);
+                                    d[a] = [100 * b[3], b[8] / 24];
+                                    q[a] = b[0]
                                 }
-                                wgh[1] = grid[m];
-                                var grrt_ = new Array();
-                                var map__ = new Array();
-                                var lvl__ = new Array();
-                                var stats_ = new Array();
-                                var bss___ = new Array();
-                                var off___ = new Array();
-                                var bll___ = new Array();
-                                var ttm___ = new Array();
-                                var hrv___ = new Array();
-                                for (var pwl = 0; pwl < gridc.length; pwl++) {
-                                    wgh[2] = gridc[pwl];
-                                    for (jj2 = 0; jj2 < 8; jj2++) {
-                                        for (kk2 = 0; kk2 < 9; kk2++) {
-                                            if (bld[jj2][kk2] === "." || bld[jj2][kk2] === "t" || bld[jj2][kk2] === "c") {
-                                                lvl[jj2][kk2] = 0;
-                                            } else {
-                                                lvl[jj2][kk2] = 12;
-                                            }
-                                        }
-                                    }
-                                    var tmp = this.operate_v2(bld, lvl, map, wgh, globaa, parms);
-                                    //[bld, lvl, [bss00, bll00, off00], grrt, grrt0, str, T, ttm, ttime]
-                                    grrt_[pwl] = [tmp[3] * 100, tmp[8] / 24];
-                                    map__[pwl] = tmp[0];
-                                    lvl__[pwl] = tmp[1];
-                                    stats_[pwl] = tmp[2];
-                                    bss___[pwl] = tmp[9];
-                                    off___[pwl] = tmp[10];
-                                    bll___[pwl] = tmp[11];
-                                    ttm___[pwl] = tmp[12];
-                                    hrv___[pwl] = tmp[13];
-                                    //                progressbar((pwl+grdln+(iql-1)*(grdln+grdcln))/(1+(grdln+grdcln)*size(optns,1)));
-                                }
-                                var g0r = 0;
-                                var m = 0;
-                                for (var ox = 0; ox < grrt_.length; ox++) {
-                                    if (grrt_[ox][0] > g0r) {
-                                        g0r = grrt_[ox][0];
-                                        var m = ox;
-                                    }
-                                }
-                                wgh[2] = gridc[m];
-                                map0_[iqll] = map__[m];
-                                lvl0_[iqll] = lvl__[m];
-                                grrt0_[iqll] = grrt_[m];
-                                wgh_[iqll] = wgh;
-                                stats0_[iqll] = stats_[m];
-                                bss__0[iqll] = bss___[m];
-                                off__0[iqll] = off___[m];
-                                bll__0[iqll] = bll___[m];
-                                ttm__0[iqll] = ttm___[m];
-                                hrv__0[iqll] = hrv___[m];
-                                opts0_[iqll] = optns[iql];
-                                iqll = iqll + 1;
+                                for (c = a = b = 0; c < d.length; c++) d[c][0] > b && (b = d[c][0], a = c);
+                                e[2] = t[a];
+                                l[iqll] = q[a];
+                                m[iqll] = d[a];
+                                iqll += 1
                             }
                         }
-                        var g0r = 0;
-                        var m = 0;
-                        for (var ox = 0; ox < grrt0_.length; ox++) {
-                            if (grrt0_[ox][0] > g0r) {
-                                g0r = grrt0_[ox][0];
-                                var m = ox;
-                            }
-                        }
-                        var optns0 = opts0_[m];
-                        var wgh0 = wgh_[m];
-                        var bss__f = bss__0[m];
-                        var off__f = off__0[m];
-                        var bll__f = bll__0[m];
-                        var ttm__f = ttm__0[m];
-                        var hrv__f = hrv__0[m];
-                        //// report best outcome
-                        //    ddat=get(handles.uitable1,'Data');
-                        //    ddat{1,2}=bname;
-                        optt = optns0[0]; //how many touches in silos to tolerate (3, 3.5, 4)
-                        acnum = optns0[1]; //number of accumulators to place
-                        opta = optns0[2]; //weight on slots when placing accumulators: 0 for max power, 0.8 to account for slots used
-                        var bldr = map0_[m];
-                        var lvlr = lvl0_[m];
-                        //console.log("Optimal Base Layout:")
-                        //console.log(cncoptpluss)
-                        //cncoptpluss=[cncoptt(1:rmv),ttx,mmp(jj0:length(mmp)),cncoptt(fnsh-1:length(cncoptt))];
-                        //set(handles.edit2,'String',cncoptpluss);
-                        //    console.log("Growth rate: "+grrt0_[m][0].toFixed(2)+"%")
-                        //    console.log("Time to fortress: " + grrt0_[m][1].toFixed(0)+" days")
-                        var tiblag = (3.5 * (4.25 - grrt0_[m][0]));
-                        //    if (tiblag>=0) {  var ch1=String.fromCharCode(65+tiblag);} else {var ch1="A+";}
-                        //    console.log("Tiberium grade: "+ch1)
-                        var crylag = 1.5 * (45 - stats0_[m][2]);
-                        //    if ((crylag+tiblag)>=0) {  var ch2=String.fromCharCode(65+crylag+tiblag);} else {var ch2="A+";}
-                        //    console.log("Crystal grade: "+ch2)
-                        var crelag = 2.5 * (8 - stats0_[m][0]);
-                        ///////////console.log([stats0_[m][0],crelag]);
-                        //    if ((crelag+tiblag)>=0) {  var ch3=String.fromCharCode(65+crelag+tiblag);} else {var ch3="A+";}
-                        //    console.log("Credit grade: "+ch3)
-                        //    console.log("Weight on power: "+wgh0[1])
-                        //    var eww=0;
-                        //    if (typeof variable !== 'undefined') {var eww=multiple_dataset2.length};
-                        // the variable is defined
-                        return grrt0_[m][0].toFixed(2);
+                        for (c = a = b = 0; c < m.length; c++) m[c][0] > b && (b = m[c][0], a = c);
+                        return m[a][0].toFixed(2)
                     },
-                    //functions used inside are defined below
-                    maxx: function (arr) {
-                        var cc = new Array();
-                        for (var xp = 0; xp < arr.length; xp++) {
-                            cc[xp] = arr[xp].sort()[arr[xp].length - 1];
-                        }
-                        return cc.sort()[cc.length - 1]
+
+                    maxx: function (a) {
+                        for (var b = [], c = 0; c < a.length; c++) b[c] = a[c].sort()[a[c].length - 1];
+                        return b.sort()[b.length - 1]
                     },
-                    summ: function (arr) {
-                        var cc = 0;
-                        for (jj2 = 0; jj2 < arr.length; jj2++) {
-                            for (kk2 = 0; kk2 < arr[jj2].length; kk2++) {
-                                cc = cc + arr[jj2][kk2];
-                            }
-                        }
-                        return cc;
+
+                    summ: function (a) {
+                        var b = 0;
+                        for (jj2 = 0; jj2 < a.length; jj2++)
+                            for (kk2 = 0; kk2 < a[jj2].length; kk2++) b += a[jj2][kk2];
+                        return b
                     },
-                    transpose: function (arr) {
-                        var rows = arr.length;
-                        var cols = arr[0].length;
-                        var arrt = new Array();
-                        for (var jj = 0; jj < cols; jj++) {
-                            var arrtt = new Array();
-                            for (var kk = 0; kk < rows; kk++) {
-                                arrtt[kk] = arr[kk][jj];
-                            }
-                            arrt[jj] = arrtt;
+
+                    transpose: function (c) {
+                        for (var f = c.length, g = c[0].length, d = [], a = 0; a < g; a++) {
+                            for (var e = [], b = 0; b < f; b++) e[b] = c[b][a];
+                            d[a] = e
                         }
-                        return arrt;
+                        return d
                     },
-                    interp1: function (xgrid, ygrid, xeval) {
-                        if (xgrid.length !== ygrid.length) {
-                            return 0;
-                        } else if (xeval <= xgrid[0]) {
-                            return ygrid[0];
-                        } else if (xeval >= xgrid[(xgrid.length - 1)]) {
-                            return ygrid[(xgrid.length - 1)];
-                        } else {
-                            for (var jj = 0; jj < (xgrid.length - 1); jj++) {
-                                if (xeval > xgrid[jj] && xeval <= xgrid[jj + 1]) {
-                                    return ygrid[jj] + (ygrid[jj + 1] - ygrid[jj]) * (xeval - xgrid[jj]) / (xgrid[jj + 1] - xgrid[jj]);
-                                }
-                            }
-                        }
+
+                    interp1: function (a, c, d) {
+                        if (a.length !== c.length) return 0;
+                        if (d <= a[0]) return c[0];
+                        if (d >= a[a.length - 1]) return c[a.length - 1];
+                        for (var b = 0; b < a.length - 1; b++)
+                            if (d > a[b] && d <= a[b + 1]) return c[b] + (c[b + 1] - c[b]) * (d - a[b]) / (a[b + 1] - a[b])
                     },
-                    operate_v2: function (bld0, lvl0, map0, wgh, globaa, parms) { //// compute the time it takes to grow fast enough tiberium-wise
-                        var bld = [
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."]
-                        ];
-                        for (jj2 = 0; jj2 < bld.length; jj2++) {
-                            for (kk2 = 0; kk2 < bld[jj2].length; kk2++) {
-                                bld[jj2][kk2] = bld0[jj2][kk2];
-                            }
-                        }
-                        var map = [
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."]
-                        ];
-                        for (jj2 = 0; jj2 < map.length; jj2++) {
-                            for (kk2 = 0; kk2 < map[jj2].length; kk2++) {
-                                map[jj2][kk2] = map0[jj2][kk2];
-                            }
-                        }
-                        var lvl = [
+
+                    operate_v2: function (A, w, k, x, M, I) {
+                        var c = [".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split("")];
+                        for (jj2 = 0; jj2 < c.length; jj2++)
+                            for (kk2 = 0; kk2 < c[jj2].length; kk2++) c[jj2][kk2] = A[jj2][kk2];
+                        A = [".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split("")];
+                        for (jj2 = 0; jj2 < A.length; jj2++)
+                            for (kk2 =
+                                0; kk2 < A[jj2].length; kk2++) A[jj2][kk2] = k[jj2][kk2];
+                        k = [
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -1565,33 +1369,25 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0]
                         ];
-                        for (jj2 = 0; jj2 < lvl.length; jj2++) {
-                            for (kk2 = 0; kk2 < lvl[jj2].length; kk2++) {
-                                lvl[jj2][kk2] = lvl0[jj2][kk2];
-                            }
-                        }
-                        var resrcs = [0, 0, 0, 0];
-                        var ttime = 0;
-                        var mvr = 0;
-                        var balvl = 12;
-                        var alliancerank = parms[7];
-                        var allbonus = Math.exp(7 + 0.2121 * (balvl + 1 - alliancerank));
-                        var tmp = this.payoff(bld, lvl, map, wgh, mvr, balvl, globaa, parms); //all roi    //    [roi,tibr,powr,cryr,crer,tibc,powc,tibw,poww,cryw,tibrb,powrb,cryrb,crerb]
-                        var roi = tmp[0];
-                        var tibr = tmp[1];
-                        var powr = tmp[2];
-                        var cryr = tmp[3];
-                        var crer = tmp[4];
-                        var tibc = tmp[5];
-                        var powc = tmp[6];
-                        var tibw = tmp[7];
-                        var poww = tmp[8];
-                        var cryw = tmp[9];
-                        var tibrb = tmp[10];
-                        var powrb = tmp[11];
-                        var cryrb = tmp[12];
-                        var crerb = tmp[13];
-                        var roip = [
+                        for (jj2 = 0; jj2 < k.length; jj2++)
+                            for (kk2 = 0; kk2 < k[jj2].length; kk2++) k[jj2][kk2] = w[jj2][kk2];
+                        var b = [0, 0, 0, 0],
+                            l = w = 0,
+                            f = 12,
+                            S = I[7],
+                            a = this.payoff(c, k, A, x, l, f, M, I),
+                            d = a[0],
+                            u = a[1],
+                            r = a[2],
+                            v = a[3],
+                            y = a[4],
+                            D = a[5],
+                            E = a[6],
+                            p = a[7],
+                            m = a[8],
+                            n = a[9],
+                            F, G;
+                        a = [
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -1601,7 +1397,7 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0]
                         ];
-                        var roit = [
+                        var H = [
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -1611,39 +1407,26 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0]
                         ];
-                        for (jj2 = 0; jj2 < 8; jj2++) {
-                            for (kk2 = 0; kk2 < 9; kk2++) {
-                                if (bld[jj2][kk2] === "h" || bld[jj2][kk2] === "s") {
-                                    roip[jj2][kk2] = NaN;
-                                } else {
-                                    roip[jj2][kk2] = roi[jj2][kk2];
-                                }
-                                if (bld[jj2][kk2] === "a" || bld[jj2][kk2] === "p") {
-                                    roit[jj2][kk2] = NaN;
-                                } else {
-                                    roit[jj2][kk2] = roi[jj2][kk2];
-                                }
-                            }
-                        }
-                        var ofns = globaa[14];
-                        var ofns_s = globaa[15];
+                        for (jj2 = 0; 8 > jj2; jj2++)
+                            for (kk2 = 0; 9 > kk2; kk2++) a[jj2][kk2] = "h" === c[jj2][kk2] || "s" === c[jj2][kk2] ? NaN : d[jj2][kk2], H[jj2][kk2] = "a" === c[jj2][kk2] || "p" === c[jj2][kk2] ? NaN : d[jj2][kk2];
+                        var W = M[15];
                         mcv = [
                             [1, 0, 0],
-                            [2, 1800000, 0],
-                            [3, 12000000, 0],
-                            [4, 60000000, 0],
-                            [5, 250000000, 0],
-                            [6, 1000000000, 0],
-                            [7, 3900000000, 0],
-                            [8, 14800000000, 0],
-                            [9, 52000000000, 0],
-                            [10, 184000000000, 0],
-                            [11, 530000000000, 0]
+                            [2, 18E5, 0],
+                            [3, 12E6, 0],
+                            [4, 6E7, 0],
+                            [5,
+                                25E7, 0
+                            ],
+                            [6, 1E9, 0],
+                            [7, 39E8, 0],
+                            [8, 148E8, 0],
+                            [9, 52E9, 0],
+                            [10, 184E9, 0],
+                            [11, 53E10, 0]
                         ];
                         mcv[0][2] = 0;
-                        for (var wl = 1; wl < 11; wl++) {
-                            mcv[wl][2] = mcv[(wl - 1)][2] + mcv[wl][1];
-                        }
+                        for (var g = 1; 11 > g; g++) mcv[g][2] = mcv[g - 1][2] + mcv[g][1];
                         mcv2 = [
                             [1, 8],
                             [2, 12],
@@ -1658,139 +1441,65 @@ codes by NetquiK
                             [30, 12],
                             [42, 24]
                         ];
-                        var allbonus = Math.exp(7 + 0.2121 * (balvl + 1 - alliancerank));
-                        var ttibr = this.summ(tibr) + allbonus;
-                        var tpowr = this.summ(powr) + allbonus;
-                        var tcryr = this.summ(cryr) + allbonus;
-                        var tcrer = this.summ(crer);
-                        var tret = [ttibr, tpowr, tcryr, tcrer];
-                        var twort = [this.summ(tibw), this.summ(poww), this.summ(cryw)];
-                        var tt = 0;
-                        var twortt = new Array();
-                        twortt[tt] = [twort[0] + resrcs[0], twort[1] + resrcs[1], twort[2] + resrcs[2], 0 + resrcs[3]];
-                        var ttwortt = new Array();
-                        ttwortt[tt] = twortt[tt][0] + twortt[tt][1] + twortt[tt][2] + twortt[tt][3];
-                        var bss_ = new Array();
-                        bss_[tt] = 2;
-                        var off_ = new Array();
-                        off_[tt] = 0;
-                        var lvl_ = new Array();
-                        lvl_[tt] = lvl;
-                        var bll_ = new Array();
-                        bll_[tt] = 12;
-                        var smm = 0;
-                        var ct = 0;
-                        for (jj2 = 0; jj2 < bld.length; jj2++) {
-                            for (kk2 = 0; kk2 < bld[jj2].length; kk2++) {
-                                if (bld[jj2][kk2] === "h" || bld[jj2][kk2] === "n") {
-                                    smm = smm + lvl[jj2][kk2];
-                                    ct++;
-                                }
-                            }
-                        }
-                        var harvlvl = new Array();
-                        harvlvl[tt] = smm / ct;
-                        var smm = 0;
-                        var ct = 0;
-                        for (jj2 = 0; jj2 < bld.length; jj2++) {
-                            for (kk2 = 0; kk2 < bld[jj2].length; kk2++) {
-                                if (bld[jj2][kk2] !== "." && bld[jj2][kk2] !== "t" && bld[jj2][kk2] !== "c") {
-                                    smm = smm + lvl[jj2][kk2];
-                                    ct++;
-                                }
-                            }
-                        }
-                        var baselvl = new Array();
-                        baselvl[tt] = smm / ct;
-                        var resid = new Array();
-                        resid[tt] = [resrcs[0] / tret[0], resrcs[1] / tret[1], resrcs[2] / tret[2], resrcs[3] / tret[3]];
-                        var ttm = new Array();
-                        ttm[tt] = ttime;
-                        var str = 1;
-                        var nwo = 0;
-                        while (balvl < 43 && ttime < (400 * 24)) //end at around 100G tib aka base worth at level 43
-                        {
-                            var upgg = [0, 0];
-                            var upgt = [0, 0];
-                            var upgp = [0, 0];
-                            var mroi = 100000000000000;
-                            var mroit = 100000000000000;
-                            var mroip = 100000000000000;
-                            for (jj2 = 0; jj2 < bld.length; jj2++) {
-                                for (kk2 = 0; kk2 < bld[jj2].length; kk2++) {
-                                    if (roi[jj2][kk2] < mroi) {
-                                        upgg[0] = jj2;
-                                        upgg[1] = kk2;
-                                        mroi = roi[jj2][kk2];
-                                    }
-                                    if (roit[jj2][kk2] < mroit) {
-                                        upgt[0] = jj2;
-                                        upgt[1] = kk2;
-                                        mroit = roit[jj2][kk2];
-                                    }
-                                    if (roip[jj2][kk2] < mroip) {
-                                        upgp[0] = jj2;
-                                        upgp[1] = kk2;
-                                        mroip = roip[jj2][kk2];
-                                    }
-                                }
-                            }
-                            if (resid[tt][0] > 24) {
-                                var upg = [upgp[0], upgp[1]];
-                            } else if (resid[tt][1] > 24) {
-                                var upg = [upgt[0], upgt[1]];
-                            } else {
-                                var upg = [upgg[0], upgg[1]];
-                            }
-                            if (bld[upg[0]][upg[1]] !== "q") {
-                                var tm = [(tibc[upg[0]][upg[1]] - resrcs[0]) / ttibr, (powc[upg[0]][upg[1]] - resrcs[1]) / tpowr, 0];
-                                if (tm[0] > tm[1] && tm[0] > 0) {
-                                    var tm0 = tm[0];
-                                } else if (tm[1] > tm[0] && tm[1] > 0) {
-                                    var tm0 = tm[1];
-                                } else {
-                                    var tm0 = 0;
-                                }
-                                ttime = ttime + tm0; //accumulate resources and pay cost of upgrade
-                                resrcs[0] = resrcs[0] + tm0 * ttibr - tibc[upg[0]][upg[1]];
-                                resrcs[1] = resrcs[1] + tm0 * tpowr - powc[upg[0]][upg[1]];
-                                resrcs[2] = resrcs[2] + tm0 * tcryr;
-                                resrcs[3] = resrcs[3] + tm0 * tcrer;
-                                lvl[upg[0]][upg[1]] = lvl[upg[0]][upg[1]] + 1; //upgrade
-                            } else //spend crystal and power on defense
-                            {
-                                var tm = [(tibc[upg[0]][upg[1]] - resrcs[2]) / tcryr, (powc[upg[0]][upg[1]] - resrcs[1]) / tpowr, 0];
-                                if (tm[0] > tm[1] && tm[0] > 0) {
-                                    var tm0 = tm[0];
-                                } else if (tm[1] > tm[0] && tm[1] > 0) {
-                                    var tm0 = tm[1];
-                                } else {
-                                    var tm0 = 0;
-                                }
-                                ttime = ttime + tm0; //accumulate resources and pay cost of upgrade
-                                resrcs[0] = resrcs[0] + tm0 * ttibr;
-                                resrcs[1] = resrcs[1] + tm0 * tpowr - powc[upg[0]][upg[1]];
-                                resrcs[2] = resrcs[2] + tm0 * tcryr - tibc[upg[0]][upg[1]];
-                                resrcs[3] = resrcs[3] + tm0 * tcrer;
-                                lvl[upg[0]][upg[1]] = lvl[upg[0]][upg[1]] + 1; //upgrade
-                            }
-                            lvl_[tt] = lvl;
-                            var tmp = this.payoff(bld, lvl, map, wgh, mvr, balvl, globaa, parms); //all roi    //    [roi,tibr,powr,cryr,crer,tibc,powc,tibw,poww,cryw,tibrb,powrb,cryrb,crerb]
-                            var roi = tmp[0];
-                            var tibr = tmp[1];
-                            var powr = tmp[2];
-                            var cryr = tmp[3];
-                            var crer = tmp[4];
-                            var tibc = tmp[5];
-                            var powc = tmp[6];
-                            var tibw = tmp[7];
-                            var poww = tmp[8];
-                            var cryw = tmp[9];
-                            var tibrb = tmp[10];
-                            var powrb = tmp[11];
-                            var cryrb = tmp[12];
-                            var crerb = tmp[13];
-                            var roip = [
+                        var B = Math.exp(7 + .2121 * (f + 1 - S));
+                        u = this.summ(u) + B;
+                        r = this.summ(r) + B;
+                        v = this.summ(v) + B;
+                        y = this.summ(y);
+                        var h = [u, r, v, y];
+                        p = [this.summ(p), this.summ(m), this.summ(n)];
+                        var e = 0;
+                        g = [];
+                        g[e] = [p[0] + b[0], p[1] + b[1], p[2] + b[2], 0 + b[3]];
+                        var J = [];
+                        J[e] = g[e][0] + g[e][1] + g[e][2] + g[e][3];
+                        var N = [];
+                        N[e] =
+                            2;
+                        var O = [];
+                        O[e] = 0;
+                        var P = [];
+                        P[e] = 12;
+                        for (jj2 = n = m = 0; jj2 < c.length; jj2++)
+                            for (kk2 = 0; kk2 < c[jj2].length; kk2++)
+                                if ("h" === c[jj2][kk2] || "n" === c[jj2][kk2]) m += k[jj2][kk2], n++;
+                        var Q = [];
+                        Q[e] = m / n;
+                        for (jj2 = n = m = 0; jj2 < c.length; jj2++)
+                            for (kk2 = 0; kk2 < c[jj2].length; kk2++) "." !== c[jj2][kk2] && "t" !== c[jj2][kk2] && "c" !== c[jj2][kk2] && (m += k[jj2][kk2], n++);
+                        var K = [];
+                        K[e] = [b[0] / h[0], b[1] / h[1], b[2] / h[2], b[3] / h[3]];
+                        var z = [];
+                        z[e] = w;
+                        for (var C = 1, R = 0; 43 > f && 9600 > w;) {
+                            var q = [0, 0],
+                                t = [0, 0];
+                            h = [0, 0];
+                            var L = F = G = 1E14;
+                            for (jj2 = 0; jj2 < c.length; jj2++)
+                                for (kk2 =
+                                    0; kk2 < c[jj2].length; kk2++) d[jj2][kk2] < G && (q[0] = jj2, q[1] = kk2, G = d[jj2][kk2]), H[jj2][kk2] < F && (t[0] = jj2, t[1] = kk2, F = H[jj2][kk2]), a[jj2][kk2] < L && (h[0] = jj2, h[1] = kk2, L = a[jj2][kk2]);
+                            d = 24 < K[e][0] ? [h[0], h[1]] : 24 < K[e][1] ? [t[0], t[1]] : [q[0], q[1]];
+                            "q" !== c[d[0]][d[1]] ? (a = [(D[d[0]][d[1]] - b[0]) / u, (E[d[0]][d[1]] - b[1]) / r, 0], a = a[0] > a[1] && 0 < a[0] ? a[0] : a[1] > a[0] && 0 < a[1] ? a[1] : 0, w += a, b[0] = b[0] + a * u - D[d[0]][d[1]], b[1] = b[1] + a * r - E[d[0]][d[1]], b[2] += a * v) : (a = [(D[d[0]][d[1]] - b[2]) / v, (E[d[0]][d[1]] - b[1]) / r, 0], a = a[0] > a[1] && 0 < a[0] ?
+                                a[0] : a[1] > a[0] && 0 < a[1] ? a[1] : 0, w += a, b[0] += a * u, b[1] = b[1] + a * r - E[d[0]][d[1]], b[2] = b[2] + a * v - D[d[0]][d[1]]);
+                            b[3] += a * y;
+                            k[d[0]][d[1]] += 1;
+                            a = this.payoff(c, k, A, x, l, f, M, I);
+                            d = a[0];
+                            u = a[1];
+                            r = a[2];
+                            v = a[3];
+                            y = a[4];
+                            D = a[5];
+                            E = a[6];
+                            p = a[7];
+                            m = a[8];
+                            n = a[9];
+                            L = a[10];
+                            F = a[11];
+                            h = a[12];
+                            G = a[13];
+                            a = [
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -1800,7 +1509,95 @@ codes by NetquiK
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0]
                             ];
-                            var roit = [
+                            H = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0,
+                                    0, 0, 0
+                                ],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ];
+                            for (jj2 = 0; 8 > jj2; jj2++)
+                                for (kk2 = 0; 9 > kk2; kk2++) a[jj2][kk2] = "h" === c[jj2][kk2] || "s" === c[jj2][kk2] ? NaN : d[jj2][kk2], H[jj2][kk2] = "a" === c[jj2][kk2] || "p" === c[jj2][kk2] ? NaN : d[jj2][kk2];
+                            p = [this.summ(p), this.summ(m), this.summ(n)];
+                            e += 1;
+                            g[e] = [p[0] + b[0], p[1] + b[1], p[2] + b[2], 0 + b[3]];
+                            J[e] = g[e][0] + g[e][1] + g[e][2] + g[e][3];
+                            for (jj2 = n = m = 0; jj2 < c.length; jj2++)
+                                for (kk2 = 0; kk2 < c[jj2].length; kk2++)
+                                    if ("h" === c[jj2][kk2] || "n" === c[jj2][kk2]) m +=
+                                        k[jj2][kk2], n++;
+                            Q[e] = m / n;
+                            for (jj2 = n = m = 0; jj2 < c.length; jj2++)
+                                for (kk2 = 0; kk2 < c[jj2].length; kk2++) "." !== c[jj2][kk2] && "t" !== c[jj2][kk2] && "c" !== c[jj2][kk2] && (m += k[jj2][kk2], n++);
+                            l = [];
+                            q = [];
+                            for (f = 0; 60 > f; f++) l[f] = W[f][0], q[f] = f + 1;
+                            f = this.interp1(l, q, p[0] + b[0]);
+                            t = this.interp1(this.transpose(mcv2)[1], this.transpose(mcv2)[0], f);
+                            q = this.interp1(l, q, b[2] * (t - 1));
+                            t = this.interp1(this.transpose(mcv)[2], this.transpose(mcv)[0], b[3] * (t - 1));
+                            l = this.interp1(this.transpose(movrec)[0], this.transpose(movrec)[1], f);
+                            24 < l && (l = 24);
+                            l *= I[4];
+                            B = Math.exp(7 + .2121 * (f + 1 - S));
+                            u = this.summ(u) - l / 24 * this.summ(L) + B;
+                            r = this.summ(r) - l / 24 * this.summ(F) + B;
+                            v = this.summ(v) - l / 24 * this.summ(h) + B;
+                            y = this.summ(y) - l / 24 * this.summ(G);
+                            h = [u, r, v, y];
+                            N[e] = t;
+                            O[e] = q;
+                            P[e] = f;
+                            K[e] = [b[0] / h[0], b[1] / h[1], b[2] / h[2], b[3] / h[3]];
+                            z[e] = w;
+                            19 < f && 1 === C && (C = e);
+                            if (43200 < w && 0 === R) {
+                                R = 1;
+                                var T = q,
+                                    U = f,
+                                    V = t
+                            }
+                        }
+                        0 === R && (T = q, U = f, V = t);
+                        x = e;
+                        return [c, k, [V, U, T], Math.log(J[x] / J[C]) / ((z[x] - z[C]) / 24), Math.log(g[x][0] / g[C][0]) / ((z[x] - z[C]) / 24), C, x, z, w, N, O, P, z, Q]
+                    },
+
+
+
+                    payoff: function (k, c, P, x, y, D, g, p) {
+                        var f = g[0],
+                            l = g[1],
+                            z = g[2],
+                            A = g[3],
+                            B = g[4],
+                            E = g[5],
+                            Q = g[6],
+                            R = g[7];
+                        D = g[8];
+                        var F = g[9],
+                            C = g[10],
+                            S = g[11],
+                            T = g[12];
+                        g = g[13];
+                        var M = p[2],
+                            N = p[3];
+                        p = [
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                        ];
+                        for (var G = [
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -1809,591 +1606,324 @@ codes by NetquiK
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                            ];
-                            for (jj2 = 0; jj2 < 8; jj2++) {
-                                for (kk2 = 0; kk2 < 9; kk2++) {
-                                    if (bld[jj2][kk2] === "h" || bld[jj2][kk2] === "s") {
-                                        roip[jj2][kk2] = NaN;
-                                    } else {
-                                        roip[jj2][kk2] = roi[jj2][kk2];
-                                    }
-                                    if (bld[jj2][kk2] === "a" || bld[jj2][kk2] === "p") {
-                                        roit[jj2][kk2] = NaN;
-                                    } else {
-                                        roit[jj2][kk2] = roi[jj2][kk2];
-                                    }
-                                }
+                            ], H = [
+                                [0,
+                                    0, 0, 0, 0, 0, 0, 0, 0
+                                ],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], I = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], m = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], n = [
+                                [0, 0, 0, 0, 0, 0,
+                                    0, 0, 0
+                                ],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], u = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], q = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], U = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0,
+                                    0, 0, 0, 0, 0, 0, 0, 0
+                                ],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], J = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], K = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], L = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0,
+                                    0, 0, 0
+                                ],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], O = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ], r = 0, v = 0, t = 0, w = 0, a = 0; 8 > a; a++)
+                            for (var b = 0; 9 > b; b++) switch (k[a][b]) {
+                                case "s":
+                                    var d = this.countadj(k, [a, b], "h"),
+                                        e = d[0] + 1,
+                                        h = 0 < e ? 1 : 0;
+                                    d = this.countadj(k, [a, b], "n");
+                                    d = d[0] + 1;
+                                    var V = 0 < d ? 1 : 0;
+                                    p[a][b] = f[c[a][b] - 1][2] + e * f[c[a][b] -
+                                        1][3] + h * f[c[a][b] - 1][4];
+                                    J[a][b] = f[c[a][b] - 1][2];
+                                    H[a][b] = f[c[a][b] - 1][2] + d * f[c[a][b] - 1][3] + V * f[c[a][b] - 1][4];
+                                    L[a][b] = f[c[a][b] - 1][2];
+                                    m[a][b] = f[c[a][b] - 1][0];
+                                    n[a][b] = f[c[a][b] - 1][1];
+                                    u[a][b] = B[c[a][b] - 1][0];
+                                    q[a][b] = B[c[a][b] - 1][1];
+                                    break;
+                                case "h":
+                                    d = this.countadj(k, [a, b], "s");
+                                    e = d[0] + 1;
+                                    h = 0 < e ? 1 : 0;
+                                    p[a][b] = l[c[a][b] - 1][2] + e * l[c[a][b] - 1][3] + h * l[c[a][b] - 1][4];
+                                    J[a][b] = l[c[a][b] - 1][2];
+                                    m[a][b] = l[c[a][b] - 1][0];
+                                    n[a][b] = l[c[a][b] - 1][1];
+                                    u[a][b] = E[c[a][b] - 1][0];
+                                    q[a][b] = E[c[a][b] - 1][1];
+                                    break;
+                                case "y":
+                                    e = 3;
+                                    h = 0 < e ? 1 : 0;
+                                    d =
+                                        c[a][b];
+                                    10 < d && (d = c[a][b] + M);
+                                    p[a][b] = f[d - 1][2] + e * f[d - 1][3] + h * f[d - 1][4];
+                                    m[a][b] = f[d - 1][0];
+                                    n[a][b] = f[d - 1][1];
+                                    u[a][b] = B[d - 1][0];
+                                    q[a][b] = B[d - 1][1];
+                                    r = a;
+                                    v = b;
+                                    break;
+                                case "q":
+                                    e = 3;
+                                    h = 0 < e ? 1 : 0;
+                                    d = c[a][b];
+                                    10 < d && (d = c[a][b] + N);
+                                    p[a][b] = f[d - 1][2] + e * f[d - 1][3] + h * f[d - 1][4];
+                                    m[a][b] = f[d - 1][0];
+                                    n[a][b] = f[d - 1][1];
+                                    u[a][b] = B[d - 1][0];
+                                    q[a][b] = B[d - 1][1];
+                                    t = a;
+                                    w = b;
+                                    break;
+                                case "n":
+                                    d = this.countadj(k, [a, b], "s");
+                                    e = d[0] + 1;
+                                    h = 0 < e ? 1 : 0;
+                                    H[a][b] = l[c[a][b] - 1][2] + e * l[c[a][b] - 1][3] + h * l[c[a][b] - 1][4];
+                                    L[a][b] = l[c[a][b] - 1][2];
+                                    m[a][b] = l[c[a][b] - 1][0];
+                                    n[a][b] = l[c[a][b] - 1][1];
+                                    u[a][b] = E[c[a][b] - 1][0];
+                                    q[a][b] = E[c[a][b] - 1][1];
+                                    break;
+                                case "a":
+                                    d = this.countadj(k, [a, b], "p");
+                                    e = d[0] + 1;
+                                    h = 0 < e ? 1 : 0;
+                                    G[a][b] = A[c[a][b] - 1][2] + e * A[c[a][b] - 1][3] + h * A[c[a][b] - 1][4];
+                                    K[a][b] = A[c[a][b] - 1][2];
+                                    m[a][b] = A[c[a][b] - 1][0];
+                                    n[a][b] = A[c[a][b] - 1][1];
+                                    u[a][b] = R[c[a][b] - 1][0];
+                                    q[a][b] = R[c[a][b] - 1][1];
+                                    break;
+                                case "p":
+                                    d = this.countadj(k, [a, b], "a");
+                                    e = d[0] + 1;
+                                    h = 0 < e ? 1 : 0;
+                                    d = this.countadj(P, [a, b], "c");
+                                    e = d[0] + 1;
+                                    G[a][b] = z[c[a][b] - 1][2] + e * z[c[a][b] - 1][3] + h * z[c[a][b] - 1][4];
+                                    K[a][b] = z[c[a][b] - 1][2];
+                                    m[a][b] =
+                                        z[c[a][b] - 1][0];
+                                    n[a][b] = z[c[a][b] - 1][1];
+                                    u[a][b] = Q[c[a][b] - 1][0];
+                                    q[a][b] = Q[c[a][b] - 1][1];
+                                    d = this.countadj(k, [a, b], "r");
+                                    I[a][b] = (d[0] + 1) * z[c[a][b] - 1][5];
+                                    break;
+                                case "r":
+                                    d = this.countadj(k, [a, b], "p"), e = d[0] + 1, h = 0 < e ? 1 : 0, d = this.countadj(P, [a, b], "t"), e = d[0] + 1, I[a][b] = C[c[a][b] - 1][2] + e * C[c[a][b] - 1][3] + h * C[c[a][b] - 1][4], O[a][b] = C[c[a][b] - 1][2], m[a][b] = C[c[a][b] - 1][0], n[a][b] = C[c[a][b] - 1][1], u[a][b] = S[c[a][b] - 1][0], q[a][b] = S[c[a][b] - 1][1]
                             }
-                            var twort = [this.summ(tibw), this.summ(poww), this.summ(cryw)];
-                            tt = tt + 1;
-                            twortt[tt] = [twort[0] + resrcs[0], twort[1] + resrcs[1], twort[2] + resrcs[2], 0 + resrcs[3]];
-                            ttwortt[tt] = twortt[tt][0] + twortt[tt][1] + twortt[tt][2] + twortt[tt][3];
-                            var smm = 0;
-                            var ct = 0;
-                            for (jj2 = 0; jj2 < bld.length; jj2++) {
-                                for (kk2 = 0; kk2 < bld[jj2].length; kk2++) {
-                                    if (bld[jj2][kk2] === "h" || bld[jj2][kk2] === "n") {
-                                        smm = smm + lvl[jj2][kk2];
-                                        ct++;
-                                    }
-                                }
-                            }
-                            harvlvl[tt] = smm / ct;
-                            var smm = 0;
-                            var ct = 0;
-                            for (jj2 = 0; jj2 < bld.length; jj2++) {
-                                for (kk2 = 0; kk2 < bld[jj2].length; kk2++) {
-                                    if (bld[jj2][kk2] !== "." && bld[jj2][kk2] !== "t" && bld[jj2][kk2] !== "c") {
-                                        smm = smm + lvl[jj2][kk2];
-                                        ct++;
-                                    }
-                                }
-                            }
-                            baselvl[tt] = smm / ct;
-                            //bnchmrk;
-                            var offgrd = new Array();
-                            var offval = new Array();
-                            for (var jj = 0; jj < 60; jj++) {
-                                offgrd[jj] = ofns_s[jj][0];
-                                offval[jj] = jj + 1;
-                            }
-                            var balvl = this.interp1(offgrd, offval, (twort[0] + resrcs[0]));
-                            var bses0 = this.interp1(this.transpose(mcv2)[1], this.transpose(mcv2)[0], balvl);
-                            var offlvl = this.interp1(offgrd, offval, (resrcs[2] * (bses0 - 1)));
-                            var bses = this.interp1(this.transpose(mcv)[2], this.transpose(mcv)[0], resrcs[3] * (bses0 - 1));
-                            var mvr = this.interp1(this.transpose(movrec)[0], this.transpose(movrec)[1], balvl);
-                            if (mvr > 24) {
-                                mvr = 24;
-                            }
-                            var recovery = parms[4];
-                            mvr = mvr * recovery;
-                            //
-                            var allbonus = Math.exp(7 + 0.2121 * (balvl + 1 - alliancerank));
-                            var ttibr = this.summ(tibr) - mvr / 24 * this.summ(tibrb) + allbonus;
-                            var tpowr = this.summ(powr) - mvr / 24 * this.summ(powrb) + allbonus;
-                            var tcryr = this.summ(cryr) - mvr / 24 * this.summ(cryrb) + allbonus;
-                            var tcrer = this.summ(crer) - mvr / 24 * this.summ(crerb);
-                            var tret = [ttibr, tpowr, tcryr, tcrer];
-                            bss_[tt] = bses;
-                            off_[tt] = offlvl;
-                            bll_[tt] = balvl;
-                            resid[tt] = [resrcs[0] / tret[0], resrcs[1] / tret[1], resrcs[2] / tret[2], resrcs[3] / tret[3]];
-                            ttm[tt] = ttime;
-                            if (balvl > 19 && str === 1) //start at 100M tib
-                            {
-                                str = tt;
-                            }
-                            if (ttime > (180 * 240) && nwo === 0) {
-                                nwo = 1;
-                                var off00 = offlvl;
-                                var bll00 = balvl;
-                                var bss00 = bses;
-                            }
-                        }
-                        if (nwo === 0) {
-                            var off00 = offlvl;
-                            var bll00 = balvl;
-                            var bss00 = bses;
-                        }
-                        var T = tt;
-                        var grrt = Math.log(ttwortt[T] / ttwortt[str]) / ((ttm[T] - ttm[str]) / 24);
-                        var grrt0 = Math.log(twortt[T][0] / twortt[str][0]) / ((ttm[T] - ttm[str]) / 24);
-                        //console.log(allbonus);
-                        return [bld, lvl, [bss00, bll00, off00], grrt, grrt0, str, T, ttm, ttime, bss_, off_, bll_, ttm, harvlvl];
+                        k = [
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0,
+                                0, 0, 0, 0, 0, 0
+                            ],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                        ];
+                        for (jj2 = 0; 8 > jj2; jj2++)
+                            for (kk2 = 0; 9 > kk2; kk2++) k[jj2][kk2] = (m[jj2][kk2] + n[jj2][kk2] * x[1]) / (p[jj2][kk2] - y / 24 * J[jj2][kk2] + (G[jj2][kk2] - y / 24 * K[jj2][kk2]) * x[1] + (H[jj2][kk2] - y / 24 * L[jj2][kk2]) * x[2] + (I[jj2][kk2] - y / 24 * O[jj2][kk2]) * x[3]) / 24 * 4; - 1 < r && (p[r][v] = 0, x = 10 < c[r][v] ? c[r][v] : 10, y = 10 < c[r][v] - (N - M) ? c[r][v] - (N - M) : 10, m[r][v] = 2 * D[x - 1][0] + 2 * D[y - 1][0], n[r][v] = 2 * D[x - 1][1] + 2 * D[y - 1][1], u[r][v] = 2 * F[x - 1][0] + 2 * F[y - 1][0], q[r][v] =
+                            2 * F[x - 1][1] + 2 * F[y - 1][1]); - 1 < t && (p[t][w] = 0, m[t][w] = T[c[t][w] - 1][0], n[t][w] = T[c[t][w] - 1][1], U[t][w] = g[c[t][w] - 1][0], q[t][w] = g[c[t][w] - 1][1]);
+                        return [k, p, G, H, I, m, n, u, q, U, J, K, L, O]
                     },
-                    payoff: function (bld, lvl, map, wgh, mvr, balvl, globaa, parms) {
-                        var silo = globaa[0];
-                        var harv = globaa[1];
-                        var plnt = globaa[2];
-                        var accu = globaa[3];
-                        var silo_s = globaa[4];
-                        var harv_s = globaa[5];
-                        var plnt_s = globaa[6];
-                        var accu_s = globaa[7];
-                        var defoff = globaa[8];
-                        var defoff_s = globaa[9];
-                        var rfnr = globaa[10];
-                        var rfnr_s = globaa[11];
-                        var dfns = globaa[12];
-                        var dfns_s = globaa[13];
-                        var ofns = globaa[14];
-                        var ofns_s = globaa[15];
-                        var optt = parms[0];
-                        var opta = parms[1];
-                        var opty = parms[2];
-                        var optd = parms[3];
-                        var recovery = parms[4];
-                        var acnum = parms[5];
-                        var addref = parms[6];
-                        var alliancerank = parms[7];
-                        var tibr = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+                    countadj: function (c, a, g) {
+                        a = [
+                            [a[0] - 1, a[1] - 1],
+                            [a[0] - 1, a[1]],
+                            [a[0] - 1, a[1] + 1],
+                            [a[0], a[1] - 1],
+                            [a[0], a[1] + 1],
+                            [a[0] + 1, a[1] - 1],
+                            [a[0] + 1, a[1]],
+                            [a[0] + 1, a[1] + 1]
                         ];
-                        var powr = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var cryr = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var crer = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var tibc = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var powc = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var tibw = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var poww = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var cryw = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        //bonus (non-continuous) part of returns
-                        var tibrb = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var powrb = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var cryrb = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var crerb = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var r0 = 0;
-                        var c0 = 0;
-                        var r1 = 0;
-                        var c1 = 0;
-                        for (var row = 0; row < 8; row++) {
-                            for (var col = 0; col < 9; col++) {
-                                switch (bld[row][col]) {
-                                    case "s":
-                                        var tmp = this.countadj(bld, [row, col], "h");
-                                        var tch = tmp[0] + 1;
-                                        if (tch > 0) {
-                                            var tchsgn = 1;
-                                        } else {
-                                            var tchsgn = 0;
-                                        }
-                                        var tmp = this.countadj(bld, [row, col], "n");
-                                        var tchn = tmp[0] + 1;
-                                        if (tchn > 0) {
-                                            var tchnsgn = 1;
-                                        } else {
-                                            var tchnsgn = 0;
-                                        }
-                                        tibr[row][col] = silo[lvl[row][col] - 1][2] + tch * silo[lvl[row][col] - 1][3] + tchsgn * silo[lvl[row][col] - 1][4];
-                                        tibrb[row][col] = silo[lvl[row][col] - 1][2];
-                                        cryr[row][col] = silo[lvl[row][col] - 1][2] + tchn * silo[lvl[row][col] - 1][3] + tchnsgn * silo[lvl[row][col] - 1][4];
-                                        cryrb[row][col] = silo[lvl[row][col] - 1][2];
-                                        tibc[row][col] = silo[lvl[row][col] - 1][0];
-                                        powc[row][col] = silo[lvl[row][col] - 1][1];
-                                        tibw[row][col] = silo_s[lvl[row][col] - 1][0];
-                                        poww[row][col] = silo_s[lvl[row][col] - 1][1];
-                                        break;
-                                    case "h":
-                                        var tmp = this.countadj(bld, [row, col], "s");
-                                        var tch = tmp[0] + 1;
-                                        if (tch > 0) {
-                                            var tchsgn = 1;
-                                        } else {
-                                            var tchsgn = 0;
-                                        }
-                                        tibr[row][col] = harv[lvl[row][col] - 1][2] + tch * harv[lvl[row][col] - 1][3] + tchsgn * harv[lvl[row][col] - 1][4];
-                                        tibrb[row][col] = harv[lvl[row][col] - 1][2];
-                                        tibc[row][col] = harv[lvl[row][col] - 1][0];
-                                        powc[row][col] = harv[lvl[row][col] - 1][1];
-                                        tibw[row][col] = harv_s[lvl[row][col] - 1][0];
-                                        poww[row][col] = harv_s[lvl[row][col] - 1][1];
-                                        break;
-                                    case "y":
-                                        var tch = 3;
-                                        if (tch > 0) {
-                                            var tchsgn = 1;
-                                        } else {
-                                            var tchsgn = 0;
-                                        }
-                                        var llv = lvl[row][col];
-                                        if (llv > 10) {
-                                            var llv = lvl[row][col] + opty;
-                                        } //CY needs to be at most opty levels below harvesters
-                                        tibr[row][col] = silo[llv - 1][2] + tch * silo[llv - 1][3] + tchsgn * silo[llv - 1][4];
-                                        tibc[row][col] = silo[llv - 1][0];
-                                        powc[row][col] = silo[llv - 1][1];
-                                        tibw[row][col] = silo_s[llv - 1][0];
-                                        poww[row][col] = silo_s[llv - 1][1]; //use this to compute all kinds of roi
-                                        var r0 = row;
-                                        var c0 = col; //remember the location
-                                        break;
-                                    case "q":
-                                        var tch = 3;
-                                        if (tch > 0) {
-                                            var tchsgn = 1;
-                                        } else {
-                                            var tchsgn = 0;
-                                        }
-                                        var llv = lvl[row][col];
-                                        if (llv > 10) {
-                                            var llv = lvl[row][col] + optd;
-                                        } //defense needs to be at least optd levels below harvesters
-                                        tibr[row][col] = silo[llv - 1][2] + tch * silo[llv - 1][3] + tchsgn * silo[llv - 1][4];
-                                        tibc[row][col] = silo[llv - 1][0];
-                                        powc[row][col] = silo[llv - 1][1];
-                                        tibw[row][col] = silo_s[llv - 1][0];
-                                        poww[row][col] = silo_s[llv - 1][1]; //use this to compute all kinds of roi
-                                        var r1 = row;
-                                        var c1 = col; //remember the location
-                                        break;
-                                    case "n":
-                                        var tmp = this.countadj(bld, [row, col], "s");
-                                        var tch = tmp[0] + 1;
-                                        if (tch > 0) {
-                                            var tchsgn = 1;
-                                        } else {
-                                            var tchsgn = 0;
-                                        }
-                                        cryr[row][col] = harv[lvl[row][col] - 1][2] + tch * harv[lvl[row][col] - 1][3] + tchsgn * harv[lvl[row][col] - 1][4];
-                                        cryrb[row][col] = harv[lvl[row][col] - 1][2];
-                                        tibc[row][col] = harv[lvl[row][col] - 1][0];
-                                        powc[row][col] = harv[lvl[row][col] - 1][1];
-                                        tibw[row][col] = harv_s[lvl[row][col] - 1][0];
-                                        poww[row][col] = harv_s[lvl[row][col] - 1][1];
-                                        break;
-                                    case "a":
-                                        var tmp = this.countadj(bld, [row, col], "p");
-                                        var tch = tmp[0] + 1;
-                                        if (tch > 0) {
-                                            var tchsgn = 1;
-                                        } else {
-                                            var tchsgn = 0;
-                                        }
-                                        powr[row][col] = accu[lvl[row][col] - 1][2] + tch * accu[lvl[row][col] - 1][3] + tchsgn * accu[lvl[row][col] - 1][4];
-                                        powrb[row][col] = accu[lvl[row][col] - 1][2];
-                                        tibc[row][col] = accu[lvl[row][col] - 1][0];
-                                        powc[row][col] = accu[lvl[row][col] - 1][1];
-                                        tibw[row][col] = accu_s[lvl[row][col] - 1][0];
-                                        poww[row][col] = accu_s[lvl[row][col] - 1][1];
-                                        break;
-                                    case "p":
-                                        var tmp = this.countadj(bld, [row, col], "a");
-                                        var tch2 = tmp[0] + 1;
-                                        if (tch2 > 0) {
-                                            var tch2sgn = 1;
-                                        } else {
-                                            var tch2sgn = 0;
-                                        }
-                                        var tmp = this.countadj(map, [row, col], "c");
-                                        var tch = tmp[0] + 1;
-                                        if (tch > 0) {
-                                            var tchsgn = 1;
-                                        } else {
-                                            var tchsgn = 0;
-                                        }
-                                        powr[row][col] = plnt[lvl[row][col] - 1][2] + tch * plnt[lvl[row][col] - 1][3] + tch2sgn * plnt[lvl[row][col] - 1][4];
-                                        powrb[row][col] = plnt[lvl[row][col] - 1][2];
-                                        tibc[row][col] = plnt[lvl[row][col] - 1][0];
-                                        powc[row][col] = plnt[lvl[row][col] - 1][1];
-                                        tibw[row][col] = plnt_s[lvl[row][col] - 1][0];
-                                        poww[row][col] = plnt_s[lvl[row][col] - 1][1];
-                                        var tmp = this.countadj(bld, [row, col], "r");
-                                        var tchR = tmp[0] + 1;
-                                        if (tchR > 0) {
-                                            var tchRsgn = 1;
-                                        } else {
-                                            var tchRsgn = 0;
-                                        }
-                                        crer[row][col] = tchR * plnt[lvl[row][col] - 1][5];
-                                        break;
-                                    case "r":
-                                        var tmp = this.countadj(bld, [row, col], "p");
-                                        var tch2 = tmp[0] + 1;
-                                        if (tch2 > 0) {
-                                            var tch2sgn = 1;
-                                        } else {
-                                            var tch2sgn = 0;
-                                        }
-                                        var tmp = this.countadj(map, [row, col], "t");
-                                        var tch = tmp[0] + 1;
-                                        if (tch > 0) {
-                                            var tchsgn = 1;
-                                        } else {
-                                            var tchsgn = 0;
-                                        }
-                                        crer[row][col] = rfnr[lvl[row][col] - 1][2] + tch * rfnr[lvl[row][col] - 1][3] + tch2sgn * rfnr[lvl[row][col] - 1][4];
-                                        crerb[row][col] = rfnr[lvl[row][col] - 1][2];
-                                        tibc[row][col] = rfnr[lvl[row][col] - 1][0];
-                                        powc[row][col] = rfnr[lvl[row][col] - 1][1];
-                                        tibw[row][col] = rfnr_s[lvl[row][col] - 1][0];
-                                        poww[row][col] = rfnr_s[lvl[row][col] - 1][1];
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
-                        var roi = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        for (jj2 = 0; jj2 < 8; jj2++) {
-                            for (kk2 = 0; kk2 < 9; kk2++) {
-                                roi[jj2][kk2] = (tibc[jj2][kk2] + powc[jj2][kk2] * wgh[1]) / (tibr[jj2][kk2] - mvr / 24 * tibrb[jj2][kk2] + (powr[jj2][kk2] - mvr / 24 * powrb[jj2][kk2]) * wgh[1] + (cryr[jj2][kk2] - mvr / 24 * cryrb[jj2][kk2]) * wgh[2] + (crer[jj2][kk2] - mvr / 24 * crerb[jj2][kk2]) * wgh[3]) / 24 * 4;
-                            }
-                        }
-                        // correct CY data
-                        if (r0 > -1) {
-                            tibr[r0][c0] = 0;
-                            if (lvl[r0][c0] > 10) {
-                                var lllv = lvl[r0][c0];
-                            } else {
-                                var lllv = 10;
-                            }
-                            if (lvl[r0][c0] - (optd - opty) > 10) {
-                                var lllv2 = lvl[r0][c0] - (optd - opty);
-                            } else {
-                                var lllv2 = 10;
-                            }
-                            tibc[r0][c0] = defoff[lllv - 1][0] * 2 + defoff[lllv2 - 1][0] * 2; //there are 2 buildins: CY, SUPPORT that have opty level and DF, DFHQ have optd level
-                            powc[r0][c0] = defoff[lllv - 1][1] * 2 + defoff[lllv2 - 1][1] * 2;
-                            tibw[r0][c0] = defoff_s[lllv - 1][0] * 2 + defoff_s[lllv2 - 1][0] * 2;
-                            poww[r0][c0] = defoff_s[lllv - 1][1] * 2 + defoff_s[lllv2 - 1][1] * 2;
-                        }
-                        // correct DFHQ data
-                        if (r1 > -1) {
-                            tibr[r1][c1] = 0;
-                            tibc[r1][c1] = dfns[lvl[r1][c1] - 1][0]; //defense costs are in crystal instead of tiberium
-                            powc[r1][c1] = dfns[lvl[r1][c1] - 1][1];
-                            cryw[r1][c1] = dfns_s[lvl[r1][c1] - 1][0]; //defense worth are also in crystal
-                            poww[r1][c1] = dfns_s[lvl[r1][c1] - 1][1];
-                        }
-                        return [roi, tibr, powr, cryr, crer, tibc, powc, tibw, poww, cryw, tibrb, powrb, cryrb, crerb];
+                        var d = [],
+                            e = [],
+                            b = -1,
+                            f = -1;
+                        for (js = 0; 8 > js; js++) - 1 < a[js][0] && 8 > a[js][0] && -1 < a[js][1] && 9 > a[js][1] && (c[a[js][0]][a[js][1]] === g && (b++, d[b] = js), f++, e[f] = c[a[js][0]][a[js][1]]);
+                        return [b, e, d, a]
                     },
-                    countadj: function (bldn, cntr, typ) {
-                        // counts number of buildings of certain type adjacent to a particular location in a layout
-                        var srnd = [
-                            [cntr[0] - 1, cntr[1] - 1],
-                            [cntr[0] - 1, cntr[1]],
-                            [cntr[0] - 1, cntr[1] + 1],
-                            [cntr[0], cntr[1] - 1],
-                            [cntr[0], cntr[1] + 1],
-                            [cntr[0] + 1, cntr[1] - 1],
-                            [cntr[0] + 1, cntr[1]],
-                            [cntr[0] + 1, cntr[1] + 1]
-                        ];
-                        var ind = new Array();
-                        var bb = new Array();
-                        var jjs = -1;
-                        var jjs2 = -1;
-                        for (js = 0; js < 8; js++) {
-                            if (srnd[js][0] > -1 && srnd[js][0] < 8 && srnd[js][1] > -1 && srnd[js][1] < 9) {
-                                if (bldn[srnd[js][0]][srnd[js][1]] === typ) {
-                                    jjs++;
-                                    ind[jjs] = js;
-                                }
-                                jjs2++;
-                                bb[jjs2] = bldn[srnd[js][0]][srnd[js][1]];
-                            }
-                        }
-                        return [jjs, bb, ind, srnd];
-                    },
-                    //INITIALIZATION PART
+
                     initializ: function () {
-                        var silo = [
-                            [2, 0, 0, 72, 0, 0],
-                            [3, 1, 0, 90, 0, 0],
-                            [4, 1, 0, 125, 0, 0],
-                            [20, 5, 0, 170, 0, 0],
-                            [110, 28, 0, 220, 0, 0],
-                            [360, 90, 0, 275, 0, 0],
-                            [1100, 275, 0, 335, 0, 0],
-                            [3200, 800, 0, 400, 0, 0],
-                            [8800, 2200, 0, 460, 0, 0],
-                            [22400, 5600, 0, 530, 0, 0],
-                            [48000, 12000, 0, 610, 0, 0],
-                            [63360, 15840, 0, 710, 0, 0],
-                            [83630, 20900, 0, 888, 0, 0],
-                            [110390, 27600, 0, 1100, 0, 0],
-                            [145720, 36430, 0, 1380, 0, 0],
-                            [192350, 48090, 0, 1730, 0, 0],
-                            [253910, 63470, 0, 2160, 0, 0],
-                            [335160, 83790, 0, 2700, 0, 0],
-                            [442410, 110600, 0, 3380, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0]
-                        ];
-                        for (var j = 19; j < 60; j++) {
-                            silo[j][0] = silo[j - 1][0] * 1.32;
-                            silo[j][1] = silo[j][0] / 4;
-                            silo[j][2] = silo[j - 1][2] * 1.25;
-                            silo[j][3] = silo[j - 1][3] * 1.25;
-                            silo[j][4] = silo[j - 1][4] * 1.25;
+                        for (var e = [
+                                [2, 0, 0, 72, 0, 0],
+                                [3, 1, 0, 90, 0, 0],
+                                [4, 1, 0, 125, 0, 0],
+                                [20, 5, 0, 170, 0, 0],
+                                [110, 28, 0, 220, 0, 0],
+                                [360, 90, 0, 275, 0, 0],
+                                [1100, 275, 0, 335, 0, 0],
+                                [3200, 800, 0, 400, 0, 0],
+                                [8800, 2200, 0, 460, 0, 0],
+                                [22400, 5600, 0, 530, 0, 0],
+                                [48E3, 12E3, 0, 610, 0, 0],
+                                [63360, 15840, 0, 710, 0, 0],
+                                [83630, 20900, 0, 888, 0, 0],
+                                [110390, 27600, 0, 1100, 0, 0],
+                                [145720, 36430, 0, 1380, 0, 0],
+                                [192350, 48090, 0, 1730, 0, 0],
+                                [253910, 63470, 0, 2160, 0, 0],
+                                [335160, 83790, 0, 2700, 0, 0],
+                                [442410, 110600, 0, 3380, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0,
+                                    0
+                                ],
+                                [0, 0, 0, 0, 0, 0]
+                            ], a = 19; 60 > a; a++) e[a][0] = 1.32 * e[a - 1][0], e[a][1] = e[a][0] / 4, e[a][2] = 1.25 * e[a - 1][2], e[a][3] = 1.25 * e[a - 1][3], e[a][4] = 1.25 * e[a - 1][4];
+                        var f = [];
+                        for (a = 0; a < e.length; a++) {
+                            f[a] = [0, 0, 0, 0, 0, 0];
+                            for (var c = 0; c < e[a].length; c++) f[a][c] = e[a][c] + 0
                         }
-                        var harv = new Array();
-                        for (var j = 0; j < silo.length; j++) {
-                            harv[j] = [0, 0, 0, 0, 0, 0];
-                            for (var k = 0; k < silo[j].length; k++) {
-                                harv[j][k] = silo[j][k] + 0.0;
-                            }
-                        }
-                        var tmp1 = [3, 4, 6, 15, 110, 360, 1100, 3200, 8800, 22400];
-                        var tmp2 = [0, 1, 3, 12, 72, 234, 715, 2080, 5720, 14560];
-                        var tmp3 = [240, 300, 432, 570, 735, 920, 1120, 1330, 1560, 1800, 2050, 2360, 2950, 3680, 4600, 5760];
-                        for (var j = 1; j < 60; j++) {
-                            harv[j][1] = harv[j][0] * 3 / 4;
-                            harv[j][2] = 10 * harv[j][3] / 3;
-                            harv[j][4] = harv[j][3];
-                            harv[j][3] = 0;
-                            if (j < 10) {
-                                harv[j][0] = tmp1[j];
-                                harv[j][1] = tmp2[j];
-                            }
-                            if (j < 16) {
-                                harv[j][2] = tmp3[j];
-                            }
-                        }
-                        var plnt = [
+                        c = [3, 4, 6, 15, 110, 360, 1100, 3200, 8800, 22400];
+                        var d = [0, 1, 3, 12, 72, 234, 715, 2080, 5720, 14560],
+                            g = [240, 300, 432, 570, 735, 920, 1120, 1330, 1560, 1800, 2050, 2360, 2950, 3680, 4600, 5760];
+                        for (a = 1; 60 > a; a++) f[a][1] = 3 * f[a][0] / 4, f[a][2] = 10 * f[a][3] / 3, f[a][4] = f[a][3], f[a][3] = 0, 10 > a && (f[a][0] =
+                            c[a], f[a][1] = d[a]), 16 > a && (f[a][2] = g[a]);
+                        c = [
                             [3, 0, 120, 60, 72, 0],
                             [5, 0, 150, 75, 90, 0],
                             [10, 1, 198, 100, 120, 0],
@@ -2404,15 +1934,17 @@ codes by NetquiK
                             [8320, 800, 660, 330, 400, 0],
                             [22880, 2200, 780, 380, 460, 0],
                             [58240, 5600, 900, 440, 530, 0],
-                            [124800, 12000, 1020, 500, 610, 0],
+                            [124800, 12E3, 1020, 500, 610, 0],
                             [164730, 15840, 1160, 580, 700, 0],
                             [217450, 20900, 1450, 725, 875, 0],
                             [287030, 27600, 1820, 906, 1090, 0],
                             [378880, 36430, 2270, 1130, 1360, 0],
                             [500130, 48090, 2840, 1410, 1700, 0],
                             [660170, 63470, 3560, 1770, 2130, 0],
-                            [871420, 83790, 4450, 2210, 2670, 0],
-                            [1150000, 110600, 5560, 2760, 3330, 0],
+                            [871420, 83790,
+                                4450, 2210, 2670, 0
+                            ],
+                            [115E4, 110600, 5560, 2760, 3330, 0],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
@@ -2445,7 +1977,9 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
+                            [0,
+                                0, 0, 0, 0, 0
+                            ],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
@@ -2455,33 +1989,23 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0]
                         ];
-                        for (var j = 19; j < 60; j++) {
-                            plnt[j][0] = plnt[j - 1][0] * 1.32;
-                            plnt[j][1] = plnt[j - 1][1] * 1.32;
-                            plnt[j][2] = plnt[j - 1][2] * 1.25;
-                            plnt[j][3] = plnt[j - 1][3] * 1.25;
-                            plnt[j][4] = plnt[j - 1][4] * 1.25;
-                        }
-                        var tmp4 = [48, 60, 75, 100, 125, 160, 195, 230, 270, 315, 370, 430, 538, 672, 840, 1050, 1310, 1640, 2050];
-                        for (var j = 1; j < 60; j++) {
-                            if (j < 19) {
-                                plnt[j][5] = tmp4[j];
-                            } else {
-                                plnt[j][5] = plnt[j - 1][5] * 1.25;
-                            }
-                        }
-                        var accu = [
+                        for (a = 19; 60 > a; a++) c[a][0] = 1.32 * c[a - 1][0], c[a][1] = 1.32 * c[a - 1][1], c[a][2] = 1.25 * c[a - 1][2], c[a][3] = 1.25 * c[a - 1][3], c[a][4] = 1.25 * c[a - 1][4];
+                        d = [48, 60, 75, 100, 125, 160, 195, 230, 270, 315, 370, 430, 538, 672, 840, 1050, 1310, 1640, 2050];
+                        for (a = 1; 60 > a; a++) c[a][5] = 19 > a ? d[a] : 1.25 * c[a - 1][5];
+                        d = [
                             [2, 0, 0, 48, 0, 0],
                             [3, 1, 0, 60, 0, 0],
                             [4, 1, 0, 80, 0, 0],
                             [20, 5, 0, 110, 0, 0],
                             [110, 28, 0, 145, 0, 0],
                             [360, 90, 0, 185, 0, 0],
-                            [1100, 275, 0, 225, 0, 0],
+                            [1100, 275,
+                                0, 225, 0, 0
+                            ],
                             [3200, 800, 0, 265, 0, 0],
                             [8800, 2200, 0, 310, 0, 0],
                             [22400, 5600, 0, 355, 0, 0],
-                            [48000, 12000, 0, 405, 0, 0],
+                            [48E3, 12E3, 0, 405, 0, 0],
                             [63360, 15840, 0, 465, 0, 0],
                             [83630, 20900, 0, 581, 0, 0],
                             [110390, 27600, 0, 727, 0, 0],
@@ -2504,7 +2028,9 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0],
+                            [0,
+                                0, 0, 0, 0, 0
+                            ],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
@@ -2532,14 +2058,9 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0]
                         ];
-                        for (var j = 19; j < 60; j++) {
-                            accu[j][0] = accu[j - 1][0] * 1.32;
-                            accu[j][1] = accu[j - 1][1] * 1.32;
-                            accu[j][2] = accu[j - 1][2] * 1.25;
-                            accu[j][3] = accu[j - 1][3] * 1.25;
-                            accu[j][4] = accu[j - 1][4] * 1.25;
-                        }
-                        var rfnr = [
+                        for (a = 19; 60 > a; a++) d[a][0] = 1.32 * d[a - 1][0], d[a][1] = 1.32 * d[a - 1][1], d[a][2] = 1.25 * d[a - 1][2], d[a][3] = 1.25 * d[a - 1][3], d[a][4] = 1.25 * d[a -
+                            1][4];
+                        g = [
                             [3, 0, 120, 60, 72, 0],
                             [4, 1, 150, 75, 90, 0],
                             [8, 2, 180, 90, 110, 0],
@@ -2550,7 +2071,7 @@ codes by NetquiK
                             [6400, 1600, 575, 290, 345, 0],
                             [17600, 4400, 680, 340, 410, 0],
                             [44800, 11200, 790, 400, 475, 0],
-                            [96000, 24000, 925, 460, 555, 0],
+                            [96E3, 24E3, 925, 460, 555, 0],
                             [126720, 31680, 1080, 540, 650, 0],
                             [167270, 41810, 1350, 675, 813, 0],
                             [220790, 55190, 1680, 844, 1010, 0],
@@ -2558,7 +2079,9 @@ codes by NetquiK
                             [384710, 96170, 2630, 1310, 1580, 0],
                             [507820, 126950, 3290, 1640, 1980, 0],
                             [670330, 167580, 4110, 2060, 2480, 0],
-                            [884830, 221200, 5140, 2570, 3090, 0],
+                            [884830, 221200, 5140,
+                                2570, 3090, 0
+                            ],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0],
@@ -2601,15 +2124,9 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0]
                         ];
-                        var fct = [1.31999808021389, 1.31999502749370, 1.25005273120801, 1.25005273120801, 1.25008568540486];
-                        for (var j = 19; j < 60; j++) {
-                            rfnr[j][0] = rfnr[j - 1][0] * fct[0];
-                            rfnr[j][1] = rfnr[j - 1][1] * fct[1];
-                            rfnr[j][2] = rfnr[j - 1][2] * fct[2];
-                            rfnr[j][3] = rfnr[j - 1][3] * fct[3];
-                            rfnr[j][4] = rfnr[j - 1][4] * fct[4];
-                        }
-                        var harv_s = [
+                        var h = [1.31999808021389, 1.3199950274937, 1.25005273120801, 1.25005273120801, 1.25008568540486];
+                        for (a = 19; 60 > a; a++) g[a][0] = g[a - 1][0] * h[0], g[a][1] = g[a - 1][1] * h[1], g[a][2] = g[a - 1][2] * h[2], g[a][3] = g[a - 1][3] * h[3], g[a][4] = g[a - 1][4] * h[4];
+                        h = [
                             [1, 0],
                             [1, 0],
                             [1, 0],
@@ -2641,7 +2158,9 @@ codes by NetquiK
                             [1, 0],
                             [1, 0],
                             [1, 0],
-                            [1, 0],
+                            [1,
+                                0
+                            ],
                             [1, 0],
                             [1, 0],
                             [1, 0],
@@ -2671,280 +2190,275 @@ codes by NetquiK
                             [1, 0],
                             [1, 0]
                         ];
-                        var silo_s = [
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0]
-                        ];
-                        var accu_s = [
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0]
-                        ];
-                        var plnt_s = [
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0]
-                        ];
-                        var rfnr_s = [
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0]
-                        ];
-                        for (var j = 1; j < 60; j++) {
-                            harv_s[j][0] = harv_s[j - 1][0] + harv[j - 1][0];
-                            harv_s[j][1] = harv_s[j - 1][1] + harv[j - 1][1];
-                            silo_s[j][0] = silo_s[j - 1][0] + silo[j - 1][0];
-                            silo_s[j][1] = silo_s[j - 1][1] + silo[j - 1][1];
-                            accu_s[j][0] = accu_s[j - 1][0] + accu[j - 1][0];
-                            accu_s[j][1] = accu_s[j - 1][1] + accu[j - 1][1];
-                            plnt_s[j][0] = plnt_s[j - 1][0] + plnt[j - 1][0];
-                            plnt_s[j][1] = plnt_s[j - 1][1] + plnt[j - 1][1];
-                            rfnr_s[j][0] = rfnr_s[j - 1][0] + rfnr[j - 1][0];
-                            rfnr_s[j][1] = rfnr_s[j - 1][1] + rfnr[j - 1][1];
-                        }
-                        var defoff_s = [
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
+                        var k = [
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0]
+                            ],
+                            l = [
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0]
+                            ],
+                            m = [
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1,
+                                    0
+                                ],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0]
+                            ],
+                            n = [
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1,
+                                    0
+                                ],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0]
+                            ];
+                        for (a = 1; 60 > a; a++) h[a][0] = h[a - 1][0] + f[a - 1][0], h[a][1] = h[a - 1][1] + f[a - 1][1], k[a][0] = k[a - 1][0] + e[a - 1][0], k[a][1] = k[a - 1][1] + e[a - 1][1], l[a][0] = l[a - 1][0] + d[a - 1][0], l[a][1] = l[a - 1][1] + d[a - 1][1], m[a][0] = m[a - 1][0] + c[a - 1][0], m[a][1] = m[a - 1][1] + c[a - 1][1], n[a][0] = n[a - 1][0] + g[a - 1][0], n[a][1] = n[a - 1][1] + g[a - 1][1];
+                        var p = [
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1, 0],
+                            [1,
+                                0
+                            ],
                             [1, 0],
                             [1, 0],
                             [1, 0],
@@ -3004,15 +2518,15 @@ codes by NetquiK
                             [12800, 3200],
                             [35200, 8800],
                             [89600, 22400],
-                            [192000, 48000],
+                            [192E3, 48E3],
                             [253440, 63360],
                             [334540, 83630],
                             [441590, 110390],
                             [582900, 145720],
                             [769430, 192350],
-                            [1010000, 253910],
-                            [1340000, 335160],
-                            [1760000, 442410],
+                            [101E4, 253910],
+                            [134E4, 335160],
+                            [176E4, 442410],
                             [0, 0],
                             [0, 0],
                             [0, 0],
@@ -3055,11 +2569,8 @@ codes by NetquiK
                             [0, 0],
                             [0, 0]
                         ];
-                        for (var j = 19; j < 60; j++) {
-                            defoff[j][1] = defoff[j - 1][1] * 1.32;
-                            defoff[j][0] = defoff[j][1] * 4;
-                        }
-                        var ofns = [
+                        for (a = 19; 60 > a; a++) defoff[a][1] = 1.32 * defoff[a - 1][1], defoff[a][0] = 4 * defoff[a][1];
+                        a = [
                             [0, 0],
                             [0, 0],
                             [0, 0],
@@ -3121,7 +2632,7 @@ codes by NetquiK
                             [0, 0],
                             [0, 0]
                         ];
-                        var dfns = [
+                        var q = [
                             [0, 0],
                             [0, 0],
                             [0, 0],
@@ -3168,7 +2679,9 @@ codes by NetquiK
                             [0, 0],
                             [0, 0],
                             [0, 0],
-                            [0, 0],
+                            [0,
+                                0
+                            ],
                             [0, 0],
                             [0, 0],
                             [0, 0],
@@ -3183,245 +2696,197 @@ codes by NetquiK
                             [0, 0],
                             [0, 0]
                         ];
-                        ofns[35][0] = 4028442000;
-                        for (var js = 36; js < 60; js++) {
-                            ofns[js][0] = ofns[js - 1][0] * 1.32;
-                        }
-                        for (var js = 34; js >= 0; js--) {
-                            if (js < 11) {
-                                ofns[js][0] = ofns[js + 1][0] / 3.3;
-                            } else {
-                                ofns[js][0] = ofns[js + 1][0] / 1.32;
-                            }
-                        }
-                        var ofns_s = [
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0]
-                        ];
-                        var dfns_s = [
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0],
-                            [1, 0]
-                        ];
-                        for (var js = 0; js < 60; js++) {
-                            ofns[js][1] = ofns[js][0] / 4;
-                            dfns[js][0] = ofns[js][0] / 2;
-                            dfns[js][1] = ofns[js][1] / 2;
-                            if (js > 0) {
-                                dfns_s[js][0] = dfns_s[js - 1][0] + dfns[js - 1][0];
-                                dfns_s[js][1] = dfns_s[js - 1][1] + dfns[js - 1][1];
-                                ofns_s[js][0] = ofns_s[js - 1][0] + ofns[js - 1][0];
-                                ofns_s[js][1] = ofns_s[js - 1][1] + ofns[js - 1][1];
-                                defoff_s[js][0] = defoff_s[js - 1][0] + defoff[js - 1][0];
-                                defoff_s[js][1] = defoff_s[js - 1][1] + defoff[js - 1][1];
-                            }
-                        }
-                        //END INITIALIZATION PART
-                        return [silo, harv, plnt, accu, silo_s, harv_s, plnt_s, accu_s, defoff, defoff_s, rfnr, rfnr_s, dfns, dfns_s, ofns, ofns_s];
+                        a[35][0] = 4028442E3;
+                        for (var b = 36; 60 > b; b++) a[b][0] = 1.32 * a[b - 1][0];
+                        for (b = 34; 0 <= b; b--) a[b][0] = 11 > b ? a[b + 1][0] / 3.3 : a[b + 1][0] / 1.32;
+                        var r = [
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0]
+                            ],
+                            t = [
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0],
+                                [1, 0]
+                            ];
+                        for (b = 0; 60 > b; b++) a[b][1] = a[b][0] / 4, q[b][0] = a[b][0] / 2, q[b][1] = a[b][1] /
+                            2, 0 < b && (t[b][0] = t[b - 1][0] + q[b - 1][0], t[b][1] = t[b - 1][1] + q[b - 1][1], r[b][0] = r[b - 1][0] + a[b - 1][0], r[b][1] = r[b - 1][1] + a[b - 1][1], p[b][0] = p[b - 1][0] + defoff[b - 1][0], p[b][1] = p[b - 1][1] + defoff[b - 1][1]);
+                        return [e, f, c, d, k, h, m, l, defoff, p, g, n, q, t, a, r]
                     },
-                    fillin_v2: function (map, parms) {
-                        var optt = parms[0];
-                        var opta = parms[1];
-                        var opty = parms[2];
-                        var optd = parms[3];
-                        var recovery = parms[4];
-                        var acnum = parms[5];
-                        var addref = parms[6];
-                        map2 = [
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."]
-                        ];
-                        //put all possible harvesters
-                        for (jj = 0; jj < 8; jj++) {
-                            for (kk = 0; kk < 9; kk++) {
-                                if (map[jj][kk] === "t") {
-                                    map2[jj][kk] = "h";
-                                } else if (map[jj][kk] === "c") {
-                                    map2[jj][kk] = "n";
-                                }
+
+                    fillin_v2: function (q, v) {
+                        var h = v[0],
+                            n = v[1],
+                            u = v[5],
+                            d = v[6];
+                        map2 = [".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split("")];
+                        for (a = 0; 8 > a; a++)
+                            for (b = 0; 9 > b; b++) "t" === q[a][b] ? map2[a][b] = "h" : "c" === q[a][b] && (map2[a][b] = "n");
+                        var e = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ],
+                            f = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ],
+                            p = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                            ];
+                        for (a = 0; 8 > a; a++)
+                            for (b = 0; 9 > b; b++) {
+                                var c = this.countadj(q, [a, b], "t");
+                                e[a][b] = c[0] + 1;
+                                c = this.countadj(q, [a, b], "c");
+                                f[a][b] = c[0] + 1;
+                                p[a][b] = e[a][b] + f[a][b];
+                                e[a][b] + f[a][b] >= h && (map2[a][b] =
+                                    "s")
                             }
-                        }
-                        var tibcnt = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var crycnt = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        var totcnt = [
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        ];
-                        // put silos in all 4 and 5 touch places
-                        for (jj = 0; jj < 8; jj++) {
-                            for (kk = 0; kk < 9; kk++) {
-                                var tmp = this.countadj(map, [jj, kk], "t");
-                                tibcnt[jj][kk] = tmp[0] + 1;
-                                var tmp = this.countadj(map, [jj, kk], "c");
-                                crycnt[jj][kk] = tmp[0] + 1;
-                                totcnt[jj][kk] = tibcnt[jj][kk] + crycnt[jj][kk];
-                                if (tibcnt[jj][kk] + crycnt[jj][kk] >= optt) {
-                                    map2[jj][kk] = "s";
-                                }
-                            }
-                        }
-                        // link up harvs without silos with 3 touch silos, or remove harv if not possible
-                        for (jj = 0; jj < 8; jj++) {
-                            for (kk = 0; kk < 9; kk++) {
-                                if (map2[jj][kk] === "h" || map2[jj][kk] === "n") {
-                                    var tmp = this.countadj(map2, [jj, kk], "s");
-                                    var conn = tmp[0] + 1;
-                                    if (conn === 0) {
-                                        var tmp = this.countadj(totcnt, [jj, kk], 3);
-                                        var fn = tmp[0] + 1;
-                                        var bb = tmp[1];
-                                        var ind = tmp[2];
-                                        var srnd = tmp[3];
-                                        if (fn > 0) {
-                                            if (ind.length === 1) {
-                                                map2[srnd[ind[0]][0]][srnd[ind[0]][1]] = "s";
-                                            } else { //complicate things a bit
-                                                var dconn = [
+                        for (a = 0; 8 > a; a++)
+                            for (b = 0; 9 > b; b++)
+                                if ("h" === map2[a][b] || "n" === map2[a][b])
+                                    if (c = this.countadj(map2, [a, b], "s"), 0 === c[0] + 1) {
+                                        c = this.countadj(p, [a, b], 3);
+                                        f = c[2];
+                                        var g = c[3];
+                                        if (0 < c[0] + 1)
+                                            if (1 === f.length) map2[g[f[0]][0]][g[f[0]][1]] = "s";
+                                            else {
+                                                var m = [
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3431,20 +2896,11 @@ codes by NetquiK
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0]
                                                 ];
-                                                //first figure out all disconnected harvesters left
-                                                for (jj1 = 0; jj1 < 8; jj1++) {
-                                                    for (kk1 = 0; kk1 < 9; kk1++) {
-                                                        if (map2[jj1][kk1] === "h" || map2[jj1][kk1] === "n") {
-                                                            var tmp = this.countadj(map2, [jj1, kk1], "s");
-                                                            var conn2 = tmp[0] + 1;
-                                                            if (conn2 === 0) {
-                                                                dconn[jj1][kk1] = 1;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                //then count locations touching max number of disconnected harvesters
-                                                var cntdcnt = [
+                                                for (jj1 = 0; 8 > jj1; jj1++)
+                                                    for (kk1 = 0; 9 > kk1; kk1++)
+                                                        if ("h" === map2[jj1][kk1] || "n" === map2[jj1][kk1]) c = this.countadj(map2,
+                                                            [jj1, kk1], "s"), c = c[0] + 1, 0 === c && (m[jj1][kk1] = 1);
+                                                var r = [
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3454,52 +2910,27 @@ codes by NetquiK
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                                     [0, 0, 0, 0, 0, 0, 0, 0, 0]
                                                 ];
-                                                for (jj1 = 0; jj1 < 8; jj1++) {
-                                                    for (kk1 = 0; kk1 < 9; kk1++) {
-                                                        var tmp = this.countadj(dconn, [jj1, kk1], 1);
-                                                        cntdcnt[jj1][kk1] = tmp[0] + 1;
-                                                    }
-                                                }
-                                                var ttm = -10;
-                                                for (var ij = 0; ij < ind.length; ij++) {
-                                                    if (cntdcnt[srnd[ind[ij]][0]][srnd[ind[ij]][1]] > ttm) {
-                                                        ttm = cntdcnt[srnd[ind[ij]][0]][srnd[ind[ij]][1]];
-                                                        var ind1 = srnd[ind[ij]][0];
-                                                        var ind2 = srnd[ind[ij]][1];
-                                                    }
-                                                }
-                                                map2[ind1][ind2] = "s";
+                                                for (jj1 = 0; 8 > jj1; jj1++)
+                                                    for (kk1 = 0; 9 > kk1; kk1++) c = this.countadj(m, [jj1, kk1], 1), r[jj1][kk1] = c[0] + 1;
+                                                c = -10;
+                                                for (m = 0; m < f.length; m++)
+                                                    if (r[g[f[m]][0]][g[f[m]][1]] > c) {
+                                                        c = r[g[f[m]][0]][g[f[m]][1]];
+                                                        var k = g[f[m]][0],
+                                                            t = g[f[m]][1]
+                                                    } map2[k][t] = "s"
                                             }
-                                        } else {
-                                            map2[jj][kk] = map[jj][kk];
-                                        } //remove harv is not possible to connect
-                                    }
-                                }
-                            }
-                        }
-                        if (optt > 3) { //now some 3-touch silos might still be redundant
-                            for (jj = 0; jj < 8; jj++) {
-                                for (kk = 0; kk < 9; kk++) {
-                                    if (map2[jj][kk] === "s" && totcnt[jj][kk] === 3) //if it's a 3-touch silo
-                                    { //test if removing it leaves any harvesters disconnected
-                                        var map3 = [
-                                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                            [".", ".", ".", ".", ".", ".", ".", ".", "."]
-                                        ];
-                                        for (jj2 = 0; jj2 < 8; jj2++) {
-                                            for (kk2 = 0; kk2 < 9; kk2++) {
-                                                map3[jj2][kk2] = map2[jj2][kk2];
-                                            }
-                                        }
-                                        map3[jj][kk] = ".";
-                                        //first figure out all disconnected harvesters left
-                                        var dconn = [
+                                        else map2[a][b] = q[a][b]
+                                    } if (3 < h)
+                            for (a = 0; 8 > a; a++)
+                                for (b = 0; 9 > b; b++)
+                                    if ("s" ===
+                                        map2[a][b] && 3 === p[a][b]) {
+                                        k = [".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split("")];
+                                        for (jj2 = 0; 8 > jj2; jj2++)
+                                            for (kk2 = 0; 9 > kk2; kk2++) k[jj2][kk2] = map2[jj2][kk2];
+                                        k[a][b] = ".";
+                                        m = [
                                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3509,34 +2940,16 @@ codes by NetquiK
                                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                             [0, 0, 0, 0, 0, 0, 0, 0, 0]
                                         ];
-                                        //first figure out all disconnected harvesters left
-                                        var ssm = 0;
-                                        for (jj1 = 0; jj1 < 8; jj1++) {
-                                            for (kk1 = 0; kk1 < 9; kk1++) {
-                                                if (map2[jj1][kk1] === "h" || map2[jj1][kk1] === "n") {
-                                                    var tmp = this.countadj(map3, [jj1, kk1], "s");
-                                                    var conn2 = tmp[0] + 1;
-                                                    if (conn2 === 0) {
-                                                        dconn[jj1][kk1] = 1;
-                                                    }
-                                                }
-                                                ssm = ssm + dconn[jj1][kk1];
+                                        for (jj1 = f = 0; 8 > jj1; jj1++)
+                                            for (kk1 = 0; 9 > kk1; kk1++) {
+                                                if ("h" ===
+                                                    map2[jj1][kk1] || "n" === map2[jj1][kk1]) c = this.countadj(k, [jj1, kk1], "s"), c = c[0] + 1, 0 === c && (m[jj1][kk1] = 1);
+                                                f += m[jj1][kk1]
                                             }
-                                        }
-                                        if (ssm === 0) //no new disconnected harvesters
-                                        { //then worth removing this harvester
-                                            for (jj2 = 0; jj2 < 8; jj2++) {
-                                                for (kk2 = 0; kk2 < 9; kk2++) {
-                                                    map2[jj2][kk2] = map3[jj2][kk2];
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        // find best place for accumulators
-                        var acm = [
+                                        if (0 === f)
+                                            for (jj2 = 0; 8 > jj2; jj2++)
+                                                for (kk2 = 0; 9 > kk2; kk2++) map2[jj2][kk2] = k[jj2][kk2]
+                                    } g = [
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3546,91 +2959,36 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0]
                         ];
-                        for (jj = 0; jj < 8; jj++) {
-                            for (kk = 0; kk < 9; kk++) {
-                                if (map2[jj][kk] === ".") {
-                                    var tmp = this.countadj(map2, [jj, kk], ".");
-                                    acm[jj][kk] = tmp[0] + 1;
-                                } else {
-                                    acm[jj][kk] = 0;
-                                }
-                            }
-                        }
-                        //this lists all accumulator spots with 7 or 8 touches
-                        var loc = new Array();
-                        var ijkk = -1;
-                        for (jj = 0; jj < 8; jj++) {
-                            for (kk = 0; kk < 9; kk++) {
-                                if (acm[jj][kk] >= 6) {
-                                    ijkk++;
-                                    loc[ijkk] = [jj, kk];
-                                }
-                            }
-                        }
-                        //console.log(acm)
-                        var cmbind = new Array();
-                        var ijkk = -1;
-                        if (acnum === 1) {
-                            for (jj = 0; jj < loc.length; jj++) {
-                                ijkk++;
-                                cmbind[ijkk] = [jj];
-                            }
-                        } else {
-                            for (jj = 0; jj < loc.length; jj++) {
-                                for (kk = jj + 1; kk < loc.length; kk++) {
-                                    ijkk++;
-                                    cmbind[ijkk] = [jj, kk];
-                                }
-                            }
-                        }
-                        //console.log(loc)
-                        var crycnt_ = new Array();
-                        var ppcnt_ = new Array();
-                        var pptch_ = new Array();
-                        var refcnt = new Array();
-                        var mapss_ = new Array();
-                        for (var ijk = 0; ijk < cmbind.length; ijk++) { //temporary map
-                            var map3 = [
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."]
-                            ];
-                            for (jj2 = 0; jj2 < 8; jj2++) {
-                                for (kk2 = 0; kk2 < 9; kk2++) {
-                                    map3[jj2][kk2] = map2[jj2][kk2];
-                                }
-                            }
-                            for (var woq = 0; woq < cmbind[ijk].length; woq++) {
-                                map3[loc[cmbind[ijk][woq]][0]][loc[cmbind[ijk][woq]][1]] = "a";
-                            } //place both accums
-                            //place all powerplants
-                            crycnt_[ijk] = 0;
-                            ppcnt_[ijk] = 0;
-                            for (jj = 0; jj < 8; jj++) {
-                                for (kk = 0; kk < 9; kk++) {
-                                    if (map3[jj][kk] === ".") {
-                                        var tmp = this.countadj(map3, [jj, kk], "a");
-                                        wp = tmp[0] + 1;
-                                        if (wp > 0) {
-                                            var tmp = this.countadj(map, [jj, kk], "c");
-                                            crycnt_[ijk] = crycnt_[ijk] + tmp[0] + 1; //count crystal touches                       
-                                            ppcnt_[ijk] = ppcnt_[ijk] + 1; //count pplants
-                                            map3[jj][kk] = "p"; //place power plant
-                                        }
-                                    }
-                                }
-                            }
-                            pptch_[ijk] = 0;
-                            for (var woq = 0; woq < cmbind[ijk].length; woq++) {
-                                var tmp = this.countadj(map3, [loc[cmbind[ijk][woq]][0], loc[cmbind[ijk][woq]][1]], "p");
-                                pptch_[ijk] = pptch_[ijk] + tmp[0] + 1;
-                            }
-                            var ttcnt = [
+                        for (a = 0; 8 > a; a++)
+                            for (b = 0; 9 > b; b++) "." === map2[a][b] ? (c = this.countadj(map2, [a, b], "."), g[a][b] = c[0] + 1) : g[a][b] = 0;
+                        f = [];
+                        c = -1;
+                        for (a = 0; 8 > a; a++)
+                            for (b =
+                                0; 9 > b; b++) 6 <= g[a][b] && (c++, f[c] = [a, b]);
+                        g = [];
+                        c = -1;
+                        if (1 === u)
+                            for (a = 0; a < f.length; a++) c++, g[c] = [a];
+                        else
+                            for (a = 0; a < f.length; a++)
+                                for (b = a + 1; b < f.length; b++) c++, g[c] = [a, b];
+                        t = [];
+                        m = [];
+                        r = [];
+                        var w = [];
+                        u = [];
+                        for (var l = 0; l < g.length; l++) {
+                            k = [".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split("")];
+                            for (jj2 = 0; 8 > jj2; jj2++)
+                                for (kk2 = 0; 9 > kk2; kk2++) k[jj2][kk2] = map2[jj2][kk2];
+                            for (a = 0; a < g[l].length; a++) k[f[g[l][a]][0]][f[g[l][a]][1]] =
+                                "a";
+                            t[l] = 0;
+                            for (a = m[l] = 0; 8 > a; a++)
+                                for (b = 0; 9 > b; b++) "." === k[a][b] && (c = this.countadj(k, [a, b], "a"), wp = c[0] + 1, 0 < wp && (c = this.countadj(q, [a, b], "c"), t[l] = t[l] + c[0] + 1, m[l] += 1, k[a][b] = "p"));
+                            for (a = r[l] = 0; a < g[l].length; a++) c = this.countadj(k, [f[g[l][a]][0], f[g[l][a]][1]], "p"), r[l] = r[l] + c[0] + 1;
+                            var x = [
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3640,101 +2998,54 @@ codes by NetquiK
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0]
                             ];
-                            for (jj = 0; jj < 8; jj++) {
-                                for (kk = 0; kk < 9; kk++) {
-                                    if (map3[jj][kk] === ".") {
-                                        var tmp = this.countadj(map3, [jj, kk], "t");
-                                        ttcnt[jj][kk] = tmp[0] + 1;
-                                    }
-                                }
-                            }
-                            refcnt[ijk] = 0; //also take into account potential future refineries one might place
-                            for (jj = 0; jj < 8; jj++) {
-                                for (kk = 0; kk < 9; kk++) {
-                                    if (map3[jj][kk] === "p") {
-                                        var tmp1 = this.countadj(ttcnt, [jj, kk], 1);
-                                        var tmp2 = this.countadj(ttcnt, [jj, kk], 2);
-                                        var tmp3 = this.countadj(ttcnt, [jj, kk], 3);
-                                        refcnt[ijk] = refcnt[ijk] + tmp1[0] + 1 + tmp2[0] + 1 + tmp3[0] + 1;
-                                    }
-                                }
-                            }
-                            mapss_[ijk] = [
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                                [".", ".", ".", ".", ".", ".", ".", ".", "."]
+                            for (a = 0; 8 > a; a++)
+                                for (b = 0; 9 > b; b++) "." === k[a][b] && (c = this.countadj(k,
+                                    [a, b], "t"), x[a][b] = c[0] + 1);
+                            for (a = w[l] = 0; 8 > a; a++)
+                                for (b = 0; 9 > b; b++)
+                                    if ("p" === k[a][b]) {
+                                        var z = this.countadj(x, [a, b], 1);
+                                        c = this.countadj(x, [a, b], 2);
+                                        var y = this.countadj(x, [a, b], 3);
+                                        w[l] = w[l] + z[0] + 1 + c[0] + 1 + y[0] + 1
+                                    } u[l] = [".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split("")];
+                            for (jj2 = 0; 8 > jj2; jj2++)
+                                for (kk2 = 0; 9 > kk2; kk2++) u[l][jj2][kk2] = k[jj2][kk2]
+                        }
+                        a = [];
+                        b = [];
+                        f = -10;
+                        for (c = 0; c < g.length; c++) a[c] = r[c] -
+                            n * m[c], b[c] = t[c] + .1 * w[c], a[c] > f && (f = a[c]);
+                        n = [];
+                        k = -1;
+                        for (c = 0; c < g.length; c++) a[c] === f && (k++, n[k] = c);
+                        f = -10;
+                        for (c = 0; c < n.length; c++) b[n[c]] > f && (f = b[n[c]], k = n[c]);
+                        for (jj2 = 0; 8 > jj2; jj2++)
+                            for (kk2 = 0; 9 > kk2; kk2++) map2[jj2][kk2] = u[k][jj2][kk2];
+                        if (3.5 === h)
+                            for (a = 0; 8 > a; a++)
+                                for (b = 0; 9 > b; b++) 3 <= p[a][b] && 0 < e[a][b] && (map2[a][b] = "s");
+                        if (0 !== d) {
+                            for (a = h = 0; 8 > a; a++)
+                                for (b = 0; 9 > b; b++) "." !== map2[a][b] && "t" !== map2[a][b] && "c" !== map2[a][b] && "y" !== map2[a][b] && h++;
+                            h = 41 - h - 4;
+                            d = [
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0,
+                                    0, 0
+                                ],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
                             ];
-                            for (jj2 = 0; jj2 < 8; jj2++) {
-                                for (kk2 = 0; kk2 < 9; kk2++) {
-                                    mapss_[ijk][jj2][kk2] = map3[jj2][kk2];
-                                }
-                            }
-                        }
-                        //now choose best setup
-                        //1. max pp touches net of number of power plants
-                        //2. among equals, minimum power plants
-                        //3. among equals, maximum pp crystal touches + discounted refinery touches
-                        var ttt = new Array();
-                        var ttt2 = new Array();
-                        var w0e = -10;
-                        var dcnt = 0.1;
-                        for (var ikj = 0; ikj < cmbind.length; ikj++) {
-                            ttt[ikj] = pptch_[ikj] - opta * ppcnt_[ikj];
-                            ttt2[ikj] = crycnt_[ikj] + refcnt[ikj] * dcnt;
-                            if (ttt[ikj] > w0e) {
-                                w0e = ttt[ikj];
-                            }
-                        }
-                        var inndx = new Array();
-                        var owl = -1;
-                        for (var ikj = 0; ikj < cmbind.length; ikj++) {
-                            if (ttt[ikj] === w0e) {
-                                owl++;
-                                inndx[owl] = ikj;
-                            }
-                        }
-                        w0e = -10;
-                        for (var ikj = 0; ikj < inndx.length; ikj++) {
-                            if (ttt2[inndx[ikj]] > w0e) {
-                                w0e = ttt2[inndx[ikj]];
-                                owl = inndx[ikj];
-                            }
-                        }
-                        //console.log(mapss_);
-                        //console.log(owl);
-                        for (jj2 = 0; jj2 < 8; jj2++) {
-                            for (kk2 = 0; kk2 < 9; kk2++) {
-                                map2[jj2][kk2] = mapss_[owl][jj2][kk2];
-                            }
-                        }
-                        //now fill in extra 3-touch tibs if wanted
-                        if (optt === 3.5) {
-                            for (jj = 0; jj < 8; jj++) {
-                                for (kk = 0; kk < 9; kk++) {
-                                    if (totcnt[jj][kk] >= 3 && tibcnt[jj][kk] > 0) {
-                                        map2[jj][kk] = "s";
-                                    }
-                                }
-                            }
-                        }
-                        if (addref !== 0) { //add refineries and extra power plants in the remaining spots
-                            var ocpd = 0;
-                            for (jj = 0; jj < 8; jj++) {
-                                for (kk = 0; kk < 9; kk++) {
-                                    if (map2[jj][kk] !== "." && map2[jj][kk] !== "t" && map2[jj][kk] !== "c" && map2[jj][kk] !== "y") {
-                                        ocpd++;
-                                    }
-                                }
-                            }
-                            var slots = 41 - ocpd - 4;
-                            var sltlft = slots + 0;
-                            //3touches and 2touches that already have pps
-                            var rfnrtc = [
+                            for (a = 0; 8 > a; a++)
+                                for (b = 0; 9 > b; b++) "." === map2[a][b] ? (c = this.countadj(q, [a, b], "t"), d[a][b] = c[0] + 1) : d[a][b] = 0, c = this.countadj(map2, [a, b], "p"), 0 < c[0] + 1 && (d[a][b] += .5, 2.5 === d[a][b] && (d[a][b] = 3.25));
+                            e = [
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3744,24 +3055,96 @@ codes by NetquiK
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0]
                             ];
-                            for (jj = 0; jj < 8; jj++) {
-                                for (kk = 0; kk < 9; kk++) {
-                                    if (map2[jj][kk] === ".") {
-                                        var tmp = this.countadj(map, [jj, kk], "t");
-                                        rfnrtc[jj][kk] = tmp[0] + 1;
-                                    } else {
-                                        rfnrtc[jj][kk] = 0;
-                                    }
-                                    var tmp = this.countadj(map2, [jj, kk], "p");
-                                    if ((tmp[0] + 1) > 0) {
-                                        rfnrtc[jj][kk] = rfnrtc[jj][kk] + 0.5;
-                                        if (rfnrtc[jj][kk] === 2.5) {
-                                            rfnrtc[jj][kk] = 3.25;
-                                        }
-                                    }
+                            for (jj2 = 0; 8 > jj2; jj2++)
+                                for (kk2 = 0; 9 > kk2; kk2++) e[jj2][kk2] =
+                                    d[jj2][kk2];
+                            for (e = this.maxx(e); 3 < e && 0 < h;) {
+                                for (var a = 0; 8 > a; a++)
+                                    for (var b = 0; 9 > b; b++) d[a][b] === e && 0 < h && (d[a][b] = 0, --h, map2[a][b] = "r");
+                                e = [
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                                ];
+                                for (jj2 = 0; 8 > jj2; jj2++)
+                                    for (kk2 = 0; 9 > kk2; kk2++) e[jj2][kk2] = d[jj2][kk2];
+                                e = this.maxx(e)
+                            }
+                            for (e = 1; 1 < h && 1 === e;) {
+                                d = [
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                                ];
+                                for (a = 0; 8 > a; a++)
+                                    for (b = 0; 9 > b; b++) "." === map2[a][b] ? (c = this.countadj(q, [a, b], "t"), d[a][b] = c[0] + 1) : d[a][b] = 0;
+                                p = [
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                                ];
+                                for (a = 0; 8 > a; a++)
+                                    for (b = 0; 9 > b; b++) "." === map2[a][b] ? (y = this.countadj(d, [a, b], 3), c = this.countadj(d, [a, b], 2), p[a][b] = c[0] + 1 + y[0] + 1) : p[a][b] = 0;
+                                a = [
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0,
+                                        0, 0, 0, 0
+                                    ],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                                ];
+                                b = [
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                                ];
+                                n = 0;
+                                f = [0, 0];
+                                for (jj2 = 0; 8 > jj2; jj2++)
+                                    for (kk2 = 0; 9 > kk2; kk2++) a[jj2][kk2] = p[jj2][kk2] - d[jj2][kk2], b[jj2][kk2] = p[jj2][kk2], a[jj2][kk2] > n && (n = a[jj2][kk2], f = [jj2, kk2]);
+                                if (0 === n) {
+                                    for (jj2 = 0; 8 > jj2; jj2++)
+                                        for (kk2 = 0; 9 > kk2; kk2++) b[jj2][kk2] >
+                                            n && (n = b[jj2][kk2], f = [jj2, kk2]);
+                                    0 == n && (e = 0)
+                                }
+                                if (1 === e) {
+                                    1 < h && (map2[f[0]][f[1]] = "p", --h);
+                                    c = this.countadj(d, f, 3);
+                                    p = c[2];
+                                    a = c[3];
+                                    for (ii = 0; ii < p.length; ii++) 0 < h && (map2[a[p[ii]][0]][a[p[ii]][1]] = "r", --h);
+                                    c = this.countadj(d, f, 2);
+                                    f = c[2];
+                                    g = c[3];
+                                    for (ii = 0; ii < f.length; ii++) 0 < h && (map2[g[f[ii]][0]][g[f[ii]][1]] = "r", --h)
                                 }
                             }
-                            var b = [
+                            d = [
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3771,157 +3154,10 @@ codes by NetquiK
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0]
                             ];
-                            for (jj2 = 0; jj2 < 8; jj2++) {
-                                for (kk2 = 0; kk2 < 9; kk2++) {
-                                    b[jj2][kk2] = rfnrtc[jj2][kk2];
-                                }
-                            }
-                            var marfn = this.maxx(b);
-                            while (marfn > 3 && sltlft > 0) {
-                                for (var jj = 0; jj < 8; jj++) {
-                                    for (var kk = 0; kk < 9; kk++) {
-                                        if (rfnrtc[jj][kk] === marfn && sltlft > 0) {
-                                            rfnrtc[jj][kk] = 0;
-                                            sltlft = sltlft - 1;
-                                            map2[jj][kk] = "r";
-                                        }
-                                    }
-                                }
-                                var b = [
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                                ];
-                                for (jj2 = 0; jj2 < 8; jj2++) {
-                                    for (kk2 = 0; kk2 < 9; kk2++) {
-                                        b[jj2][kk2] = rfnrtc[jj2][kk2];
-                                    }
-                                }
-                                var marfn = this.maxx(b);
-                            }
-                            //now find all the 2touches and 3touches and minimum powerplants that can serve them
-                            var cntn = 1;
-                            while (sltlft > 1 && cntn === 1) {
-                                var rfnrtc = [
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                                ];
-                                for (var jj = 0; jj < 8; jj++) {
-                                    for (var kk = 0; kk < 9; kk++) {
-                                        if (map2[jj][kk] === ".") {
-                                            var tmp = this.countadj(map, [jj, kk], "t");
-                                            rfnrtc[jj][kk] = tmp[0] + 1;
-                                        } else {
-                                            rfnrtc[jj][kk] = 0;
-                                        }
-                                    }
-                                }
-                                var rfnrpp = [
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                                ];
-                                for (jj = 0; jj < 8; jj++) {
-                                    for (kk = 0; kk < 9; kk++) {
-                                        if (map2[jj][kk] === ".") {
-                                            var tmp3 = this.countadj(rfnrtc, [jj, kk], 3);
-                                            var tmp2 = this.countadj(rfnrtc, [jj, kk], 2);
-                                            rfnrpp[jj][kk] = tmp2[0] + 1 + tmp3[0] + 1;
-                                        } else {
-                                            rfnrpp[jj][kk] = 0;
-                                        }
-                                    }
-                                }
-                                var trgt = [
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                                ];
-                                var trgt2 = [
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                                ];
-                                var mm = 0;
-                                var loc = [0, 0];
-                                for (jj2 = 0; jj2 < 8; jj2++) {
-                                    for (kk2 = 0; kk2 < 9; kk2++) {
-                                        trgt[jj2][kk2] = rfnrpp[jj2][kk2] - rfnrtc[jj2][kk2];
-                                        trgt2[jj2][kk2] = rfnrpp[jj2][kk2];
-                                        if (trgt[jj2][kk2] > mm) {
-                                            mm = trgt[jj2][kk2];
-                                            loc = [jj2, kk2];
-                                        }
-                                    }
-                                }
-                                if (mm === 0) {
-                                    for (jj2 = 0; jj2 < 8; jj2++) {
-                                        for (kk2 = 0; kk2 < 9; kk2++) {
-                                            if (trgt2[jj2][kk2] > mm) {
-                                                mm = trgt2[jj2][kk2];
-                                                loc = [jj2, kk2];
-                                            }
-                                        }
-                                    }
-                                    if (mm == 0) {
-                                        cntn = 0;
-                                    }
-                                }
-                                if (cntn === 1) {
-                                    if (sltlft > 1) {
-                                        map2[loc[0]][loc[1]] = "p";
-                                        sltlft = sltlft - 1;
-                                    }
-                                    var tmp = this.countadj(rfnrtc, loc, 3);
-                                    var ind3 = tmp[2];
-                                    var srnd3 = tmp[3];
-                                    for (ii = 0; ii < ind3.length; ii++) //ii=1:size(llc,1))
-                                    {
-                                        if (sltlft > 0) {
-                                            map2[srnd3[ind3[ii]][0]][srnd3[ind3[ii]][1]] = "r";
-                                            sltlft = sltlft - 1;
-                                        }
-                                    }
-                                    var tmp = this.countadj(rfnrtc, loc, 2);
-                                    var ind = tmp[2];
-                                    var srnd = tmp[3];
-                                    for (ii = 0; ii < ind.length; ii++) //ii=1:size(llc,1))
-                                    {
-                                        if (sltlft > 0) {
-                                            map2[srnd[ind[ii]][0]][srnd[ind[ii]][1]] = "r";
-                                            sltlft = sltlft - 1;
-                                        }
-                                    }
-                                }
-                            }
-                            //1touches that already have pps
-                            var rfnrtc = [
+                            for (a = 0; 8 > a; a++)
+                                for (b = 0; 9 > b; b++) "." ===
+                                    map2[a][b] ? (c = this.countadj(q, [a, b], "t"), d[a][b] = c[0] + 1) : d[a][b] = 0, c = this.countadj(map2, [a, b], "p"), 0 < c[0] + 1 && 0 < d[a][b] && (d[a][b] += .5);
+                            e = [
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3931,48 +3167,15 @@ codes by NetquiK
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0]
                             ];
-                            for (var jj = 0; jj < 8; jj++) {
-                                for (var kk = 0; kk < 9; kk++) {
-                                    if (map2[jj][kk] === ".") {
-                                        var tmp = this.countadj(map, [jj, kk], "t");
-                                        rfnrtc[jj][kk] = tmp[0] + 1;
-                                    } else {
-                                        rfnrtc[jj][kk] = 0;
-                                    }
-                                    var tmp = this.countadj(map2, [jj, kk], "p");
-                                    if ((tmp[0] + 1) > 0 && rfnrtc[jj][kk] > 0) {
-                                        rfnrtc[jj][kk] = rfnrtc[jj][kk] + 0.5;
-                                    }
-                                }
-                            }
-                            var b = [
-                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                            ];
-                            for (jj2 = 0; jj2 < 8; jj2++) {
-                                for (kk2 = 0; kk2 < 9; kk2++) {
-                                    b[jj2][kk2] = rfnrtc[jj2][kk2];
-                                }
-                            }
-                            var marfn = this.maxx(b);
-                            while (marfn === 1.5 && sltlft > 0) {
-                                for (var jj = 0; jj < 8; jj++) {
-                                    for (var kk = 0; kk < 9; kk++) {
-                                        if (rfnrtc[jj][kk] === marfn && sltlft > 0) {
-                                            rfnrtc[jj][kk] = 0;
-                                            sltlft = sltlft - 1;
-                                            map2[jj][kk] = "r";
-                                        }
-                                    }
-                                }
-                                var b = [
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            for (jj2 = 0; 8 > jj2; jj2++)
+                                for (kk2 = 0; 9 > kk2; kk2++) e[jj2][kk2] = d[jj2][kk2];
+                            for (e = this.maxx(e); 1.5 === e && 0 < h;) {
+                                for (a = 0; 8 > a; a++)
+                                    for (b = 0; 9 > b; b++) d[a][b] === e && 0 < h && (d[a][b] = 0, --h, map2[a][b] = "r");
+                                e = [
+                                    [0, 0, 0, 0, 0, 0, 0, 0,
+                                        0
+                                    ],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3981,15 +3184,11 @@ codes by NetquiK
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0]
                                 ];
-                                for (jj2 = 0; jj2 < 8; jj2++) {
-                                    for (kk2 = 0; kk2 < 9; kk2++) {
-                                        b[jj2][kk2] = rfnrtc[jj2][kk2];
-                                    }
-                                }
-                                var marfn = this.maxx(b);
+                                for (jj2 = 0; 8 > jj2; jj2++)
+                                    for (kk2 = 0; 9 > kk2; kk2++) e[jj2][kk2] = d[jj2][kk2];
+                                e = this.maxx(e)
                             }
-                            //0touches with max pp
-                            var rfnrtc = [
+                            d = [
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -3999,17 +3198,9 @@ codes by NetquiK
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0]
                             ];
-                            for (var jj = 0; jj < 8; jj++) {
-                                for (var kk = 0; kk < 9; kk++) {
-                                    if (map2[jj][kk] === ".") {
-                                        var tmp = this.countadj(map2, [jj, kk], "p");
-                                        rfnrtc[jj][kk] = tmp[0] + 1;
-                                    } else {
-                                        rfnrtc[jj][kk] = 0;
-                                    }
-                                }
-                            }
-                            var b = [
+                            for (a = 0; 8 > a; a++)
+                                for (b = 0; 9 > b; b++) "." === map2[a][b] ? (c = this.countadj(map2, [a, b], "p"), d[a][b] = c[0] + 1) : d[a][b] = 0;
+                            e = [
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -4019,23 +3210,12 @@ codes by NetquiK
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0, 0, 0, 0, 0]
                             ];
-                            for (jj2 = 0; jj2 < 8; jj2++) {
-                                for (kk2 = 0; kk2 < 9; kk2++) {
-                                    b[jj2][kk2] = rfnrtc[jj2][kk2];
-                                }
-                            }
-                            var marfn = this.maxx(b);
-                            while (marfn > 0 && sltlft > 0) {
-                                for (var jj = 0; jj < 8; jj++) {
-                                    for (var kk = 0; kk < 9; kk++) {
-                                        if (rfnrtc[jj][kk] === marfn && sltlft > 0) {
-                                            rfnrtc[jj][kk] = 0;
-                                            sltlft = sltlft - 1;
-                                            map2[jj][kk] = "r";
-                                        }
-                                    }
-                                }
-                                var b = [
+                            for (jj2 = 0; 8 > jj2; jj2++)
+                                for (kk2 = 0; 9 > kk2; kk2++) e[jj2][kk2] = d[jj2][kk2];
+                            for (e = this.maxx(e); 0 < e && 0 < h;) {
+                                for (a = 0; 8 > a; a++)
+                                    for (b = 0; 9 > b; b++) d[a][b] === e && 0 < h && (d[a][b] = 0, --h, map2[a][b] = "r");
+                                e = [
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -4043,18 +3223,16 @@ codes by NetquiK
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                                    [0, 0, 0, 0, 0, 0, 0, 0,
+                                        0
+                                    ]
                                 ];
-                                for (jj2 = 0; jj2 < 8; jj2++) {
-                                    for (kk2 = 0; kk2 < 9; kk2++) {
-                                        b[jj2][kk2] = rfnrtc[jj2][kk2];
-                                    }
-                                }
-                                var marfn = this.maxx(b);
+                                for (jj2 = 0; 8 > jj2; jj2++)
+                                    for (kk2 = 0; 9 > kk2; kk2++) e[jj2][kk2] = d[jj2][kk2];
+                                e = this.maxx(e)
                             }
                         }
-                        //remove holders for crys and tib (do not do this!)
-                        var lvl2 = [
+                        h = [
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -4064,41 +3242,11 @@ codes by NetquiK
                             [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0]
                         ];
-                        var bld2 = [
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."],
-                            [".", ".", ".", ".", ".", ".", ".", ".", "."]
-                        ];
-                        var cccnt = 0;
-                        for (jj2 = 0; jj2 < 8; jj2++) {
-                            for (kk2 = 0; kk2 < 9; kk2++) {
-                                bld2[jj2][kk2] = map2[jj2][kk2];
-                                if (bld2[jj2][kk2] === "." && cccnt === 0) {
-                                    bld2[jj2][kk2] = "y";
-                                    cccnt++;
-                                } else if (bld2[jj2][kk2] === "." && cccnt === 1) {
-                                    bld2[jj2][kk2] = "q";
-                                    cccnt++;
-                                } else if (bld2[jj2][kk2] === "." && cccnt === 2) {
-                                    bld2[jj2][kk2] = "w";
-                                    cccnt++;
-                                } else if (bld2[jj2][kk2] === "." && cccnt === 3) {
-                                    bld2[jj2][kk2] = "z";
-                                    cccnt++;
-                                }
-                                if (bld2[jj2][kk2] === "." || bld2[jj2][kk2] === "t" || bld2[jj2][kk2] === "c") {
-                                    lvl2[jj2][kk2] = 0;
-                                } else {
-                                    lvl2[jj2][kk2] = 12;
-                                }
-                            }
-                        }
-                        return [bld2, lvl2];
+                        d = [".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split(""), ".........".split("")];
+                        for (jj2 = e = 0; 8 > jj2; jj2++)
+                            for (kk2 = 0; 9 > kk2; kk2++) d[jj2][kk2] = map2[jj2][kk2],
+                                "." === d[jj2][kk2] && 0 === e ? (d[jj2][kk2] = "y", e++) : "." === d[jj2][kk2] && 1 === e ? (d[jj2][kk2] = "q", e++) : "." === d[jj2][kk2] && 2 === e ? (d[jj2][kk2] = "w", e++) : "." === d[jj2][kk2] && 3 === e && (d[jj2][kk2] = "z", e++), h[jj2][kk2] = "." === d[jj2][kk2] || "t" === d[jj2][kk2] || "c" === d[jj2][kk2] ? 0 : 12;
+                        return [d, h]
                     }
                 }
             });
