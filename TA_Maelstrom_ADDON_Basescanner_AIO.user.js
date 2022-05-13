@@ -57,7 +57,11 @@ codes by NetquiK
                     createRowStyle: function (rowInfo) {
                         var rowStyle = [];
                         rowStyle.push(";");
-                        rowStyle.push(this._fontStyleString);
+                        if (this._fontStyleString) {
+                            rowStyle.push(this._fontStyleString);
+                        } else {
+                            rowStyle.push(qx.bom.element.Style.compile(qx.theme.manager.Font.getInstance().resolve('default').getStyles()).replace(/"/g, "'"));
+                        }
                         rowStyle.push("background-color:");
                         if (rowInfo.focusedRow && this.getHighlightFocusRow()) {
                             rowStyle.push(rowInfo.selected ? this._colors.bgcolFocusedSelected : this._colors.bgcolFocused);
