@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         22.05.05
+// @version         22.05.12
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -878,14 +878,14 @@ codes by NetquiK
                                     _this._playAreaChildren[11].exclude();
                                 }
                                 //MOD FIX PLAY BUTTON
-                                _this = TABS.GUI.ReportReplayOverlay.getInstance();
-                                let r = _this.ReportReplayOverlay;
-                                null != r[_this.PBIS] && r[_this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
-                                null != r[_this.PBIS_S] && (r[_this.PBIS_S] = !1);
-                                null != r[_this.PBIS_L] && r[_this.PBIS_L].setValue('x1.0');
+                                //_this = TABS.GUI.ReportReplayOverlay.getInstance();
+                                let r = this.ReportReplayOverlay;
+                                null != r[this.PBIS] && r[this.PBIS].setIcon('FactionUI/icons/icon_replay_pause_button.png');
+                                null != r[this.PBIS_S] && (r[this.PBIS_S] = !1);
+                                null != r[this.PBIS_L] && r[this.PBIS_L].setValue('x1.0');
 
                                 ClientLib.Vis.VisMain.GetInstance().get_Battleground().set_ReplaySpeed(1);
-                            }, this, 0);
+                            }, TABS.GUI.ReportReplayOverlay.getInstance(), 0);
                         }
                     }
                 });
@@ -3198,6 +3198,7 @@ codes by NetquiK
                             this.ReportReplayOverlay = qx.core.Init.getApplication().getReportReplayOverlay();
                             //MOD New Play Button Icon Selector
                             this._PlayAreaHUD = this.qxApp.getPlayArea().getHUD();
+                            this._playAreaChildren = this.qxApp.getPlayArea().getChildren();
                             var PBIS_S = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.reports.ReportReplayOverlay.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.reports.ReportReplayOverlay.constructor);
                             var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this\.([_a-zA-Z]+)\.addListener\([a-z]/);
                             "object" == typeof this.ReportReplayOverlay[PBIS_M[1]] && "btn_play" == this.ReportReplayOverlay[PBIS_M[1]].objid && (this.PBIS = PBIS_M[1]);
@@ -3288,8 +3289,12 @@ codes by NetquiK
                                         if (bG.get_CombatComplete() == true) bG.RestartReplay();
                                         //this.TopAttackerPos = bA.get_PositionY() - 500;
                                         /* var pos1 = (this.LastSIM_R.Defense / 100) * ClientLib.Vis.VisMain.GetInstance().get_Battleground().get_ViewHeight() */
+                                        if(!this._playAreaChildren[11].isVisible()){
                                         var overall = (this.LastSIM_R / 100) * bG.get_ViewHeight();
                                         this.TopAttackerPos = this.LastSIM_R < 25 ? bG.get_MinYPosition() : bG.get_MinYPosition() + overall;
+                                        } else {
+                                            this.TopAttackerPos = null;
+                                        }
                                         phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
                                         this.ResetAutoscroll = pA.getPlayerAutoScrollPreference();
                                         this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().hide();
@@ -3344,10 +3349,10 @@ codes by NetquiK
                                     ClientLib.Config.Main.GetInstance().SaveToDB();
                                     this.ResetAutoscroll = 0;
                                 }
-                                bA.SetPosition(0, this.TopAttackerPos);
-                                qx.event.Timer.once(function () {
+                                if (this.TopAttackerPos) bA.SetPosition(0, this.TopAttackerPos);
+                                window.setTimeout(function () {
                                     qx.core.Init.getApplication().getPlayArea().autoScroll = 1
-                                }, 500);
+                                }, 1000);
                                 this.ReportReplayOverlay.setEnabled(true)
                                 this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().show();
                                 phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
