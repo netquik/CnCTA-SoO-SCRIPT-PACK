@@ -4,7 +4,7 @@
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_Basic.user.js
 // @include     http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.8.13
+// @version     1.8.19
 // @author      BlinDManX
 // @contributor leo7044 (https://github.com/leo7044)
 // @contributor AlkalyneD4 Patch 19.3 fix
@@ -26,7 +26,7 @@ codes by NetquiK
 */
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.8.11";
+        window.__msbs_version = "1.8.19";
 
         function createMaelstromTools_Basescanner() {
             qx.Class.define("Addons.BaseScannerGUI", {
@@ -576,8 +576,8 @@ codes by NetquiK
                             this.ZG.setLabel("Pause");
                             this.ZD.setEnabled(false);
                             qx.event.Timer.once(function () {
-                                window.Addons.BaseScannerGUI.getInstance().FJ()
-                            }, 1000);
+                                this.FJ()
+                            }, window.Addons.BaseScannerGUI.getInstance(),  1000);
                             return;
                         }
                         //After Pause
@@ -593,14 +593,14 @@ codes by NetquiK
                             if (c > 0) {
                                 this.ZH = true;
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FG()
-                                }, 1000);
+                                    this.FG()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 1000);
                                 return;
                             } else {
                                 this.ZH = false;
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FJ()
-                                }, 1000);
+                                   this.FJ()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 1000);
                             }
                         } else {
                             this.ZH = false;
@@ -733,8 +733,8 @@ codes by NetquiK
                             this.FP(0, this.ZE.length, 200);
                             this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
                             if (this.YY.name != "DR01D") qx.event.Timer.once(function () {
-                                window.Addons.BaseScannerGUI.getInstance().FG()
-                            }, 50);
+                                this.FG()
+                            }, window.Addons.BaseScannerGUI.getInstance(), 50);
                         } catch (ex) {
                             console.debug("Maelstrom_Basescanner FJ error: ", ex);
                         }
@@ -941,8 +941,8 @@ codes by NetquiK
                             if (this.ZH && Addons.BaseScannerGUI.getInstance().isVisible()) {
                                 //console.log("loop");
                                 qx.event.Timer.once(function () {
-                                    window.Addons.BaseScannerGUI.getInstance().FG()
-                                }, sleeptime);
+                                    this.FG()
+                                }, window.Addons.BaseScannerGUI.getInstance(), sleeptime);
                             } else {
                                 this.ZG.setLabel(this.T.get("Scan"));
                                 this.ZH = false;
