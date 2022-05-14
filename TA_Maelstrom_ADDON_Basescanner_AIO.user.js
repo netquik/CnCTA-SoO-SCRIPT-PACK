@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.20
+// @version     1.8.21
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -29,6 +29,7 @@ codes by NetquiK
 - Reorder Columns Save State
 - Sorting Columns fixed
 - SpeedUP+
+- Fix WorldCity Wrappers Regex
 ----------------
 */
 
@@ -656,7 +657,8 @@ codes by NetquiK
                         ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentCityId(selectedBase.get_Id());
                         if (this.ZT) {
                             var obj = ClientLib.Data.WorldSector.WorldObjectCity.prototype;
-                            var fa = foundfnkstring(obj['$ctor'], /this\.(.{6})=\(?\(?\(?g>>8\)?\&.*d\+=f;this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectCity", 2);
+                            //MOD FIX FOR PLAYER WRAPPERS
+                            var fa = foundfnkstring(obj['$ctor'], /this\.([A-Z]{6})=\(?\(?\(?g>>9\)?\&.*d\+=f;this\.([A-Z]{6})=\(.*d\+=f;this\.[A-Z]{6}=\(/, "ClientLib.Data.WorldSector.WorldObjectCity", 2);
                             if (fa != null && fa[1].length == 6) {
                                 obj.getLevel = function () {
                                     return this[fa[1]];
