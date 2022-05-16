@@ -388,6 +388,7 @@ codes by NetquiK
                             this.ZC.setHeight(25);
                             this.ZC.setMargin(5);
                             this.ZC.setMarginTop(0);
+                            this.OWNS = [];
                             MT_Cache.updateCityCache();
                             MT_Cache = window.MaelstromTools.Cache.getInstance();
                             var cname;
@@ -397,6 +398,7 @@ codes by NetquiK
                                 if (Addons.LocalStorage.getserver("Basescanner_LastCityID") == MT_Cache.Cities[cname].Object.get_Id()) {
                                     this.ZC.setSelection([item]);
                                 }
+                                this.OWNS.push(MT_Cache.Cities[cname].Object.get_Id());
                             }
                             this.ZC.addListener("changeSelection", function (e) {
                                 this.FP(0, 1, 200);
@@ -667,7 +669,7 @@ codes by NetquiK
                                     var o = ClientLib.Data.WorldSector['WorldObject' + obj].prototype;
                                     var g = ClientLib.Vis.Region['Region' + obj].prototype;
                                     var b = (typeof o.get_BaseLevel != 'function') ? g.get_BaseLevel.toString().match(RE)[1] : null;
-                                    var d = (typeof o.get_ID != 'function') ? g.get_Id.toString().match(RE)[1] : null;
+                                    var d = (typeof o.getID != 'function') ? g.get_Id.toString().match(RE)[1] : null;
                                     if (b) o.get_BaseLevel = function () {
                                         return this[b];
                                     }, console.debug('WorldObject' + obj + ' get_BaseLevel = ' + b);
@@ -863,7 +865,7 @@ codes by NetquiK
                             var scanX = 0;
                             var scanY = 0;
                             var world = ClientLib.Data.MainData.GetInstance().get_World();
-                            //var Allies = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
+                            //var Owns = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
                             console.info("Scanning from: " + selectedBase.get_Name());
                             // world.CheckAttackBase (System.Int32 targetX ,System.Int32 targetY) -> ClientLib.Data.EAttackBaseResult
                             // world.CheckAttackBaseRegion (System.Int32 targetX ,System.Int32 targetY) -> ClientLib.Data.EAttackBaseResult
@@ -908,7 +910,9 @@ codes by NetquiK
                                             var needcp = selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY);
                                             if (needcp <= ZQ && typeof object.getID == 'function') {
                                                 //MOD not add if ownbase
-                                                if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
+                                                if (c5 <= object.get_BaseLevel() && !this.OWNS.includes(object.getID())) {
+                                                //Owns.hasOwnProperty(object.getID())) {
+                                                //if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
                                                     // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
                                                     // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
                                                     var d = this.FL(object.getID(), 0);
@@ -1042,7 +1046,7 @@ codes by NetquiK
                                     //console.log("ncity", ncity);
                                     if (ncity != null) {
                                         // MOD remove if Ally
-                                        if (!ncity.get_IsGhostMode() && !ncity.IsAllianceBase()) {
+                                        if (!ncity.get_IsGhostMode() && (!ncity.IsAllianceBase() || ![1,2].includes(ClientLib.Data.MainData.GetInstance().get_Alliance().GetRelation(ncity)))) {
                                             //if(ncity.get_Name() != null)
                                             //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
                                             //var cityBuildings = ncity.get_CityBuildingsData();
