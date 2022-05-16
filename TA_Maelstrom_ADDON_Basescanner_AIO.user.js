@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9
+// @version     1.9.1
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -36,7 +36,7 @@ codes by NetquiK
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9 AIO";
+        window.__msbs_version = "1.9.1 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -762,16 +762,18 @@ codes by NetquiK
                                 g++;
                             }
                         }
-                        // GR only setvalues
-                        if (this.GR_Fill && g > 0) {
-                            qx.event.Timer.once(function () {
-                                this.GR()
-                            }, window.Addons.BaseScannerGUI.getInstance(), 1000);
-                            return;
-                        }
+
                         if (!this.ZH) {
                             this.ZG.setLabel("Pause");
                             this.ZD.setEnabled(false);
+                            // GR only setvalues
+                            if (this.GR_Fill && g > 0) {
+                                this.ZH = true;
+                                qx.event.Timer.once(function () {
+                                    this.GR()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 1000);
+                                return;
+                            }
                             if (c > 0) {
                                 this.ZH = true;
                                 qx.event.Timer.once(function () {
@@ -797,43 +799,45 @@ codes by NetquiK
                         }
                     },
                     GR: function () { //MOD GR only fill
-                        if (!this.GR_to_Fill) {
-                            this.GR_to_Fill = []
-                            for (i = 0; i < this.ZE.length; i++) {
-                                if (this.ZE[i][1] == -1) {
-                                    break;
-                                }
-                                if (this.ZE[i][14] == "-") {
-                                    this.GR_to_Fill.push({
-                                        "index": i,
-                                        "id": this.ZE[i][0]
-                                    });
-                                }
+                        if (this.ZH) {
+                            if (!this.GR_to_Fill || this.GR_to_Fill.length == 0) {
+                                this.GR_to_Fill = []
+                                for (i = 0; i < this.ZE.length; i++) {
+                                    if (this.ZE[i][1] == -1) {
+                                        break;
+                                    }
+                                    if (this.ZE[i][14] == "-") {
+                                        this.GR_to_Fill.push({
+                                            "index": i,
+                                            "id": this.ZE[i][0]
+                                        });
+                                    }
 
+                                }
                             }
-                        }
-
-                        let index = this.GR_to_Fill[0]['index'];
-                        let id = this.GR_to_Fill[0]['id'];
-                        if (this.ZS[id]) {
-                            this.FP(index + 1, this.ZE.length, 200); //Progressbar
-                            this.ZM[id] = this.ZS[id];
-                            //this.ZZ[index][14] = this.maaain(id);
-                            this.ZL.setValue(14, index, this.maaain(id));
-                            this.ZN.updateContent();
-                        }
-                        this.GR_to_Fill.shift();
-                        if (this.GR_to_Fill.length > 0) {
-                            qx.event.Timer.once(function () {
-                                this.GR()
-                            }, window.Addons.BaseScannerGUI.getInstance(), 200);
-                        } else {
-                            this.GR_Fill = false;
-                            this.GR_to_Fill = null;
-                            this.FE();
-                        }
 
 
+                            let index = this.GR_to_Fill[0]['index'];
+                            let id = this.GR_to_Fill[0]['id'];
+                            if (this.ZS[id]) {
+                                this.FP(index + 1, this.ZE.length, 200); //Progressbar
+                                this.ZM[id] = this.ZS[id];
+                                //this.ZZ[index][14] = this.maaain(id);
+                                this.ZL.setValue(14, index, this.maaain(id));
+                                this.ZN.updateContent();
+                            }
+                            this.GR_to_Fill.shift();
+                            if (this.GR_to_Fill.length > 0) {
+                                qx.event.Timer.once(function () {
+                                    this.GR()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 200);
+                            } else {
+                                this.GR_Fill = false;
+                                this.GR_to_Fill = null;
+                                this.FE();
+                            }
+
+                        }
 
 
                     },
@@ -911,8 +915,8 @@ codes by NetquiK
                                             if (needcp <= ZQ && typeof object.getID == 'function') {
                                                 //MOD not add if ownbase
                                                 if (c5 <= object.get_BaseLevel() && !this.OWNS.includes(object.getID())) {
-                                                //Owns.hasOwnProperty(object.getID())) {
-                                                //if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
+                                                    //Owns.hasOwnProperty(object.getID())) {
+                                                    //if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
                                                     // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
                                                     // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
                                                     var d = this.FL(object.getID(), 0);
@@ -1046,7 +1050,7 @@ codes by NetquiK
                                     //console.log("ncity", ncity);
                                     if (ncity != null) {
                                         // MOD remove if Ally
-                                        if (!ncity.get_IsGhostMode() && (!ncity.IsAllianceBase() || ![1,2].includes(ClientLib.Data.MainData.GetInstance().get_Alliance().GetRelation(ncity)))) {
+                                        if (!ncity.get_IsGhostMode() && (!ncity.IsAllianceBase() || ![1, 2].includes(ClientLib.Data.MainData.GetInstance().get_Alliance().GetRelation(ncity)))) {
                                             //if(ncity.get_Name() != null)
                                             //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
                                             //var cityBuildings = ncity.get_CityBuildingsData();
