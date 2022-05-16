@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.21
+// @version     1.8.3
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -29,7 +29,8 @@ codes by NetquiK
 - Reorder Columns Save State
 - Sorting Columns fixed
 - SpeedUP+
-- Fix WorldCity Wrappers Regex
+- New WorldCity Wrappers
+- Not add Allies or Own Bases
 ----------------
 */
 
@@ -656,62 +657,86 @@ codes by NetquiK
                         ClientLib.Vis.VisMain.GetInstance().ViewUpdate();
                         ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentCityId(selectedBase.get_Id());
                         if (this.ZT) {
-                            var obj = ClientLib.Data.WorldSector.WorldObjectCity.prototype;
                             //MOD FIX FOR PLAYER WRAPPERS
-                            var fa = foundfnkstring(obj['$ctor'], /this\.([A-Z]{6})=\(?\(?\(?g>>9\)?\&.*d\+=f;this\.([A-Z]{6})=\(.*d\+=f;this\.[A-Z]{6}=\(/, "ClientLib.Data.WorldSector.WorldObjectCity", 2);
-                            if (fa != null && fa[1].length == 6) {
-                                obj.getLevel = function () {
-                                    return this[fa[1]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectCity.Level undefined");
+                            try {
+                                var RE = /return this\.[A-Z]{6}\.([A-Z]{6})/;
+                                var objs = ['City', 'NPCBase', 'NPCCamp'];
+                                objs.forEach(wrap);
+
+                                function wrap(obj) {
+                                    var o = ClientLib.Data.WorldSector['WorldObject' + obj].prototype;
+                                    var g = ClientLib.Vis.Region['Region' + obj].prototype;
+                                    var b = (typeof o.get_BaseLevel != 'function') ? g.get_BaseLevel.toString().match(RE)[1] : null;
+                                    var d = (typeof o.get_ID != 'function') ? g.get_Id.toString().match(RE)[1] : null;
+                                    if (b) o.get_BaseLevel = function () {
+                                        return this[b];
+                                    }, console.debug('WorldObject' + obj + ' get_BaseLevel = ' + b);
+                                    if (d) o.getID = function () {
+                                        return this[d];
+                                    }, console.debug('WorldObject' + obj + ' get_ID = ' + d);
+                                }
+                            } catch (e) {
+                                console.debug("Maelstrom_Basescanner WRAPPERS error: ", e);
                             }
-                            if (fa != null && fa[2].length == 6) {
-                                obj.getID = function () {
-                                    return this[fa[2]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectCity.ID undefined");
-                            }
-                            obj = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
-                            var fb = foundfnkstring(obj['$ctor'], /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectNPCBase", 2);
-                            if (fb != null && fb[1].length == 6) {
-                                obj.getLevel = function () {
-                                    return this[fb[1]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined");
-                            }
-                            if (fb != null && fb[2].length == 6) {
-                                obj.getID = function () {
-                                    return this[fb[2]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.ID undefined");
-                            }
-                            obj = ClientLib.Data.WorldSector.WorldObjectNPCCamp.prototype;
-                            var fc = foundfnkstring(obj['$ctor'], /100\){0,1};this\.(.{6})=Math.floor.*this\.(.{6})=\(*g\>\>(22|0x16)\)*\&.*=-1;\}this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectNPCCamp", 4);
-                            if (fc != null && fc[1].length == 6) {
-                                obj.getLevel = function () {
-                                    return this[fc[1]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.Level undefined");
-                            }
-                            if (fc != null && fc[2].length == 6) {
-                                obj.getCampType = function () {
-                                    return this[fc[2]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.CampType undefined");
-                            }
-                            if (fc != null && fc[4].length == 6) {
-                                obj.getID = function () {
-                                    return this[fc[4]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.ID undefined");
-                            }
+
+
+                            /*                             var obj = ClientLib.Data.WorldSector.WorldObjectCity.prototype;
+                                                        var fa = foundfnkstring(obj['$ctor'], /this\.([A-Z]{6})=\(?\(?\(?g>>9\)?\&.*d\+=f;this\.([A-Z]{6})=\(.*d\+=f;this\.[A-Z]{6}=\(/, "ClientLib.Data.WorldSector.WorldObjectCity", 2);
+                                                        if (fa != null && fa[1].length == 6) {
+                                                            obj.getLevel = function () {
+                                                                return this[fa[1]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectCity.Level undefined");
+                                                        }
+                                                        if (fa != null && fa[2].length == 6) {
+                                                            obj.getID = function () {
+                                                                return this[fa[2]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectCity.ID undefined");
+                                                        }
+                                                        obj = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
+                                                        var fb = foundfnkstring(obj['$ctor'], /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectNPCBase", 2);
+                                                        if (fb != null && fb[1].length == 6) {
+                                                            obj.getLevel = function () {
+                                                                return this[fb[1]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined");
+                                                        }
+                                                        if (fb != null && fb[2].length == 6) {
+                                                            obj.getID = function () {
+                                                                return this[fb[2]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.ID undefined");
+                                                        }
+                                                        obj = ClientLib.Data.WorldSector.WorldObjectNPCCamp.prototype;
+                                                        var fc = foundfnkstring(obj['$ctor'], /100\){0,1};this\.(.{6})=Math.floor.*this\.(.{6})=\(*g\>\>(22|0x16)\)*\&.*=-1;\}this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectNPCCamp", 4);
+                                                        if (fc != null && fc[1].length == 6) {
+                                                            obj.getLevel = function () {
+                                                                return this[fc[1]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.Level undefined");
+                                                        }
+                                                         if (fc != null && fc[2].length == 6) {
+                                                            obj.getCampType = function () {
+                                                                return this[fc[2]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.CampType undefined");
+                                                        } 
+                                                        if (fc != null && fc[4].length == 6) {
+                                                            obj.getID = function () {
+                                                                return this[fc[4]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.ID undefined");
+                                                        }
+                                                        
+                                                       */
                             this.ZT = false;
                         }
                         //Firstscan
@@ -838,6 +863,7 @@ codes by NetquiK
                             var scanX = 0;
                             var scanY = 0;
                             var world = ClientLib.Data.MainData.GetInstance().get_World();
+                            //var Allies = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
                             console.info("Scanning from: " + selectedBase.get_Name());
                             // world.CheckAttackBase (System.Int32 targetX ,System.Int32 targetY) -> ClientLib.Data.EAttackBaseResult
                             // world.CheckAttackBaseRegion (System.Int32 targetX ,System.Int32 targetY) -> ClientLib.Data.EAttackBaseResult
@@ -855,9 +881,10 @@ codes by NetquiK
                                     if (distance <= maxAttackDistance) {
                                         var object = world.GetObjectFromPosition(scanX, scanY);
                                         var loot = {};
-                                        if (object) {
+                                        //MOD Scan only correct types and get existing functions
+                                        if (object && [1, 2, 3].includes(object.Type)) {
                                             //console.log(object);
-                                            if (object.Type == 1 && t1) {
+                                            /* if (object.Type == 1 && t1) {
                                                 //console.log("object typ 1");
                                                 //objfnkstrON(object);
                                                 //t1 = !t1;
@@ -873,14 +900,15 @@ codes by NetquiK
                                                 //t3 = !t3;
                                             }
                                             if (object.Type == 3) {
-                                                if (c5 <= parseInt(object.getLevel(), 10)) {
+                                                //if (c5 <= parseInt(object.getLevel(), 10)) {
                                                     //console.log(object);
-                                                }
-                                            }
+                                                //}
+                                            } */
                                             //if(object.ConditionBuildings>0){
                                             var needcp = selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY);
-                                            if (needcp <= ZQ && typeof object.getLevel == 'function') {
-                                                if (c5 <= parseInt(object.getLevel(), 10)) {
+                                            if (needcp <= ZQ && typeof object.getID == 'function') {
+                                                //MOD not add if ownbase
+                                                if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
                                                     // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
                                                     // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
                                                     var d = this.FL(object.getID(), 0);
@@ -895,7 +923,7 @@ codes by NetquiK
                                                         if (d != null) {
                                                             this.ZE.push(d);
                                                         } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                            this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                         }
                                                     }
                                                     if (object.Type == 2 && c2) { //basen
@@ -903,28 +931,29 @@ codes by NetquiK
                                                         if (d != null) {
                                                             this.ZE.push(d);
                                                         } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                            this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                         }
                                                     }
                                                     if (object.Type == 3 && (c3 || c4)) { //Lager Vposten
                                                         //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
+                                                        //MOD Using functions already available object.get_CampType()
                                                         if (d != null) {
-                                                            if ((object.getCampType() == 2 || object.getCampType() == 1) && c4) {
+                                                            if ((object.get_CampType() == 2 || object.get_CampType() == 1) && c4) {
                                                                 this.ZE.push(d);
-                                                            } else if ((object.getCampType() == 7) && c4) {
+                                                            } else if ((object.get_CampType() == 7) && c4) {
                                                                 this.ZE.push(d);
-                                                            } else if (object.getCampType() == 3 && c3) {
+                                                            } else if (object.get_CampType() == 3 && c3) {
                                                                 this.ZE.push(d);
                                                             }
                                                         } else {
-                                                            if ((object.getCampType() == 7 || object.getCampType() == 2 || object.getCampType() == 1) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                            if ((object.get_CampType() == 7 || object.get_CampType() == 2 || object.get_CampType() == 1) && c4) {
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
-                                                            if ((object.getCampType() == 7) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                            if ((object.get_CampType() == 7) && c4) {
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
-                                                            if (object.getCampType() == 3 && c3) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                            if (object.get_CampType() == 3 && c3) {
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
                                                         }
                                                     }
@@ -975,7 +1004,7 @@ codes by NetquiK
                                 var selectedid = 0;
                                 var id = 0;
                                 if (this.ZE == null) {
-                                    console.warn("data null: ");
+                                    console.warn("Scanning data empty");
                                     this.ZH = false;
                                     break;
                                 }
@@ -990,7 +1019,7 @@ codes by NetquiK
                                 }
                                 this.FP(i, this.ZE.length, 200); //Progressbar
                                 if (this.ZE[i] == null) {
-                                    console.warn("data[i] null: ");
+                                    console.log("Scanning data empty");
                                     this.ZH = false;
                                     this.ZG.setLabel(this.T.get("Scan"));
                                     this.ZD.setEnabled(true);
@@ -1012,7 +1041,8 @@ codes by NetquiK
                                     ncity = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(id);
                                     //console.log("ncity", ncity);
                                     if (ncity != null) {
-                                        if (!ncity.get_IsGhostMode()) {
+                                        // MOD remove if Ally
+                                        if (!ncity.get_IsGhostMode() || ncity.IsAllianceBase()) {
                                             //if(ncity.get_Name() != null)
                                             //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
                                             //var cityBuildings = ncity.get_CityBuildingsData();
@@ -1192,7 +1222,7 @@ codes by NetquiK
                                                 }
                                             }
                                         } else {
-                                            console.info(this.ZE[i][2], " on ", posX, posY, " removed (IsGhostMode)");
+                                            console.info(this.ZE[i][2], " on ", posX, posY, " removed (IsGhostMode) or Ally");
                                             this.ZE.splice(i, 1); //entfernt element aus array
                                             break;
                                         }
@@ -3854,24 +3884,24 @@ codes by NetquiK
             }
         }
 
-        function foundfnkstring(obj, redex, objname, n) {
-            var redexfounds = [];
-            var s = obj.toString();
-            var protostring = s.replace(/\s/gim, "");
-            redexfounds = protostring.match(redex);
-            var i;
-            for (i = 1; i < (n + 1); i++) {
-                if (redexfounds != null && redexfounds[i].length == 6) {
-                    console.debug(objname, i, redexfounds[i]);
-                } else if (redexfounds != null && redexfounds[i].length > 0) {
-                    console.warn(objname, i, redexfounds[i]);
-                } else {
-                    console.error("Error - ", objname, i, "not found");
-                    console.warn(objname, protostring);
-                }
-            }
-            return redexfounds;
-        }
+        /*         function foundfnkstring(obj, redex, objname, n) {
+                    var redexfounds = [];
+                    var s = obj.toString();
+                    var protostring = s.replace(/\s/gim, "");
+                    redexfounds = protostring.match(redex);
+                    var i;
+                    for (i = 1; i < (n + 1); i++) {
+                        if (redexfounds != null && redexfounds[i].length == 6) {
+                            console.debug(objname, i, redexfounds[i]);
+                        } else if (redexfounds != null && redexfounds[i].length > 0) {
+                            console.warn(objname, i, redexfounds[i]);
+                        } else {
+                            console.error("Error - ", objname, i, "not found");
+                            console.warn(objname, protostring);
+                        }
+                    }
+                    return redexfounds;
+                } */
 
         function MaelstromTools_Basescanner_checkIfLoaded() {
             try {
