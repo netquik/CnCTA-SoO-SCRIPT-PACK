@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1
+// @version     1.9.1.1
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -36,7 +36,7 @@ codes by NetquiK
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1 AIO";
+        window.__msbs_version = "1.9.1.1 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -927,6 +927,7 @@ codes by NetquiK
                                                         this.ZM[object.getID()] = e;
                                                     }
                                                     if (object.Type == 1 && c1) { //User
+                                                       // (!ncity.IsAllianceBase()  || ![1, 2].includes(ClientLib.Data.MainData.GetInstance().get_Alliance().GetRelation(ncity))*
                                                         //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
                                                         if (d != null) {
                                                             this.ZE.push(d);
@@ -1050,7 +1051,7 @@ codes by NetquiK
                                     //console.log("ncity", ncity);
                                     if (ncity != null) {
                                         // MOD remove if Ally
-                                        if (!ncity.get_IsGhostMode() && (!ncity.IsAllianceBase() || ![1, 2].includes(ClientLib.Data.MainData.GetInstance().get_Alliance().GetRelation(ncity)))) {
+                                        if (!ncity.get_IsGhostMode()) {
                                             //if(ncity.get_Name() != null)
                                             //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
                                             //var cityBuildings = ncity.get_CityBuildingsData();
