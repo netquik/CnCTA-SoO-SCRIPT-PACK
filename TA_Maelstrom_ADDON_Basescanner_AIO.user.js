@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1.3
+// @version     1.9.1.4
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -36,7 +36,7 @@ codes by NetquiK
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1.3 AIO";
+        window.__msbs_version = "1.9.1.4 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -843,7 +843,6 @@ codes by NetquiK
                     },
                     FJ: function () {
                         try {
-                            var pally = ClientLib.Data.MainData.GetInstance().get_Alliance().get_Id();
                             this.ZM = {};
                             this.crysCounter = {};
                             this.tibCounter = {};
@@ -913,9 +912,9 @@ codes by NetquiK
                                             } */
                                             //if(object.ConditionBuildings>0){
                                             var needcp = selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY);
-                                            if (needcp <= ZQ && typeof object.getID == 'function') {
+                                            if (needcp <= ZQ && typeof object.getID === 'function' && typeof object.get_BaseLevel === 'function') {
                                                 //MOD not add if ownbase
-                                                if (c5 <= object.get_BaseLevel() && !this.OWNS.includes(object.getID()) && !this.ALLY.includes(object.getID())) {
+                                                if (c5 <= parseInt(object.get_BaseLevel(), 10) && !this.OWNS.includes(object.getID()) && !this.ALLY.includes(object.getID())) {
                                                     //Owns.hasOwnProperty(object.getID())) {
                                                     //if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
                                                     // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
@@ -928,8 +927,6 @@ codes by NetquiK
                                                         this.ZM[object.getID()] = e;
                                                     }
                                                     if (object.Type == 1 && c1) { //User
-                                                        // (!ncity.IsAllianceBase()  || ![1, 2].includes(ClientLib.Data.MainData.GetInstance().get_Alliance().GetRelation(ncity))*
-                                                        //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
                                                         if (d != null) {
                                                             this.ZE.push(d);
                                                         } else {
