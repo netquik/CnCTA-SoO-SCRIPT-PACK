@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name        Maelstrom ADDON Basescanner AIO
+// @name        Maelstrom ADDON Basescanner AIO Plus
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1.6
+// @version     1.9.1.7
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -31,12 +31,13 @@ codes by NetquiK
 - SpeedUP+
 - New WorldCity Wrappers
 - Not add Allies or Own Bases
+- Fix for clear cache
 ----------------
 */
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1.6 AIO";
+        window.__msbs_version = "1.9.1.7 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -540,6 +541,7 @@ codes by NetquiK
                                 marginTop: 0
                             });
                             this.YZ.addListener("execute", function () {
+                                this.ZE = [];
                                 this.ZZ = [];
                                 this.ALLY = [];
                             }, this);
@@ -823,22 +825,29 @@ codes by NetquiK
                                 }
                             }
 
-
-                            let index = this.GR_to_Fill[0]['index'];
-                            let id = this.GR_to_Fill[0]['id'];
-                            if (this.ZS[id]) {
-                                this.FP(index + 1, this.ZE.length, 200); //Progressbar
-                                this.ZM[id] = this.ZS[id];
-                                //this.ZZ[index][14] = this.maaain(id);
-                                this.ZL.setValue(14, index, this.maaain(id));
-                                this.ZN.updateContent();
+                            if (this.GR_to_Fill.length == 0) {
+                                this.ZH = false
+                                this.GR_Fill = false;
+                                this.GR_to_Fill = null;
+                                this.FE();
+                            } else {
+                                let index = this.GR_to_Fill[0]['index'];
+                                let id = this.GR_to_Fill[0]['id'];
+                                if (this.ZS[id]) {
+                                    this.FP(index + 1, this.ZE.length, 200); //Progressbar
+                                    this.ZM[id] = this.ZS[id];
+                                    //this.ZZ[index][14] = this.maaain(id);
+                                    this.ZL.setValue(14, index, this.maaain(id));
+                                    this.ZN.updateContent();
+                                }
+                                this.GR_to_Fill.shift();
                             }
-                            this.GR_to_Fill.shift();
                             if (this.GR_to_Fill.length > 0) {
                                 qx.event.Timer.once(function () {
                                     this.GR()
                                 }, window.Addons.BaseScannerGUI.getInstance(), 200);
                             } else {
+                                this.ZH = false
                                 this.GR_Fill = false;
                                 this.GR_to_Fill = null;
                                 this.FE();
