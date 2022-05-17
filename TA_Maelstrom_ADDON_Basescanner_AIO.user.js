@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1.5
+// @version     1.9.1.6
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -36,7 +36,7 @@ codes by NetquiK
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1.5 AIO";
+        window.__msbs_version = "1.9.1.6 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -155,6 +155,7 @@ codes by NetquiK
                     YZ: null,
                     YY: null,
                     ALLY: [],
+                    skip: -1,
                     openWindow: function (title) {
                         try {
                             this.setCaption(title);
@@ -661,7 +662,7 @@ codes by NetquiK
                         ClientLib.Vis.VisMain.GetInstance().ViewUpdate();
                         ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentCityId(selectedBase.get_Id());
                         if (this.ZT) {
-                            //MOD FIX FOR PLAYER WRAPPERS
+                            //MOD FIX FOR PLAYER WRAPPERS (NEW CODE FOR ALL)
                             try {
                                 var RE = /return this\.[A-Z]{6}\.([A-Z]{6})/;
                                 var objs = ['City', 'NPCBase', 'NPCCamp'];
@@ -874,7 +875,6 @@ codes by NetquiK
                             var posY = selectedBase.get_PosY();
                             var scanX = 0;
                             var scanY = 0;
-                            var skip = 0;
                             var world = ClientLib.Data.MainData.GetInstance().get_World();
                             //var Owns = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
                             console.info("Scanning from: " + selectedBase.get_Name());
@@ -921,8 +921,8 @@ codes by NetquiK
                                             var needcp = selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY);
                                             if (needcp <= ZQ && typeof object.getID === 'function' && typeof object.get_BaseLevel === 'function') {
                                                 //MOD not add if ownbase or ally previuosly detected
-                                                if ((!this.OWNS.includes(object.getID()) && !this.ALLY.includes(object.getID())) && skip++) {
-                                                    skip--;
+                                                if (this.skip++ && !this.OWNS.includes(object.getID()) && !this.ALLY.includes(object.getID())) {
+                                                    this.skip--;
                                                     if (c5 <= parseInt(object.get_BaseLevel(), 10)) {
                                                         //Owns.hasOwnProperty(object.getID())) {
                                                         //if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
@@ -981,7 +981,8 @@ codes by NetquiK
                                     }
                                 }
                             }
-                            console.log('Skipped ' + skip + ' Own or Ally Cities');
+                            console.log('Skipped ' + this.skip + ' Own or Ally Cities');
+                            this.skip = -1;
                             this.ZH = true;
                             this.ZL.setData(this.ZE);
                             if (colsort == -1) {
@@ -1244,12 +1245,16 @@ codes by NetquiK
                                             } else {
                                                 console.info(this.ZE[i][2], " on ", posX, posY, " removed (IsGhostMode)");
                                                 this.ZE.splice(i, 1); //entfernt element aus array
+                                                this.ZA = 0;
+                                                this.countlastidchecked = 0;
                                                 this.ZL.setData(this.ZE);
                                                 break;
                                             }
                                         } else {
                                             console.info(this.ZE[i][2], " on ", posX, posY, " removed Ally");
                                             this.ZE.splice(i, 1); //entfernt element aus array
+                                            this.ZA = 0;
+                                            this.countlastidchecked = 0;
                                             this.ZL.setData(this.ZE);
                                             this.ALLY.push(id);
                                             break;
