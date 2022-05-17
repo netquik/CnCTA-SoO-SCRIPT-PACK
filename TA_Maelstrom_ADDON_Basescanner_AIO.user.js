@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1.2
+// @version     1.9.1.3
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -36,7 +36,7 @@ codes by NetquiK
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1.1 AIO";
+        window.__msbs_version = "1.9.1.3 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -665,20 +665,18 @@ codes by NetquiK
                             try {
                                 var RE = /return this\.[A-Z]{6}\.([A-Z]{6})/;
                                 var objs = ['City', 'NPCBase', 'NPCCamp'];
-                                objs.forEach(wrap);
-
-                                function wrap(obj) {
+                                objs.forEach(obj => {
                                     var o = ClientLib.Data.WorldSector['WorldObject' + obj].prototype;
                                     var g = ClientLib.Vis.Region['Region' + obj].prototype;
                                     var b = (typeof o.get_BaseLevel != 'function') ? g.get_BaseLevel.toString().match(RE)[1] : null;
                                     var d = (typeof o.getID != 'function') ? g.get_Id.toString().match(RE)[1] : null;
                                     if (b) o.get_BaseLevel = function () {
                                         return this[b];
-                                    }, console.debug('WorldObject' + obj + ' get_BaseLevel = ' + b);
+                                    }, console.log('WorldObject' + obj + ' get_BaseLevel = ' + b);
                                     if (d) o.getID = function () {
                                         return this[d];
-                                    }, console.debug('WorldObject' + obj + ' get_ID = ' + d);
-                                }
+                                    }, console.log('WorldObject' + obj + ' getID = ' + d);
+                                })
                             } catch (e) {
                                 console.debug("Maelstrom_Basescanner WRAPPERS error: ", e);
                             }
