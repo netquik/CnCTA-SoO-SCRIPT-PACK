@@ -2,11 +2,11 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1.4
+// @version     1.9.1.5
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
-// @contributor Netquik (https://github.com/netquik) 
+// @contributor Netquik (https://github.com/netquik)
 // @grant       none
 // @copyright   2012+, Claus Neumann
 // @license     CC BY-NC-ND 3.0 - http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -14,7 +14,7 @@
 // ==/UserScript==
 
 
-/* 
+/*
 codes by NetquiK
 ----------------
 - Sync with Base Scanner Basic code
@@ -36,7 +36,7 @@ codes by NetquiK
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1.4 AIO";
+        window.__msbs_version = "1.9.1.5 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -670,12 +670,18 @@ codes by NetquiK
                                     var g = ClientLib.Vis.Region['Region' + obj].prototype;
                                     var b = (typeof o.get_BaseLevel != 'function') ? g.get_BaseLevel.toString().match(RE)[1] : null;
                                     var d = (typeof o.getID != 'function') ? g.get_Id.toString().match(RE)[1] : null;
+                                    if (obj == 'NPCCamp') {
+                                        var t = (typeof o.get_CampType != 'function') ? g.get_CampType.toString().match(RE)[1] : null;
+                                    }
                                     if (b) o.get_BaseLevel = function () {
                                         return this[b];
                                     }, console.log('WorldObject' + obj + ' get_BaseLevel = ' + b);
                                     if (d) o.getID = function () {
                                         return this[d];
                                     }, console.log('WorldObject' + obj + ' getID = ' + d);
+                                    if (t) o.get_CampType = function () {
+                                        return this[t];
+                                    }, console.log('WorldObject' + obj + ' get_CampType = ' + t);
                                 })
                             } catch (e) {
                                 console.debug("Maelstrom_Basescanner WRAPPERS error: ", e);
@@ -868,6 +874,7 @@ codes by NetquiK
                             var posY = selectedBase.get_PosY();
                             var scanX = 0;
                             var scanY = 0;
+                            var skip = 0;
                             var world = ClientLib.Data.MainData.GetInstance().get_World();
                             //var Owns = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
                             console.info("Scanning from: " + selectedBase.get_Name());
@@ -913,54 +920,57 @@ codes by NetquiK
                                             //if(object.ConditionBuildings>0){
                                             var needcp = selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY);
                                             if (needcp <= ZQ && typeof object.getID === 'function' && typeof object.get_BaseLevel === 'function') {
-                                                //MOD not add if ownbase
-                                                if (c5 <= parseInt(object.get_BaseLevel(), 10) && !this.OWNS.includes(object.getID()) && !this.ALLY.includes(object.getID())) {
-                                                    //Owns.hasOwnProperty(object.getID())) {
-                                                    //if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
-                                                    // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
-                                                    // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
-                                                    var d = this.FL(object.getID(), 0);
-                                                    //MOD Fix needcp when cached city by Netquik
-                                                    null != d && d[13] !== needcp && (d[13] = needcp);
-                                                    var e = this.FL(object.getID(), 1);
-                                                    if (e != null) {
-                                                        this.ZM[object.getID()] = e;
-                                                    }
-                                                    if (object.Type == 1 && c1) { //User
-                                                        if (d != null) {
-                                                            this.ZE.push(d);
-                                                        } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                //MOD not add if ownbase or ally previuosly detected
+                                                if ((!this.OWNS.includes(object.getID()) && !this.ALLY.includes(object.getID())) && skip++) {
+                                                    skip--;
+                                                    if (c5 <= parseInt(object.get_BaseLevel(), 10)) {
+                                                        //Owns.hasOwnProperty(object.getID())) {
+                                                        //if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
+                                                        // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
+                                                        // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
+                                                        var d = this.FL(object.getID(), 0);
+                                                        //MOD Fix needcp when cached city by Netquik
+                                                        null != d && d[13] !== needcp && (d[13] = needcp);
+                                                        var e = this.FL(object.getID(), 1);
+                                                        if (e != null) {
+                                                            this.ZM[object.getID()] = e;
                                                         }
-                                                    }
-                                                    if (object.Type == 2 && c2) { //basen
-                                                        //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
-                                                        if (d != null) {
-                                                            this.ZE.push(d);
-                                                        } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                        if (object.Type == 1 && c1) { //User
+                                                            if (d != null) {
+                                                                this.ZE.push(d);
+                                                            } else {
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                            }
                                                         }
-                                                    }
-                                                    if (object.Type == 3 && (c3 || c4)) { //Lager Vposten
-                                                        //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
-                                                        //MOD Using functions already available object.get_CampType()
-                                                        if (d != null) {
-                                                            if ((object.get_CampType() == 2 || object.get_CampType() == 1) && c4) {
+                                                        if (object.Type == 2 && c2) { //basen
+                                                            //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
+                                                            if (d != null) {
                                                                 this.ZE.push(d);
-                                                            } else if ((object.get_CampType() == 7) && c4) {
-                                                                this.ZE.push(d);
-                                                            } else if (object.get_CampType() == 3 && c3) {
-                                                                this.ZE.push(d);
+                                                            } else {
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
-                                                        } else {
-                                                            if ((object.get_CampType() == 7 || object.get_CampType() == 2 || object.get_CampType() == 1) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
-                                                            }
-                                                            if ((object.get_CampType() == 7) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
-                                                            }
-                                                            if (object.get_CampType() == 3 && c3) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                        }
+                                                        if (object.Type == 3 && (c3 || c4)) { //Lager Vposten
+                                                            //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
+                                                            //MOD Using functions already available object.get_CampType()
+                                                            if (d != null) {
+                                                                if ((object.get_CampType() == 2 || object.get_CampType() == 1) && c4) {
+                                                                    this.ZE.push(d);
+                                                                } else if ((object.get_CampType() == 7) && c4) {
+                                                                    this.ZE.push(d);
+                                                                } else if (object.get_CampType() == 3 && c3) {
+                                                                    this.ZE.push(d);
+                                                                }
+                                                            } else {
+                                                                if ((object.get_CampType() == 7 || object.get_CampType() == 2 || object.get_CampType() == 1) && c4) {
+                                                                    this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                                }
+                                                                if ((object.get_CampType() == 7) && c4) {
+                                                                    this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                                }
+                                                                if (object.get_CampType() == 3 && c3) {
+                                                                    this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -971,6 +981,7 @@ codes by NetquiK
                                     }
                                 }
                             }
+                            console.log('Skipped ' + skip + ' Own or Ally Cities');
                             this.ZH = true;
                             this.ZL.setData(this.ZE);
                             if (colsort == -1) {
