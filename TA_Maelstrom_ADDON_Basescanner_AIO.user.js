@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1.1
+// @version     1.9.1.2
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -154,6 +154,7 @@ codes by NetquiK
                     ZS: {},
                     YZ: null,
                     YY: null,
+                    ALLY: [],
                     openWindow: function (title) {
                         try {
                             this.setCaption(title);
@@ -539,6 +540,7 @@ codes by NetquiK
                             });
                             this.YZ.addListener("execute", function () {
                                 this.ZZ = [];
+                                this.ALLY = [];
                             }, this);
                             oOptions.add(this.YZ);
                             this.ZK[4] = new qx.ui.form.CheckBox(this.T.get("Only center on World"));
@@ -843,6 +845,7 @@ codes by NetquiK
                     },
                     FJ: function () {
                         try {
+                            var pally = ClientLib.Data.MainData.GetInstance().get_Alliance().get_Id();
                             this.ZM = {};
                             this.crysCounter = {};
                             this.tibCounter = {};
@@ -914,7 +917,7 @@ codes by NetquiK
                                             var needcp = selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY);
                                             if (needcp <= ZQ && typeof object.getID == 'function') {
                                                 //MOD not add if ownbase
-                                                if (c5 <= object.get_BaseLevel() && !this.OWNS.includes(object.getID())) {
+                                                if (c5 <= object.get_BaseLevel() && !this.OWNS.includes(object.getID()) && !this.ALLY.includes(object.getID())) {
                                                     //Owns.hasOwnProperty(object.getID())) {
                                                     //if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
                                                     // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
@@ -927,7 +930,7 @@ codes by NetquiK
                                                         this.ZM[object.getID()] = e;
                                                     }
                                                     if (object.Type == 1 && c1) { //User
-                                                       // (!ncity.IsAllianceBase()  || ![1, 2].includes(ClientLib.Data.MainData.GetInstance().get_Alliance().GetRelation(ncity))*
+                                                        // (!ncity.IsAllianceBase()  || ![1, 2].includes(ClientLib.Data.MainData.GetInstance().get_Alliance().GetRelation(ncity))*
                                                         //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
                                                         if (d != null) {
                                                             this.ZE.push(d);
@@ -1049,190 +1052,200 @@ codes by NetquiK
                                     ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentCityId(id);
                                     ncity = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(id);
                                     //console.log("ncity", ncity);
-                                    if (ncity != null) {
+                                    if (ncity != null && ncity.get_Version() > 0) {
                                         // MOD remove if Ally
-                                        if (!ncity.get_IsGhostMode()) {
-                                            //if(ncity.get_Name() != null)
-                                            //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
-                                            //var cityBuildings = ncity.get_CityBuildingsData();
-                                            var cityUnits = ncity.get_CityUnitsData();
-                                            if (cityUnits != null) { // cityUnits !=null können null sein
-                                                //console.log("ncity.cityUnits", cityUnits );
-                                                var selectedBase = this.ZC.getSelection()[0].getModel();
-                                                var buildings = ncity.get_Buildings().d;
-                                                var defenseUnits = cityUnits.get_DefenseUnits().d;
-                                                var offensivUnits = selectedBase.get_CityUnitsData().get_OffenseUnits().d;
-                                                //console.log(buildings,defenseUnits,offensivUnits);
-                                                if (buildings != null) //defenseUnits !=null können null sein
-                                                {
-                                                    var buildingLoot = getResourcesPart(buildings);
-                                                    var unitLoot = getResourcesPart(defenseUnits);
-                                                    //console.log("buildingLoot", buildingLoot);
-                                                    //console.log("unitLoot", unitLoot);
-                                                    this.ZE[i][2] = ncity.get_Name();
-                                                    this.ZE[i][5] = buildingLoot[ClientLib.Base.EResourceType.Tiberium] + unitLoot[ClientLib.Base.EResourceType.Tiberium];
-                                                    this.ZE[i][6] = buildingLoot[ClientLib.Base.EResourceType.Crystal] + unitLoot[ClientLib.Base.EResourceType.Crystal];
-                                                    this.ZE[i][7] = buildingLoot[ClientLib.Base.EResourceType.Gold] + unitLoot[ClientLib.Base.EResourceType.Gold];
-                                                    this.ZE[i][8] = buildingLoot[ClientLib.Base.EResourceType.ResearchPoints] + unitLoot[ClientLib.Base.EResourceType.ResearchPoints];
-                                                    //console.log(posX,posY,"GetBuildingsConditionInPercent", ncity.GetBuildingsConditionInPercent() );
-                                                    if (ncity.GetBuildingsConditionInPercent() != 0) {
-                                                        this.ZA = 0;
-                                                        if (this.ZE[i][5] != 0) {
-                                                            var c = 0;
-                                                            var t = 0;
-                                                            var m = 0;
-                                                            this.ZM[id] = new Array(9);
-                                                            this.crysCounter[id] = new Array(9);
-                                                            this.tibCounter[id] = new Array(9);
-                                                            for (m = 0; m < 9; m++) {
-                                                                this.ZM[id][m] = new Array(8);
-                                                                this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
-                                                                this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
-                                                            }
-
-                                                            var tib4 = 0;
-                                                            var tib5 = 0;
-                                                            var tib6 = 0;
-                                                            var tib7 = 0;
-                                                            var cry4 = 0;
-                                                            var cry5 = 0;
-                                                            var cry6 = 0;
-                                                            var cry7 = 0;
-                                                            var mix4 = 0;
-                                                            var mix5 = 0;
-                                                            var mix6 = 0;
-                                                            var mix7 = 0;
-                                                            var mix8 = 0;
-                                                            var pow8 = 0;
-                                                            var powL = {};
-                                                            var totT = 0; // count total tib
-                                                            var totC = 0; // count total cry
-                                                            this.ZM[id] = new Array(9);
-                                                            this.crysCounter[id] = new Array(9);
-                                                            this.tibCounter[id] = new Array(9);
-                                                            for (m = 0; m < 9; m++) {
-                                                                this.ZM[id][m] = new Array(8);
-                                                                this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
-                                                                this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
-                                                            }
-                                                            for (var y = 0; 8 > y; y++) {
-                                                                for (var x = 0; 9 > x; x++) {
-                                                                    var aKey = x + "," + y;
-                                                                    switch (ncity.GetResourceType(x, y)) {
-                                                                        case 0:
-                                                                            var cntT = 0,
-                                                                                cntC = 0,
-                                                                                cntM = 0,
-                                                                                cntP = 0;
-                                                                            0 < y && 7 > y && 0 < x && 8 > x && (2 === ncity.GetResourceType(x - 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x +
-                                                                                1, y + 1) && (cntC++, cntM++), 1 === ncity.GetResourceType(x - 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y +
-                                                                                1) && (cntT++, cntM++), 0 === ncity.GetResourceType(x - 1, y - 1) && this.checkFieldFree(x - 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y - 1) && this.checkFieldFree(x, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y - 1) && this.checkFieldFree(x + 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x - 1, y) && this.checkFieldFree(x - 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y) && this.checkFieldFree(x + 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x -
-                                                                                1, y + 1) && this.checkFieldFree(x - 1, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y + 1) && this.checkFieldFree(x, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y + 1) && this.checkFieldFree(x + 1, y + 1, powL) && cntP++);
-                                                                            4 === cntC && (tib4++, mix4--);
-                                                                            5 === cntC && (tib5++, mix5--);
-                                                                            6 === cntC && (tib6++, mix6--);
-                                                                            7 === cntC && (tib7++, mix7--);
-                                                                            4 === cntT && (cry4++, mix4--);
-                                                                            5 === cntT && (cry5++, mix5--);
-                                                                            6 === cntT && (cry6++, mix6--);
-                                                                            7 === cntT && (cry7++, mix7--);
-                                                                            4 === cntM && mix4++;
-                                                                            5 === cntM && mix5++;
-                                                                            6 === cntM && mix6++;
-                                                                            7 === cntM && mix7++;
-                                                                            8 === cntM && mix8++;
-                                                                            8 === cntP && (pow8++, powL[aKey] = 1);
-                                                                            break;
-                                                                        case 1:
-                                                                            totC++;
-                                                                            this.ZM[id][x][y] = 1;
-                                                                            break;
-                                                                        case 2:
-                                                                            this.ZM[id][x][y] = 2, totT++;
-                                                                    }
-                                                                }
-                                                            }
-
-                                                            this.ZE[i][9] = totC;
-                                                            this.ZE[i][10] = totT;
-                                                            this.ZE[i][11] = ncity.GetBuildingsConditionInPercent();
-                                                            this.ZE[i][12] = ncity.GetDefenseConditionInPercent();
-                                                            this.ZE[i][21] = tib7 + " | " + tib6 + " | " + tib5 + " | " + tib4;
-                                                            this.ZE[i][22] = cry7 + " | " + cry6 + " | " + cry5 + " | " + cry4;
-                                                            this.ZE[i][23] = mix7 + " | " + mix6 + " | " + mix5 + " | " + mix4;
-                                                            this.ZE[i][20] = pow8;
-                                                            try {
-                                                                var u = offensivUnits;
-                                                                //console.log("OffenseUnits",u);
-                                                                var offhp = 0;
-                                                                var defhp = 0;
-                                                                for (var g in u) {
-                                                                    offhp += u[g].get_Health();
-                                                                }
-                                                                u = defenseUnits;
-                                                                //console.log("DefUnits",u);
-                                                                for (var g in u) {
-                                                                    defhp += u[g].get_Health();
-                                                                }
-                                                                u = buildings;
-                                                                //console.log("DefUnits",u);
-                                                                for (var g in u) {
-                                                                    //var id=0;
-                                                                    //console.log("MdbUnitId",u[g].get_MdbUnitId());
-                                                                    var mid = u[g].get_MdbUnitId();
-                                                                    //DF
-                                                                    if (mid == 158 || mid == 131 || mid == 195) {
-                                                                        this.ZE[i][18] = 8 - u[g].get_CoordY();
-                                                                    }
-                                                                    //CY
-                                                                    if (mid == 112 || mid == 151 || mid == 177) {
-                                                                        this.ZE[i][17] = 8 - u[g].get_CoordY();
-                                                                    }
-                                                                }
-                                                                //console.log("HPs",offhp,defhp, (defhp/offhp) );
-                                                            } catch (x) {
-                                                                console.debug("HPRecord", x);
-                                                            }
-                                                            this.ZE[i][14] = this.ZK[5].getValue() ? "-" : this.maaain(id);
-                                                            this.ZE[i][15] = this.ZE[i][5] + this.ZE[i][6] + this.ZE[i][7];
-                                                            this.ZE[i][16] = this.ZE[i][15] / this.ZE[i][13];
-                                                            this.ZE[i][1] = 0;
-                                                            this.ZE[i][24] = !1;
-                                                            retry = true;
-                                                            console.info(ncity.get_Name(), " finish");
+                                        if (ncity.get_OwnerAllianceId() == 0 || (ncity.get_OwnerAllianceId() != playerbase.get_AllianceId()) && !Object.values(ClientLib.Data.MainData.GetInstance().get_Alliance().get_Relationships()).some(e => e.OtherAllianceId == ncity.get_OwnerAllianceId() && [1, 2].includes(e.Relationship))) {
+                                            if (!ncity.get_IsGhostMode() && (ncity.get_OwnerAllianceId() != playerbase.get_AllianceId())) {
+                                                //if(ncity.get_Name() != null)
+                                                //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
+                                                //var cityBuildings = ncity.get_CityBuildingsData();
+                                                var cityUnits = ncity.get_CityUnitsData();
+                                                if (cityUnits != null) { // cityUnits !=null können null sein
+                                                    //console.log("ncity.cityUnits", cityUnits );
+                                                    var selectedBase = this.ZC.getSelection()[0].getModel();
+                                                    var buildings = ncity.get_Buildings().d;
+                                                    var defenseUnits = cityUnits.get_DefenseUnits().d;
+                                                    var offensivUnits = selectedBase.get_CityUnitsData().get_OffenseUnits().d;
+                                                    //console.log(buildings,defenseUnits,offensivUnits);
+                                                    if (buildings != null) //defenseUnits !=null können null sein
+                                                    {
+                                                        var buildingLoot = getResourcesPart(buildings);
+                                                        var unitLoot = getResourcesPart(defenseUnits);
+                                                        //console.log("buildingLoot", buildingLoot);
+                                                        //console.log("unitLoot", unitLoot);
+                                                        this.ZE[i][2] = ncity.get_Name();
+                                                        this.ZE[i][5] = buildingLoot[ClientLib.Base.EResourceType.Tiberium] + unitLoot[ClientLib.Base.EResourceType.Tiberium];
+                                                        this.ZE[i][6] = buildingLoot[ClientLib.Base.EResourceType.Crystal] + unitLoot[ClientLib.Base.EResourceType.Crystal];
+                                                        this.ZE[i][7] = buildingLoot[ClientLib.Base.EResourceType.Gold] + unitLoot[ClientLib.Base.EResourceType.Gold];
+                                                        this.ZE[i][8] = buildingLoot[ClientLib.Base.EResourceType.ResearchPoints] + unitLoot[ClientLib.Base.EResourceType.ResearchPoints];
+                                                        //console.log(posX,posY,"GetBuildingsConditionInPercent", ncity.GetBuildingsConditionInPercent() );
+                                                        if (ncity.GetBuildingsConditionInPercent() != 0) {
                                                             this.ZA = 0;
-                                                            this.countlastidchecked = 0;
-                                                            //console.log(this.ZE[i],this.ZM[id],id);
-                                                            this.FK(this.ZE[i], this.ZM[id], id);
-                                                            //update table + retain sorting 
-                                                            let colsort = this.ZL.getSortColumnIndex();
-                                                            let colsort_ASC = this.ZL.isSortAscending();
-                                                            this.ZL.setData(this.ZE);
-                                                            if (colsort == -1) {
-                                                                if (!this.ZK[5].getValue()) {
-                                                                    this.ZL.sortByColumn(14, false); //Sort for Growth Rate
+                                                            if (this.ZE[i][5] != 0) {
+                                                                var c = 0;
+                                                                var t = 0;
+                                                                var m = 0;
+                                                                this.ZM[id] = new Array(9);
+                                                                this.crysCounter[id] = new Array(9);
+                                                                this.tibCounter[id] = new Array(9);
+                                                                for (m = 0; m < 9; m++) {
+                                                                    this.ZM[id][m] = new Array(8);
+                                                                    this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
+                                                                    this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
+                                                                }
+
+                                                                var tib4 = 0;
+                                                                var tib5 = 0;
+                                                                var tib6 = 0;
+                                                                var tib7 = 0;
+                                                                var cry4 = 0;
+                                                                var cry5 = 0;
+                                                                var cry6 = 0;
+                                                                var cry7 = 0;
+                                                                var mix4 = 0;
+                                                                var mix5 = 0;
+                                                                var mix6 = 0;
+                                                                var mix7 = 0;
+                                                                var mix8 = 0;
+                                                                var pow8 = 0;
+                                                                var powL = {};
+                                                                var totT = 0; // count total tib
+                                                                var totC = 0; // count total cry
+                                                                this.ZM[id] = new Array(9);
+                                                                this.crysCounter[id] = new Array(9);
+                                                                this.tibCounter[id] = new Array(9);
+                                                                for (m = 0; m < 9; m++) {
+                                                                    this.ZM[id][m] = new Array(8);
+                                                                    this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
+                                                                    this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
+                                                                }
+                                                                for (var y = 0; 8 > y; y++) {
+                                                                    for (var x = 0; 9 > x; x++) {
+                                                                        var aKey = x + "," + y;
+                                                                        switch (ncity.GetResourceType(x, y)) {
+                                                                            case 0:
+                                                                                var cntT = 0,
+                                                                                    cntC = 0,
+                                                                                    cntM = 0,
+                                                                                    cntP = 0;
+                                                                                0 < y && 7 > y && 0 < x && 8 > x && (2 === ncity.GetResourceType(x - 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x +
+                                                                                    1, y + 1) && (cntC++, cntM++), 1 === ncity.GetResourceType(x - 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y +
+                                                                                    1) && (cntT++, cntM++), 0 === ncity.GetResourceType(x - 1, y - 1) && this.checkFieldFree(x - 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y - 1) && this.checkFieldFree(x, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y - 1) && this.checkFieldFree(x + 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x - 1, y) && this.checkFieldFree(x - 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y) && this.checkFieldFree(x + 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x -
+                                                                                    1, y + 1) && this.checkFieldFree(x - 1, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y + 1) && this.checkFieldFree(x, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y + 1) && this.checkFieldFree(x + 1, y + 1, powL) && cntP++);
+                                                                                4 === cntC && (tib4++, mix4--);
+                                                                                5 === cntC && (tib5++, mix5--);
+                                                                                6 === cntC && (tib6++, mix6--);
+                                                                                7 === cntC && (tib7++, mix7--);
+                                                                                4 === cntT && (cry4++, mix4--);
+                                                                                5 === cntT && (cry5++, mix5--);
+                                                                                6 === cntT && (cry6++, mix6--);
+                                                                                7 === cntT && (cry7++, mix7--);
+                                                                                4 === cntM && mix4++;
+                                                                                5 === cntM && mix5++;
+                                                                                6 === cntM && mix6++;
+                                                                                7 === cntM && mix7++;
+                                                                                8 === cntM && mix8++;
+                                                                                8 === cntP && (pow8++, powL[aKey] = 1);
+                                                                                break;
+                                                                            case 1:
+                                                                                totC++;
+                                                                                this.ZM[id][x][y] = 1;
+                                                                                break;
+                                                                            case 2:
+                                                                                this.ZM[id][x][y] = 2, totT++;
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                this.ZE[i][9] = totC;
+                                                                this.ZE[i][10] = totT;
+                                                                this.ZE[i][11] = ncity.GetBuildingsConditionInPercent();
+                                                                this.ZE[i][12] = ncity.GetDefenseConditionInPercent();
+                                                                this.ZE[i][21] = tib7 + " | " + tib6 + " | " + tib5 + " | " + tib4;
+                                                                this.ZE[i][22] = cry7 + " | " + cry6 + " | " + cry5 + " | " + cry4;
+                                                                this.ZE[i][23] = mix7 + " | " + mix6 + " | " + mix5 + " | " + mix4;
+                                                                this.ZE[i][20] = pow8;
+                                                                try {
+                                                                    var u = offensivUnits;
+                                                                    //console.log("OffenseUnits",u);
+                                                                    var offhp = 0;
+                                                                    var defhp = 0;
+                                                                    for (var g in u) {
+                                                                        offhp += u[g].get_Health();
+                                                                    }
+                                                                    u = defenseUnits;
+                                                                    //console.log("DefUnits",u);
+                                                                    for (var g in u) {
+                                                                        defhp += u[g].get_Health();
+                                                                    }
+                                                                    u = buildings;
+                                                                    //console.log("DefUnits",u);
+                                                                    for (var g in u) {
+                                                                        //var id=0;
+                                                                        //console.log("MdbUnitId",u[g].get_MdbUnitId());
+                                                                        var mid = u[g].get_MdbUnitId();
+                                                                        //DF
+                                                                        if (mid == 158 || mid == 131 || mid == 195) {
+                                                                            this.ZE[i][18] = 8 - u[g].get_CoordY();
+                                                                        }
+                                                                        //CY
+                                                                        if (mid == 112 || mid == 151 || mid == 177) {
+                                                                            this.ZE[i][17] = 8 - u[g].get_CoordY();
+                                                                        }
+                                                                    }
+                                                                    //console.log("HPs",offhp,defhp, (defhp/offhp) );
+                                                                } catch (x) {
+                                                                    console.debug("HPRecord", x);
+                                                                }
+                                                                this.ZE[i][14] = this.ZK[5].getValue() ? "-" : this.maaain(id);
+                                                                this.ZE[i][15] = this.ZE[i][5] + this.ZE[i][6] + this.ZE[i][7];
+                                                                this.ZE[i][16] = this.ZE[i][15] / this.ZE[i][13];
+                                                                this.ZE[i][1] = 0;
+                                                                this.ZE[i][24] = !1;
+                                                                retry = true;
+                                                                console.info(ncity.get_Name(), " finish");
+                                                                this.ZA = 0;
+                                                                this.countlastidchecked = 0;
+                                                                //console.log(this.ZE[i],this.ZM[id],id);
+                                                                this.FK(this.ZE[i], this.ZM[id], id);
+                                                                //update table + retain sorting 
+                                                                let colsort = this.ZL.getSortColumnIndex();
+                                                                let colsort_ASC = this.ZL.isSortAscending();
+                                                                this.ZL.setData(this.ZE);
+                                                                if (colsort == -1) {
+                                                                    if (!this.ZK[5].getValue()) {
+                                                                        this.ZL.sortByColumn(14, false); //Sort for Growth Rate
+                                                                    } else {
+                                                                        this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                                                                    }
                                                                 } else {
-                                                                    this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                                                                    this.ZL.sortByColumn(colsort, colsort_ASC); //Sort User Choice
                                                                 }
-                                                            } else {
-                                                                this.ZL.sortByColumn(colsort, colsort_ASC); //Sort User Choice
                                                             }
+                                                        } else {
+                                                            if (this.ZA > 250) {
+                                                                console.info(this.ZE[i][2], " on ", posX, posY, " removed (GetBuildingsConditionInPercent == 0)");
+                                                                this.ZE.splice(i, 1); //entfernt element aus array
+                                                                this.ZA = 0;
+                                                                this.countlastidchecked = 0;
+                                                                this.ZL.setData(this.ZE);
+                                                                break;
+                                                            }
+                                                            this.ZA++;
                                                         }
-                                                    } else {
-                                                        if (this.ZA > 250) {
-                                                            console.info(this.ZE[i][2], " on ", posX, posY, " removed (GetBuildingsConditionInPercent == 0)");
-                                                            this.ZE.splice(i, 1); //entfernt element aus array
-                                                            this.ZA = 0;
-                                                            this.countlastidchecked = 0;
-                                                            break;
-                                                        }
-                                                        this.ZA++;
                                                     }
                                                 }
+                                            } else {
+                                                console.info(this.ZE[i][2], " on ", posX, posY, " removed (IsGhostMode)");
+                                                this.ZE.splice(i, 1); //entfernt element aus array
+                                                this.ZL.setData(this.ZE);
+                                                break;
                                             }
                                         } else {
-                                            console.info(this.ZE[i][2], " on ", posX, posY, " removed (IsGhostMode) or Ally");
+                                            console.info(this.ZE[i][2], " on ", posX, posY, " removed Ally");
                                             this.ZE.splice(i, 1); //entfernt element aus array
+                                            this.ZL.setData(this.ZE);
+                                            this.ALLY.push(id);
                                             break;
                                         }
                                     }
@@ -1252,6 +1265,7 @@ codes by NetquiK
                                 if (this.countlastidchecked > 16) {
                                     console.info(this.ZE[i][2], " on ", posX, posY, " removed (found no data)");
                                     this.ZE.splice(i, 1); //entfernt element aus array
+                                    this.ZL.setData(this.ZE);
                                     this.countlastidchecked = 0;
                                 } else if (this.countlastidchecked > 10) {
                                     sleeptime = 500;
