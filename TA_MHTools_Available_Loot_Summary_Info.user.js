@@ -7,7 +7,7 @@
 // @author        MrHIDEn based on Yaeger & Panavia code. Totaly recoded.
 // @contributor   leo7044 (https://github.com/leo7044)
 // @contributor   NetquiK (https://github.com/netquik) url res free version
-// @version       1.8.3.5
+// @version       1.8.3.6
 // @grant         none
 // ==/UserScript==
 
@@ -165,7 +165,7 @@
                             }));
                         }
                         for (var k in this.troopPaths) {
-                            this.troopImages.push(new qx.ui.basic.Image("data:image/png;base64," + this.troopPaths[k]).set({
+                            this.troopImages.push(new qx.ui.basic.Image(this.troopPaths[k]).set({
                                 Scale: true,
                                 Width: 16,
                                 Height: 16
