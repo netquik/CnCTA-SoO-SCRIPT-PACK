@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name        Maelstrom ADDON Basescanner AIO Plus
+// @name        Maelstrom ADDON Basescanner AIO
 // @match     https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1.7
+// @version     1.9.1.8
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -37,7 +37,7 @@ codes by NetquiK
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1.7 AIO";
+        window.__msbs_version = "1.9.1.8 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -810,9 +810,11 @@ codes by NetquiK
                     GR: function () { //MOD GR only fill
                         if (this.ZH) {
                             if (!this.GR_to_Fill || this.GR_to_Fill.length == 0) {
-                                this.GR_to_Fill = []
+                                this.GR_to_Fill = [];
+                                this.GR_After = true;
                                 for (i = 0; i < this.ZE.length; i++) {
                                     if (this.ZE[i][1] == -1) {
+                                        this.GR_After = false;
                                         break;
                                     }
                                     if (this.ZE[i][14] == "-") {
@@ -824,13 +826,7 @@ codes by NetquiK
 
                                 }
                             }
-
-                            if (this.GR_to_Fill.length == 0) {
-                                this.ZH = false
-                                this.GR_Fill = false;
-                                this.GR_to_Fill = null;
-                                this.FE();
-                            } else {
+                            if (this.GR_to_Fill.length > 0) {
                                 let index = this.GR_to_Fill[0]['index'];
                                 let id = this.GR_to_Fill[0]['id'];
                                 if (this.ZS[id]) {
@@ -847,7 +843,7 @@ codes by NetquiK
                                     this.GR()
                                 }, window.Addons.BaseScannerGUI.getInstance(), 200);
                             } else {
-                                this.ZH = false
+                                this.ZH = this.GR_After;
                                 this.GR_Fill = false;
                                 this.GR_to_Fill = null;
                                 this.FE();
