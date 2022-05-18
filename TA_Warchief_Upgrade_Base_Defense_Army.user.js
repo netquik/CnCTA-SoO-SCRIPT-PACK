@@ -2,10 +2,13 @@
 // @name            WarChiefs - Tiberium Alliances Upgrade Base/Defense/Army
 // @description     Upgrade your Base,Defense Army to a specific Level.
 // @author          Eistee
-// @version         22.05.04
+// @version         22.05.18
+// @contributor    NetquiK (https://github.com/netquik)
+// @translator     ES: Nefrontheone
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match         https://*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Warchief_Upgrade_Base_Defense_Army.user.js
 // ==/UserScript==
 /**
  *  License: CC-BY-NC-SA 3.0
@@ -983,6 +986,15 @@
 				"All defense units": "??? ????????? ?????",
 				"Selected army unit": "?????????? ???? ?????",
 				"All army units": "??? ????? ?????"
+			});
+			// Spanish
+			localeManager.addTranslation("es", {
+				"Selected building": "Edificio seleccionado",
+				"All buildings": "Todos los edificios",
+				"Selected defense unit": "Unidad defensiva seleccionada",
+				"All defense units": "Todas las unidades defensivas",
+				"Selected army unit": "Unidad de ataque seleccionada",
+				"All army units": "Todas las unidades de ataque"
 			});
 		}
 
