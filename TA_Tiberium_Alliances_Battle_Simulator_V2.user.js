@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         22.05.12
+// @version         22.05.18
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -3215,7 +3215,7 @@ codes by NetquiK
                                 width: 48,
                                 height: 48,
                                 appearance: "button-addpoints",
-                                toolTipText: this.qxApp.tr("Return to Attack Preparation"),
+                                toolTipText: this.qxApp.tr("tnf:tt replay back button"),
                                 icon: "FactionUI/icons/icon_return.png",
                                 appearance: "button-friendlist-scroll"
                             });
@@ -3230,7 +3230,7 @@ codes by NetquiK
                                 height: 24,
                                 appearance: "button-addpoints",
                                 icon: "FactionUI/icons/icon_replay_skip.png",
-                                toolTipText: this.qxApp.tr("Skip to End"),
+                                toolTipText: this.qxApp.tr("tnf:tt replay skip"),
                                 appearance: "button-friendlist-scroll"
                             });
                             this.btnSkip.addListener("click", this.onClick_btnSkip, this);
