@@ -3,7 +3,7 @@
 // @description Display alliance's POIs scores and next tier requirements.
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     2.0.7
+// @version     2.0.8
 // @contributor NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @grant none
 // @author zdoom
@@ -614,8 +614,8 @@ codes by NetquiK
 						/* var rewrittenFunctionBody = TabViewPopulateMethodString.replace(/(?!if\()this\.[_a-zA-Z]+(!|=)=(this\.[_a-zA-Z]+)(?=\){(this\.[_a-zA-Z]+)\.(?:add|remove))/g, function (match, g1, g2, g3) {
 							return '-1' + ("="==g1?"!":"=") + '==' + g3 + '.indexOf(' + g2 + ')';
 						}); */
-						// MOD NOEVIL by Netquik
-						var AOM = TabViewPopulateMethodString.match(/{if\(this\.[_a-zA-Z]+==this\.([_a-zA-Z]+)\){this\.([_a-zA-Z]+)\.remove.+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\(this\.[_a-zA-Z]+!=this\.\1/);
+						// MOD NOEVIL by Netquik + bugfix
+						var AOM = TabViewPopulateMethodString.replace(/[\r\n]/g, "").match(/{if\(this\.[_a-zA-Z]+==this\.([_a-zA-Z]+)\){this\.([_a-zA-Z]+)\.remove.+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\(this\.[_a-zA-Z]+!=this\.\1/);
 
 						/* var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
 						var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")")); */
