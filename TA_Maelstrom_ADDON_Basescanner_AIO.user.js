@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        Maelstrom ADDON Basescanner AIO
-// @match     https://*.alliances.commandandconquer.com/*/index.aspx*
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1.8
+// @version     1.9.1.9
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -37,7 +37,7 @@ codes by NetquiK
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1.8 AIO";
+        window.__msbs_version = "1.9.1.9 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -527,7 +527,7 @@ codes by NetquiK
                             this.ZX = new qx.ui.basic.Label("").set({
                                 decorator: null,
                                 textAlign: "center",
-                                width: 200,
+                                width: 200
                             });
                             this.ZV.add(this.ZX, {
                                 left: 0,
@@ -929,10 +929,6 @@ codes by NetquiK
                                                 if (this.skip++ && !this.OWNS.includes(object.getID()) && !this.ALLY.includes(object.getID())) {
                                                     this.skip--;
                                                     if (c5 <= parseInt(object.get_BaseLevel(), 10)) {
-                                                        //Owns.hasOwnProperty(object.getID())) {
-                                                        //if (c5 <= object.get_BaseLevel() && !Object.values(MT_Cache.Cities).some(e => parseInt(e.ID) === object.getID())) {
-                                                        // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
-                                                        // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
                                                         var d = this.FL(object.getID(), 0);
                                                         //MOD Fix needcp when cached city by Netquik
                                                         null != d && d[13] !== needcp && (d[13] = needcp);
@@ -1002,8 +998,8 @@ codes by NetquiK
                             this.FP(0, this.ZE.length, 200);
 
                             if (this.YY.name != "DR01D") qx.event.Timer.once(function () {
-                                window.Addons.BaseScannerGUI.getInstance().FG()
-                            }, 50);
+                                this.FG()
+                            }, window.Addons.BaseScannerGUI.getInstance(), 50);
                         } catch (ex) {
                             console.debug("Maelstrom_Basescanner FJ error: ", ex);
                         }
@@ -1067,7 +1063,7 @@ codes by NetquiK
                                     if (ncity != null && ncity.get_Version() > 0) {
                                         // MOD remove if Ally
                                         if (ncity.get_OwnerAllianceId() == 0 || (ncity.get_OwnerAllianceId() != playerbase.get_AllianceId()) && !Object.values(ClientLib.Data.MainData.GetInstance().get_Alliance().get_Relationships()).some(e => e.OtherAllianceId == ncity.get_OwnerAllianceId() && [1, 2].includes(e.Relationship))) {
-                                            if (!ncity.get_IsGhostMode() && (ncity.get_OwnerAllianceId() != playerbase.get_AllianceId())) {
+                                            if (!ncity.get_IsGhostMode()) {
                                                 //if(ncity.get_Name() != null)
                                                 //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
                                                 //var cityBuildings = ncity.get_CityBuildingsData();
