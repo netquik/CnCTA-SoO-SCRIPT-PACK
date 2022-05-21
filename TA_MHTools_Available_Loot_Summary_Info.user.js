@@ -7,7 +7,7 @@
 // @author        MrHIDEn based on Yaeger & Panavia code. Totaly recoded.
 // @contributor   leo7044 (https://github.com/leo7044)
 // @contributor   NetquiK (https://github.com/netquik) url res free version
-// @version       1.8.3.6
+// @version       1.8.3.7
 // @grant         none
 // ==/UserScript==
 
@@ -965,6 +965,8 @@
                                     var cyhp = tbhp;
 
                                     // DF
+                                    var dfhp = 0
+                                    if (typeof df != 'undefined'){
                                     tb = df;
                                     cnt = 0;
                                     tbhp = 0;
@@ -990,7 +992,8 @@
                                         }
                                     }
                                     tbhp = 100 * tbhp / cnt;
-                                    var dfhp = tbhp;
+                                    dfhp = tbhp;
+                                }
 
                                     hp = {};
                                     hp.name = '<b>CY & DF column HP [%]</b>';
