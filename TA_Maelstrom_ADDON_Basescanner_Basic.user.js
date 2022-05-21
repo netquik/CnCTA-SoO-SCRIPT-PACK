@@ -3,7 +3,7 @@
 // @description Maelstrom ADDON Basescanner
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_Basic.user.js
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.9.1.9
+// @version     1.9.1.9.1
 // @author      BlinDManX
 // @contributor leo7044 (https://github.com/leo7044)
 // @contributor AlkalyneD4 Patch 19.3 fix
@@ -31,7 +31,7 @@ codes by NetquiK
 */
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1.9";
+        window.__msbs_version = "1.9.1.9.1";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -148,7 +148,8 @@ codes by NetquiK
                     YZ: null,
                     YY: null,
                     ALLY: [],
-                    skip: -1,
+                    skip: 0,
+                    OWNS: ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d,
                     openWindow: function (title) {
                         try {
                             this.setCaption(title);
@@ -357,7 +358,7 @@ codes by NetquiK
                             this.ZC.setHeight(25);
                             this.ZC.setMargin(5);
                             this.ZC.setMarginTop(0);
-                            this.OWNS = [];
+                            //this.OWNS = [];
                             MT_Cache.updateCityCache();
                             MT_Cache = window.MaelstromTools.Cache.getInstance();
                             var cname;
@@ -367,7 +368,7 @@ codes by NetquiK
                                 if (Addons.LocalStorage.getserver("Basescanner_LastCityID") == MT_Cache.Cities[cname].Object.get_Id()) {
                                     this.ZC.setSelection([item]);
                                 }
-                                this.OWNS.push(MT_Cache.Cities[cname].Object.get_Id());
+                                //this.OWNS.push(MT_Cache.Cities[cname].Object.get_Id());
                             }
                             this.ZC.addListener("changeSelection", function (e) {
                                 this.FP(0, 1, 200);
@@ -755,7 +756,8 @@ codes by NetquiK
                                             var needcp = selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY);
                                             if (needcp <= ZQ && typeof object.getID === 'function' && typeof object.get_BaseLevel === 'function') {
                                                 //MOD not add if ownbase or ally previuosly detected
-                                                if (this.skip++ && !this.OWNS.includes(object.getID()) && !this.ALLY.includes(object.getID())) {
+                                                this.skip++
+                                                if (!this.OWNS.hasOwnProperty(object.getID()) && !this.ALLY.includes(object.getID())) {
                                                     this.skip--;
                                                     if (c5 <= parseInt(object.get_BaseLevel(), 10)) {
                                                         var d = this.FL(object.getID(), 0);
@@ -807,7 +809,7 @@ codes by NetquiK
                                 }
                             }
                             console.log('Skipped ' + this.skip + ' Own or Ally Cities');
-                            this.skip = -1;
+                            this.skip = 0;
                             this.ZH = true;
                             this.ZL.setData(this.ZE);
                             if (colsort == -1) {
