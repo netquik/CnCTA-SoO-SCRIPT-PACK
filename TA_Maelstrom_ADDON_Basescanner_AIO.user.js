@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.1.9.1
+// @version     1.9.1.10
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -32,12 +32,13 @@ codes by NetquiK
 - New WorldCity Wrappers
 - Not add Allies or Own Bases
 - Fix for clear cache
+- Fix FOR CP Calculation on PLAYERS
 ----------------
 */
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.1.9.1 AIO";
+        window.__msbs_version = "1.9.1.10 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -924,7 +925,8 @@ codes by NetquiK
                                                 //}
                                             } */
                                             //if(object.ConditionBuildings>0){
-                                            var needcp = selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY);
+                                            // MOD FIX FOR CP on PLAYERS
+                                            var needcp = object.Type != 1 ? selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY) : selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY, true, true);
                                             if (needcp <= ZQ && typeof object.getID === 'function' && typeof object.get_BaseLevel === 'function') {
                                                 //MOD not add if ownbase or ally previuosly detected
                                                 this.skip++
