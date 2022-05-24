@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.76
+// @version        3.77
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -29,6 +29,7 @@ codes by NetquiK
 - NOEVIL for all code
 - New Fixes for simulation + ReplayBar + Date hidden
 - New SkipSimulation Function
+- Fix FOR CP Calculation on PLAYERS
 ----------------
 */
 
@@ -2815,7 +2816,9 @@ codes by NetquiK
                                     if (currentcity != null) {
                                         var ownCity = this._MainData.get_Cities().get_CurrentOwnCity();
                                         var cityFaction = currentcity.get_CityFaction();
-                                        this.stats.attacks.attackCost = ownCity.CalculateAttackCommandPointCostToCoord(currentcity.get_PosX(), currentcity.get_PosY());
+                                        /* this.stats.attacks.attackCost = ownCity.CalculateAttackCommandPointCostToCoord(currentcity.get_PosX(), currentcity.get_PosY()); */
+                                        // MOD Fix FOR CP Calculation on PLAYERS
+                                        this.stats.attacks.attackCost = ownCity.CalculateAttackCommandPointCostToCoord(currentcity.get_PosX(), currentcity.get_PosY(), cityFaction === ClientLib.Base.EFactionType.GDIFaction || cityFaction === ClientLib.Base.EFactionType.NODFaction, true);
                                         this.getAvailableRepairAndCP();
                                         this.calculateLoot();
                                         this.updateLayoutsList();
