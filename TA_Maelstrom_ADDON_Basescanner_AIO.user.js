@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name        Maelstrom ADDON Basescanner AIO
-// @match     https://*.alliances.commandandconquer.com/*/index.aspx*
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.8.20
+// @version     1.9.2
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
-// @contributor Netquik (https://github.com/netquik) 
+// @contributor Netquik (https://github.com/netquik)
 // @grant       none
 // @copyright   2012+, Claus Neumann
 // @license     CC BY-NC-ND 3.0 - http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -14,7 +14,7 @@
 // ==/UserScript==
 
 
-/* 
+/*
 codes by NetquiK
 ----------------
 - Sync with Base Scanner Basic code
@@ -29,12 +29,16 @@ codes by NetquiK
 - Reorder Columns Save State
 - Sorting Columns fixed
 - SpeedUP+
+- New WorldCity Wrappers
+- Not add Allies or Own Bases
+- Fix for clear cache
+- Fix FOR CP Calculation on PLAYERS
 ----------------
 */
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.8.20 AIO";
+        window.__msbs_version = "1.9.2 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -152,6 +156,9 @@ codes by NetquiK
                     ZS: {},
                     YZ: null,
                     YY: null,
+                    ALLY: [],
+                    skip: 0,
+                    OWNS: ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d,
                     openWindow: function (title) {
                         try {
                             this.setCaption(title);
@@ -386,6 +393,7 @@ codes by NetquiK
                             this.ZC.setHeight(25);
                             this.ZC.setMargin(5);
                             this.ZC.setMarginTop(0);
+                            //this.OWNS = [];
                             MT_Cache.updateCityCache();
                             MT_Cache = window.MaelstromTools.Cache.getInstance();
                             var cname;
@@ -395,6 +403,7 @@ codes by NetquiK
                                 if (Addons.LocalStorage.getserver("Basescanner_LastCityID") == MT_Cache.Cities[cname].Object.get_Id()) {
                                     this.ZC.setSelection([item]);
                                 }
+                                //this.OWNS.push(MT_Cache.Cities[cname].Object.get_Id());
                             }
                             this.ZC.addListener("changeSelection", function (e) {
                                 this.FP(0, 1, 200);
@@ -520,7 +529,7 @@ codes by NetquiK
                             this.ZX = new qx.ui.basic.Label("").set({
                                 decorator: null,
                                 textAlign: "center",
-                                width: 200,
+                                width: 200
                             });
                             this.ZV.add(this.ZX, {
                                 left: 0,
@@ -534,7 +543,9 @@ codes by NetquiK
                                 marginTop: 0
                             });
                             this.YZ.addListener("execute", function () {
+                                this.ZE = [];
                                 this.ZZ = [];
+                                this.ALLY = [];
                             }, this);
                             oOptions.add(this.YZ);
                             this.ZK[4] = new qx.ui.form.CheckBox(this.T.get("Only center on World"));
@@ -655,61 +666,90 @@ codes by NetquiK
                         ClientLib.Vis.VisMain.GetInstance().ViewUpdate();
                         ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentCityId(selectedBase.get_Id());
                         if (this.ZT) {
-                            var obj = ClientLib.Data.WorldSector.WorldObjectCity.prototype;
-                            var fa = foundfnkstring(obj['$ctor'], /this\.(.{6})=\(?\(?\(?g>>8\)?\&.*d\+=f;this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectCity", 2);
-                            if (fa != null && fa[1].length == 6) {
-                                obj.getLevel = function () {
-                                    return this[fa[1]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectCity.Level undefined");
+                            //MOD FIX FOR PLAYER WRAPPERS (NEW CODE FOR ALL)
+                            try {
+                                var RE = /return this\.[A-Z]{6}\.([A-Z]{6})/;
+                                var objs = ['City', 'NPCBase', 'NPCCamp'];
+                                objs.forEach(obj => {
+                                    var o = ClientLib.Data.WorldSector['WorldObject' + obj].prototype;
+                                    var g = ClientLib.Vis.Region['Region' + obj].prototype;
+                                    var b = (typeof o.get_BaseLevel != 'function') ? g.get_BaseLevel.toString().match(RE)[1] : null;
+                                    var d = (typeof o.getID != 'function') ? g.get_Id.toString().match(RE)[1] : null;
+                                    if (obj == 'NPCCamp') {
+                                        var t = (typeof o.get_CampType != 'function') ? g.get_CampType.toString().match(RE)[1] : null;
+                                    }
+                                    if (b) o.get_BaseLevel = function () {
+                                        return this[b];
+                                    }, console.log('WorldObject' + obj + ' get_BaseLevel = ' + b);
+                                    if (d) o.getID = function () {
+                                        return this[d];
+                                    }, console.log('WorldObject' + obj + ' getID = ' + d);
+                                    if (t) o.get_CampType = function () {
+                                        return this[t];
+                                    }, console.log('WorldObject' + obj + ' get_CampType = ' + t);
+                                })
+                            } catch (e) {
+                                console.debug("Maelstrom_Basescanner WRAPPERS error: ", e);
                             }
-                            if (fa != null && fa[2].length == 6) {
-                                obj.getID = function () {
-                                    return this[fa[2]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectCity.ID undefined");
-                            }
-                            obj = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
-                            var fb = foundfnkstring(obj['$ctor'], /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectNPCBase", 2);
-                            if (fb != null && fb[1].length == 6) {
-                                obj.getLevel = function () {
-                                    return this[fb[1]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined");
-                            }
-                            if (fb != null && fb[2].length == 6) {
-                                obj.getID = function () {
-                                    return this[fb[2]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.ID undefined");
-                            }
-                            obj = ClientLib.Data.WorldSector.WorldObjectNPCCamp.prototype;
-                            var fc = foundfnkstring(obj['$ctor'], /100\){0,1};this\.(.{6})=Math.floor.*this\.(.{6})=\(*g\>\>(22|0x16)\)*\&.*=-1;\}this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectNPCCamp", 4);
-                            if (fc != null && fc[1].length == 6) {
-                                obj.getLevel = function () {
-                                    return this[fc[1]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.Level undefined");
-                            }
-                            if (fc != null && fc[2].length == 6) {
-                                obj.getCampType = function () {
-                                    return this[fc[2]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.CampType undefined");
-                            }
-                            if (fc != null && fc[4].length == 6) {
-                                obj.getID = function () {
-                                    return this[fc[4]];
-                                };
-                            } else {
-                                console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.ID undefined");
-                            }
+
+
+                            /*                             var obj = ClientLib.Data.WorldSector.WorldObjectCity.prototype;
+                                                        var fa = foundfnkstring(obj['$ctor'], /this\.([A-Z]{6})=\(?\(?\(?g>>9\)?\&.*d\+=f;this\.([A-Z]{6})=\(.*d\+=f;this\.[A-Z]{6}=\(/, "ClientLib.Data.WorldSector.WorldObjectCity", 2);
+                                                        if (fa != null && fa[1].length == 6) {
+                                                            obj.getLevel = function () {
+                                                                return this[fa[1]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectCity.Level undefined");
+                                                        }
+                                                        if (fa != null && fa[2].length == 6) {
+                                                            obj.getID = function () {
+                                                                return this[fa[2]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectCity.ID undefined");
+                                                        }
+                                                        obj = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
+                                                        var fb = foundfnkstring(obj['$ctor'], /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectNPCBase", 2);
+                                                        if (fb != null && fb[1].length == 6) {
+                                                            obj.getLevel = function () {
+                                                                return this[fb[1]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined");
+                                                        }
+                                                        if (fb != null && fb[2].length == 6) {
+                                                            obj.getID = function () {
+                                                                return this[fb[2]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.ID undefined");
+                                                        }
+                                                        obj = ClientLib.Data.WorldSector.WorldObjectNPCCamp.prototype;
+                                                        var fc = foundfnkstring(obj['$ctor'], /100\){0,1};this\.(.{6})=Math.floor.*this\.(.{6})=\(*g\>\>(22|0x16)\)*\&.*=-1;\}this\.(.{6})=\(/, "ClientLib.Data.WorldSector.WorldObjectNPCCamp", 4);
+                                                        if (fc != null && fc[1].length == 6) {
+                                                            obj.getLevel = function () {
+                                                                return this[fc[1]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.Level undefined");
+                                                        }
+                                                         if (fc != null && fc[2].length == 6) {
+                                                            obj.getCampType = function () {
+                                                                return this[fc[2]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.CampType undefined");
+                                                        } 
+                                                        if (fc != null && fc[4].length == 6) {
+                                                            obj.getID = function () {
+                                                                return this[fc[4]];
+                                                            };
+                                                        } else {
+                                                            console.error("Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.ID undefined");
+                                                        }
+                                                        
+                                                       */
                             this.ZT = false;
                         }
                         //Firstscan
@@ -733,16 +773,18 @@ codes by NetquiK
                                 g++;
                             }
                         }
-                        // GR only setvalues
-                        if (this.GR_Fill && g > 0) {
-                            qx.event.Timer.once(function () {
-                                this.GR()
-                            }, window.Addons.BaseScannerGUI.getInstance(), 1000);
-                            return;
-                        }
+
                         if (!this.ZH) {
                             this.ZG.setLabel("Pause");
                             this.ZD.setEnabled(false);
+                            // GR only setvalues
+                            if (this.GR_Fill && g > 0) {
+                                this.ZH = true;
+                                qx.event.Timer.once(function () {
+                                    this.GR()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 1000);
+                                return;
+                            }
                             if (c > 0) {
                                 this.ZH = true;
                                 qx.event.Timer.once(function () {
@@ -768,43 +810,48 @@ codes by NetquiK
                         }
                     },
                     GR: function () { //MOD GR only fill
-                        if (!this.GR_to_Fill) {
-                            this.GR_to_Fill = []
-                            for (i = 0; i < this.ZE.length; i++) {
-                                if (this.ZE[i][1] == -1) {
-                                    break;
-                                }
-                                if (this.ZE[i][14] == "-") {
-                                    this.GR_to_Fill.push({
-                                        "index": i,
-                                        "id": this.ZE[i][0]
-                                    });
-                                }
+                        if (this.ZH) {
+                            if (!this.GR_to_Fill || this.GR_to_Fill.length == 0) {
+                                this.GR_to_Fill = [];
+                                this.GR_After = true;
+                                for (i = 0; i < this.ZE.length; i++) {
+                                    if (this.ZE[i][1] == -1) {
+                                        this.GR_After = false;
+                                        break;
+                                    }
+                                    if (this.ZE[i][14] == "-") {
+                                        this.GR_to_Fill.push({
+                                            "index": i,
+                                            "id": this.ZE[i][0]
+                                        });
+                                    }
 
+                                }
                             }
-                        }
+                            if (this.GR_to_Fill.length > 0) {
+                                let index = this.GR_to_Fill[0]['index'];
+                                let id = this.GR_to_Fill[0]['id'];
+                                if (this.ZS[id]) {
+                                    this.FP(index + 1, this.ZE.length, 200); //Progressbar
+                                    this.ZM[id] = this.ZS[id];
+                                    //this.ZZ[index][14] = this.maaain(id);
+                                    this.ZL.setValue(14, index, this.maaain(id));
+                                    this.ZN.updateContent();
+                                }
+                                this.GR_to_Fill.shift();
+                            }
+                            if (this.GR_to_Fill.length > 0) {
+                                qx.event.Timer.once(function () {
+                                    this.GR()
+                                }, window.Addons.BaseScannerGUI.getInstance(), 200);
+                            } else {
+                                this.ZH = this.GR_After;
+                                this.GR_Fill = false;
+                                this.GR_to_Fill = null;
+                                this.FE();
+                            }
 
-                        let index = this.GR_to_Fill[0]['index'];
-                        let id = this.GR_to_Fill[0]['id'];
-                        if (this.ZS[id]) {
-                            this.FP(index + 1, this.ZE.length, 200); //Progressbar
-                            this.ZM[id] = this.ZS[id];
-                            //this.ZZ[index][14] = this.maaain(id);
-                            this.ZL.setValue(14, index, this.maaain(id));
-                            this.ZN.updateContent();
                         }
-                        this.GR_to_Fill.shift();
-                        if (this.GR_to_Fill.length > 0) {
-                            qx.event.Timer.once(function () {
-                                this.GR()
-                            }, window.Addons.BaseScannerGUI.getInstance(), 200);
-                        } else {
-                            this.GR_Fill = false;
-                            this.GR_to_Fill = null;
-                            this.FE();
-                        }
-
-
 
 
                     },
@@ -836,6 +883,7 @@ codes by NetquiK
                             var scanX = 0;
                             var scanY = 0;
                             var world = ClientLib.Data.MainData.GetInstance().get_World();
+                            //var Owns = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
                             console.info("Scanning from: " + selectedBase.get_Name());
                             // world.CheckAttackBase (System.Int32 targetX ,System.Int32 targetY) -> ClientLib.Data.EAttackBaseResult
                             // world.CheckAttackBaseRegion (System.Int32 targetX ,System.Int32 targetY) -> ClientLib.Data.EAttackBaseResult
@@ -853,9 +901,10 @@ codes by NetquiK
                                     if (distance <= maxAttackDistance) {
                                         var object = world.GetObjectFromPosition(scanX, scanY);
                                         var loot = {};
-                                        if (object) {
+                                        //MOD Scan only correct types and get existing functions
+                                        if (object && [1, 2, 3].includes(object.Type)) {
                                             //console.log(object);
-                                            if (object.Type == 1 && t1) {
+                                            /* if (object.Type == 1 && t1) {
                                                 //console.log("object typ 1");
                                                 //objfnkstrON(object);
                                                 //t1 = !t1;
@@ -871,58 +920,62 @@ codes by NetquiK
                                                 //t3 = !t3;
                                             }
                                             if (object.Type == 3) {
-                                                if (c5 <= parseInt(object.getLevel(), 10)) {
+                                                //if (c5 <= parseInt(object.getLevel(), 10)) {
                                                     //console.log(object);
-                                                }
-                                            }
+                                                //}
+                                            } */
                                             //if(object.ConditionBuildings>0){
-                                            var needcp = selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY);
-                                            if (needcp <= ZQ && typeof object.getLevel == 'function') {
-                                                if (c5 <= parseInt(object.getLevel(), 10)) {
-                                                    // 0:ID , 1:Scanned, 2:Name, 3:Location, 4:Level, 5:Tib, 6:Kristal, 7:Credits, 8:Forschung, 9:Kristalfelder, 10:Tiberiumfelder,
-                                                    // 11:ConditionBuildings,12:ConditionDefense,13: CP pro Angriff , 14: defhp/offhp , 15:sum tib,krist,credits, 16: sum/cp
-                                                    var d = this.FL(object.getID(), 0);
-                                                    //MOD Fix needcp when cached city by Netquik
-                                                    null != d && d[13] !== needcp && (d[13] = needcp);
-                                                    var e = this.FL(object.getID(), 1);
-                                                    if (e != null) {
-                                                        this.ZM[object.getID()] = e;
-                                                    }
-                                                    if (object.Type == 1 && c1) { //User
-                                                        //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
-                                                        if (d != null) {
-                                                            this.ZE.push(d);
-                                                        } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                            // MOD FIX FOR CP on PLAYERS
+                                            var needcp = object.Type != 1 ? selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY) : selectedBase.CalculateAttackCommandPointCostToCoord(scanX, scanY, true, true);
+                                            if (needcp <= ZQ && typeof object.getID === 'function' && typeof object.get_BaseLevel === 'function') {
+                                                //MOD not add if ownbase or ally previuosly detected
+                                                this.skip++
+                                                if (!this.OWNS.hasOwnProperty(object.getID()) && !this.ALLY.includes(object.getID())) {
+                                                    this.skip--;
+                                                    if (c5 <= parseInt(object.get_BaseLevel(), 10)) {
+                                                        var d = this.FL(object.getID(), 0);
+                                                        //MOD Fix needcp when cached city by Netquik
+                                                        null != d && d[13] !== needcp && (d[13] = needcp);
+                                                        var e = this.FL(object.getID(), 1);
+                                                        if (e != null) {
+                                                            this.ZM[object.getID()] = e;
                                                         }
-                                                    }
-                                                    if (object.Type == 2 && c2) { //basen
-                                                        //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
-                                                        if (d != null) {
-                                                            this.ZE.push(d);
-                                                        } else {
-                                                            this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                        if (object.Type == 1 && c1) { //User
+                                                            if (d != null) {
+                                                                this.ZE.push(d);
+                                                            } else {
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Player"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                            }
                                                         }
-                                                    }
-                                                    if (object.Type == 3 && (c3 || c4)) { //Lager Vposten
-                                                        //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
-                                                        if (d != null) {
-                                                            if ((object.getCampType() == 2 || object.getCampType() == 1) && c4) {
+                                                        if (object.Type == 2 && c2) { //basen
+                                                            //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
+                                                            if (d != null) {
                                                                 this.ZE.push(d);
-                                                            } else if ((object.getCampType() == 7) && c4) {
-                                                                this.ZE.push(d);
-                                                            } else if (object.getCampType() == 3 && c3) {
-                                                                this.ZE.push(d);
+                                                            } else {
+                                                                this.ZE.push([object.getID(), -1, this.T.get("Bases"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
                                                             }
-                                                        } else {
-                                                            if ((object.getCampType() == 7 || object.getCampType() == 2 || object.getCampType() == 1) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
-                                                            }
-                                                            if ((object.getCampType() == 7) && c4) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
-                                                            }
-                                                            if (object.getCampType() == 3 && c3) {
-                                                                this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.getLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                        }
+                                                        if (object.Type == 3 && (c3 || c4)) { //Lager Vposten
+                                                            //console.log("object ID LEVEL", object.getID() ,object.getLevel() );
+                                                            //MOD Using functions already available object.get_CampType()
+                                                            if (d != null) {
+                                                                if ((object.get_CampType() == 2 || object.get_CampType() == 1) && c4) {
+                                                                    this.ZE.push(d);
+                                                                } else if ((object.get_CampType() == 7) && c4) {
+                                                                    this.ZE.push(d);
+                                                                } else if (object.get_CampType() == 3 && c3) {
+                                                                    this.ZE.push(d);
+                                                                }
+                                                            } else {
+                                                                if ((object.get_CampType() == 7 || object.get_CampType() == 2 || object.get_CampType() == 1) && c4) {
+                                                                    this.ZE.push([object.getID(), -1, this.T.get("Camp"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                                }
+                                                                if ((object.get_CampType() == 7) && c4) {
+                                                                    this.ZE.push([object.getID(), -1, this.T.get("Infected Camp"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                                }
+                                                                if (object.get_CampType() == 3 && c3) {
+                                                                    this.ZE.push([object.getID(), -1, this.T.get("Outpost"), scanX + ":" + scanY, object.get_BaseLevel(), 0, 0, 0, 0, 0, 0, 0, 0, needcp, "-", 0, 0, 0, 0, 0, 0]);
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -933,6 +986,8 @@ codes by NetquiK
                                     }
                                 }
                             }
+                            console.log('Skipped ' + this.skip + ' Own or Ally Cities');
+                            this.skip = 0;
                             this.ZH = true;
                             this.ZL.setData(this.ZE);
                             if (colsort == -1) {
@@ -947,8 +1002,8 @@ codes by NetquiK
                             this.FP(0, this.ZE.length, 200);
 
                             if (this.YY.name != "DR01D") qx.event.Timer.once(function () {
-                                window.Addons.BaseScannerGUI.getInstance().FG()
-                            }, 50);
+                                this.FG()
+                            }, window.Addons.BaseScannerGUI.getInstance(), 50);
                         } catch (ex) {
                             console.debug("Maelstrom_Basescanner FJ error: ", ex);
                         }
@@ -973,7 +1028,7 @@ codes by NetquiK
                                 var selectedid = 0;
                                 var id = 0;
                                 if (this.ZE == null) {
-                                    console.warn("data null: ");
+                                    console.warn("Scanning data empty");
                                     this.ZH = false;
                                     break;
                                 }
@@ -988,7 +1043,7 @@ codes by NetquiK
                                 }
                                 this.FP(i, this.ZE.length, 200); //Progressbar
                                 if (this.ZE[i] == null) {
-                                    console.warn("data[i] null: ");
+                                    console.log("Scanning data empty");
                                     this.ZH = false;
                                     this.ZG.setLabel(this.T.get("Scan"));
                                     this.ZD.setEnabled(true);
@@ -1009,189 +1064,204 @@ codes by NetquiK
                                     ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentCityId(id);
                                     ncity = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(id);
                                     //console.log("ncity", ncity);
-                                    if (ncity != null) {
-                                        if (!ncity.get_IsGhostMode()) {
-                                            //if(ncity.get_Name() != null)
-                                            //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
-                                            //var cityBuildings = ncity.get_CityBuildingsData();
-                                            var cityUnits = ncity.get_CityUnitsData();
-                                            if (cityUnits != null) { // cityUnits !=null können null sein
-                                                //console.log("ncity.cityUnits", cityUnits );
-                                                var selectedBase = this.ZC.getSelection()[0].getModel();
-                                                var buildings = ncity.get_Buildings().d;
-                                                var defenseUnits = cityUnits.get_DefenseUnits().d;
-                                                var offensivUnits = selectedBase.get_CityUnitsData().get_OffenseUnits().d;
-                                                //console.log(buildings,defenseUnits,offensivUnits);
-                                                if (buildings != null) //defenseUnits !=null können null sein
-                                                {
-                                                    var buildingLoot = getResourcesPart(buildings);
-                                                    var unitLoot = getResourcesPart(defenseUnits);
-                                                    //console.log("buildingLoot", buildingLoot);
-                                                    //console.log("unitLoot", unitLoot);
-                                                    this.ZE[i][2] = ncity.get_Name();
-                                                    this.ZE[i][5] = buildingLoot[ClientLib.Base.EResourceType.Tiberium] + unitLoot[ClientLib.Base.EResourceType.Tiberium];
-                                                    this.ZE[i][6] = buildingLoot[ClientLib.Base.EResourceType.Crystal] + unitLoot[ClientLib.Base.EResourceType.Crystal];
-                                                    this.ZE[i][7] = buildingLoot[ClientLib.Base.EResourceType.Gold] + unitLoot[ClientLib.Base.EResourceType.Gold];
-                                                    this.ZE[i][8] = buildingLoot[ClientLib.Base.EResourceType.ResearchPoints] + unitLoot[ClientLib.Base.EResourceType.ResearchPoints];
-                                                    //console.log(posX,posY,"GetBuildingsConditionInPercent", ncity.GetBuildingsConditionInPercent() );
-                                                    if (ncity.GetBuildingsConditionInPercent() != 0) {
-                                                        this.ZA = 0;
-                                                        if (this.ZE[i][5] != 0) {
-                                                            var c = 0;
-                                                            var t = 0;
-                                                            var m = 0;
-                                                            this.ZM[id] = new Array(9);
-                                                            this.crysCounter[id] = new Array(9);
-                                                            this.tibCounter[id] = new Array(9);
-                                                            for (m = 0; m < 9; m++) {
-                                                                this.ZM[id][m] = new Array(8);
-                                                                this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
-                                                                this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
-                                                            }
-
-                                                            var tib4 = 0;
-                                                            var tib5 = 0;
-                                                            var tib6 = 0;
-                                                            var tib7 = 0;
-                                                            var cry4 = 0;
-                                                            var cry5 = 0;
-                                                            var cry6 = 0;
-                                                            var cry7 = 0;
-                                                            var mix4 = 0;
-                                                            var mix5 = 0;
-                                                            var mix6 = 0;
-                                                            var mix7 = 0;
-                                                            var mix8 = 0;
-                                                            var pow8 = 0;
-                                                            var powL = {};
-                                                            var totT = 0; // count total tib
-                                                            var totC = 0; // count total cry
-                                                            this.ZM[id] = new Array(9);
-                                                            this.crysCounter[id] = new Array(9);
-                                                            this.tibCounter[id] = new Array(9);
-                                                            for (m = 0; m < 9; m++) {
-                                                                this.ZM[id][m] = new Array(8);
-                                                                this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
-                                                                this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
-                                                            }
-                                                            for (var y = 0; 8 > y; y++) {
-                                                                for (var x = 0; 9 > x; x++) {
-                                                                    var aKey = x + "," + y;
-                                                                    switch (ncity.GetResourceType(x, y)) {
-                                                                        case 0:
-                                                                            var cntT = 0,
-                                                                                cntC = 0,
-                                                                                cntM = 0,
-                                                                                cntP = 0;
-                                                                            0 < y && 7 > y && 0 < x && 8 > x && (2 === ncity.GetResourceType(x - 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x +
-                                                                                1, y + 1) && (cntC++, cntM++), 1 === ncity.GetResourceType(x - 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y +
-                                                                                1) && (cntT++, cntM++), 0 === ncity.GetResourceType(x - 1, y - 1) && this.checkFieldFree(x - 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y - 1) && this.checkFieldFree(x, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y - 1) && this.checkFieldFree(x + 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x - 1, y) && this.checkFieldFree(x - 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y) && this.checkFieldFree(x + 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x -
-                                                                                1, y + 1) && this.checkFieldFree(x - 1, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y + 1) && this.checkFieldFree(x, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y + 1) && this.checkFieldFree(x + 1, y + 1, powL) && cntP++);
-                                                                            4 === cntC && (tib4++, mix4--);
-                                                                            5 === cntC && (tib5++, mix5--);
-                                                                            6 === cntC && (tib6++, mix6--);
-                                                                            7 === cntC && (tib7++, mix7--);
-                                                                            4 === cntT && (cry4++, mix4--);
-                                                                            5 === cntT && (cry5++, mix5--);
-                                                                            6 === cntT && (cry6++, mix6--);
-                                                                            7 === cntT && (cry7++, mix7--);
-                                                                            4 === cntM && mix4++;
-                                                                            5 === cntM && mix5++;
-                                                                            6 === cntM && mix6++;
-                                                                            7 === cntM && mix7++;
-                                                                            8 === cntM && mix8++;
-                                                                            8 === cntP && (pow8++, powL[aKey] = 1);
-                                                                            break;
-                                                                        case 1:
-                                                                            totC++;
-                                                                            this.ZM[id][x][y] = 1;
-                                                                            break;
-                                                                        case 2:
-                                                                            this.ZM[id][x][y] = 2, totT++;
-                                                                    }
-                                                                }
-                                                            }
-
-                                                            this.ZE[i][9] = totC;
-                                                            this.ZE[i][10] = totT;
-                                                            this.ZE[i][11] = ncity.GetBuildingsConditionInPercent();
-                                                            this.ZE[i][12] = ncity.GetDefenseConditionInPercent();
-                                                            this.ZE[i][21] = tib7 + " | " + tib6 + " | " + tib5 + " | " + tib4;
-                                                            this.ZE[i][22] = cry7 + " | " + cry6 + " | " + cry5 + " | " + cry4;
-                                                            this.ZE[i][23] = mix7 + " | " + mix6 + " | " + mix5 + " | " + mix4;
-                                                            this.ZE[i][20] = pow8;
-                                                            try {
-                                                                var u = offensivUnits;
-                                                                //console.log("OffenseUnits",u);
-                                                                var offhp = 0;
-                                                                var defhp = 0;
-                                                                for (var g in u) {
-                                                                    offhp += u[g].get_Health();
-                                                                }
-                                                                u = defenseUnits;
-                                                                //console.log("DefUnits",u);
-                                                                for (var g in u) {
-                                                                    defhp += u[g].get_Health();
-                                                                }
-                                                                u = buildings;
-                                                                //console.log("DefUnits",u);
-                                                                for (var g in u) {
-                                                                    //var id=0;
-                                                                    //console.log("MdbUnitId",u[g].get_MdbUnitId());
-                                                                    var mid = u[g].get_MdbUnitId();
-                                                                    //DF
-                                                                    if (mid == 158 || mid == 131 || mid == 195) {
-                                                                        this.ZE[i][18] = 8 - u[g].get_CoordY();
-                                                                    }
-                                                                    //CY
-                                                                    if (mid == 112 || mid == 151 || mid == 177) {
-                                                                        this.ZE[i][17] = 8 - u[g].get_CoordY();
-                                                                    }
-                                                                }
-                                                                //console.log("HPs",offhp,defhp, (defhp/offhp) );
-                                                            } catch (x) {
-                                                                console.debug("HPRecord", x);
-                                                            }
-                                                            this.ZE[i][14] = this.ZK[5].getValue() ? "-" : this.maaain(id);
-                                                            this.ZE[i][15] = this.ZE[i][5] + this.ZE[i][6] + this.ZE[i][7];
-                                                            this.ZE[i][16] = this.ZE[i][15] / this.ZE[i][13];
-                                                            this.ZE[i][1] = 0;
-                                                            this.ZE[i][24] = !1;
-                                                            retry = true;
-                                                            console.info(ncity.get_Name(), " finish");
+                                    if (ncity != null && ncity.get_Version() > 0) {
+                                        // MOD remove if Ally
+                                        if (ncity.get_OwnerAllianceId() == 0 || (ncity.get_OwnerAllianceId() != playerbase.get_AllianceId()) && !Object.values(ClientLib.Data.MainData.GetInstance().get_Alliance().get_Relationships()).some(e => e.OtherAllianceId == ncity.get_OwnerAllianceId() && [1, 2].includes(e.Relationship))) {
+                                            if (!ncity.get_IsGhostMode()) {
+                                                //if(ncity.get_Name() != null)
+                                                //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
+                                                //var cityBuildings = ncity.get_CityBuildingsData();
+                                                var cityUnits = ncity.get_CityUnitsData();
+                                                if (cityUnits != null) { // cityUnits !=null können null sein
+                                                    //console.log("ncity.cityUnits", cityUnits );
+                                                    var selectedBase = this.ZC.getSelection()[0].getModel();
+                                                    var buildings = ncity.get_Buildings().d;
+                                                    var defenseUnits = cityUnits.get_DefenseUnits().d;
+                                                    var offensivUnits = selectedBase.get_CityUnitsData().get_OffenseUnits().d;
+                                                    //console.log(buildings,defenseUnits,offensivUnits);
+                                                    if (buildings != null) //defenseUnits !=null können null sein
+                                                    {
+                                                        var buildingLoot = getResourcesPart(buildings);
+                                                        var unitLoot = getResourcesPart(defenseUnits);
+                                                        //console.log("buildingLoot", buildingLoot);
+                                                        //console.log("unitLoot", unitLoot);
+                                                        this.ZE[i][2] = ncity.get_Name();
+                                                        this.ZE[i][5] = buildingLoot[ClientLib.Base.EResourceType.Tiberium] + unitLoot[ClientLib.Base.EResourceType.Tiberium];
+                                                        this.ZE[i][6] = buildingLoot[ClientLib.Base.EResourceType.Crystal] + unitLoot[ClientLib.Base.EResourceType.Crystal];
+                                                        this.ZE[i][7] = buildingLoot[ClientLib.Base.EResourceType.Gold] + unitLoot[ClientLib.Base.EResourceType.Gold];
+                                                        this.ZE[i][8] = buildingLoot[ClientLib.Base.EResourceType.ResearchPoints] + unitLoot[ClientLib.Base.EResourceType.ResearchPoints];
+                                                        //console.log(posX,posY,"GetBuildingsConditionInPercent", ncity.GetBuildingsConditionInPercent() );
+                                                        if (ncity.GetBuildingsConditionInPercent() != 0) {
                                                             this.ZA = 0;
-                                                            this.countlastidchecked = 0;
-                                                            //console.log(this.ZE[i],this.ZM[id],id);
-                                                            this.FK(this.ZE[i], this.ZM[id], id);
-                                                            //update table + retain sorting 
-                                                            let colsort = this.ZL.getSortColumnIndex();
-                                                            let colsort_ASC = this.ZL.isSortAscending();
-                                                            this.ZL.setData(this.ZE);
-                                                            if (colsort == -1) {
-                                                                if (!this.ZK[5].getValue()) {
-                                                                    this.ZL.sortByColumn(14, false); //Sort for Growth Rate
+                                                            if (this.ZE[i][5] != 0) {
+                                                                var c = 0;
+                                                                var t = 0;
+                                                                var m = 0;
+                                                                this.ZM[id] = new Array(9);
+                                                                this.crysCounter[id] = new Array(9);
+                                                                this.tibCounter[id] = new Array(9);
+                                                                for (m = 0; m < 9; m++) {
+                                                                    this.ZM[id][m] = new Array(8);
+                                                                    this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
+                                                                    this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
+                                                                }
+
+                                                                var tib4 = 0;
+                                                                var tib5 = 0;
+                                                                var tib6 = 0;
+                                                                var tib7 = 0;
+                                                                var cry4 = 0;
+                                                                var cry5 = 0;
+                                                                var cry6 = 0;
+                                                                var cry7 = 0;
+                                                                var mix4 = 0;
+                                                                var mix5 = 0;
+                                                                var mix6 = 0;
+                                                                var mix7 = 0;
+                                                                var mix8 = 0;
+                                                                var pow8 = 0;
+                                                                var powL = {};
+                                                                var totT = 0; // count total tib
+                                                                var totC = 0; // count total cry
+                                                                this.ZM[id] = new Array(9);
+                                                                this.crysCounter[id] = new Array(9);
+                                                                this.tibCounter[id] = new Array(9);
+                                                                for (m = 0; m < 9; m++) {
+                                                                    this.ZM[id][m] = new Array(8);
+                                                                    this.crysCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
+                                                                    this.tibCounter[id][m] = new Array(9).join('0').split('').map(parseFloat);
+                                                                }
+                                                                for (var y = 0; 8 > y; y++) {
+                                                                    for (var x = 0; 9 > x; x++) {
+                                                                        var aKey = x + "," + y;
+                                                                        switch (ncity.GetResourceType(x, y)) {
+                                                                            case 0:
+                                                                                var cntT = 0,
+                                                                                    cntC = 0,
+                                                                                    cntM = 0,
+                                                                                    cntP = 0;
+                                                                                0 < y && 7 > y && 0 < x && 8 > x && (2 === ncity.GetResourceType(x - 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y - 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x + 1, y) && (cntC++, cntM++), 2 === ncity.GetResourceType(x - 1, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x, y + 1) && (cntC++, cntM++), 2 === ncity.GetResourceType(x +
+                                                                                    1, y + 1) && (cntC++, cntM++), 1 === ncity.GetResourceType(x - 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y - 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y) && (cntT++, cntM++), 1 === ncity.GetResourceType(x - 1, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x, y + 1) && (cntT++, cntM++), 1 === ncity.GetResourceType(x + 1, y +
+                                                                                    1) && (cntT++, cntM++), 0 === ncity.GetResourceType(x - 1, y - 1) && this.checkFieldFree(x - 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y - 1) && this.checkFieldFree(x, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y - 1) && this.checkFieldFree(x + 1, y - 1, powL) && cntP++, 0 === ncity.GetResourceType(x - 1, y) && this.checkFieldFree(x - 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y) && this.checkFieldFree(x + 1, y, powL) && cntP++, 0 === ncity.GetResourceType(x -
+                                                                                    1, y + 1) && this.checkFieldFree(x - 1, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x, y + 1) && this.checkFieldFree(x, y + 1, powL) && cntP++, 0 === ncity.GetResourceType(x + 1, y + 1) && this.checkFieldFree(x + 1, y + 1, powL) && cntP++);
+                                                                                4 === cntC && (tib4++, mix4--);
+                                                                                5 === cntC && (tib5++, mix5--);
+                                                                                6 === cntC && (tib6++, mix6--);
+                                                                                7 === cntC && (tib7++, mix7--);
+                                                                                4 === cntT && (cry4++, mix4--);
+                                                                                5 === cntT && (cry5++, mix5--);
+                                                                                6 === cntT && (cry6++, mix6--);
+                                                                                7 === cntT && (cry7++, mix7--);
+                                                                                4 === cntM && mix4++;
+                                                                                5 === cntM && mix5++;
+                                                                                6 === cntM && mix6++;
+                                                                                7 === cntM && mix7++;
+                                                                                8 === cntM && mix8++;
+                                                                                8 === cntP && (pow8++, powL[aKey] = 1);
+                                                                                break;
+                                                                            case 1:
+                                                                                totC++;
+                                                                                this.ZM[id][x][y] = 1;
+                                                                                break;
+                                                                            case 2:
+                                                                                this.ZM[id][x][y] = 2, totT++;
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                this.ZE[i][9] = totC;
+                                                                this.ZE[i][10] = totT;
+                                                                this.ZE[i][11] = ncity.GetBuildingsConditionInPercent();
+                                                                this.ZE[i][12] = ncity.GetDefenseConditionInPercent();
+                                                                this.ZE[i][21] = tib7 + " | " + tib6 + " | " + tib5 + " | " + tib4;
+                                                                this.ZE[i][22] = cry7 + " | " + cry6 + " | " + cry5 + " | " + cry4;
+                                                                this.ZE[i][23] = mix7 + " | " + mix6 + " | " + mix5 + " | " + mix4;
+                                                                this.ZE[i][20] = pow8;
+                                                                try {
+                                                                    var u = offensivUnits;
+                                                                    //console.log("OffenseUnits",u);
+                                                                    var offhp = 0;
+                                                                    var defhp = 0;
+                                                                    for (var g in u) {
+                                                                        offhp += u[g].get_Health();
+                                                                    }
+                                                                    u = defenseUnits;
+                                                                    //console.log("DefUnits",u);
+                                                                    for (var g in u) {
+                                                                        defhp += u[g].get_Health();
+                                                                    }
+                                                                    u = buildings;
+                                                                    //console.log("DefUnits",u);
+                                                                    for (var g in u) {
+                                                                        //var id=0;
+                                                                        //console.log("MdbUnitId",u[g].get_MdbUnitId());
+                                                                        var mid = u[g].get_MdbUnitId();
+                                                                        //DF
+                                                                        if (mid == 158 || mid == 131 || mid == 195) {
+                                                                            this.ZE[i][18] = 8 - u[g].get_CoordY();
+                                                                        }
+                                                                        //CY
+                                                                        if (mid == 112 || mid == 151 || mid == 177) {
+                                                                            this.ZE[i][17] = 8 - u[g].get_CoordY();
+                                                                        }
+                                                                    }
+                                                                    //console.log("HPs",offhp,defhp, (defhp/offhp) );
+                                                                } catch (x) {
+                                                                    console.debug("HPRecord", x);
+                                                                }
+                                                                this.ZE[i][14] = this.ZK[5].getValue() ? "-" : this.maaain(id);
+                                                                this.ZE[i][15] = this.ZE[i][5] + this.ZE[i][6] + this.ZE[i][7];
+                                                                this.ZE[i][16] = this.ZE[i][15] / this.ZE[i][13];
+                                                                this.ZE[i][1] = 0;
+                                                                this.ZE[i][24] = !1;
+                                                                retry = true;
+                                                                console.info(ncity.get_Name(), " finish");
+                                                                this.ZA = 0;
+                                                                this.countlastidchecked = 0;
+                                                                //console.log(this.ZE[i],this.ZM[id],id);
+                                                                this.FK(this.ZE[i], this.ZM[id], id);
+                                                                //update table + retain sorting 
+                                                                let colsort = this.ZL.getSortColumnIndex();
+                                                                let colsort_ASC = this.ZL.isSortAscending();
+                                                                this.ZL.setData(this.ZE);
+                                                                if (colsort == -1) {
+                                                                    if (!this.ZK[5].getValue()) {
+                                                                        this.ZL.sortByColumn(14, false); //Sort for Growth Rate
+                                                                    } else {
+                                                                        this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                                                                    }
                                                                 } else {
-                                                                    this.ZL.sortByColumn(4, false); //Sort form Highlevel to Lowlevel
+                                                                    this.ZL.sortByColumn(colsort, colsort_ASC); //Sort User Choice
                                                                 }
-                                                            } else {
-                                                                this.ZL.sortByColumn(colsort, colsort_ASC); //Sort User Choice
                                                             }
+                                                        } else {
+                                                            if (this.ZA > 250) {
+                                                                console.info(this.ZE[i][2], " on ", posX, posY, " removed (GetBuildingsConditionInPercent == 0)");
+                                                                this.ZE.splice(i, 1); //entfernt element aus array
+                                                                this.ZA = 0;
+                                                                this.countlastidchecked = 0;
+                                                                this.ZL.setData(this.ZE);
+                                                                break;
+                                                            }
+                                                            this.ZA++;
                                                         }
-                                                    } else {
-                                                        if (this.ZA > 250) {
-                                                            console.info(this.ZE[i][2], " on ", posX, posY, " removed (GetBuildingsConditionInPercent == 0)");
-                                                            this.ZE.splice(i, 1); //entfernt element aus array
-                                                            this.ZA = 0;
-                                                            this.countlastidchecked = 0;
-                                                            break;
-                                                        }
-                                                        this.ZA++;
                                                     }
                                                 }
+                                            } else {
+                                                console.info(this.ZE[i][2], " on ", posX, posY, " removed (IsGhostMode)");
+                                                this.ZE.splice(i, 1); //entfernt element aus array
+                                                this.ZA = 0;
+                                                this.countlastidchecked = 0;
+                                                this.ZL.setData(this.ZE);
+                                                break;
                                             }
                                         } else {
-                                            console.info(this.ZE[i][2], " on ", posX, posY, " removed (IsGhostMode)");
+                                            console.info(this.ZE[i][2], " on ", posX, posY, " removed Ally");
                                             this.ZE.splice(i, 1); //entfernt element aus array
+                                            this.ZA = 0;
+                                            this.countlastidchecked = 0;
+                                            this.ZL.setData(this.ZE);
+                                            this.ALLY.push(id);
                                             break;
                                         }
                                     }
@@ -1211,6 +1281,7 @@ codes by NetquiK
                                 if (this.countlastidchecked > 16) {
                                     console.info(this.ZE[i][2], " on ", posX, posY, " removed (found no data)");
                                     this.ZE.splice(i, 1); //entfernt element aus array
+                                    this.ZL.setData(this.ZE);
                                     this.countlastidchecked = 0;
                                 } else if (this.countlastidchecked > 10) {
                                     sleeptime = 500;
@@ -3852,24 +3923,24 @@ codes by NetquiK
             }
         }
 
-        function foundfnkstring(obj, redex, objname, n) {
-            var redexfounds = [];
-            var s = obj.toString();
-            var protostring = s.replace(/\s/gim, "");
-            redexfounds = protostring.match(redex);
-            var i;
-            for (i = 1; i < (n + 1); i++) {
-                if (redexfounds != null && redexfounds[i].length == 6) {
-                    console.debug(objname, i, redexfounds[i]);
-                } else if (redexfounds != null && redexfounds[i].length > 0) {
-                    console.warn(objname, i, redexfounds[i]);
-                } else {
-                    console.error("Error - ", objname, i, "not found");
-                    console.warn(objname, protostring);
-                }
-            }
-            return redexfounds;
-        }
+        /*         function foundfnkstring(obj, redex, objname, n) {
+                    var redexfounds = [];
+                    var s = obj.toString();
+                    var protostring = s.replace(/\s/gim, "");
+                    redexfounds = protostring.match(redex);
+                    var i;
+                    for (i = 1; i < (n + 1); i++) {
+                        if (redexfounds != null && redexfounds[i].length == 6) {
+                            console.debug(objname, i, redexfounds[i]);
+                        } else if (redexfounds != null && redexfounds[i].length > 0) {
+                            console.warn(objname, i, redexfounds[i]);
+                        } else {
+                            console.error("Error - ", objname, i, "not found");
+                            console.warn(objname, protostring);
+                        }
+                    }
+                    return redexfounds;
+                } */
 
         function MaelstromTools_Basescanner_checkIfLoaded() {
             try {
