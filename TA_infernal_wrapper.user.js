@@ -3,15 +3,17 @@
 // @description Supplies some wrapper functions for public use
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
-// @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.42
+// @match          https://*.alliances.commandandconquer.com/*/index.aspx*
+// @version 1.44
 // @author NetquiK (original code from infernal_me, KRS_L, krisan)
-// @contributor NetquiK (Recoded all for NOEVIL and removed iterations)
+// @contributor NetquiK (Recoded all for NOEVIL and removed iterations - 22.2 New Framework Update - 22.3 FIX)
 // ==/UserScript==
 
 (function () {
     var CCTAWrapper_main = function () {
-        window.navigator.pointerEnabled = "PointerEvent" in window;
+        // 22.2 New Framework Fixes issue #9182: new unified pointer input model since Chrome 55
+        if (parseFloat(GameVersion) < 22.2) window.navigator.pointerEnabled = "PointerEvent" in window;
+        // see https://github.com/qooxdoo/qooxdoo/issues/9182
         try {
             _log = function () {
                 if (typeof console != 'undefined') console.log(arguments);
@@ -44,7 +46,7 @@
                         }
                     }
                 } */
-                var subM = StartBattle_Source.match(/this\.([a-zA-Z]+)=\(new \$I\.([a-zA-Z]+)\)\..+{this\.\1\.([a-zA-Z]+)\(false\)/);
+                var subM = StartBattle_Source.match(/this\.([a-zA-Z]+)=\(new \$I\.([a-zA-Z]+)\)\..+{this\.\1\.([a-zA-Z]+)\((false|!1\))/);
                 $I[subM[2]].prototype.DoStep = $I[subM[2]].prototype[subM[3]];
                 console.log("SharedLib.Combat.CbtSimulation.prototype.DoStep = $I." + subM[2] + ".prototype." + subM[3]);
                 /*// ClientLib.Data.CityRepair.prototype.CanRepair
@@ -76,7 +78,9 @@
                 var startPos = strFunction.indexOf(searchString) + searchString.length;
                 var fn_name = strFunction.slice(startPos, startPos + 6);*/
                 //var fn_name = strFunction.match(/for {0,1}\(var b in {d:this.([A-Z]{6})/)[1];
-                var get_OffenseUnitsF = HasUnitMdbId_Source.match(/for {0,1}\(var b in {d:this.([A-Z]{6})/)[1];
+                var get_UnitsF = HasUnitMdbId_Source.match(/for ?\(.+[a-z]:this.([A-Z]{6}).+[a-z]:this.([A-Z]{6})/);
+
+                var get_OffenseUnitsF = get_UnitsF[1];
                 //strFunction = "var $createHelper;return this." + fn_name + ";";
                 //var fn = Evil('', strFunction);
                 /* var get_OffenseUnits = function(){
@@ -85,7 +89,6 @@
                 } */
                 //ClientLib.Data.CityUnits.prototype.get_OffenseUnits = fn;
                 ClientLib.Data.CityUnits.prototype.get_OffenseUnits = function () {
-                    var $createHelper;
                     return this[get_OffenseUnitsF];
                 };
                 //console.log("ClientLib.Data.CityUnits.prototype.get_OffenseUnits = function(){var $createHelper;return this." + fn_name + ";}");
@@ -97,12 +100,12 @@
                 startPos = strFunction.indexOf(searchString) + searchString.length;
                 fn_name = strFunction.slice(startPos, startPos + 6);*/
                 //var fn_name = strFunction.match(/for {0,1}\(var c in {d:this.([A-Z]{6})/)[1];
-                var get__DefenseUnitsF = HasUnitMdbId_Source.match(/for {0,1}\(var c in {d:this.([A-Z]{6})/)[1];
+
+                var get__DefenseUnitsF = get_UnitsF[2];
                 //strFunction = "var $createHelper;return this." + fn_name + ";";
                 //var fn = Evil('', strFunction);
                 //ClientLib.Data.CityUnits.prototype.get_DefenseUnits = fn;
                 ClientLib.Data.CityUnits.prototype.get_DefenseUnits = function () {
-                    var $createHelper;
                     return this[get__DefenseUnitsF];
                 };
                 //console.log("ClientLib.Data.CityUnits.prototype.get_DefenseUnits = function(){var $createHelper;return this." + fn_name + ";}");
@@ -118,7 +121,6 @@
                 //fn = Evil('', strFunction);
                 //ClientLib.Vis.Battleground.Battleground.prototype.get_Simulation = fn;
                 ClientLib.Vis.Battleground.Battleground.prototype.get_Simulation = function () {
-                    var $createHelper;
                     return this[subM[1]];
                 };
                 //console.log("ClientLib.Vis.Battleground.Battleground.prototype.get_Simulation = function(){return this." + fn_name + ";}");
