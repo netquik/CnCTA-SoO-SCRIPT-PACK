@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name           OPERA BLANKGIF GAMEFIX
 // @description    Opera browser support and blank.gif fix
-// @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_opera_blank_gif.user.js
-// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_opera_blank_gif.user.js
+// @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Opera_Blank_Gif_Fix.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Opera_Blank_Gif_Fix.user.js
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.0
-// @author NetquiK
+// @version        1.0 
+// @author         NetquiK (https://github.com/netquik)
 // ==/UserScript==
 
 (function () {
