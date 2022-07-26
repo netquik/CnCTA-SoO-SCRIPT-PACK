@@ -2,8 +2,8 @@
 // @name           TACS (Tiberium Alliances Combat Simulator)
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
-// @include        https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.77
+// @match          https://*.alliances.commandandconquer.com/*/index.aspx*
+// @version        3.78
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -30,6 +30,7 @@ codes by NetquiK
 - New Fixes for simulation + ReplayBar + Date hidden
 - New SkipSimulation Function
 - Fix FOR CP Calculation on PLAYERS
+- Patch for 22.3
 ----------------
 */
 
@@ -537,7 +538,8 @@ codes by NetquiK
                             var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this\.([_a-zA-Z]+)\.addListener\([a-z]/);
                             "object" == typeof this.ReplayBar[PBIS_M[1]] && "btn_play" == this.ReplayBar[PBIS_M[1]].objid && (this.PBIS = PBIS_M[1]);
                             "object" == typeof this.ReplayBar[PBIS_M[3]] && "btn_skip" == this.ReplayBar[PBIS_M[3]].objid && (this.PBIS_SK = PBIS_M[3]);
-                            PBIS_M = webfrontend.gui.reports.ReportReplayOverlay.prototype[PBIS_M[2]].toString().match(/if\(this\.([_a-zA-Z]+)\){this\.[_a-zA-Z]+\(false\).+this\.([_a-zA-Z]+)\.setValue/);
+                            // MOD 22.3 - 1
+                            PBIS_M = webfrontend.gui.reports.ReportReplayOverlay.prototype[PBIS_M[2]].toString().match(/(?:if\(|,)this\.([_a-zA-Z]+)\){this\.[_a-zA-Z]+\((?:false|!1)\).+this\.([_a-zA-Z]+)\.setValue/);
                             "boolean" == typeof this.ReplayBar[PBIS_M[1]] && (this.PBIS_S = PBIS_M[1]);
                             "object" == typeof this.ReplayBar[PBIS_M[2]] && "lbl_speed" == this.ReplayBar[PBIS_M[2]].objid && (this.PBIS_L = PBIS_M[2]);
                             //MOD New Autoscroll Button Selector
@@ -581,7 +583,8 @@ codes by NetquiK
                                 }
                             } */
                             var updatecitys = ClientLib.Data.Cities.prototype.UpdateCity.toString();
-                            var UCM = updatecitys.match(/}}[a-z]\.([A-Z]{6})\([a-z]\);/);
+                            // MOD 22.3-4
+                            var UCM = updatecitys.match(/(?:}}|,)[a-z]\.([A-Z]{6})\([a-z]\);/);
                             var UCMe = ClientLib.Data.City.prototype[UCM[1]].toString().match(/this\.([A-Z]{6})=Math.floor/);
                             ClientLib.Data.City.prototype['_' + UCM[1]] = ClientLib.Data.City.prototype[UCM[1]]
                             ClientLib.Data.City.prototype[UCM[1]] = function (a) {
@@ -597,7 +600,8 @@ codes by NetquiK
                             // MOD NEW PATCH for moving Map (adjusted for 20.1 Patch)
                             var source = ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().get_MinYPosition.toString();
                             // MOD Fix1 for 22.2 Patch
-                            var CombatMinY = source.match(/return {0,1}\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
+                            // MOD 22.3 - 2
+                            var CombatMinY = source.match(/return {0,1}\(?\$I\.([A-Z]{6})\.([A-Z]{6})-/);
                             if (typeof $I[CombatMinY[1]] === "function") $I[CombatMinY[1]][CombatMinY[2]] = -178;
 
                             if (PerforceChangelist >= 472233) { // NOTE  20.2 patch RETRO
@@ -615,7 +619,8 @@ codes by NetquiK
                                     }
                                     //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
                                     var source = this.ArmySetupAttackBar.showSetup.toString();
-                                    var extendsetupF = source.match(/\;this\.([A-Za-z_]+)\(\)\;this\.show/)[1];
+                                    // MOD 22.3-3
+                                    var extendsetupF = source.match(/[,;]this\.([A-Za-z_]+)\(\).this\.show/)[1];
                                     // MOD NOEVIL 1 by NetquiK
                                     this.ArmySetupAttackBar[extendsetupF] = function () {
                                         return;
@@ -2410,6 +2415,7 @@ codes by NetquiK
                                 var target_city_id = target_city.get_Id();
                                 var units = base_city.get_CityArmyFormationsManager().GetFormationByTargetBaseId(target_city_id);
                                 this.view.lastUnits = units;
+                                // TOFIX (when game start while attacked you can get units)
                                 this.view.lastUnitList = units.get_ArmyUnits().l;
                             }
                             this.attackUnitsLoaded = true;
@@ -2810,7 +2816,8 @@ codes by NetquiK
                                 									//qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().setZIndex(1);
                                 								}, 500);*/
                                 this.checkAttackRange();
-                                if (this.curPAVM > 3) {
+                                // Attempt to fix error when game starts while attacked
+                                if (this.curPAVM > 3 && this.curPAVM < 8) {
                                     this.showCombatTools();
                                     var currentcity = this._MainData.get_Cities().get_CurrentCity();
                                     if (currentcity != null) {
@@ -3916,7 +3923,8 @@ codes by NetquiK
                                 if (typeof ClientLib.Vis.BaseView.BaseView.prototype[key] === 'function') {
                                     strFunction = ClientLib.Vis.BaseView.BaseView.prototype[key].toString();
                                     if (strFunction.indexOf(ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip.toString()) > -1) { */
-                            var TTM = ClientLib.Vis.ArmySetup.ArmyUnit.prototype.MouseOver.toString().match(/Helper;this\.[A-Z]{6}\.([A-Z]{6})\(this\);/);
+                            // MOD 22.3 - 5
+                            var TTM = ClientLib.Vis.ArmySetup.ArmyUnit.prototype.MouseOver.toString().match(/this\.[A-Z]{6}\.([A-Z]{6})\(this\);/);
                             console.log("ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype." + TTM[1]);
                             ClientLib.Vis.BaseView.BaseView.prototype.ShowToolTip_Original = ClientLib.Vis.BaseView.BaseView.prototype[TTM[1]];
                             // var stto = Evil('', showToolTip_Original);
