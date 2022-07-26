@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.78
+// @version        3.79
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -31,6 +31,7 @@ codes by NetquiK
 - New SkipSimulation Function
 - Fix FOR CP Calculation on PLAYERS
 - Patch for 22.3
+- Fix for getAttackUnits
 ----------------
 */
 
@@ -2414,9 +2415,11 @@ codes by NetquiK
                             if (target_city != null) {
                                 var target_city_id = target_city.get_Id();
                                 var units = base_city.get_CityArmyFormationsManager().GetFormationByTargetBaseId(target_city_id);
-                                this.view.lastUnits = units;
-                                // TOFIX (when game start while attacked you can get units)
-                                this.view.lastUnitList = units.get_ArmyUnits().l;
+                                // MOD Make sure get_ArmyUnits is a function
+                                if (typeof units.get_ArmyUnits === "function") {
+                                    this.view.lastUnits = units;
+                                    this.view.lastUnitList = units.get_ArmyUnits().l;
+                                }
                             }
                             this.attackUnitsLoaded = true;
                         } catch (e) {
@@ -2816,8 +2819,8 @@ codes by NetquiK
                                 									//qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getLayoutParent().setZIndex(1);
                                 								}, 500);*/
                                 this.checkAttackRange();
-                                // Attempt to fix error when game starts while attacked
-                                if (this.curPAVM > 3 && this.curPAVM < 8) {
+                                // MOD FIX error can't get getAttackUnits
+                                if (this.curPAVM > 3 && this.curPAVM != 7) {
                                     this.showCombatTools();
                                     var currentcity = this._MainData.get_Cities().get_CurrentCity();
                                     if (currentcity != null) {
