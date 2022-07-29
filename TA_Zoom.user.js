@@ -2,8 +2,8 @@
 // @name    		    Tiberium Alliances Zoom
 // @description    	Allows you to zoom out further
 // @namespace   	  https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @include       	https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version        	1.0.3
+// @match           https://*.alliances.commandandconquer.com/*/index.aspx*
+// @version        	1.0.5
 // @author         	Original: Panavia -- Updated By: Gryphon -- New code by NetquiK (https://github.com/netquik)
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Zoom.user.js
 // ==/UserScript==
@@ -13,6 +13,7 @@ codes by NetquiK
 ----------------
 - New Code
 - !!NOEVIL!! from 1.0.3
+- 22.3 Fix
 ----------------
 */
 
@@ -29,8 +30,8 @@ codes by NetquiK
       var backgroundArea = qx.core.Init.getApplication().getBackgroundArea();
 
 
-      var getMaxZoomMethod = backgroundArea.activeSceneView.get_MaxZoomFactor.toString().match(/this\.([A-Z+]{6});}/)[1];
-      var getMinZoomMethod = backgroundArea.activeSceneView.get_MinZoomFactor.toString().match(/\$I\.[A-Z+]{6}\.([A-Z+]{6});}/)[1];
+      var getMaxZoomMethod = backgroundArea.activeSceneView.get_MaxZoomFactor.toString().match(/this\.([A-Z+]{6});?}/)[1];
+      var getMinZoomMethod = backgroundArea.activeSceneView.get_MinZoomFactor.toString().match(/\$I\.[A-Z+]{6}\.([A-Z+]{6});?}/)[1];
 
       backgroundArea.activeSceneView[getMaxZoomMethod] = zoomMin;
       ClientLib.Vis.Region.Region[getMinZoomMethod] = zoomMax;
@@ -95,7 +96,7 @@ codes by NetquiK
 
   // injecting, because there seem to be problems when creating game interface with unsafeWindow
   var tazoomScript = document.createElement("script");
-  tazoomScript.innerHTML = "(" + tazoom_main.toString() + ")();";
+  tazoomScript.textContent = "(" + tazoom_main.toString() + ")();";
   tazoomScript.type = "text/javascript";
   if (/commandandconquer\.com/i.test(document.domain)) {
     document.getElementsByTagName("head")[0].appendChild(tazoomScript);
