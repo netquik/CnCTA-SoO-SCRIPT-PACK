@@ -2,8 +2,8 @@
 // @name        C&C Tiberium Alliances POIs Analyser
 // @description Display alliance's POIs scores and next tier requirements.
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     2.0.6
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
+// @version     2.0.9
 // @contributor NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @grant none
 // @author zdoom
@@ -16,6 +16,7 @@ codes by NetquiK
 - PoiGlobalBonus FIX
 - Deep Fix for AllianceOverlay Tabs
 - NOEVIL
+- 22.3 FIX
 ----------------
 */
 
@@ -610,12 +611,13 @@ codes by NetquiK
 						var AllianceOverlay = AllianceOverlayGUI.getInstance();
 						this.AllianceOverlayTabViewPopulateMethod = AllianceOverlay._activate.toString().match(/function\(\)\{this\.([_a-zA-Z]+)\(\);this\.[_a-zA-Z]+/)[1];
 						var TabViewPopulateMethodString = AllianceOverlay[this.AllianceOverlayTabViewPopulateMethod].toString();
-						this.AllianceOverlayTabViewMethod = TabViewPopulateMethodString.match(/this\.([_a-zA-Z]+)\.remove\(this\.[_a-zA-Z]+\);/)[1];
+						this.AllianceOverlayTabViewMethod = TabViewPopulateMethodString.match(/this\.([_a-zA-Z]+)\.remove\(this\.[_a-zA-Z]+\)/)[1];
 						/* var rewrittenFunctionBody = TabViewPopulateMethodString.replace(/(?!if\()this\.[_a-zA-Z]+(!|=)=(this\.[_a-zA-Z]+)(?=\){(this\.[_a-zA-Z]+)\.(?:add|remove))/g, function (match, g1, g2, g3) {
 							return '-1' + ("="==g1?"!":"=") + '==' + g3 + '.indexOf(' + g2 + ')';
 						}); */
-						// MOD NOEVIL by Netquik
-						var AOM = TabViewPopulateMethodString.match(/{if\(this\.[_a-zA-Z]+==this\.([_a-zA-Z]+)\){this\.([_a-zA-Z]+)\.remove.+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\(this\.[_a-zA-Z]+!=this\.\1/);
+						// MOD NOEVIL by Netquik + bugfix
+						// MOD 22.3
+						var AOM = TabViewPopulateMethodString.replace(/[\r\n]/g, "").match(/this\.[_a-zA-Z]+==this\.([_a-zA-Z]+)[){&(]+this\.([_a-zA-Z]+)\.remove.+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\2\.add\(this\.([_a-zA-Z]+)\).+\(?this\.[_a-zA-Z]+!=this\.\1/);
 
 						/* var fnBody = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf('{') + 1, rewrittenFunctionBody.lastIndexOf('}'));
 						var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")")); */
@@ -1256,7 +1258,7 @@ codes by NetquiK
 
 	function inject() {
 		var script = document.createElement("script");
-		script.innerHTML = "(" + injectScript.toString() + ")();";
+		script.textContent = "(" + injectScript.toString() + ")();";
 		script.type = "text/javascript";
 		if (/commandandconquer\.com/i.test(document.domain)) {
 			document.getElementsByTagName("head")[0].appendChild(script);
