@@ -4,16 +4,27 @@
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.44
-// @author NetquiK (original code from infernal_me, KRS_L, krisan)
-// @contributor NetquiK (Recoded all for NOEVIL and removed iterations - 22.2 New Framework Update - 22.3 FIX)
+// @version 1.45
+// @author NetquiK (original code from infernal_me, KRS_L, krisan) - (https://github.com/netquik) (see first comment for changelog)
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- Recoded all for NOEVIL and removed iterations
+- 22.2 New Framework Update
+- 22.3 FIX
+- 22.3 FIX
+- !! FIX GLOBAL PHE for 22.3 PATCH !!
+----------------
+*/
 
 (function () {
     var CCTAWrapper_main = function () {
         // 22.2 New Framework Fixes issue #9182: new unified pointer input model since Chrome 55
         if (parseFloat(GameVersion) < 22.2) window.navigator.pointerEnabled = "PointerEvent" in window;
         // see https://github.com/qooxdoo/qooxdoo/issues/9182
+
         try {
             _log = function () {
                 if (typeof console != 'undefined') console.log(arguments);
@@ -136,10 +147,13 @@
 
         function CCTAWrapper_checkIfLoaded() {
             try {
-                if (typeof qx != 'undefined') {
+                if (typeof qx != 'undefined' && typeof webfrontend.phe != 'undefined')
+                {
+                // MOD FIX GLOBAL PHE for 22.3 PATCH
+                window.phe = webfrontend.phe;
                     createCCTAWrapper();
                 } else {
-                    window.setTimeout(CCTAWrapper_checkIfLoaded, 1000);
+                    window.setTimeout(CCTAWrapper_checkIfLoaded, 500);
                 }
             } catch (e) {
                 CCTAWrapper_IsInstalled = false;
