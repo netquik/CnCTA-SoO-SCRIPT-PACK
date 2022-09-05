@@ -4,7 +4,7 @@
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.45
+// @version 1.46
 // @author NetquiK (original code from infernal_me, KRS_L, krisan) - (https://github.com/netquik) (see first comment for changelog)
 // ==/UserScript==
 
@@ -147,10 +147,8 @@ codes by NetquiK
 
         function CCTAWrapper_checkIfLoaded() {
             try {
-                if (typeof qx != 'undefined' && typeof webfrontend.phe != 'undefined')
-                {
                 // MOD FIX GLOBAL PHE for 22.3 PATCH
-                window.phe = webfrontend.phe;
+                if (typeof qx != 'undefined' && (parseFloat(GameVersion) < 22.3 || (typeof webfrontend.phe != 'undefined' && (window.phe = webfrontend.phe)))) {
                     createCCTAWrapper();
                 } else {
                     window.setTimeout(CCTAWrapper_checkIfLoaded, 500);
