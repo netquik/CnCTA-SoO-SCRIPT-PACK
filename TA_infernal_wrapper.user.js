@@ -4,7 +4,7 @@
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.47
+// @version 1.48
 // @author NetquiK (original code from infernal_me, KRS_L, krisan) - (https://github.com/netquik) (see first comment for changelog)
 // ==/UserScript==
 
@@ -23,7 +23,7 @@ codes by NetquiK
 
 (function () {
     var CCTAWrapper_main = function () {
-        var operafixed = false;
+        var iterations = 1;
         try {
             _log = function () {
                 if (typeof console != 'undefined') console.log(arguments);
@@ -33,42 +33,21 @@ codes by NetquiK
 
             function operafix() {
                 // MOD OPERA BROWSER SUPPORT
-                webfrontend.Application.prototype.checkBrowserSupport = function () {
-                    var n = webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_PART,
-                        t = parseFloat(qx.core.Environment.get("browser.version")),
-                        i = parseFloat(qx.core.Environment.get("browser.documentmode"));
-                    switch (qx.core.Environment.get('browser.name')) {
-                        case 'opera':
-                            t < 15 && (n = webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_NONE);
-                            t >= 15 && (n = webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_OK);
-                            break;
-                        case 'firefox':
-                            t < 3.6 && (n = webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_NONE);
-                            t >= 4 && (n = webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_OK);
-                            break;
-                        case 'ie':
-                            (t <= 9 || i <= 9) && (n = webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_NONE);
-                            t >= 10 && (n = webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_OK);
-                            break;
-                        case 'chrome':
-                            n = t < 14 ? webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_NONE : webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_OK;
-                            break;
-                        case 'safari':
-                            n = t < 4 ? webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_NONE : webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_OK;
-                            break;
-                        case 'edge':
-                            n = webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_OK
-                    }
-                    if (n == webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_OK && ClientLib.Draw.WebGL.SceneFactory.CheckWebGL() == -1 && (n = webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_NOGFX),
-                        n == webfrontend.gui.BadBrowserWindow.EBadBrowserMode.EBBM_SUPPORT_OK) {
+                if (qx.core.Environment.get('browser.name') == 'opera' && parseFloat(qx.core.Environment.get("browser.version")) > 15) {
+                    webfrontend.Application.prototype.checkBrowserSupport = function () {
                         this.waitForAssetPreload();
                         return
                     }
-                    (new webfrontend.gui.BadBrowserWindow).set({
-                        BrowserMode: n
-                    }).show()
+                    webfrontend.Application.prototype.checkBrowserSupport();
+                    var nags = qx.core.Init.getApplication().getRoot().getChildren();
+                    for (b in nags) {
+                        if (nags[b] instanceof webfrontend.gui.BadBrowserWindow && nags[b].isVisible()) {
+                            nags[b].close();
+                            break;
+                        }
+                    }
+                    console.log("FIX: OPERA BROWSER NOW SUPPORTED");
                 }
-                console.log("FIX: OPERA BROWSER NOW SUPPORTED");
             }
 
             function blankfix() {
@@ -86,11 +65,13 @@ codes by NetquiK
 
             function phefix() {
                 // MOD FIX GLOBAL PHE for 22.3 PATCH
-                if (parseFloat(GameVersion) >= 22.3 && typeof webfrontend.phe != "undefined") window.phe = webfrontend.phe, console.log("FIX: PHE GLOBALIZED for Game Version " + GameVersion);
+                if (parseFloat(GameVersion) >= 22.3 && typeof webfrontend.phe != 'undefined') window.phe = webfrontend.phe, console.log("FIX: PHE GLOBALIZED for Game Version " + GameVersion);
+                else if (typeof phe != 'undefined') console.log("FIX: PHE ALREADY GLOBAL for Game Version " + GameVersion);
+                else  console.log("FIX FAIL: EXPECT ERRORS -> PHE NOT DEFINED");
             }
 
             function createCCTAWrapper() {
-                console.log('CCTAWrapper loaded');
+                console.log('CCTAWrapper loaded after ' + iterations + ' iterations');
                 _log('wrapper loading' + PerforceChangelist);
                 System = $I;
                 SharedLib = $I;
@@ -107,18 +88,18 @@ codes by NetquiK
                 var get_UnitsF = HasUnitMdbId_Source.match(/for ?\(.+[a-z]:this.([A-Z]{6}).+[a-z]:this.([A-Z]{6})/);
 
                 var get_OffenseUnitsF = get_UnitsF[1];
-                
+
                 ClientLib.Data.CityUnits.prototype.get_OffenseUnits = function () {
                     return this[get_OffenseUnitsF];
                 };
-                
+
                 console.log("ClientLib.Data.CityUnits.prototype.get_OffenseUnits = function(){var $createHelper;return this." + get_OffenseUnitsF + ";}");
 
-                var get__DefenseUnitsF = get_UnitsF[2];   
+                var get__DefenseUnitsF = get_UnitsF[2];
                 ClientLib.Data.CityUnits.prototype.get_DefenseUnits = function () {
                     return this[get__DefenseUnitsF];
                 };
-                
+
                 console.log("ClientLib.Data.CityUnits.prototype.get_DefenseUnits = function(){var $createHelper;return this." + get__DefenseUnitsF + ";}");
                 ClientLib.Vis.Battleground.Battleground.prototype.get_Simulation = function () {
                     return this[subM[1]];
@@ -135,16 +116,14 @@ codes by NetquiK
 
         function CCTAWrapper_checkIfLoaded() {
             try {
-                if (typeof webfrontend.Application != 'undefined' && !operafixed) {
-                    operafix();
-                    operafixed = true;
-                }
-                if (typeof qx != 'undefined') {
+                if (typeof webfrontend != 'undefined' && typeof qx != 'undefined') {
                     phefix();
+                    operafix();
                     blankfix();
                     createCCTAWrapper();
                 } else {
-                    window.setTimeout(CCTAWrapper_checkIfLoaded, 200);
+                    iterations++;
+                    window.setTimeout(CCTAWrapper_checkIfLoaded, 50);
                 }
             } catch (e) {
                 CCTAWrapper_IsInstalled = false;
@@ -153,7 +132,7 @@ codes by NetquiK
         }
 
 
-        window.setTimeout(CCTAWrapper_checkIfLoaded, 200);
+        window.setTimeout(CCTAWrapper_checkIfLoaded, 50);
 
     }
 
