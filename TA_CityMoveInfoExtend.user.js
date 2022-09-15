@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name CityMoveInfoExtend
-// @version 22.04.28
+// @version 22.07.24
 // @description Extended move info.
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @author Nogrod
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_CityMoveInfoExtend.user.js
@@ -13,12 +13,13 @@
 codes by NetquiK
 ----------------
 - !!NOEVIL!! code
+- 22.3 Fix
 ----------------
 */
 
 (function () {
 	var c = document.createElement("script");
-	c.innerHTML = "(" + function () {
+	c.textContent = "(" + function () {
 		function c() {
 			console.log('CityMoveInfoExtend Loaded')
 			if ("undefined" == typeof webfrontend.gui.region.RegionCityMoveInfo.prototype.updateBases) {
@@ -132,8 +133,8 @@ codes by NetquiK
 					//		g * g + h * h <= f * f && (g = c.GetObjectFromPosition(k, d), null !== g && g.Type == ClientLib.Data.WorldSector.ObjectType.NPCBase && e++)
 					//	}
 
-
-				}, b = /this\.(__\w{3})\.setValue\(phe\.cnc\.Util\.getTimespanString\(\w\.GetTimeSpan\(\w\)\)/.exec(webfrontend.gui.region.RegionCityMoveInfo.prototype[a]), /* webfrontend.gui.region.RegionCityMoveInfo.prototype[a] = (new Evil("return function (x,y){this." +
+				// MOD 22.3
+				}, b = /this\.(__\w{3})\.setValue\(phe\.cnc\.Util\.getTimespanString\(\w\.GetTimeSpan\(\w+\)\)/.exec(webfrontend.gui.region.RegionCityMoveInfo.prototype[a]), /* webfrontend.gui.region.RegionCityMoveInfo.prototype[a] = (new Evil("return function (x,y){this." +
 					a + "Orig(x,y);var time=ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().GetCityMoveCooldownTime(x,y);this." + b[1] + ".setValue(this." + b[1] + ".getValue()+' ('+phe.cnc.Util.getDateTimeString(new Date(Date.now()+(time*1000)))+')');this.updateBases(x,y);}"))()) */
 					//MOD NOEVIL
 					webfrontend.gui.region.RegionCityMoveInfo.prototype[a] = function (x, y) {

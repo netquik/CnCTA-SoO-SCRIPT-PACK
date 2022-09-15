@@ -1,19 +1,28 @@
 // ==UserScript==
 // @name           Tiberium Alliances Report Stats
-// @version        0.5.3.2
+// @version        0.5.5
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    leo7044 (https://github.com/leo7044)
 // @contributor    AlkalyneD4 (https://github.com/SebHeuze)
-// @downloadURL    https://raw.githubusercontent.com/SebHeuze/CnC_TA/master/Tiberium_Alliances_Report_Stats_sumPerCp.user.js
-// @updateURL      https://raw.githubusercontent.com/SebHeuze/CnC_TA/master/Tiberium_Alliances_Report_Stats_sumPerCp.user.js
+// @contributor    NetquiK (https://github.com/netquik) (see first comments for changelog)
+// @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Report_Stats.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Report_Stats.user.js
 // @description    Calculates combined RT and CP costs and loot of multiple combat reports
-// @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match          https://*.alliances.commandandconquer.com/*/index.aspx*
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- 22.2 FIX
+- 22.3 ALL REGEXs FIX
+----------------
+*/
 'use strict';
 
-(function() {
-	var main = function() {
+(function () {
+	var main = function () {
 		'use strict';
 
 		function createReportStats() {
@@ -23,12 +32,12 @@
 				type: 'singleton',
 				extend: qx.core.Object,
 				statics: {
-					BaseInfoExtraWidth: 6,	// width to add to BaseInfoWindow to get rid of horizontal scroll bar
-					StatusbarHeight: 35,	// height to add to BaseInfoWindow to accomodate statusbar being visible
+					BaseInfoExtraWidth: 6, // width to add to BaseInfoWindow to get rid of horizontal scroll bar
+					StatusbarHeight: 35, // height to add to BaseInfoWindow to accomodate statusbar being visible
 					CheckboxColumnWidth: 28,
 					ResourceTypes: {}
 				},
-				defer: function(statics) {
+				defer: function (statics) {
 					var fileManager = ClientLib.File.FileManager.GetInstance();
 					statics.ResourceTypes[ClientLib.Base.EResourceType.Tiberium] = fileManager.GetPhysicalPath('ui/common/icn_res_tiberium.png');
 					statics.ResourceTypes[ClientLib.Base.EResourceType.Crystal] = fileManager.GetPhysicalPath('ui/common/icn_res_chrystal.png');
@@ -41,26 +50,26 @@
 					reportsLoaded: [],
 					skipBaseInfoReportsReload: 0,
 
-					initialize: function() {
+					initialize: function () {
 						this.initializeHacks();
 						this.initializeUserInterface();
 					},
 
-					initializeHacks: function() {
+					initializeHacks: function () {
 						var source;
 
 						if (typeof qx.ui.table.model.Abstract.prototype.addColumn !== 'function') {
 							source = qx.ui.table.model.Abstract.prototype.getColumnId.toString();
-							var columnIdsMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Z]\];/)[1];
+							var columnIdsMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Za-z]\];?/)[1];
 							source = qx.ui.table.model.Abstract.prototype.getColumnName.toString();
-							var columnNamesMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Z]\];/)[1];
+							var columnNamesMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Za-z]\];?/)[1];
 
 							/**
 							 * @param {String} id
 							 * @param {String} name
 							 * @returns {Number}
 							 */
-							qx.ui.table.model.Abstract.prototype.addColumn = function(id, name) {
+							qx.ui.table.model.Abstract.prototype.addColumn = function (id, name) {
 								var columnIndex = this[columnIdsMemberName].push(id) - 1;
 								this[columnNamesMemberName].push(name);
 								this.fireEvent('metaDataChanged');
@@ -71,16 +80,16 @@
 
 						if (typeof qx.ui.table.columnmodel.Basic.prototype.addColumn !== 'function') {
 							source = qx.ui.table.columnmodel.Basic.prototype.getColumnWidth.toString();
-							var columnsMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Z]\]\.width;/)[1];
+							var columnsMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Za-z]\]\.width;?/)[1];
 							source = qx.ui.table.columnmodel.Basic.prototype.getOverallColumnCount.toString();
-							var columnOrderMemberName = source.match(/return this\.([A-Za-z_]+)\.length;/)[1];
+							var columnOrderMemberName = source.match(/return this\.([A-Za-z_]+)\.length;?/)[1];
 							source = qx.ui.table.columnmodel.Basic.prototype.getVisibleColumnAtX.toString();
-							var columnVisibilityMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Z]\];/)[1];
+							var columnVisibilityMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Za-z]\];?/)[1];
 							source = qx.ui.table.columnmodel.Basic.prototype._getColToXPosMap.toString();
-							var columnToXPosMapMemberName = source.match(/return this\.([A-Za-z_]+);\}$/)[1];
+							var columnToXPosMapMemberName = source.match(/return this\.([A-Za-z_]+);?\}$/)[1];
 
 							source = qx.ui.table.columnmodel.Basic.prototype.init.toString();
-							var matches = source.match(/this\.([A-Za-z_]+)\|\|\(this\.\1=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_HEADER_RENDERER\(\)\);.+this\.([A-Za-z_]+)\|\|\(this\.\2=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_DATA_RENDERER\(\)\);.+this\.([A-Za-z_]+)\|\|\(this\.\3=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_EDITOR_FACTORY\(\)\);/);
+							var matches = source.match(/this\.([A-Za-z_]+)\|\|\(this\.\1=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_HEADER_RENDERER.+this\.([A-Za-z_]+)\|\|\(this\.\2=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_DATA_RENDERER.+this\.([A-Za-z_]+)\|\|\(this\.\3=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_EDITOR_FACTORY/);
 							var headerRendererMemberName = matches[1];
 							var dataRendererMemberName = matches[2];
 							var editorFactoryMemberName = matches[3];
@@ -89,7 +98,7 @@
 							 * @param {Boolean} visible
 							 * @returns {Number}
 							 */
-							qx.ui.table.columnmodel.Basic.prototype.addColumn = function(visible) {
+							qx.ui.table.columnmodel.Basic.prototype.addColumn = function (visible) {
 								var columnIndex = this[columnsMemberName].push({
 									width: qx.ui.table.columnmodel.Basic.DEFAULT_WIDTH,
 									headerRenderer: this[headerRendererMemberName],
@@ -111,10 +120,11 @@
 						}
 
 						if (typeof webfrontend.gui.info.BaseInfoWindow.prototype.onCellClick !== 'function') {
-							source = Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor);
-							var createOutgoingTabMethodName = source.match(/;[A-Za-z]+\.add\(this\.([A-Za-z_]+)\(\)\);this\.[A-Za-z_]+=new webfrontend\.gui\.widgets\.confirmationWidgets\.ProtectionConfirmationWidget\(\);/)[1];
+							// MOD 22.2 FIX
+							source = (parseFloat(GameVersion) >= 22.2) ? Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor.$$original) : Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor);
+							var createOutgoingTabMethodName = source.match(/;[A-Za-z]+\.add\(this\.([A-Za-z_]+)\(\)\);this\.[A-Za-z_]+=new webfrontend\.gui\.widgets\.confirmationWidgets\.ProtectionConfirmationWidget/)[1];
 							source = webfrontend.gui.info.BaseInfoWindow.prototype[createOutgoingTabMethodName].toString();
-							var onCellClickMethodName = source.match(/([A-Za-z]+)\.set\(\{statusBarVisible:false,columnVisibilityButtonVisible:false\}\);\1\.addListener\([A-Za-z]+,this\.([A-Za-z_]+),this\.[A-Za-z_]+\);/)[2];
+							var onCellClickMethodName = source.match(/([A-Za-z]+)\.set\(\{statusBarVisible:(?:false|!1),columnVisibilityButtonVisible:(?:false|!1)\}\)[;,]\1\.addListener\([A-Za-z]+,this\.([A-Za-z_]+),this\.[A-Za-z_]+\)/)[2];
 							webfrontend.gui.info.BaseInfoWindow.prototype.onCellClick = webfrontend.gui.info.BaseInfoWindow.prototype[onCellClickMethodName];
 						}
 
@@ -124,31 +134,32 @@
 							webfrontend.gui.info.BaseInfoWindow.prototype.onTotalUnreadCountUpdated = webfrontend.gui.info.BaseInfoWindow.prototype[onTotalUnreadCountUpdatedMethodName];
 
 							var context = this;
-							webfrontend.gui.info.BaseInfoWindow.prototype[onTotalUnreadCountUpdatedMethodName] = function() {
+							webfrontend.gui.info.BaseInfoWindow.prototype[onTotalUnreadCountUpdatedMethodName] = function () {
 								return context.onTotalUnreadCountUpdated(this, arguments);
 							};
 						}
 
-						/* Detect and fix bug described in https://forum.alliances.commandandconquer.com/showthread.php?tid=30346 */ {
+						/* Detect and fix bug described in https://forum.alliances.commandandconquer.com/showthread.php?tid=30346 */
+						{
+							// MOD 22.2 FIX
 							source = ClientLib.Data.Reports.Reports.prototype.AddReport.toString();
-							var initMethodName = source.match(/break;\}[a-z]\.([A-Z]{6})\([a-z]\);if/)[1];
+							var initMethodName = source.match(/}[a-z]\.([A-Z]{6})\([a-z]\);/)[1];
 
 							source = ClientLib.Data.Reports.CombatReport.prototype[initMethodName].toString();
-							var setDataMethodName = source.match(/this\.([A-Z]{6})\([A-Za-z]+\);/)[1];
+							var setDataMethodName = source.match(/this\.([A-Z]{6})\([A-Za-z]+\);?/)[1];
 
 							source = ClientLib.Data.Reports.CombatReport.prototype[setDataMethodName].toString();
-							var matches = source.match(/this\.([A-Z]{6})=([a-z])\.abl;/);
+							var matches = source.match(/this\.([A-Z]{6})=([a-z])\.abl;?/);
 
 							if (matches !== null) {
 								var attackerBaseIdMemberName = matches[1];
 								var original = ClientLib.Data.Reports.CombatReport.prototype[setDataMethodName];
 
-								ClientLib.Data.Reports.CombatReport.prototype[setDataMethodName] = function(data) {
+								ClientLib.Data.Reports.CombatReport.prototype[setDataMethodName] = function (data) {
 									original.call(this, data);
 									this[attackerBaseIdMemberName] = data.d.abi;
 								};
-							}
-							else {
+							} else {
 								console.warn('ReportStats::initializeHacks', 'Unable to patch ClientLib.Data.Reports.CombatReport.prototype.' + setDataMethodName + '. Its likely already fixed in the game code.');
 							}
 						}
@@ -157,7 +168,7 @@
 							qx.ui.table.Table.prototype.lastFocusedRow = null;
 							var originalSetFocusedCell = qx.ui.table.Table.prototype.setFocusedCell;
 
-							qx.ui.table.Table.prototype.setFocusedCell = function() {
+							qx.ui.table.Table.prototype.setFocusedCell = function () {
 								this.lastFocusedRow = this.getFocusedRow();
 								originalSetFocusedCell.apply(this, arguments);
 							};
@@ -165,13 +176,13 @@
 							/**
 							 * @returns {Number}
 							 */
-							qx.ui.table.Table.prototype.getLastFocusedRow = function() {
+							qx.ui.table.Table.prototype.getLastFocusedRow = function () {
 								return this.lastFocusedRow;
 							};
 						}
 					},
 
-					initializeUserInterface: function() {
+					initializeUserInterface: function () {
 						var baseInfoWindow = webfrontend.gui.info.BaseInfoWindow.getInstance();
 						var tabs = baseInfoWindow.getChildren()[0].getChildren();
 
@@ -197,8 +208,8 @@
 								height: ReportStats.StatusbarHeight,
 								rich: true,
 								toolTip: new qx.ui.tooltip.ToolTip().set({
-									label: '<div>"Loot" is the sum of resources gained from destruction, plunder and own repair costs.</div><br/>'
-										+ '<div>Tip: You can select multiple reports at once by holding down the Shift key.</div>',
+									label: '<div>"Loot" is the sum of resources gained from destruction, plunder and own repair costs.</div><br/>' +
+										'<div>Tip: You can select multiple reports at once by holding down the Shift key.</div>',
 									rich: true
 								})
 							});
@@ -212,7 +223,7 @@
 					 * Sets checkbox value to false for rows being initialized
 					 * @param {qx.event.type.Data} event
 					 */
-					onTableModelDataChange: function(event) {
+					onTableModelDataChange: function (event) {
 						var data = event.getData();
 
 						if (data.firstColumn !== 0) {
@@ -246,13 +257,12 @@
 					/**
 					 * @param {qx.ui.table.pane.CellEvent} event
 					 */
-					onCellClickDelegate: function(event) {
+					onCellClickDelegate: function (event) {
 						var tableModel = event.getTarget().getTable().getTableModel();
 
 						if (event.getColumn() === tableModel.getUserData('checkboxColumnIndex') && tableModel.getRowData(event.getRow())) {
 							this.onCheckboxClick(event);
-						}
-						else {
+						} else {
 							webfrontend.gui.info.BaseInfoWindow.prototype.onCellClick.call(tableModel, event);
 						}
 					},
@@ -260,7 +270,7 @@
 					/**
 					 * @param {qx.ui.table.pane.CellEvent} event
 					 */
-					onCheckboxClick: function(event) {
+					onCheckboxClick: function (event) {
 						var table = event.getTarget().getTable();
 						var tableModel = table.getTableModel();
 						var newValue = !tableModel.getValue(event.getColumn(), event.getRow());
@@ -272,8 +282,7 @@
 							for (var row = start; row <= end; row++) {
 								tableModel.setValue(event.getColumn(), row, newValue);
 							}
-						}
-						else {
+						} else {
 							tableModel.setValue(event.getColumn(), event.getRow(), newValue);
 						}
 
@@ -283,7 +292,7 @@
 					/**
 					 * @param {webfrontend.data.ReportHeaderDataModel} tableModel
 					 */
-					calculateCombinedRepairCosts: function(tableModel) {
+					calculateCombinedRepairCosts: function (tableModel) {
 						var wasLoading = this.reportsLoading.length > 0;
 						this.reportsLoading = [];
 						this.reportsLoaded = [];
@@ -313,8 +322,7 @@
 								var table = this.getCurrentBaseInfoTab().getChildren()[0];
 								table.getChildControl('statusbar').setValue('Please wait...');
 							}
-						}
-						else {
+						} else {
 							this.onAllReportsLoaded();
 						}
 					},
@@ -323,11 +331,10 @@
 					 * @param {webfrontend.gui.info.BaseInfoWindow} baseInfoWindow
 					 * @param {Object} parameters
 					 */
-					onTotalUnreadCountUpdated: function(baseInfoWindow, parameters) {
+					onTotalUnreadCountUpdated: function (baseInfoWindow, parameters) {
 						if (!this.skipBaseInfoReportsReload) {
 							baseInfoWindow.onTotalUnreadCountUpdated.apply(baseInfoWindow, parameters);
-						}
-						else {
+						} else {
 							this.skipBaseInfoReportsReload--;
 						}
 					},
@@ -335,7 +342,7 @@
 					/**
 					 * @param {ClientLib.Data.Reports.CombatReport} report
 					 */
-					onReportDelivered: function(report) {
+					onReportDelivered: function (report) {
 						var index = this.reportsLoading.indexOf(report.get_Id());
 
 						if (index !== -1) {
@@ -353,7 +360,7 @@
 						}
 					},
 
-					onAllReportsLoaded: function() {
+					onAllReportsLoaded: function () {
 						phe.cnc.Util.detachNetEvent(ClientLib.Data.MainData.GetInstance().get_Reports(), 'ReportDelivered', ClientLib.Data.Reports.ReportDelivered, this, this.onReportDelivered);
 
 						var hasSelectedReports = this.reportsLoaded.length > 0;
@@ -375,8 +382,7 @@
 							if (this.reportsLoaded[0].get_PlayerReportType() === ClientLib.Data.Reports.EPlayerReportType.CombatOffense) {
 								getTotalLootMethod = ClientLib.Data.Reports.CombatReport.prototype.GetAttackerTotalResourceReceived;
 								getRepairCostsMethod = ClientLib.Data.Reports.CombatReport.prototype.GetAttackerRepairCosts;
-							}
-							else {
+							} else {
 								getTotalLootMethod = ClientLib.Data.Reports.CombatReport.prototype.GetDefenderTotalResourceCosts;
 								getRepairCostsMethod = ClientLib.Data.Reports.CombatReport.prototype.GetDefenderRepairCosts;
 							}
@@ -458,32 +464,31 @@
 							}
 
 							var lootRow = 'Loot:';
-                            var sumRes = 0;
+							var sumRes = 0;
 							for (var resourceType in loot) {
 								lootRow += ' <img width="17" height="17" src="' + ReportStats.ResourceTypes[resourceType] + '" style="vertical-align: text-bottom;"/>';
 
 								if (loot[resourceType] < 0) {
 									lootRow += '<span style="color: #d00;">' + phe.cnc.gui.util.Numbers.formatNumbersCompact(loot[resourceType]) + '</span>';
-								}
-								else {
+								} else {
 									lootRow += phe.cnc.gui.util.Numbers.formatNumbersCompact(loot[resourceType]);
-                                    sumRes += loot[resourceType];
+									sumRes += loot[resourceType];
 								}
 							}
-                            lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum: ' + phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes);
-                            lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum/CP (max): ' + phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes / minCommandPointCosts);
-                            lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum/CP (min): ' + phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes / maxCommandPointCosts);
+							lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum: ' + phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes);
+							lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum/CP (max): ' + phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes / minCommandPointCosts);
+							lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum/CP (min): ' + phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes / maxCommandPointCosts);
 
 							table.getChildControl('statusbar').setValue(
 								attackerBaseIds.length + ' attacker' + (attackerBaseIds.length === 1 ? '' : 's') + ', ' +
 								defenderBaseIds.length + ' defender' + (defenderBaseIds.length === 1 ? '' : 's') + ', ' +
 								this.reportsLoaded.length + ' attack' + (this.reportsLoaded.length === 1 ? '' : 's') + ', ' +
-								phe.cnc.Util.getTimespanString(repairTimeCosts) + ' RT and ' + (minCommandPointCosts === maxCommandPointCosts
-									? minCommandPointCosts
-									: (minCommandPointCosts + '-' + maxCommandPointCosts)
-								) + ' CPs spent' + (this.reportsLoaded.length > 1
-									? ' in ' + phe.cnc.Util.getTimespanString((lastAttack - firstAttack) / 1000)
-									: ''
+								phe.cnc.Util.getTimespanString(repairTimeCosts) + ' RT and ' + (minCommandPointCosts === maxCommandPointCosts ?
+									minCommandPointCosts :
+									(minCommandPointCosts + '-' + maxCommandPointCosts)
+								) + ' CPs spent' + (this.reportsLoaded.length > 1 ?
+									' in ' + phe.cnc.Util.getTimespanString((lastAttack - firstAttack) / 1000) :
+									''
 								) + '<br/>' + lootRow
 							);
 						}
@@ -492,7 +497,7 @@
 					/**
 					 * @returns {qx.ui.tabview.Page}
 					 */
-					getCurrentBaseInfoTab: function() {
+					getCurrentBaseInfoTab: function () {
 						return webfrontend.gui.info.BaseInfoWindow.getInstance().getChildren()[0].getSelection()[0];
 					},
 
@@ -500,7 +505,7 @@
 					 * @param {qx.ui.tabview.Page} tab
 					 * @returns {Boolean}
 					 */
-					isReportTab: function(tab) {
+					isReportTab: function (tab) {
 						var tabView = webfrontend.gui.info.BaseInfoWindow.getInstance().getChildren()[0];
 						var tabIndex = tabView.getChildren().indexOf(tab);
 
@@ -515,12 +520,10 @@
 				if (typeof qx !== 'undefined' && qx.core.Init.getApplication() && qx.core.Init.getApplication().initDone) {
 					createReportStats();
 					ReportStats.getInstance().initialize();
-				}
-				else {
+				} else {
 					setTimeout(waitForGame, 1000);
 				}
-			}
-			catch (e) {
+			} catch (e) {
 				console.log('ReportStats: ', e.toString());
 			}
 		}
@@ -529,7 +532,7 @@
 	};
 
 	var script = document.createElement('script');
-	script.innerHTML = '(' + main.toString() + ')();';
+	script.textContent = '(' + main.toString() + ')();';
 	script.type = 'text/javascript';
 	document.getElementsByTagName('head')[0].appendChild(script);
 })();

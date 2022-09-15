@@ -1,17 +1,17 @@
 // ==UserScript==
 // @name           Tiberium Alliances Real POI Bonus
-// @version        1.0.2
+// @version        1.0.4
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
-// @author         petui (POI factor Fix AlkalyneD4)
+// @author         petui (POI factor Fix AlkalyneD4) - NetquiK (regex update)
 // @description    Displays actual gain/loss for POIs by taking rank multiplier properly into account
-// @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @updateURL      https://openuserjs.org/meta/petui/Tiberium_Alliances_Real_POI_Bonus.meta.js
+// @match          https://*.alliances.commandandconquer.com/*/index.aspx*
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Real_POI_Bonus.user.js
 // ==/UserScript==
 'use strict';
 
-(function() {
-	var main = function() {
+(function () {
+	var main = function () {
 		'use strict';
 
 		function createRealPOIBonus() {
@@ -24,7 +24,7 @@
 					PoiTypeToPoiRankingTypeMap: {},
 					PoiRankingTypeToSortColumnMap: {}
 				},
-				defer: function(statics) {
+				defer: function (statics) {
 					statics.PoiTypeToPoiRankingTypeMap[ClientLib.Base.EPOIType.TiberiumBonus] = ClientLib.Data.Ranking.ERankingType.BonusTiberium;
 					statics.PoiTypeToPoiRankingTypeMap[ClientLib.Base.EPOIType.CrystalBonus] = ClientLib.Data.Ranking.ERankingType.BonusCrystal;
 					statics.PoiTypeToPoiRankingTypeMap[ClientLib.Base.EPOIType.PowerBonus] = ClientLib.Data.Ranking.ERankingType.BonusPower;
@@ -48,7 +48,7 @@
 					amountLabel: null,
 					ownedPoiCount: 0,
 
-					initialize: function() {
+					initialize: function () {
 						this.initializeHacks();
 
 						this.container = new qx.ui.container.Composite(new qx.ui.layout.HBox(4)).set({
@@ -66,22 +66,23 @@
 						this.onAllianceChange();
 					},
 
-					initializeHacks: function() {
+					initializeHacks: function () {
+						// MOD regex mod by NetquiK
 						if (typeof webfrontend.gui.region.RegionPointOfInterestStatusInfo.prototype.getObject !== 'function') {
 							var source = webfrontend.gui.region.RegionPointOfInterestStatusInfo.prototype.setObject.toString();
-							source = source.replace("function(", "function (");
-							var objectMemberName = source.match(/^function \(([A-Za-z]+)\)\{this\.([A-Za-z_]+)=\1;/)[2];
+							//source = source.replace("function(", "function (");
+							var objectMemberName = source.match(/^function\s?\(([A-Za-z]+)\)\{this\.([A-Za-z_]+)=\1;/)[2];
 
 							/**
 							 * @returns {ClientLib.Vis.Region.RegionPointOfInterest}
 							 */
-							webfrontend.gui.region.RegionPointOfInterestStatusInfo.prototype.getObject = function() {
+							webfrontend.gui.region.RegionPointOfInterestStatusInfo.prototype.getObject = function () {
 								return this[objectMemberName];
 							};
 						}
 					},
 
-					onAllianceChange: function() {
+					onAllianceChange: function () {
 						var alliance = ClientLib.Data.MainData.GetInstance().get_Alliance();
 						var poiCount = alliance.get_Exists() ? alliance.get_OwnedPOIs().length : 0;
 
@@ -94,7 +95,7 @@
 					/**
 					 * @param {qx.event.type.Event} event
 					 */
-					onStatusInfoAppear: function(event) {
+					onStatusInfoAppear: function (event) {
 						var visObject = event.getTarget().getObject();
 						var allianceId = ClientLib.Data.MainData.GetInstance().get_Alliance().get_Id();
 
@@ -107,7 +108,7 @@
 							var nextAllianceScore = poiRankScore.ns;
 							var previousAllianceScore = poiRankScore.ps;
 							var bonusMultiplier = ClientLib.Data.MainData.GetInstance().get_Server().get_POIGlobalBonusFactor();
-							var currentTotalBonus = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore,bonusMultiplier);
+							var currentTotalBonus = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore, bonusMultiplier);
 
 							var gainOrLoss = null;
 
@@ -116,53 +117,43 @@
 
 								if (previousAllianceScore <= 0) {
 									// No rank multiplier; no loss by rank
-									gainOrLoss = currentTotalBonus - ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore - selectedPoiScore,bonusMultiplier);
-								}
-								else if (allianceScore - selectedPoiScore < previousAllianceScore) {
+									gainOrLoss = currentTotalBonus - ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore - selectedPoiScore, bonusMultiplier);
+								} else if (allianceScore - selectedPoiScore < previousAllianceScore) {
 									// Falling behind previous alliance; need to use rankings
-								}
-								else {
+								} else {
 									// No loss by rank; if we end up with same score as previous alliance, our rank stays the same and they get same rank
-									gainOrLoss = currentTotalBonus - ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore - selectedPoiScore,bonusMultiplier);
+									gainOrLoss = currentTotalBonus - ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore - selectedPoiScore, bonusMultiplier);
 								}
-							}
-							else {
+							} else {
 								this.titleLabel.setValue('Real gain:');
 
 								if (!allianceScore) {
 									// Zero bonus; need to use rankings
-								}
-								else if (nextAllianceScore <= 0 || allianceRank <= 1) {
+								} else if (nextAllianceScore <= 0 || allianceRank <= 1) {
 									// Already rank 1; no gain by rank
-									gainOrLoss = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore + selectedPoiScore,bonusMultiplier) - currentTotalBonus;
-								}
-								else if (visObject.get_OwnerAllianceId() !== webfrontend.gui.widgets.AllianceLabel.ESpecialNoAllianceName) {
+									gainOrLoss = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore + selectedPoiScore, bonusMultiplier) - currentTotalBonus;
+								} else if (visObject.get_OwnerAllianceId() !== webfrontend.gui.widgets.AllianceLabel.ESpecialNoAllianceName) {
 									// Current owner of POI will lose score while we gain; need to use rankings
-								}
-								else if (allianceScore + selectedPoiScore > nextAllianceScore) {
+								} else if (allianceScore + selectedPoiScore > nextAllianceScore) {
 									// Overtaking next alliance; need to use rankings
-								}
-								else if (allianceScore + selectedPoiScore < nextAllianceScore) {
+								} else if (allianceScore + selectedPoiScore < nextAllianceScore) {
 									// No gain by rank
-									gainOrLoss = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore + selectedPoiScore,bonusMultiplier) - currentTotalBonus;
-								}
-								else {
+									gainOrLoss = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank, allianceScore + selectedPoiScore, bonusMultiplier) - currentTotalBonus;
+								} else {
 									// Same score as next alliance; same rank and same bonus as them
-									gainOrLoss = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank - 1, allianceScore + selectedPoiScore,bonusMultiplier) - currentTotalBonus;
+									gainOrLoss = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(poiType, allianceRank - 1, allianceScore + selectedPoiScore, bonusMultiplier) - currentTotalBonus;
 								}
 							}
 
 							if (gainOrLoss === null) {
 								this.amountLabel.setValue('Loading...');
 								this.fetchAndCalculateBonusWithRankingData(poiType, allianceRank, allianceScore, selectedPoiScore, allianceId, visObject.get_OwnerAllianceId());
-							}
-							else {
+							} else {
 								this.amountLabel.setValue(this.formatGainOrLoss(gainOrLoss, poiType));
 							}
 
 							this.container.setVisibility('visible');
-						}
-						else {
+						} else {
 							this.container.setVisibility('excluded');
 						}
 					},
@@ -175,7 +166,7 @@
 					 * @param {Number} allianceId
 					 * @param {Number} poiOwnerId
 					 */
-					fetchAndCalculateBonusWithRankingData: function(poiType, currentRank, currentScore, poiScore, allianceId, poiOwnerId) {
+					fetchAndCalculateBonusWithRankingData: function (poiType, currentRank, currentScore, poiScore, allianceId, poiOwnerId) {
 						var context = {
 							poiType: poiType,
 							currentRank: currentRank,
@@ -187,8 +178,7 @@
 
 						if (poiType in this.rankingBonusDataCache && this.rankingBonusDataCache[poiType].expire >= Date.now()) {
 							this.calculateBonus(context, this.rankingBonusDataCache[poiType].results);
-						}
-						else {
+						} else {
 							var lastMultiplierRank = Object.keys(ClientLib.Res.ResMain.GetInstance().GetGamedata().poibmbr).length;
 							var rankingPoiType = RealPOIBonus.PoiTypeToPoiRankingTypeMap[poiType];
 							var sortColumn = RealPOIBonus.PoiRankingTypeToSortColumnMap[rankingPoiType];
@@ -208,7 +198,7 @@
 					 * @param {Object} context
 					 * @param {Object} results
 					 */
-					onRankingGetData: function(context, results) {
+					onRankingGetData: function (context, results) {
 						if (results === null) {
 							return;
 						}
@@ -219,8 +209,7 @@
 						for (var i = 0; i < allianceBonuses.length; i++) {
 							if (allianceBonuses[i].a === context.allianceId) {
 								allianceBonuses.splice(i--, 1);
-							}
-							else if (allianceBonuses[i].pois === undefined) {
+							} else if (allianceBonuses[i].pois === undefined) {
 								allianceBonuses[i].pois = 0;
 							}
 						}
@@ -237,7 +226,7 @@
 					 * @param {Object} context
 					 * @param {Array} allianceBonuses
 					 */
-					calculateBonus: function(context, allianceBonuses) {
+					calculateBonus: function (context, allianceBonuses) {
 						var isGain = context.poiOwnerId !== context.allianceId;
 						var i;
 
@@ -249,7 +238,7 @@
 									allianceBonuses = allianceBonuses.map(this.shallowClone);
 									allianceBonuses[i].pois -= context.poiScore;
 
-									allianceBonuses.sort(function(a, b) {
+									allianceBonuses.sort(function (a, b) {
 										return b.pois - a.pois;
 									});
 									break;
@@ -265,11 +254,11 @@
 							}
 						}
 						var bonusMultiplier = ClientLib.Data.MainData.GetInstance().get_Server().get_POIGlobalBonusFactor();
-						var currentTotalBonus = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(context.poiType, context.currentRank, context.currentScore,bonusMultiplier);
-						var newTotalBonus = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(context.poiType, i + 1, newAllianceScore,bonusMultiplier);
-						var gainOrLoss = isGain
-							? newTotalBonus - currentTotalBonus
-							: currentTotalBonus - newTotalBonus;
+						var currentTotalBonus = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(context.poiType, context.currentRank, context.currentScore, bonusMultiplier);
+						var newTotalBonus = ClientLib.Base.PointOfInterestTypes.GetTotalBonusByType(context.poiType, i + 1, newAllianceScore, bonusMultiplier);
+						var gainOrLoss = isGain ?
+							newTotalBonus - currentTotalBonus :
+							currentTotalBonus - newTotalBonus;
 
 						this.amountLabel.setValue(this.formatGainOrLoss(gainOrLoss, context.poiType));
 					},
@@ -279,7 +268,7 @@
 					 * @param {ClientLib.Base.EPOIType} poiType
 					 * @returns {String}
 					 */
-					formatGainOrLoss: function(gainOrLoss, poiType) {
+					formatGainOrLoss: function (gainOrLoss, poiType) {
 						switch (poiType) {
 							case ClientLib.Base.EPOIType.TiberiumBonus:
 							case ClientLib.Base.EPOIType.CrystalBonus:
@@ -297,7 +286,7 @@
 					 * @param {Object} object
 					 * @returns {Object}
 					 */
-					shallowClone: function(object) {
+					shallowClone: function (object) {
 						var clone = new object.constructor;
 
 						for (var key in object) {
@@ -317,12 +306,10 @@
 				if (typeof qx !== 'undefined' && qx.core.Init.getApplication() && qx.core.Init.getApplication().initDone) {
 					createRealPOIBonus();
 					RealPOIBonus.getInstance().initialize();
-				}
-				else {
+				} else {
 					setTimeout(waitForGame, 1000);
 				}
-			}
-			catch (e) {
+			} catch (e) {
 				console.log('RealPOIBonus: ', e.toString());
 			}
 		}
@@ -331,7 +318,7 @@
 	};
 
 	var script = document.createElement('script');
-	script.innerHTML = '(' + main.toString() + ')();';
+	script.textContent = '(' + main.toString() + ')();';
 	script.type = 'text/javascript';
 	document.getElementsByTagName('head')[0].appendChild(script);
 })();
