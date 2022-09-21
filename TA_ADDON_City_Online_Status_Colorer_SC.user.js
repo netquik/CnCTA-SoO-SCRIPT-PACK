@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        Maelstrom ADDON City Online Status Colorer for SC
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description change the color of cities according to online state of the player
-// @version     0.7.4
+// @version     0.7.5
 // @author      White X Dragon / Debitosphere / NetquiK
 // @author      Der_Flake
 // @contributor NetquiK (https://github.com/netquik) - (see first comments for changelog)
@@ -17,6 +17,7 @@ codes by NetquiK
 - !!NOEVIL!!
 - RECODED
 - Compatibility with PlayerTag Script
+- Fix 22.3
 ----------------
 */
 (function () {
@@ -55,7 +56,8 @@ codes by NetquiK
                 return defaultColor;
             };
             /*  var updateColorParts = g(regionCityPrototype.UpdateColor, /createHelper;this\.([A-Z]{6})\(/, "ClientLib.Vis.Region.RegionCity UpdateColor", 1); */
-            var updateColorParts = regionCityPrototype.UpdateColor.toString().match(/\$createHelper;this\.([A-Z]{6})\(this\.[A-Z]{6},this\.([A-Z]{6})\)/);
+            // MOD 22.3-1 
+            var updateColorParts = regionCityPrototype.UpdateColor.toString().match(/this\.([A-Z]{6})\(this\.[A-Z]{6},this\.([A-Z]{6})\)/);
 
             var setCanvasValue_Name = updateColorParts[1];
             var cityinfo = updateColorParts[2];
@@ -66,13 +68,14 @@ codes by NetquiK
                 return;
             }
             regionCityPrototype.SetCanvasValue_ORG = regionCityPrototype[setCanvasValue_Name];
-            //MOD FIX for other manipulator scripts
-            var M = regionCityPrototype[setCanvasValue_Name].toString().replace(/[\r\n]/g, "").match(/\([a-z],([a-z])\).+this\.([A-Z]{6})\.([A-Z]{6}).+\+\1\.([A-Z]{6}).+\1\.([A-Z]{6}).+[a-z]\.([A-Z]{6});.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.([A-Z]{6}).+this\.\10\.([A-Z]{6}).+this\.([A-Z]{6})\(\);}}/);
+            // MOD FIX for other manipulator scripts
+            // MOD 22.3-2
+            var M = regionCityPrototype[setCanvasValue_Name].toString().replace(/[\r\n]/g, "").match(/\([a-z],([a-z])\).+this\.([A-Z]{6})\.([A-Z]{6}).+\+\1\.([A-Z]{6}).+\1\.([A-Z]{6}).+[a-z]\.([A-Z]{6});.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.T.+this\.([A-Z]{6})\.([A-Z]{6}).+this\.\10\.([A-Z]{6}).+this\.([A-Z]{6})\(\);?}?}/);
             /* var setCanvasValueFunctionBodyFixed = setCanvasValueFunctionBody.replace(
                 /\{g="#000000";\}/im,
                 "{g=\"#000000\";}else{g=this.CityTextcolor(g);}"); */
             setCanvasValueFunctionBodyFixed = function (a, b) {
-                var $createHelper;
+                //var $createHelper;
                 var c = ClientLib.Data.MainData.GetInstance().get_BaseColors();
                 var d = true;
                 var e = null;

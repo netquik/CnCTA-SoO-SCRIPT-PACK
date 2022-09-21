@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name        TA Autorepair
 // @description Repair buildings in a specific order
-// @include     http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.0.3
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
+// @version     1.0.4
 // @author      petui
 // @contributor    AlkalyneD4 (https://github.com/SebHeuze) Patch 19.3 Fix
-// @contributor    Netquik (https://github.com/SebHeuze) Patch 19.4 Fix + NOEVIL
+// @contributor    Netquik (https://github.com/SebHeuze) Patch 19.4 Fix + NOEVIL + 22.3
 // @downloadURL    https://raw.githubusercontent.com/SebHeuze/CnC_TA/master/TA_Autorepair.user.js
 // @updateURL      https://raw.githubusercontent.com/SebHeuze/CnC_TA/master/TA_Autorepair.user.js
 // ==/UserScript==
@@ -46,14 +46,15 @@
                             var b = a.match(/case \$I\.[A-Z]{6}\.RepairBuilding:{{0,1}return this\.[A-Z]{6}\(\)\.([A-Z]{6})\(\);/)[1];
                             ClientLib.Data.CityEntity.prototype.CanRepair = ClientLib.Data.CityEntity.prototype[b]
                         }
+                        // MOD 22.3 (multiple)
                         if (typeof ClientLib.Data.CityEntity.prototype.Repair !== 'function') {
                             a = ClientLib.Vis.City.CityBuilding.prototype.ExecuteCommand.toString();
-                            var c = a.match(/case \$I\.[A-Z]{6}\.RepairBuilding:{{0,1}this\.[A-Z]{6}\(\)\.([A-Z]{6})\(false\);return true;/)[1];
+                            var c = a.match(/case \$I\.[A-Z]{6}\.RepairBuilding:[{retun\s]+this\.[A-Z]{6}\(\)\.([A-Z]{6})\((?:false||!1)\)/)[1];
                             ClientLib.Data.CityEntity.prototype.Repair = ClientLib.Data.CityEntity.prototype[c]
                         }
                         if (typeof ClientLib.Data.CityEntity.prototype.get_City !== 'function') {
                             a = ClientLib.Data.CityEntity.prototype.get_CurrentLevel.toString();
-                            var d = a.match(/return\(this\.([A-Z]{6})\.[A-Z]{6}\(\)-[a-z]\);/)[1];
+                            var d = a.match(/return\(this\.([A-Z]{6})\.[A-Z]{6}\(\)-[a-z]\)/)[1];
                             ClientLib.Data.CityEntity.prototype.get_City = function () {
                                 return this[d]
                             }

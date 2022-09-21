@@ -1,14 +1,13 @@
 // ==UserScript==
 // @name           Tiberium Alliances The Movement
-// @version        1.0.6
+// @version        1.0.7
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    Xdaast (19.4 FIX)
-// @contributor    Netquik (19.3||19.4||20.3||22.2 FIX) + !!NOEVIL!!
+// @contributor    Netquik (19.3||19.4||20.3||22.2||22.3 FIX) + !!NOEVIL!!
 // @description    Strategical territory simulator
-// @include        http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match          https://*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TheMovement.user.js
 // ==/UserScript==
 'use strict';
@@ -124,7 +123,8 @@
                 extend: TheMovement.Entrypoint.Abstract,
                 construct: function (history) {
                     TheMovement.Entrypoint.Abstract.call(this, history);
-                    this.selectedObjectMemberName = webfrontend.gui.region.RegionCityMenu.prototype.onTick.toString().match(/if\(this\.([A-Za-z0-9_]+)!==null\){{0,1}this\.[A-Za-z0-9_]+\(\);/)[1];
+                    // MOD 22.3-6
+                    this.selectedObjectMemberName = webfrontend.gui.region.RegionCityMenu.prototype.onTick.toString().match(/this\.([A-Za-z0-9_]+)!==null\)?{?&?&?this\.[A-Za-z0-9_]+\(\)/)[1];
                     this.actionButtons = {};
                     this.blankMenu = new qx.ui.container.Composite(new qx.ui.layout.VBox(0)).set({
                         padding: 2
@@ -305,17 +305,18 @@
                     this.worldObjectWrapper = worldObjectWrapper;
                     this.hash = hash;
                     this.dirtySectors = {};
-                    var matches = ClientLib.Data.WorldSector.prototype.SetDetails.toString().match(/case \$I\.[A-Z]{6}\.City:.+?this\.([A-Z]{6})\.[A-Z]{6}\(\(\(e<<(?:16|0x10)\)\|d\),g\);.+?var h=this\.([A-Z]{6})\.d\[g\.[A-Z]{6}\];if\(h==null\){return false;}var i=\(\(h\.([A-Z]{6})!=0\)\s?\?\s?this\.([A-Z]{6})\.d\[h\.\3\]\s?:\s?null\);/);
+                    //MOD 22.3-4 (multiple)
+                    var matches = ClientLib.Data.WorldSector.prototype.SetDetails.toString().match(/case \$I\.[A-Z]{6}\.City:.+?this\.([A-Z]{6})\.[A-Z]{6}\(\(?\(?[a-z]<<(?:16|0x10)\)?\|[a-z]\)?,[a-z]\).+?[a-z]=this\.([A-Z]{6})\.d\[[a-z]\.[A-Z]{6}\].+?[a-z]=\(?\(?[a-z]\.([A-Z]{6})!=0.+?this\.([A-Z]{6})\.d\[[a-z]\.\3\]\s?:\s?null/);
                     this.worldSectorObjectsMemberName = matches[1];
                     this.worldSectorPlayersMemberName = matches[2];
                     this.playerAllianceDataIndexMemberName = matches[3];
                     this.worldSectorAlliancesMemberName = matches[4];
-                    this.playerIdMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_PlayerId.toString().match(/return [A-Za-z]+\.([A-Z]{6});/)[1];
-                    this.playerNameMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_PlayerName.toString().match(/return [A-Za-z]+\.([A-Z]{6});/)[1];
-                    this.playerFactionMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_PlayerFaction.toString().match(/return [A-Za-z]+\.([A-Z]{6});/)[1];
-                    this.allianceIdMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_AllianceId.toString().match(/return [A-Za-z]+\.([A-Z]{6});/)[1];
-                    this.allianceNameMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_AllianceName.toString().match(/return [A-Za-z]+\.([A-Z]{6});/)[1];
-                    this.worldSectorVersionMemberName = ClientLib.Data.WorldSector.prototype.get_Version.toString().match(/return this\.([A-Z]{6});/)[1];
+                    this.playerIdMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_PlayerId.toString().match(/(?:return |:)[A-Za-z]+\.([A-Z]{6});?}/)[1];
+                    this.playerNameMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_PlayerName.toString().match(/(?:return |:)[A-Za-z]+\.([A-Z]{6});?}/)[1];
+                    this.playerFactionMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_PlayerFaction.toString().match(/(?:return |:)[A-Za-z]+\.([A-Z]{6});?}/)[1];
+                    this.allianceIdMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_AllianceId.toString().match(/(?:return |:)[A-Za-z]+\.([A-Z]{6});?}/)[1];
+                    this.allianceNameMemberName = ClientLib.Vis.Region.RegionCity.prototype.get_AllianceName.toString().match(/(?:return |:)[A-Za-z]+\.([A-Z]{6});?}/)[1];
+                    this.worldSectorVersionMemberName = ClientLib.Data.WorldSector.prototype.get_Version.toString().match(/return this\.([A-Z]{6})/)[1];
                     this.updateData$ctorMethodName = ClientLib.Vis.MouseTool.CreateUnitTool.prototype.Activate.toString().match(/\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\(new \$I\.[A-Z]{6}\)\.([A-Z]{6})\(this,this\.[A-Z]{6}\)\);/)[1];
                 },
                 members: {
@@ -535,15 +536,16 @@
                 extend: Object,
                 construct: function (worldObjectWrapper) {
                     this.worldObjectWrapper = worldObjectWrapper;
-                    this.worldSetTerritoryOwnershipMethodName = ClientLib.Data.EndGame.HubCenter.prototype.$ctor.toString().match(/h\.([A-Z]{6})\(i,j,\$I\.[A-Z]{6}\.NPC,0,0,100,true\);/)[1];
-                    this.regionUpdateMethodName = ClientLib.Vis.Region.Region.prototype.SetPosition.toString().match(/this\.([A-Z]{6})\(\);/)[1];
-                    var updateSectorsMethodName = ClientLib.Vis.Region.Region.prototype.SetActive.toString().match(/this\.([A-Z]{6})\(\);/)[1];
-                    var matches = ClientLib.Vis.Region.Region.prototype[updateSectorsMethodName].toString().match(/if\s?\(\(([a-z])\.\$r=this\.([A-Z]{6})\.([A-Z]{6})\([a-z],\1\),([a-z])=\1\.b,\1\.\$r\)\)\{.+\4=\(new \$I\.([A-Z]{6})\)\.([A-Z]{6})\(this,\s?\(([a-z])\.[A-Z]{6}\(\)\*(?:32|0x20)\),\s?\(\7\.[A-Z]{6}\(\)\*(?:32|0x20)\)\);/);
+                    // MOD 22.3-3 (multiple)
+                    this.worldSetTerritoryOwnershipMethodName = ClientLib.Data.EndGame.HubCenter.prototype.$ctor.toString().match(/[a-z]\.([A-Z]{6})\([a-z],[a-z],\$I\.[A-Z]{6}\.NPC,0,0,100,(?:true|!0)\);/)[1];
+                    this.regionUpdateMethodName = ClientLib.Vis.Region.Region.prototype.SetPosition.toString().match(/this\.([A-Z]{6})\(\)/)[1];
+                    var updateSectorsMethodName = ClientLib.Vis.Region.Region.prototype.SetActive.toString().match(/this\.([A-Z]{6})\(\)/)[1];
+                    var matches = ClientLib.Vis.Region.Region.prototype[updateSectorsMethodName].toString().match(/([a-z])\.\$r=this\.([A-Z]{6})\.([A-Z]{6})\([a-z],\1\),([a-z])=\1\.b,\1\.\$r.+\4=\(new \$I\.([A-Z]{6})\)\.([A-Z]{6})\(this,\s?\(?([a-z])\.[A-Z]{6}\(\)\*(?:32|0x20)\)?,\s?\(?\7\.[A-Z]{6}\(\)\*(?:32|0x20)\)\)?/);
                     this.regionSectorsMemberName = matches[2];
                     this.regionSectorsTryGetValueMethodName = matches[3];
                     var regionSectorClassName = matches[5];
                     var regionSector$ctorMethodName = matches[6];
-                    this.regionSectorObjectsMemberName = $I[regionSectorClassName].prototype[regionSector$ctorMethodName].toString().match(/this\.([A-Z]{6})=\$I\.[A-Z]{6,12}\.[A-Z]{6}\(\$I\.[A-Z]{6},(?:32|0x20),\s?(?:32|0x20)\);/)[1];
+                    this.regionSectorObjectsMemberName = $I[regionSectorClassName].prototype[regionSector$ctorMethodName].toString().match(/this\.([A-Z]{6})=\$I\.[A-Z]{6,12}\.[A-Z]{6}\(\$I\.[A-Z]{6},(?:32|0x20),\s?(?:32|0x20)\)/)[1];
                 },
                 members: {
                     worldObjectWrapper: null,
@@ -676,19 +678,20 @@
                 extend: Object,
                 construct: function () {
                     this.visObjectTypeNameMap = {};
-                    this.visObjectTypeNameMap[ClientLib.Vis.VisObject.EObjectType.RegionCityType] = ClientLib.Vis.Region.RegionCity.prototype.get_ConditionDefense.toString().match(/&&\(this\.([A-Z]{6})\.[A-Z]{6}>=0\)/)[1];
-                    this.visObjectTypeNameMap[ClientLib.Vis.VisObject.EObjectType.RegionNPCBase] = ClientLib.Vis.Region.RegionNPCBase.prototype.get_BaseLevel.toString().match(/return this\.([A-Z]{6})\.[A-Z]{6};/)[1];
+                    // MOD 22.3-2 (multiple)
+                    this.visObjectTypeNameMap[ClientLib.Vis.VisObject.EObjectType.RegionCityType] = ClientLib.Vis.Region.RegionCity.prototype.get_ConditionDefense.toString().match(/&&\(?this\.([A-Z]{6})\.[A-Z]{6}>=0/)[1];
+                    this.visObjectTypeNameMap[ClientLib.Vis.VisObject.EObjectType.RegionNPCBase] = ClientLib.Vis.Region.RegionNPCBase.prototype.get_BaseLevel.toString().match(/return this\.([A-Z]{6})\.[A-Z]{6}/)[1];
                     this.territoryRadiusMemberNameMap = {};
-                    this.territoryRadiusMemberNameMap[ClientLib.Data.WorldSector.ObjectType.City] = ClientLib.Data.WorldSector.WorldObjectCity.prototype.$ctor.toString().match(/this\.([A-Z]{6})=\(\([a-z]>>(?:17|0x\d+)\)&15\);/)[1];
-                    this.territoryRadiusMemberNameMap[ClientLib.Data.WorldSector.ObjectType.NPCBase] = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype.$ctor.toString().match(/this\.([A-Z]{6})=\(\([a-z]>>(?:18|0x\d+)\)&15\);/)[1];
-                    this.territoryRadiusMemberNameMap[ClientLib.Data.WorldSector.ObjectType.Ruin] = ClientLib.Data.WorldSector.WorldObjectRuin.prototype.$ctor.toString().match(/this\.([A-Z]{6})=\(\(g>>9\)&15\);/)[1];
+                    this.territoryRadiusMemberNameMap[ClientLib.Data.WorldSector.ObjectType.City] = ClientLib.Data.WorldSector.WorldObjectCity.prototype.$ctor.toString().match(/this\.([A-Z]{6})=\(?\(?[a-z]>>(?:17|0x\d+)\)?&15\)?/)[1];
+                    this.territoryRadiusMemberNameMap[ClientLib.Data.WorldSector.ObjectType.NPCBase] = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype.$ctor.toString().match(/this\.([A-Z]{6})=\(?\(?[a-z]>>(?:18|0x\d+)\)?&15\)?/)[1];
+                    this.territoryRadiusMemberNameMap[ClientLib.Data.WorldSector.ObjectType.Ruin] = ClientLib.Data.WorldSector.WorldObjectRuin.prototype.$ctor.toString().match(/this\.([A-Z]{6})=\(?\(?[a-z]>>9\)?&15\)?/)[1];
                     this.baseLevelMemberNameMap = {};
-                    this.baseLevelMemberNameMap[ClientLib.Data.WorldSector.ObjectType.City] = ClientLib.Vis.Region.RegionCity.prototype.get_BaseLevel.toString().match(/return this\.[A-Z]{6}\.([A-Z]{6});/)[1];
-                    this.baseLevelMemberNameMap[ClientLib.Data.WorldSector.ObjectType.NPCBase] = ClientLib.Vis.Region.RegionNPCBase.prototype.get_BaseLevel.toString().match(/return this\.[A-Z]{6}\.([A-Z]{6});/)[1];
-                    this.baseLevelMemberNameMap[ClientLib.Data.WorldSector.ObjectType.Ruin] = ClientLib.Vis.Region.RegionRuin.prototype.get_BaseLevel.toString().match(/return this\.[A-Z]{6}\.([A-Z]{6});/)[1];
+                    this.baseLevelMemberNameMap[ClientLib.Data.WorldSector.ObjectType.City] = ClientLib.Vis.Region.RegionCity.prototype.get_BaseLevel.toString().match(/return this\.[A-Z]{6}\.([A-Z]{6})/)[1];
+                    this.baseLevelMemberNameMap[ClientLib.Data.WorldSector.ObjectType.NPCBase] = ClientLib.Vis.Region.RegionNPCBase.prototype.get_BaseLevel.toString().match(/return this\.[A-Z]{6}\.([A-Z]{6})/)[1];
+                    this.baseLevelMemberNameMap[ClientLib.Data.WorldSector.ObjectType.Ruin] = ClientLib.Vis.Region.RegionRuin.prototype.get_BaseLevel.toString().match(/return this\.[A-Z]{6}\.([A-Z]{6})/)[1];
                     this.playerDataIndexMemberNameMap = {};
-                    this.playerDataIndexMemberNameMap[ClientLib.Data.WorldSector.ObjectType.City] = ClientLib.Data.WorldSector.prototype.SetDetails.toString().match(/\$I\.[A-Z]{6}\.City:.+?var ([A-Za-z]+)=this\.[A-Z]{6}\.d\[[A-Za-z]+\.([A-Z]{6})\];if\(\1==null\){return false;}/)[2];
-                    this.playerDataIndexMemberNameMap[ClientLib.Data.WorldSector.ObjectType.Ruin] = ClientLib.Data.WorldSector.prototype.SetDetails.toString().match(/case \$I\.[A-Z]{6}\.Ruin:.+?var ([A-Za-z]+)=this\.[A-Z]{6}\.d\[[A-Za-z]+\.([A-Z]{6})\];if\(\1==null\){return false;}/)[2];
+                    this.playerDataIndexMemberNameMap[ClientLib.Data.WorldSector.ObjectType.City] = ClientLib.Data.WorldSector.prototype.SetDetails.toString().match(/case \$I\.[A-Z]{6}\.City:.+?([a-z])=this\.[A-Z]{6}\.d\[[a-z]\.([A-Z]{6})\].+?\1==null\)(?:{return false;}|\?!1)/)[2];
+                    this.playerDataIndexMemberNameMap[ClientLib.Data.WorldSector.ObjectType.Ruin] = ClientLib.Data.WorldSector.prototype.SetDetails.toString().match(/case \$I\.[A-Z]{6}\.Ruin:.+?([a-z])=this\.[A-Z]{6}\.d\[[a-z]\.([A-Z]{6})\].+?\1==null\)(?:{return false;}|\?!1)/)[2];
                 },
                 members: {
                     visObjectTypeNameMap: null,
@@ -777,10 +780,33 @@
                      var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
                      this.GetTerritoryTypeByCoordinatesPatched = new Evil(args, fnBody); */
                     /* var GTTM = ClientLib.Data.World.prototype.GetTerritoryTypeByCoordinates.toString().match(/var \$.+this\.([a-zA-Z]+).+{case \$\I.([a-zA-Z]+).+{return \$\I.([a-zA-Z]+)/); */
-                    this.GetTerritoryTypeByCoordinatesPatched=function(territoryIdentity,a,b){var $createHelper;var c=this.GetOwner(a,b);var d=territoryIdentity.playerId;var e=territoryIdentity.allianceId;var f=c>>29;var g=c&536870911;switch(f){case ClientLib.Data.EOwnerType.Player:if(g==0||g!=d){if(g==0)return ClientLib.Data.ETerritoryType.Neutral;break}return ClientLib.Data.ETerritoryType.Own;case ClientLib.Data.EOwnerType.Alliance:if(g!=e)break;return ClientLib.Data.ETerritoryType.Alliance;case ClientLib.Data.EOwnerType.StartSlot:return ClientLib.Data.ETerritoryType.SpawnZone;
-case ClientLib.Data.EOwnerType.NPC:if(g!=1)break;return ClientLib.Data.ETerritoryType.Restricted}return ClientLib.Data.ETerritoryType.Enemy};
-
-                    this.CheckMoveBaseMethodName = ClientLib.Vis.MouseTool.MoveBaseTool.prototype.VisUpdate.toString().match(/var [A-Za-z]+=[A-Za-z]+\.([A-Z]{6})\([A-Za-z]+,[A-Za-z]+,this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\);/)[1];
+                    this.GetTerritoryTypeByCoordinatesPatched = function (territoryIdentity, a, b) {
+                        //var $createHelper;
+                        var c = this.GetOwner(a, b);
+                        var d = territoryIdentity.playerId;
+                        var e = territoryIdentity.allianceId;
+                        var f = c >> 29;
+                        var g = c & 536870911;
+                        switch (f) {
+                            case ClientLib.Data.EOwnerType.Player:
+                                if (g == 0 || g != d) {
+                                    if (g == 0) return ClientLib.Data.ETerritoryType.Neutral;
+                                    break
+                                }
+                                return ClientLib.Data.ETerritoryType.Own;
+                            case ClientLib.Data.EOwnerType.Alliance:
+                                if (g != e) break;
+                                return ClientLib.Data.ETerritoryType.Alliance;
+                            case ClientLib.Data.EOwnerType.StartSlot:
+                                return ClientLib.Data.ETerritoryType.SpawnZone;
+                            case ClientLib.Data.EOwnerType.NPC:
+                                if (g != 1) break;
+                                return ClientLib.Data.ETerritoryType.Restricted
+                        }
+                        return ClientLib.Data.ETerritoryType.Enemy
+                    };
+                    // MOD 22.3-5 (multiple)
+                    this.CheckMoveBaseMethodName = ClientLib.Vis.MouseTool.MoveBaseTool.prototype.VisUpdate.toString().match(/[A-Za-z]+=[A-Za-z]+\.([A-Z]{6})\([A-Za-z]+,[A-Za-z]+,this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\.[A-Z]{6}\(\),this\.[A-Z]{6}\)/)[1];
                     // The second replace takes care of landing on a ruin and the third one landing next to a ruin
                     // MOD fixed regex by Netquik
                     /* var rewrittenFunctionBody = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().replace(/^(function\s*\()/, '$1territoryIdentity,').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\(([A-Za-z]\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\$I\.[A-Z]{6}\.FailFieldOccupied;)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5').replace(/(var ([A-Za-z]+)=([A-Za-z]+)\.[A-Z]{6}\(([A-Za-z]\.[A-Z]{6})\);if\(\(\2!=\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\)&&)\(\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.[A-Z]{6}\(\2\)==null\)(\)\{[A-Za-z]+\|=\(\$I\.[A-Z]{6}\.FailNeighborRuin)/, '$1 $3.GetPlayerAllianceId($4) != territoryIdentity.allianceId$5');
@@ -788,14 +814,96 @@ case ClientLib.Data.EOwnerType.NPC:if(g!=1)break;return ClientLib.Data.ETerritor
                     var args = rewrittenFunctionBody.substring(rewrittenFunctionBody.indexOf("(") + 1, rewrittenFunctionBody.indexOf(")"));
                     this.CheckMoveBasePatched = new Evil(args, fnBody); */
 
-                    var CMBM = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().match(/this\.([A-Z]{6})\(.,.,.,.\);.+if\(\(.\.([A-Z]{6})!.+\.([A-Z]{6})>.+\(.\.([A-Z]{6})\(.,.\)\).+[A-Z]{6}\(.\.([A-Z]{6})\).+([A-Z]{6})\[.\].+\.([A-Z]{6})!=.+([A-Z]{6})\.len/);
-                    this.CheckMoveBasePatched=function(territoryIdentity,a,b,c,d,e){var $createHelper;var xx=ClientLib.Data.EMoveBaseResult;var f=xx.OK;var g=ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity();var h=a-g.get_X();var i=b-g.get_Y();var j=h*h+i*i;var k=ClientLib.Data.MainData.GetInstance().get_Server().get_MaxBaseMoveDistance();if(g.get_IsGhostMode())k=ClientLib.Data.MainData.GetInstance().get_Server().get_MaxMaterializeMoveDistance();if(j>k*k)f|=xx.FailDistance;f|=this.CheckMoveBaseRestrictions(a,
-                        b,g);var l=this[CMBM[1]](g,a,b,e);if(l!=0){var m=this.GetObjectFromPosition(a,b);if((l&8192)==8192)f|=xx.FailReservedTerritory;else if((l&4096)==4096)f|=xx.FailNotOwned;else if((l&2)==2)f|=xx.FailBlocked;else if((l&4)==4)if(a==g.get_X()&&b==g.get_Y())f|=xx.FailOldBasePosition;else f|=xx.FailFieldOccupied;else if((l&1024)==1024||(l&512)==512||((l&2048)==2048||(l&32)==32))f|=xx.FailFieldOccupied;else if((l&16)==16){var n=m;if(n[CMBM[2]]!=ClientLib.Data.WorldSector.WorldObjectNPCCamp.ECampType.Destroyed&&
-                        n[CMBM[3]]>ClientLib.Data.MainData.GetInstance().get_Time().GetServerStep())f|=xx.FailCampIsAttacked}else if((l&256)==256){var o=ClientLib.Data.MainData.GetInstance().get_EndGame().GetObjectFromPosition(a,b);if(o!=null&&o.get_Type()==ClientLib.Data.EndGame.EHubType.Server)if(g.get_IsGhostMode())f|=xx.FailGhostSatellite;else if(o[CMBM[4]](a,b))f|=xx.FailSatellite;var p=ClientLib.Data.MainData.GetInstance().get_EndGame().GetServer(a,b);if(p!=null&&(p.get_ServerState()==ClientLib.Data.EndGame.EHubState.Crater||
-                        p.get_ServerState()==ClientLib.Data.EndGame.EHubState.Impact)&&ClientLib.Data.MainData.GetInstance().get_Player().get_HasControlHubCode())f|=xx.FailSatellitePlayerHasCode}else if((l&128)==128)f|=this.CheckMoveBaseControlHub(a,b,g);else if((l&8)==8){var q=m;var r=this.GetWorldSectorByCoords(a,b);if(r!=null){var s=r.GetPlayerId(q[CMBM[5]]);if(s!=ClientLib.Data.MainData.GetInstance().get_Player().get_Id()&&r.GetPlayerAllianceId(q[CMBM[5]])!=territoryIdentity.allianceId)f|=xx.FailFieldOccupied;else f|=
-                        this.CheckMoveBaseControlHub(a,b,g)}}else if((l&1)==1)f|=xx.FailBlocked}if(f==xx.OK){for(var t=0;t<ClientLib.Data.World[CMBM[6]].length;t++){var u=a+ClientLib.Data.World[CMBM[6]][t][0];var v=b+ClientLib.Data.World[CMBM[6]][t][1];l=this[CMBM[1]](g,u,v,e);if(l!=0){var w=this.GetObjectFromPosition(u,v);if((l&8)==8){var x=w;var y=this.GetWorldSectorByCoords(u,v);if(y!=null){var z=y.GetPlayerId(x[CMBM[5]]);if(z!=ClientLib.Data.MainData.GetInstance().get_Player().get_Id()&&y.GetPlayerAllianceId(x[CMBM[5]])!=
-                        territoryIdentity.allianceId)f|=xx.FailNeighborRuin|xx.FailNeighbor}}else if((l&4)==4||(l&16384)==16384){var ab=w;if(ab[CMBM[7]]!=g.get_Id())f|=xx.FailNeighborCity|xx.FailNeighbor}else if((l&2048)==2048)f|=xx.FailNeighborNewPlayerSlot|xx.FailNeighbor;else if((l&32)==32)f|=xx.FailNeighborBase|xx.FailNeighbor;else if((l&64)==64)f|=xx.FailNeighborHubCenter|xx.FailNeighbor;if(g.get_IsGhostMode()){if((l&1024)==1024)f|=xx.FailGhostNeighbor|xx.FailNeighborPOI;if((l&128)==128)f|=xx.FailGhostNeighbor|xx.FailNeighborHub;
-                        else if((l&256)==256)f|=xx.FailGhostNeighbor|xx.FailNeighborHubServer}}if(f!=xx.OK)return f}if(!g.get_IsGhostMode())return f;for(var bb=0;bb<ClientLib.Data.World[CMBM[8]].length;bb++){var cb=a+ClientLib.Data.World[CMBM[8]][bb][0];var db=b+ClientLib.Data.World[CMBM[8]][bb][1];l=this[CMBM[1]](g,cb,db,e);if(l!=0)if((l&1024)==1024)f|=xx.FailGhostNeighbor|xx.FailNeighborPOI;else if((l&64)==64)f|=xx.FailGhostNeighbor|xx.FailNeighborHubCenter;if(f!=xx.OK)return f}}return f};
+                    var CMBM = ClientLib.Data.World.prototype[this.CheckMoveBaseMethodName].toString().match(/this\.([A-Z]{6})\(.,.,.,.\).+[a-z]\.([A-Z]{6})!=\$I.+&&\(?[a-z]\.([A-Z]{6})>\$I.+[a-z]\.([A-Z]{6})\(.,.\)\)?&?&?[{(][a-z]\|=.+[a-z]=[a-z]\.[A-Z]{6}\([a-z]+\.([A-Z]{6})\).+([A-Z]{6})\[[a-z]\]\[1\].+[a-z]+\.([A-Z]{6})!=.+([A-Z]{6})\.len/);
+                    this.CheckMoveBasePatched = function (territoryIdentity, a, b, c, d, e) {
+                        //var $createHelper;
+                        var xx = ClientLib.Data.EMoveBaseResult;
+                        var f = xx.OK;
+                        var g = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity();
+                        var h = a - g.get_X();
+                        var i = b - g.get_Y();
+                        var j = h * h + i * i;
+                        var k = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxBaseMoveDistance();
+                        if (g.get_IsGhostMode()) k = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxMaterializeMoveDistance();
+                        if (j > k * k) f |= xx.FailDistance;
+                        f |= this.CheckMoveBaseRestrictions(a,
+                            b, g);
+                        var l = this[CMBM[1]](g, a, b, e);
+                        if (l != 0) {
+                            var m = this.GetObjectFromPosition(a, b);
+                            if ((l & 8192) == 8192) f |= xx.FailReservedTerritory;
+                            else if ((l & 4096) == 4096) f |= xx.FailNotOwned;
+                            else if ((l & 2) == 2) f |= xx.FailBlocked;
+                            else if ((l & 4) == 4)
+                                if (a == g.get_X() && b == g.get_Y()) f |= xx.FailOldBasePosition;
+                                else f |= xx.FailFieldOccupied;
+                            else if ((l & 1024) == 1024 || (l & 512) == 512 || ((l & 2048) == 2048 || (l & 32) == 32)) f |= xx.FailFieldOccupied;
+                            else if ((l & 16) == 16) {
+                                var n = m;
+                                if (n[CMBM[2]] != ClientLib.Data.WorldSector.WorldObjectNPCCamp.ECampType.Destroyed &&
+                                    n[CMBM[3]] > ClientLib.Data.MainData.GetInstance().get_Time().GetServerStep()) f |= xx.FailCampIsAttacked
+                            } else if ((l & 256) == 256) {
+                                var o = ClientLib.Data.MainData.GetInstance().get_EndGame().GetObjectFromPosition(a, b);
+                                if (o != null && o.get_Type() == ClientLib.Data.EndGame.EHubType.Server)
+                                    if (g.get_IsGhostMode()) f |= xx.FailGhostSatellite;
+                                    else if (o[CMBM[4]](a, b)) f |= xx.FailSatellite;
+                                var p = ClientLib.Data.MainData.GetInstance().get_EndGame().GetServer(a, b);
+                                if (p != null && (p.get_ServerState() == ClientLib.Data.EndGame.EHubState.Crater ||
+                                        p.get_ServerState() == ClientLib.Data.EndGame.EHubState.Impact) && ClientLib.Data.MainData.GetInstance().get_Player().get_HasControlHubCode()) f |= xx.FailSatellitePlayerHasCode
+                            } else if ((l & 128) == 128) f |= this.CheckMoveBaseControlHub(a, b, g);
+                            else if ((l & 8) == 8) {
+                                var q = m;
+                                var r = this.GetWorldSectorByCoords(a, b);
+                                if (r != null) {
+                                    var s = r.GetPlayerId(q[CMBM[5]]);
+                                    if (s != ClientLib.Data.MainData.GetInstance().get_Player().get_Id() && r.GetPlayerAllianceId(q[CMBM[5]]) != territoryIdentity.allianceId) f |= xx.FailFieldOccupied;
+                                    else f |=
+                                        this.CheckMoveBaseControlHub(a, b, g)
+                                }
+                            } else if ((l & 1) == 1) f |= xx.FailBlocked
+                        }
+                        if (f == xx.OK) {
+                            for (var t = 0; t < ClientLib.Data.World[CMBM[6]].length; t++) {
+                                var u = a + ClientLib.Data.World[CMBM[6]][t][0];
+                                var v = b + ClientLib.Data.World[CMBM[6]][t][1];
+                                l = this[CMBM[1]](g, u, v, e);
+                                if (l != 0) {
+                                    var w = this.GetObjectFromPosition(u, v);
+                                    if ((l & 8) == 8) {
+                                        var x = w;
+                                        var y = this.GetWorldSectorByCoords(u, v);
+                                        if (y != null) {
+                                            var z = y.GetPlayerId(x[CMBM[5]]);
+                                            if (z != ClientLib.Data.MainData.GetInstance().get_Player().get_Id() && y.GetPlayerAllianceId(x[CMBM[5]]) !=
+                                                territoryIdentity.allianceId) f |= xx.FailNeighborRuin | xx.FailNeighbor
+                                        }
+                                    } else if ((l & 4) == 4 || (l & 16384) == 16384) {
+                                        var ab = w;
+                                        if (ab[CMBM[7]] != g.get_Id()) f |= xx.FailNeighborCity | xx.FailNeighbor
+                                    } else if ((l & 2048) == 2048) f |= xx.FailNeighborNewPlayerSlot | xx.FailNeighbor;
+                                    else if ((l & 32) == 32) f |= xx.FailNeighborBase | xx.FailNeighbor;
+                                    else if ((l & 64) == 64) f |= xx.FailNeighborHubCenter | xx.FailNeighbor;
+                                    if (g.get_IsGhostMode()) {
+                                        if ((l & 1024) == 1024) f |= xx.FailGhostNeighbor | xx.FailNeighborPOI;
+                                        if ((l & 128) == 128) f |= xx.FailGhostNeighbor | xx.FailNeighborHub;
+                                        else if ((l & 256) == 256) f |= xx.FailGhostNeighbor | xx.FailNeighborHubServer
+                                    }
+                                }
+                                if (f != xx.OK) return f
+                            }
+                            if (!g.get_IsGhostMode()) return f;
+                            for (var bb = 0; bb < ClientLib.Data.World[CMBM[8]].length; bb++) {
+                                var cb = a + ClientLib.Data.World[CMBM[8]][bb][0];
+                                var db = b + ClientLib.Data.World[CMBM[8]][bb][1];
+                                l = this[CMBM[1]](g, cb, db, e);
+                                if (l != 0)
+                                    if ((l & 1024) == 1024) f |= xx.FailGhostNeighbor | xx.FailNeighborPOI;
+                                    else if ((l & 64) == 64) f |= xx.FailGhostNeighbor | xx.FailNeighborHubCenter;
+                                if (f != xx.OK) return f
+                            }
+                        }
+                        return f
+                    };
                 },
                 members: {
                     playerId: null,
@@ -837,7 +945,8 @@ case ClientLib.Data.EOwnerType.NPC:if(g!=1)break;return ClientLib.Data.ETerritor
                     var matches = ClientLib.Data.AllianceSupportState.prototype.Update.toString().match(/switch\s?\(\$I\.([A-Z]{6})\.([A-Z]{6})\([a-z]\.c\[[a-z]\]\.charCodeAt\(0\)\)\)\{/);
                     var hashEncoderClassname = matches[1];
                     var decodeCharCodeMethodName = matches[2];
-                    var hashTableMemberName = $I[hashEncoderClassname][decodeCharCodeMethodName].toString().match(/return \$I\.[A-Z]{6}\.([A-Z]{6})\[[a-z]\];/)[1];
+                    // MOD 22.3-1
+                    var hashTableMemberName = $I[hashEncoderClassname][decodeCharCodeMethodName].toString().match(/return \$I\.[A-Z]{6}\.([A-Z]{6})\[[a-z]\]/)[1];
                     this.hashTable = $I[hashEncoderClassname][hashTableMemberName];
                 },
                 members: {

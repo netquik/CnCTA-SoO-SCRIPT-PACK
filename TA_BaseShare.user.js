@@ -2,10 +2,10 @@
 // @name        Base Share
 // @description Base Share
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @icon        data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAqCAMAAADyHTlpAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAADYUExURQAAAP/YZf/SXv/ebeLi4sSLOf/MV6WlpczMzOHh4f/GUP/rfP/icv/md97e3v/DTP+/SP/VYmEpAKGhof77rnE+AmYwA//PW6N/OPq0Pv/bav+8Q66ursvLy8unSrW1tfDllNycOVEdAIJSFsWrYP30nf/+tf/wi9HR0f//wv/5o5hwLf/ETdnFdv76qYteHcy1aLudU6+ORMapgcbGxnlHEtqyUeLQfdS8avXto72gdsqfQuzOZfXrmP//y6CgoOnBWOvbiP7xlvjdcL6hd8WpgJycnPvXaAl6Tu4AAAAKdFJOUwD///84//84Nzjgp7DKAAACz0lEQVQ4y4XV6VriMBQG4FoGdVhsiW0oFLV2Cbalq5YWBWTRmfu/ozlZWKwMfn/C8j4nSUkOkgT5dfNDriWR3zdPz80zeb67uz7Ix4FpqqqiTFpHmSiKqprm4HFnhVSVVuvyW1otRd1bLgFeXvb7ci39PmhFFXYv+3Kvd1FLryf3d/ZFevoUEtxw2PiS4RC0sJ8P0lNzYIKUexfgOoc0EseZg77oyWDNQZNSU2U1Kewesk38zNh2Gg1WVzU5VZgUsC3SoXTehfLUKpxCURlm7xwYTeX4eTLvdjuwBliCKigr+kVuHWMdL7KCWSgrKJ2fFm23x/sU1TL2gqWF57QsXYGgMD8tGlgRxNKqyDCWLiwg9Ktky1dA6V1zApTNT3IbITs1MMazBYZt2ZXvFInzBnTCaEvQMUmQrqM0IZoWeJrmxZoHA7GcFezrmLbHcaHrOi6dKq3iRVrG63StlW6ZOtM63QQzmjjKsyLSMPYN25rpeRg2v9G4LBxIYDlh4ZBZpqXrZZhZ09VKrlOS2bAhrEU21lE48z0C+7S8KTzYGh2TEMNSC1IhumQnJ5WOUKqdoJtYRxgjx3ehOEIlPFcb2yGptpyODtQLLJpF4LHBSpZ5NoO35fwbDSyXJoLnQ1MWlmGkrustpnXaJi78Vsg2lgYbowzTddjr+L5Ox8Sg20GZz8d0SXep0339FfRF0I2WsK9c3/gy5qSc7yk/LsEMpkUYTkhiYxhz+gAQRoVmTdlxoZQdQjiBoQEJ11pGX4QpidgHhufds0PIKRztMT1ENN4mZmOwCdgYe95U7gvKL8zq7e3+RN5oVvTCcHrqGvIcXUNKT19uyiCHy82oyppLrWXsYIO1F5XT042Id6OjRgT0A9rbhNnT7Q3kBNrbx0h6eHjl9v9Nk8rX0a10NWL2h1b8Onq/koQ93+C53Nszfxs7ye25P6ODBHt7Nu9/mPwHuCKM2LRl3icAAAAASUVORK5CYII=
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_BaseShare.js
-// @version     22.05.04
+// @version     22.07.22
 // @author      TheStriker
 // @contributor NetquiK (https://github.com/netquik) (see first comments for changelog)
 // ==/UserScript==
@@ -15,6 +15,7 @@ codes by NetquiK
 - Fix for potential icon overlaps
 - First Try to speed up Attack buttons enabling
 - NOEVIL
+- Fix 22.3
 ----------------
 */
 'use strict';
@@ -56,11 +57,12 @@ codes by NetquiK
                 this.QuickWrapProperty(
                   ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype,
                   "$ctor",
-                  /this\.([A-Z]{6,12})\s*=\s*\(\w\.\$\w\s*=\s*\$I\.[A-Z]{6,12}\.[A-Z]{6,12}\(\w,\s*\w,\s*\w\),\s*\w\s*=\s*\w.\w,\s*\w\.\$\w\);\s*return\sthis;/,
+                  // MOD 22.3
+                  /this\.([A-Z]{6})=\(\w\.\$\w=\$I\.[A-Z]{6}\.[A-Z]{6}\(\w,\w,\w\),\w=\w.\w,\w\.\$\w\)[,;](?:return\s)?this;?}/,
                   "get_Id"
                 );
               if (typeof ClientLib.Data.City.prototype.Update === "undefined") {
-                var tmp = this.FindMethod(ClientLib.Data.City.prototype, /Math\.(?:floor|round)\(a\.adb\)/);
+                var tmp = this.FindMethod(ClientLib.Data.City.prototype, /Math\.(?:floor|round)\([a-z]+\.adb\)/);
                 this.AliasMethod(ClientLib.Data.City.prototype, tmp, "Update");
               }
               this.data = [];
@@ -178,7 +180,7 @@ codes by NetquiK
           },
           createCityMovePatch: function () {
             if (typeof ClientLib.Data.City.prototype.MoveToResult === "undefined") {
-              var tmp = this.FindRegexSubStr(ClientLib.Data.City.prototype.MoveTo, /\.[A-Z]{6,12}\(this\,this\.([A-Z]{6,12})\)/, 1);
+              var tmp = this.FindRegexSubStr(ClientLib.Data.City.prototype.MoveTo, /\.[A-Z]{6}\(this\,this\.([A-Z]{6})\)/, 1);
               this.AliasMethod(ClientLib.Data.City.prototype, tmp, "MoveToResult");
               ClientLib.Data.City.prototype[tmp] = function (a, b) {
                 this.MoveToResult(a, b);

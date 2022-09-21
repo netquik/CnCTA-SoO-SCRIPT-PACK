@@ -2,9 +2,9 @@
 // @name            MovableMenuOverlay
 // @description     Make Overlay Menu Windows Movable including Forum and Mail
 // @author          Netquik [SoO] (https://github.com/netquik)
-// @version         1.0.7
+// @version         1.0.9
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match           https://*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_MovableMenuOverlay.user.js
 // ==/UserScript==
 /**
@@ -19,6 +19,7 @@ codes by NetquiK
 - Rewritten InjectFunctions
 - Patch for 22.2
 - Removed 'Evil' code_eval
+- Patch for 22.3
 ----------------
 */
 
@@ -65,7 +66,7 @@ codes by NetquiK
                         }
                     },
                     oOModF: null,
-                    centerMod:null
+                    centerMod: null
                 }
             });
             var qxA = qx.core.Init.getApplication();
@@ -74,7 +75,8 @@ codes by NetquiK
             var source = qxA[oOMethod].toString().replace(/[\r\n]/g, "");
             // MOD injecting MMOverlay in switchMenuOverlay->oOMethod
             //var oOArg = source.match(/function\(([a-zA-Z]+)\)/)[1];
-            var oOEMatch = source.match(/if\(this\.([_a-zA-Z]+)\){.+this\.([_a-zA-Z]+)\.focus.+this\.([_a-zA-Z]+)\.reset/);
+            // MOD 22.3
+            var oOEMatch = source.match(/this\.([_a-zA-Z]+)[){&]+.+this\.([_a-zA-Z]+)\.focus.+this\.([_a-zA-Z]+)\.reset/);
             var oOE = oOEMatch[1];
             /* var oOEl = 'this.' + source.match(/if\(this.([_a-zA-Z]+)\){/)[1];
             var oOMod = source.replace(/function\([a-zA-Z]+\){(if.+setActive\(false\);};{0,1}}{0,1})(this\.[_a-zA-Z]+\.focus.+open\(\);}{0,1}else {0,1}{).+\.(add.+0}\);)(.+)}/, '$1if('+oOEl+'.getLayoutParent()instanceof MMOverlay){var t=MMOverlay.getInstance().MMO;'+oOEl+'._deactivate();-1!=t.indexOf(this.__nN)&&t.remove('+oOEl+');t.exclude();}$2var MM=MMOverlay.getInstance();m=MM.createMM();m.$3MM.activateMM();m.fadeIn(250);'+oOEl+'.setMinHeight(625);'+oOEl+'.addListener("move",function(e){this.setLayoutProperties({top:0,left:0})});'+oOEl+'.addListener("appear",function(e){this.setLayoutProperties({top:0,left:0})});$4'); 
@@ -128,57 +130,78 @@ codes by NetquiK
                         qxA[oOEMatch[3]].reset();
                 };
             } */
-            this.oOModF = function(a) {
+            this.oOModF = function (a) {
                 if (qxA[oOE]) {
-                  qxA[oOE] instanceof webfrontend.gui.OverlayWindow ? qxA[oOE].close() : qxA[oOE] instanceof webfrontend.gui.MenuOverlayWidget && qxA[oOE].setActive(!1);
-                  if (qxA[oOE].getLayoutParent() instanceof MMOverlay) {
-                    var b = MMOverlay.getInstance().MMO;
-                    b.remove(qxA[oOE]);
-                    b.exclude();
-                  }
-                  qxA[oOEMatch[2]].focus();
+                    qxA[oOE] instanceof webfrontend.gui.OverlayWindow ? qxA[oOE].close() : qxA[oOE] instanceof webfrontend.gui.MenuOverlayWidget && qxA[oOE].setActive(!1);
+                    if (qxA[oOE].getLayoutParent() instanceof MMOverlay) {
+                        var b = MMOverlay.getInstance().MMO;
+                        //b.remove(qxA[oOE]);
+                        // MOD IMPORTANT FOR CLOSING MAIL MESSAGES
+                        qxA[oOE]._deactivate(); - 1 != b.indexOf(qxA[oOE]) && b.remove(qxA[oOE]);
+                        b.exclude();
+                    }
+                    qxA[oOEMatch[2]].focus();
                 }
-                qxA[oOE] != a && (qxA[oOE] = a, qxA[oOE] ? qxA[oOE] instanceof webfrontend.gui.OverlayWindow ? qxA[oOE].open() : (a = MMOverlay.getInstance(), m = a.createMM(), m.add(qxA[oOE], {left:0, top:0}), a.activateMM(), m.fadeIn(250), qxA[oOE].setMinHeight(625), qxA[oOE].addListener("move", function(c) {
-                  this.setLayoutProperties({top:0, left:0});
-                }), qxA[oOE].addListener("appear", function(c) {
-                  this.setLayoutProperties({top:0, left:0});
+                qxA[oOE] != a && (qxA[oOE] = a, qxA[oOE] ? qxA[oOE] instanceof webfrontend.gui.OverlayWindow ? qxA[oOE].open() : (a = MMOverlay.getInstance(), m = a.createMM(), m.add(qxA[oOE], {
+                    left: 0,
+                    top: 0
+                }), a.activateMM(), m.fadeIn(250), qxA[oOE].setMinHeight(625), qxA[oOE].addListener("move", function (c) {
+                    this.setLayoutProperties({
+                        top: 0,
+                        left: 0
+                    });
+                }), qxA[oOE].addListener("appear", function (c) {
+                    this.setLayoutProperties({
+                        top: 0,
+                        left: 0
+                    });
                 }), qxA[oOE] instanceof webfrontend.gui.MenuOverlayWidget && qxA[oOE].setActive(!0)) : qxA[oOEMatch[3]].reset());
-              };
+            };
             qxA[oOMethod] = this.oOModF;
             // MOD for centerposition function - should not center what is already centered
             /* var centerMod = MOW.centerPosition.toString().replace(/function\(\){(var.+)}/, 'if (this.getLayoutParent() instanceof MMOverlay === false){$1}');
             MOW.centerPosition = new Evil('', centerMod); */
-/*             this.centerModF = function () {
-                if (this.getLayoutParent() instanceof MMOverlay === false) {
-                    var A = qx.core.Init.getApplication();
-                    var C = A.getDesktop().getBounds();
-                    var B = A.getMenuBar().getBounds();
-                    var z = A.getCurrentBottomOverlay();
-                    var x = Math.floor((C.width - webfrontend.gui.MenuOverlayWidget.OverlayWidth) / 2);
-                    var y = B.height;
-                    if (z && z.isVisible()) {
-                        this.setLayoutProperties({
-                            left: x,
-                            top: y,
-                            bottom: webfrontend.Application.legacySocHeight + webfrontend.gui.notifications.Ticker.TickerHeight
-                        });
-                    } else
-                        this.setLayoutProperties({
-                            left: x,
-                            top: y,
-                            bottom: webfrontend.gui.notifications.Ticker.TickerHeight
-                        });
-                }
-            } */
-            this.centerModF = function() {
+            /*             this.centerModF = function () {
+                            if (this.getLayoutParent() instanceof MMOverlay === false) {
+                                var A = qx.core.Init.getApplication();
+                                var C = A.getDesktop().getBounds();
+                                var B = A.getMenuBar().getBounds();
+                                var z = A.getCurrentBottomOverlay();
+                                var x = Math.floor((C.width - webfrontend.gui.MenuOverlayWidget.OverlayWidth) / 2);
+                                var y = B.height;
+                                if (z && z.isVisible()) {
+                                    this.setLayoutProperties({
+                                        left: x,
+                                        top: y,
+                                        bottom: webfrontend.Application.legacySocHeight + webfrontend.gui.notifications.Ticker.TickerHeight
+                                    });
+                                } else
+                                    this.setLayoutProperties({
+                                        left: x,
+                                        top: y,
+                                        bottom: webfrontend.gui.notifications.Ticker.TickerHeight
+                                    });
+                            }
+                        } */
+            this.centerModF = function () {
                 if (!1 === this.getLayoutParent() instanceof MMOverlay) {
-                  var a = qx.core.Init.getApplication(), b = a.getDesktop().getBounds(), c = a.getMenuBar().getBounds();
-                  a = a.getCurrentBottomOverlay();
-                  b = Math.floor((b.width - webfrontend.gui.MenuOverlayWidget.OverlayWidth) / 2);
-                  c = c.height;
-                  a && a.isVisible() ? this.setLayoutProperties({left:b, top:c, bottom:webfrontend.Application.legacySocHeight + webfrontend.gui.notifications.Ticker.TickerHeight}) : this.setLayoutProperties({left:b, top:c, bottom:webfrontend.gui.notifications.Ticker.TickerHeight});
+                    var a = qx.core.Init.getApplication(),
+                        b = a.getDesktop().getBounds(),
+                        c = a.getMenuBar().getBounds();
+                    a = a.getCurrentBottomOverlay();
+                    b = Math.floor((b.width - webfrontend.gui.MenuOverlayWidget.OverlayWidth) / 2);
+                    c = c.height;
+                    a && a.isVisible() ? this.setLayoutProperties({
+                        left: b,
+                        top: c,
+                        bottom: webfrontend.Application.legacySocHeight + webfrontend.gui.notifications.Ticker.TickerHeight
+                    }) : this.setLayoutProperties({
+                        left: b,
+                        top: c,
+                        bottom: webfrontend.gui.notifications.Ticker.TickerHeight
+                    });
                 }
-              };
+            };
             MOW.centerPosition = this.centerModF;
         }
 

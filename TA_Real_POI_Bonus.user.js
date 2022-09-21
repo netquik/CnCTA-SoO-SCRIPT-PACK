@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name           Tiberium Alliances Real POI Bonus
-// @version        1.0.3
+// @version        1.0.4
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
-// @author         petui (POI factor Fix AlkalyneD4)
+// @author         petui (POI factor Fix AlkalyneD4) - NetquiK (regex update)
 // @description    Displays actual gain/loss for POIs by taking rank multiplier properly into account
-// @include        http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match          https://*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Real_POI_Bonus.user.js
 // ==/UserScript==
 'use strict';
@@ -67,10 +67,11 @@
 					},
 
 					initializeHacks: function () {
+						// MOD regex mod by NetquiK
 						if (typeof webfrontend.gui.region.RegionPointOfInterestStatusInfo.prototype.getObject !== 'function') {
 							var source = webfrontend.gui.region.RegionPointOfInterestStatusInfo.prototype.setObject.toString();
-							source = source.replace("function(", "function (");
-							var objectMemberName = source.match(/^function \(([A-Za-z]+)\)\{this\.([A-Za-z_]+)=\1;/)[2];
+							//source = source.replace("function(", "function (");
+							var objectMemberName = source.match(/^function\s?\(([A-Za-z]+)\)\{this\.([A-Za-z_]+)=\1;/)[2];
 
 							/**
 							 * @returns {ClientLib.Vis.Region.RegionPointOfInterest}

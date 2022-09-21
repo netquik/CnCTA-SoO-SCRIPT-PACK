@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker (SUPERCompact)
 // @namespace    TAInfoSticker
-// @version      1.13
+// @version      1.14
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
-// @include      https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match        https://*.alliances.commandandconquer.com/*/index.aspx*
 // @author       NetquiK (https://github.com/netquik) (see first comments for changelog) (original author unicode)
 // @updateURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Info_Sticker_SUPERCOMPACT.user.js
 // ==/UserScript==
@@ -13,6 +13,7 @@ codes by NetquiK
 - GUI Fix and Optimize
 - Fix for 21.3 Patch ReorderBaseNavigationBar + ResetButton
 - Fix for 22.2
+- Fix for 22.3
 ----------------
 */
 (function () {
@@ -63,10 +64,11 @@ codes by NetquiK
                                         var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
                                         //MOD Fix for 22.2
                                         let BarReorder = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.bars.BaseNavigationBar.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar);
-                                        var WgbBarReorderFunc = BarReorder.match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\(true\).*(?<=showToolTip)/)[1];
-                                        WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);\}/)[1];
+                                        //MOD 22.3 (multi)
+                                        var WgbBarReorderFunc = BarReorder.match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\((?:!0|true)\).*(?<=showToolTip)/)[1];
+                                        WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);?\}/)[1];
                                         this.ButtonResetOrderMethod = WgbBarReorderFunc;
-                                        console.log('InfoSticker.initialize: ButtonResetOrderMethod = webfrontend.gui.bars.BaseNavigationBar.prototype.'+ this.ButtonResetOrderMethod);
+                                        console.log('InfoSticker.initialize: ButtonResetOrderMethod = webfrontend.gui.bars.BaseNavigationBar.prototype.' + this.ButtonResetOrderMethod);
                                         this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
                                         WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
                                     } catch (e) {

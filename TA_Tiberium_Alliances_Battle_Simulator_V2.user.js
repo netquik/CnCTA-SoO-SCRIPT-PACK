@@ -2,11 +2,11 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         22.05.18
+// @version         22.07.20
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match           https://*.alliances.commandandconquer.com/*/index.aspx*
 // @icon            http://eistee82.github.io/ta_simv2/icon.png
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Tiberium_Alliances_Battle_Simulator_V2.user.js
 // ==/UserScript==
@@ -29,6 +29,7 @@ codes by NetquiK
 - NOEVIL for all code
 - New Fixes for simulation + ReplayBar + Date hidden
 - New SkipSimulation Function
+- Patch for 22.3
 ----------------
 */
 
@@ -2546,7 +2547,8 @@ codes by NetquiK
                             // MOD NEW PATCH for moving Map (adjusted for 20.1 Patch)
                             var source = ClientLib.Vis.VisMain.GetInstance().get_CombatSetup().get_MinYPosition.toString();
                             // MOD Fix1 for 22.2 Patch
-                            var CombatMinY = source.match(/return {0,1}\(\$I\.([A-Z]{6})\.([A-Z]{6})-/);
+                            // MOD 22.3-3
+                            var CombatMinY = source.match(/return {0,1}\(?\$I\.([A-Z]{6})\.([A-Z]{6})-/);
                             if (typeof $I[CombatMinY[1]] === "function") $I[CombatMinY[1]][CombatMinY[2]] = -178;
 
 
@@ -2651,7 +2653,8 @@ codes by NetquiK
                             if (PerforceChangelist >= 472233) { // MOD: 20.2 patch 2 RETRO
                                 //var patch211body = patch211.substring(patch211.indexOf('{') + 1, patch211.lastIndexOf('}'));
                                 var source = this.ArmySetupAttackBar.showSetup.toString();
-                                var extendsetupF = source.match(/\;this\.([A-Za-z_]+)\(\)\;this\.show/)[1];
+                                //MOD 22.3-4
+                                var extendsetupF = source.match(/[,;]this\.([A-Za-z_]+)\(\).this\.show/)[1];
                                 // MOD NOEVIL 3 by NetquiK
                                 this.ArmySetupAttackBar[extendsetupF] = function () {
                                     return;
@@ -2661,7 +2664,7 @@ codes by NetquiK
                             }
 
                             this._armyBar.setMarginTop(this._armyBar.getMarginTop() + 20);
-                            // 19.5 FIX VIEW by Netquik
+                            // 19.5 MOD VIEW by Netquik
                             if (PerforceChangelist >= 472117) { // 19.5 patch                  
                                 this._armyBar.setMarginTop(this._armyBar.getMarginTop() - 40);
                             }
@@ -3203,7 +3206,8 @@ codes by NetquiK
                             var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this\.([_a-zA-Z]+)\.addListener\([a-z]/);
                             "object" == typeof this.ReportReplayOverlay[PBIS_M[1]] && "btn_play" == this.ReportReplayOverlay[PBIS_M[1]].objid && (this.PBIS = PBIS_M[1]);
                             "object" == typeof this.ReportReplayOverlay[PBIS_M[3]] && "btn_skip" == this.ReportReplayOverlay[PBIS_M[3]].objid && (this.PBIS_SK = PBIS_M[3]);
-                            PBIS_M = webfrontend.gui.reports.ReportReplayOverlay.prototype[PBIS_M[2]].toString().match(/if\(this\.([_a-zA-Z]+)\){this\.[_a-zA-Z]+\(false\).+this\.([_a-zA-Z]+)\.setValue/);
+                            // MOD 22.3-5
+                            PBIS_M = webfrontend.gui.reports.ReportReplayOverlay.prototype[PBIS_M[2]].toString().match(/(?:if\(|,)this\.([_a-zA-Z]+)\){this\.[_a-zA-Z]+\((?:false|!1)\).+this\.([_a-zA-Z]+)\.setValue/);
                             "boolean" == typeof this.ReportReplayOverlay[PBIS_M[1]] && (this.PBIS_S = PBIS_M[1]);
                             "object" == typeof this.ReportReplayOverlay[PBIS_M[2]] && "lbl_speed" == this.ReportReplayOverlay[PBIS_M[2]].objid && (this.PBIS_L = PBIS_M[2]);
                             //MOD New Autoscroll Button Selector
@@ -4624,9 +4628,11 @@ codes by NetquiK
                                 // replacing LoadCombatDirect
                                 if (ClientLib.Vis.Battleground.Battleground.prototype.LoadCombatDirect === undefined) {
                                     var sBString = ClientLib.API.Battleground.prototype.SimulateBattle.toString();
-                                    var targetMethod = sBString.match(/\{battleSetup:[a-z]+\},\s?\(new \$I\.[A-Z]{6}\)\.[A-Z]{6}\(this,this\.([A-Z]{6})\),\s?this\);/)[1];
+                                    //MOD 22.3-1
+                                    var targetMethod = sBString.match(/\{battleSetup:[a-z]+\},\s?\(new \$I\.[A-Z]{6}\)\.[A-Z]{6}\(this,this\.([A-Z]{6})\),\s?this\)/)[1];
                                     var lCString = ClientLib.API.Battleground.prototype[targetMethod].toString();
-                                    var methodLoadDirect = lCString.match(/\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.([A-Z]{6})\(b\.d\);/)[1];
+                                    //MOD 22.3-2
+                                    var methodLoadDirect = lCString.match(/\$I\.[A-Z]{6}\.[A-Z]{6}\(\)\.[A-Z]{6}\(\)\.([A-Z]{6})\([a-z]\.d\)/)[1];
                                     console.log(methodLoadDirect);
                                     ClientLib.Vis.Battleground.Battleground.prototype.LoadCombatDirect = ClientLib.Vis.Battleground.Battleground.prototype[methodLoadDirect];
                                 }

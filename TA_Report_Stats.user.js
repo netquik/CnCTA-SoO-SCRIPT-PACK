@@ -1,16 +1,24 @@
 // ==UserScript==
 // @name           Tiberium Alliances Report Stats
-// @version        0.5.4
+// @version        0.5.5
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    leo7044 (https://github.com/leo7044)
 // @contributor    AlkalyneD4 (https://github.com/SebHeuze)
-// @contributor    NetquiK (https://github.com/netquik) 22.2 FIX
+// @contributor    NetquiK (https://github.com/netquik) (see first comments for changelog)
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Report_Stats.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Report_Stats.user.js
 // @description    Calculates combined RT and CP costs and loot of multiple combat reports
-// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
+// @match          https://*.alliances.commandandconquer.com/*/index.aspx*
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- 22.2 FIX
+- 22.3 ALL REGEXs FIX
+----------------
+*/
 'use strict';
 
 (function () {
@@ -52,9 +60,9 @@
 
 						if (typeof qx.ui.table.model.Abstract.prototype.addColumn !== 'function') {
 							source = qx.ui.table.model.Abstract.prototype.getColumnId.toString();
-							var columnIdsMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Z]\];/)[1];
+							var columnIdsMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Za-z]\];?/)[1];
 							source = qx.ui.table.model.Abstract.prototype.getColumnName.toString();
-							var columnNamesMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Z]\];/)[1];
+							var columnNamesMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Za-z]\];?/)[1];
 
 							/**
 							 * @param {String} id
@@ -72,16 +80,16 @@
 
 						if (typeof qx.ui.table.columnmodel.Basic.prototype.addColumn !== 'function') {
 							source = qx.ui.table.columnmodel.Basic.prototype.getColumnWidth.toString();
-							var columnsMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Z]\]\.width;/)[1];
+							var columnsMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Za-z]\]\.width;?/)[1];
 							source = qx.ui.table.columnmodel.Basic.prototype.getOverallColumnCount.toString();
-							var columnOrderMemberName = source.match(/return this\.([A-Za-z_]+)\.length;/)[1];
+							var columnOrderMemberName = source.match(/return this\.([A-Za-z_]+)\.length;?/)[1];
 							source = qx.ui.table.columnmodel.Basic.prototype.getVisibleColumnAtX.toString();
-							var columnVisibilityMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Z]\];/)[1];
+							var columnVisibilityMemberName = source.match(/return this\.([A-Za-z_]+)\[[A-Za-z]\];?/)[1];
 							source = qx.ui.table.columnmodel.Basic.prototype._getColToXPosMap.toString();
-							var columnToXPosMapMemberName = source.match(/return this\.([A-Za-z_]+);\}$/)[1];
+							var columnToXPosMapMemberName = source.match(/return this\.([A-Za-z_]+);?\}$/)[1];
 
 							source = qx.ui.table.columnmodel.Basic.prototype.init.toString();
-							var matches = source.match(/this\.([A-Za-z_]+)\|\|\(this\.\1=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_HEADER_RENDERER\(\)\);.+this\.([A-Za-z_]+)\|\|\(this\.\2=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_DATA_RENDERER\(\)\);.+this\.([A-Za-z_]+)\|\|\(this\.\3=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_EDITOR_FACTORY\(\)\);/);
+							var matches = source.match(/this\.([A-Za-z_]+)\|\|\(this\.\1=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_HEADER_RENDERER.+this\.([A-Za-z_]+)\|\|\(this\.\2=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_DATA_RENDERER.+this\.([A-Za-z_]+)\|\|\(this\.\3=new qx\.ui\.table\.columnmodel\.Basic\.DEFAULT_EDITOR_FACTORY/);
 							var headerRendererMemberName = matches[1];
 							var dataRendererMemberName = matches[2];
 							var editorFactoryMemberName = matches[3];
@@ -114,9 +122,9 @@
 						if (typeof webfrontend.gui.info.BaseInfoWindow.prototype.onCellClick !== 'function') {
 							// MOD 22.2 FIX
 							source = (parseFloat(GameVersion) >= 22.2) ? Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor.$$original) : Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor);
-							var createOutgoingTabMethodName = source.match(/;[A-Za-z]+\.add\(this\.([A-Za-z_]+)\(\)\);this\.[A-Za-z_]+=new webfrontend\.gui\.widgets\.confirmationWidgets\.ProtectionConfirmationWidget\(\);/)[1];
+							var createOutgoingTabMethodName = source.match(/;[A-Za-z]+\.add\(this\.([A-Za-z_]+)\(\)\);this\.[A-Za-z_]+=new webfrontend\.gui\.widgets\.confirmationWidgets\.ProtectionConfirmationWidget/)[1];
 							source = webfrontend.gui.info.BaseInfoWindow.prototype[createOutgoingTabMethodName].toString();
-							var onCellClickMethodName = source.match(/([A-Za-z]+)\.set\(\{statusBarVisible:false,columnVisibilityButtonVisible:false\}\);\1\.addListener\([A-Za-z]+,this\.([A-Za-z_]+),this\.[A-Za-z_]+\);/)[2];
+							var onCellClickMethodName = source.match(/([A-Za-z]+)\.set\(\{statusBarVisible:(?:false|!1),columnVisibilityButtonVisible:(?:false|!1)\}\)[;,]\1\.addListener\([A-Za-z]+,this\.([A-Za-z_]+),this\.[A-Za-z_]+\)/)[2];
 							webfrontend.gui.info.BaseInfoWindow.prototype.onCellClick = webfrontend.gui.info.BaseInfoWindow.prototype[onCellClickMethodName];
 						}
 
@@ -135,13 +143,13 @@
 						{
 							// MOD 22.2 FIX
 							source = ClientLib.Data.Reports.Reports.prototype.AddReport.toString();
-							var initMethodName = source.match(/break;\}\}?[a-z]\.([A-Z]{6})\([a-z]\);if/)[1];
+							var initMethodName = source.match(/}[a-z]\.([A-Z]{6})\([a-z]\);/)[1];
 
 							source = ClientLib.Data.Reports.CombatReport.prototype[initMethodName].toString();
-							var setDataMethodName = source.match(/this\.([A-Z]{6})\([A-Za-z]+\);/)[1];
+							var setDataMethodName = source.match(/this\.([A-Z]{6})\([A-Za-z]+\);?/)[1];
 
 							source = ClientLib.Data.Reports.CombatReport.prototype[setDataMethodName].toString();
-							var matches = source.match(/this\.([A-Z]{6})=([a-z])\.abl;/);
+							var matches = source.match(/this\.([A-Z]{6})=([a-z])\.abl;?/);
 
 							if (matches !== null) {
 								var attackerBaseIdMemberName = matches[1];

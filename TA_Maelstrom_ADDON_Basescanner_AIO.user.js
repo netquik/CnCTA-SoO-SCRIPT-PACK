@@ -2,7 +2,7 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.2
+// @version     1.9.4
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
@@ -33,12 +33,13 @@ codes by NetquiK
 - Not add Allies or Own Bases
 - Fix for clear cache
 - Fix FOR CP Calculation on PLAYERS
+- Fix No Alliance or no Diplomacy
 ----------------
 */
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.2 AIO";
+        window.__msbs_version = "1.9.4 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -1066,7 +1067,9 @@ codes by NetquiK
                                     //console.log("ncity", ncity);
                                     if (ncity != null && ncity.get_Version() > 0) {
                                         // MOD remove if Ally
-                                        if (ncity.get_OwnerAllianceId() == 0 || (ncity.get_OwnerAllianceId() != playerbase.get_AllianceId()) && !Object.values(ClientLib.Data.MainData.GetInstance().get_Alliance().get_Relationships()).some(e => e.OtherAllianceId == ncity.get_OwnerAllianceId() && [1, 2].includes(e.Relationship))) {
+                                        // MOD FIX No Alliance or no Diplomacy
+                                        var relationships = ClientLib.Data.MainData.GetInstance().get_Alliance().get_Relationships();
+                                        if (!ncity.get_OwnerAllianceId() || !playerbase.get_AllianceId() || (ncity.get_OwnerAllianceId() != playerbase.get_AllianceId()) && (!relationships || !Object.values(relationships).some(e => e.OtherAllianceId == ncity.get_OwnerAllianceId() && [1, 2].includes(e.Relationship)))) {
                                             if (!ncity.get_IsGhostMode()) {
                                                 //if(ncity.get_Name() != null)
                                                 //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());

@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name           Tiberium Alliances Wavy
-// @version        0.5.7
+// @version        0.5.8
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
-// @contributor    NetquiK (https://github.com/netquik) (Distance FIX)
+// @contributor    NetquiK (https://github.com/netquik) Distance FIX | 22.3 FIX
 // @description    Displays details about forgotten attack wave zones.
-// @include        http*://*.alliances.commandandconquer.com/*/index.aspx*
+// @match          https://*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Wavy.user.js
 // ==/UserScript==
 'use strict';
@@ -110,11 +110,13 @@
 
 						if (typeof webfrontend.gui.region.RegionCityInfo.prototype.getObject !== 'function') {
 							source = webfrontend.gui.region.RegionCityInfo.prototype.setObject.toString();
-							source = source.replace("function(", "function (");
+							/* source = source.replace("function(", "function (");
 							var objectMemberName = PerforceChangelist >= 448942 && PerforceChangelist < 451851 ?
 								source.match(/^function \(([A-Za-z]+)\)\{.+([A-Za-z]+)=\1\.object;[\s\S]+this\.([A-Za-z_]+)=\2;/)[3] :
-								source.match(/^function \(([A-Za-z]+)(?:,[A-Za-z]+)?\)\{.+this\.([A-Za-z_]+)=\1;/)[2];
-
+								source.match(/^function \(([A-Za-z]+)(?:,[A-Za-z]+)?\)\{.+this\.([A-Za-z_]+)=\1;/)[2]; */
+							//MOD 2.3 (multiple)
+							var objectMemberName = source.match(/\|\|0[,;if(]+this\.([a-zA-Z_]+)/)[1];
+							
 							/**
 							 * @returns {ClientLib.Vis.Region.RegionObject}
 							 */
@@ -125,7 +127,7 @@
 
 						if (typeof ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype.get_BaseLevelFloat !== 'function') {
 							source = ClientLib.Vis.Region.RegionNPCBase.prototype.get_BaseLevelFloat.toString();
-							var npcBaseBaseLevelFloatMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6});/)[1];
+							var npcBaseBaseLevelFloatMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6})/)[1];
 
 							/**
 							 * @returns {Number}
@@ -137,7 +139,7 @@
 
 						if (typeof ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype.get_BaseLevel !== 'function') {
 							source = ClientLib.Vis.Region.RegionNPCBase.prototype.get_BaseLevel.toString();
-							var npcBaseBaseLevelMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6});/)[1];
+							var npcBaseBaseLevelMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6})/)[1];
 
 							/**
 							 * @returns {Number}
@@ -149,7 +151,7 @@
 
 						if (typeof ClientLib.Data.WorldSector.WorldObjectNPCCamp.prototype.get_BaseLevelFloat !== 'function') {
 							source = ClientLib.Vis.Region.RegionNPCCamp.prototype.get_BaseLevelFloat.toString();
-							var npcCampBaseLevelFloatMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6});/)[1];
+							var npcCampBaseLevelFloatMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6})/)[1];
 
 							/**
 							 * @returns {Number}
@@ -161,7 +163,7 @@
 
 						if (typeof ClientLib.Data.WorldSector.WorldObjectNPCCamp.prototype.get_CampType !== 'function') {
 							source = ClientLib.Vis.Region.RegionNPCCamp.prototype.get_CampType.toString();
-							var npcCampTypeMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6});/)[1];
+							var npcCampTypeMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6})/)[1];
 
 							/**
 							 * @returns {ClientLib.Data.WorldSector.WorldObjectNPCCamp.ECampType}
@@ -173,7 +175,7 @@
 
 						if (typeof ClientLib.Data.WorldSector.WorldObjectPointOfInterest.prototype.get_Level !== 'function') {
 							source = ClientLib.Vis.Region.RegionPointOfInterest.prototype.get_Level.toString();
-							var poiLevelMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6});/)[1];
+							var poiLevelMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6})/)[1];
 
 							/**
 							 * @returns {Number}
@@ -185,7 +187,7 @@
 
 						if (typeof ClientLib.Data.WorldSector.WorldObjectPointOfInterest.prototype.get_Type !== 'function') {
 							source = ClientLib.Vis.Region.RegionPointOfInterest.prototype.get_Type.toString();
-							var poiTypeMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6});/)[1];
+							var poiTypeMemberName = source.match(/return this\.[A-Z]{6}\.([A-Z]{6})/)[1];
 
 							/**
 							 * @returns {ClientLib.Data.WorldSector.WorldObjectPointOfInterest.EPOIType}

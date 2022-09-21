@@ -3,11 +3,11 @@
 // @namespace   CountBasesButton
 // @description Display the number of forgotten bases in range of selected world object and paste it to chat message
 // @description im not the author of the code - this script is based on Paste Coords Button and Shockr's BaseScanner sripts
-// @include     https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.1.3
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
+// @version     1.1.4
 // @info        https://greasyfork.org/scripts/3343-c-c-ta-count-forgotten-bases-in-range
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Count_Forgotten_Bases_Range.user.js
-// @author      DrunphO --- Updated by NetquiK   
+// @author      DrunphO --- Updated by NetquiK (new patchclient func|22.3)   
 // ==/UserScript==
 (function () {
     var CNCTACountBases_main = function () {
@@ -43,10 +43,10 @@
                                 if (typeof object.getCampType === 'function' && object.getCampType() === ClientLib.Data.Reports.ENPCCampType.Destroyed) {
                                     continue;
                                 }
-                                if (typeof object.getLevel !== 'function') {
+                                if (typeof object.get_BaseLevel !== 'function') {
                                     countButton._patchClientLib();
                                 }
-                                var level = object.getLevel();
+                                var level = object.get_BaseLevel();
                                 levelCount[level] = (levelCount[level] || 0) + 1;
                                 count++;
                             }
@@ -128,8 +128,8 @@
                     _g: function (k, r, q, m) {
                         var p = [];
                         var o = k.toString();
-                        var n = o.replace(/\s/gim, '');
-                        p = n.match(r);
+                        //var n = o.replace(/\s/gim, '');
+                        p = o.match(r);
                         var l;
                         for (l = 1; l < (m + 1); l++) {
                             if (p !== null && p[l].length === 6) {
@@ -145,12 +145,13 @@
                         }
                         return p;
                     },
+                    //MOD New patch function || 22.3
                     _patchClientLib: function () {
-                        var proto = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
-                        var re = /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/;
-                        var x = countButton._g(proto.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCBase', 2);
+                        var proto = ClientLib.Vis.Region['RegionNPCBase'].prototype;
+                        var re = /return this\.[A-Z]{6}\.([A-Z]{6})/;
+                        var x = countButton._g(proto.get_BaseLevel, re, 'WorldObjectNPCBase get_BaseLevel', 1);
                         if (x !== null && x[1].length === 6) {
-                            proto.getLevel = function () {
+                            ClientLib.Data.WorldSector['WorldObjectNPCBase'].prototype.get_BaseLevel = function () {
                                 return this[x[1]];
                             };
                         } else {
