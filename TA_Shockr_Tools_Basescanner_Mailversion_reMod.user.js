@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name            Shockr - Tiberium Alliances Tools - reMod 1.4
+// @name            Shockr Tools Basescanner Mailversion - reMod 1.4
 // @author          EHz
 // @description     Tools to work with Tiberium alliances - mod by EHz - remod by Netquik
 // @contributor     Netquik (https://github.com/netquik) reMod 1.4
 // @include         http*://*.alliances.commandandconquer.com/*/index.aspx*
-// @version         2.8
+// @version         2.9
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Shockr_Tools_Basescanner_Mailversion_reMod.user.js
 // ==/UserScript==
 
@@ -14,6 +14,7 @@ codes by NetquiK
 - New Layout Filtering reMod 1.4
 - FIX WorldSector RE by NetquiK + patch if not already by other scanners
 - NOEVIL
+- New WorldCity Wrappers
 ----------------
 */
 (function () {
@@ -48,26 +49,6 @@ codes by NetquiK
                     return window.setTimeout(waitFunc, 1000);
                 }
                 return callback();
-            },
-            _g: function (k, r, q, m) {
-                var p = [];
-                var o = k.toString();
-                var n = o.replace(/\s/gim, '');
-                p = n.match(r);
-                var l;
-                for (l = 1; l < (m + 1); l++) {
-                    if (p !== null && p[l].length === 6) {
-                        console.debug(q, l, p[l]);
-                    } else {
-                        if (p !== null && p[l].length > 0) {
-                            console.warn(q, l, p[l]);
-                        } else {
-                            console.error('Error - ', q, l, 'not found');
-                            console.warn(q, n);
-                        }
-                    }
-                }
-                return p;
             }
         };
         window.ST = ST;
@@ -161,10 +142,10 @@ codes by NetquiK
                             continue;
                         }
                         // Object isnt a NPC Base/Camp/Outpost
-                        if (object.Type !== ClientLib.Data.WorldSector.ObjectType.NPCBase && object.Type !== ClientLib.Data.WorldSector.ObjectType.NPCCamp) {
+                        if (![2, 3].includes(object.Type)) {
                             continue;
                         }
-                        if (typeof object.getCampType === 'function' && object.getCampType() === ClientLib.Data.Reports.ENPCCampType.Destroyed) {
+                        if (typeof object.get_CampType === 'function' && object.get_CampType() === ClientLib.Data.Reports.ENPCCampType.Destroyed) {
                             continue;
                         }
                         // Cached
@@ -177,7 +158,7 @@ codes by NetquiK
                         var scanBase = {
                             x: scanX,
                             y: scanY,
-                            level: object.getLevel(),
+                            level: object.get_BaseLevel(),
                             id: object.getID(),
                             distance: distance,
                             selectedBaseID: base.get_Id(),
@@ -598,97 +579,35 @@ codes by NetquiK
         };
 
         var PatchClientLib = {
-            _g: function (k, r, q, m) {
-                //console.log('DEBUG: ' + 'function _g');
-                var p = [];
-                var o = k.toString();
-                var n = o.replace(/\s/gim, '');
-                p = n.match(r);
-                var l;
-                for (l = 1; l < (m + 1); l++) {
-                    if (p !== null && p[l].length === 6) {
-                        console.debug(q, l, p[l]);
-                    } else {
-                        if (p !== null && p[l].length > 0) {
-                            console.warn(q, l, p[l]);
-                        } else {
-                            console.error('Error - ', q, l, 'not found');
-                            console.warn(q, n);
-                        }
-                    }
-                }
-                return p;
-            },
             patch: function () {
                 //console.log('DEBUG: ' + 'function patch');
                 if (BaseScanner._patched) {
                     return;
                 }
-                var t = ClientLib.Data.WorldSector.WorldObjectCity.prototype;
-                // MOD FIX WorldSector RE by NetquiK + patch if not already by other scanners
-                if (typeof t.getLevel != 'function' || typeof t.getID != 'function') {
-                    var re = /this\.(.{6})=\(?\(?\(?g>>8\)?\&.*d\+=f;this\.(.{6})=\(/;
-                    var y = PatchClientLib._g(t.$ctor, re, ClientLib.Data.WorldSector.WorldObjectCity, 2);
-                    if (y !== null && y[1].length === 6) {
-                        t.getLevel = function () {
-                            return this[y[1]];
-                        };
-                    } else {
-                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectCity.Level undefined');
-                    }
-                    if (y !== null && y[2].length === 6) {
-                        t.getID = function () {
-                            return this[y[2]];
-                        };
-                    } else {
-                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectCity.ID undefined');
-                    }
-                }
-                t = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
-                if (typeof t.getLevel != 'function' || typeof t.getID != 'function') {
-                    // MOD FIX RE by NetquiK
-                    re = /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/;
-                    var x = PatchClientLib._g(t.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCBase', 2);
-                    if (x !== null && x[1].length === 6) {
-                        t.getLevel = function () {
-                            return this[x[1]];
-                        };
-                    } else {
-                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined');
-                    }
-                    if (x !== null && x[2].length === 6) {
-                        t.getID = function () {
-                            return this[x[2]];
-                        };
-                    } else {
-                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.ID undefined');
-                    }
-                }
-                t = ClientLib.Data.WorldSector.WorldObjectNPCCamp.prototype;
-                if (typeof t.getLevel != 'function' || typeof t.getCampType != 'function' || typeof t.getID != 'function') {
-                    re = /100\){0,1};this\.(.{6})=Math.floor.*this\.(.{6})=\(*g\>\>(22|0x16)\)*\&.*=-1;\}this\.(.{6})=\(/;
-                    var w = PatchClientLib._g(t.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCCamp', 4);
-                    if (w !== null && w[1].length === 6) {
-                        t.getLevel = function () {
-                            return this[w[1]];
-                        };
-                    } else {
-                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.Level undefined');
-                    }
-                    if (w !== null && w[2].length === 6) {
-                        t.getCampType = function () {
-                            return this[w[2]];
-                        };
-                    } else {
-                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.CampType undefined');
-                    }
-                    if (w !== null && w[4].length === 6) {
-                        t.getID = function () {
-                            return this[w[4]];
-                        };
-                    } else {
-                        console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.ID undefined');
-                    }
+                // MOD FIX WorldSector WRAPPER by NetquiK + patch if not already by other scanners
+                try {
+                    var RE = /return this\.[A-Z]{6}\.([A-Z]{6})/;
+                    var objs = ['City', 'NPCBase', 'NPCCamp'];
+                    objs.forEach(obj => {
+                        var o = ClientLib.Data.WorldSector['WorldObject' + obj].prototype;
+                        var g = ClientLib.Vis.Region['Region' + obj].prototype;
+                        var b = (typeof o.get_BaseLevel != 'function') ? g.get_BaseLevel.toString().match(RE)[1] : null;
+                        var d = (typeof o.getID != 'function') ? g.get_Id.toString().match(RE)[1] : null;
+                        if (obj == 'NPCCamp') {
+                            var t = (typeof o.get_CampType != 'function') ? g.get_CampType.toString().match(RE)[1] : null;
+                        }
+                        if (b) o.get_BaseLevel = function () {
+                            return this[b];
+                        }, console.log('WorldObject' + obj + ' get_BaseLevel = ' + b);
+                        if (d) o.getID = function () {
+                            return this[d];
+                        }, console.log('WorldObject' + obj + ' getID = ' + d);
+                        if (t) o.get_CampType = function () {
+                            return this[t];
+                        }, console.log('WorldObject' + obj + ' get_CampType = ' + t);
+                    })
+                } catch (e) {
+                    console.debug("Shockr_Tools_Basescanner_Mailversion WRAPPERS error: ", e);
                 }
                 BaseScanner._patched = true;
             }
@@ -751,6 +670,7 @@ codes by NetquiK
         };
         ST.util.waitForLoad(function () {
             console.log('ST: Starting module [BaseScanner]');
+            PatchClientLib.patch();
             makeButton();
         });
     };
@@ -797,16 +717,13 @@ codes by NetquiK
                         }
 
                         // Object isnt a NPC Base/Camp/Outpost
-                        if (object.Type !== ClientLib.Data.WorldSector.ObjectType.NPCBase) {
+                        if (![2, 3].includes(object.Type))  {
                             continue;
                         }
-                        if (typeof object.getCampType === 'function' && object.getCampType() === ClientLib.Data.Reports.ENPCCampType.Destroyed) {
+                        if (typeof object.get_CampType === 'function' && object.get_CampType() === ClientLib.Data.Reports.ENPCCampType.Destroyed) {
                             continue;
                         }
-                        if (typeof object.getLevel !== 'function') {
-                            BaseCounter._patchClientLib();
-                        }
-                        var level = object.getLevel();
+                        var level = object.get_BaseLevel();
                         levelCount[level] = (levelCount[level] || 0) + 1;
                         count++;
                     }
@@ -904,18 +821,6 @@ codes by NetquiK
                                 console.log(selectedVisObject.get_VisObjectType());
                         }
                     };
-                }
-            },
-            _patchClientLib: function () {
-                var proto = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
-                var re = /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/;
-                var x = ST.util._g(proto.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCBase', 2);
-                if (x !== null && x[1].length === 6) {
-                    proto.getLevel = function () {
-                        return this[x[1]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined');
                 }
             }
         };
