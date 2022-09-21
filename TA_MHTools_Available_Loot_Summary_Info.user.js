@@ -7,7 +7,7 @@
 // @author        MrHIDEn based on Yaeger & Panavia code. Totaly recoded.
 // @contributor   leo7044 (https://github.com/leo7044)
 // @contributor   NetquiK (https://github.com/netquik) url res free version
-// @version       1.8.3.7
+// @version       1.8.3.8
 // @grant         none
 // ==/UserScript==
 
@@ -680,8 +680,8 @@
 
                                 d.ol = this.getData(d.oc);
                                 d.el = this.getData(d.ec); // Buildings Defence Offence
-                                if (typeof (d.ol) == 'undefined') return false;
-                                if (typeof (d.el) == 'undefined') return false;
+                                if (typeof (d.ol) == 'undefined' || Object.keys(d.ol).length === 0) return false;
+                                if (typeof (d.el) == 'undefined' || Object.keys(d.el).length === 0) return false;
 
                                 if (d.el.Buildings.c === 0) return false;
                                 if (d.ol.Buildings.c === 0) return false;
