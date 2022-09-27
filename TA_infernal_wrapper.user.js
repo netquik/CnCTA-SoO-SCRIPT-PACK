@@ -4,7 +4,7 @@
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.48
+// @version 1.49
 // @author NetquiK (original code from infernal_me, KRS_L, krisan) - (https://github.com/netquik) (see first comment for changelog)
 // ==/UserScript==
 
@@ -38,7 +38,7 @@ codes by NetquiK
                         this.waitForAssetPreload();
                         return
                     }
-                    webfrontend.Application.prototype.checkBrowserSupport();
+                    webfrontend.Application.prototype.checkWarningScreen();
                     var nags = qx.core.Init.getApplication().getRoot().getChildren();
                     for (b in nags) {
                         if (nags[b] instanceof webfrontend.gui.BadBrowserWindow && nags[b].isVisible()) {
