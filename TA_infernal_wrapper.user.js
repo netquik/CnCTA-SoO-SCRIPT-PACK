@@ -4,7 +4,7 @@
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.49
+// @version 1.50
 // @author NetquiK (original code from infernal_me, KRS_L, krisan) - (https://github.com/netquik) (see first comment for changelog)
 // ==/UserScript==
 
@@ -32,17 +32,18 @@ codes by NetquiK
             }
 
             function operafix() {
-                // MOD OPERA BROWSER SUPPORT
+                // MOD OPERA BROWSER SUPPORT + FIX
                 if (qx.core.Environment.get('browser.name') == 'opera' && parseFloat(qx.core.Environment.get("browser.version")) > 15) {
-                    webfrontend.Application.prototype.checkBrowserSupport = function () {
+                    qx.core.Environment.__d['browser.name'] = "chrome";
+                    /* webfrontend.Application.prototype.checkBrowserSupport = function () {
                         this.waitForAssetPreload();
                         return
-                    }
-                    webfrontend.Application.prototype.checkWarningScreen();
+                    } */
                     var nags = qx.core.Init.getApplication().getRoot().getChildren();
                     for (b in nags) {
                         if (nags[b] instanceof webfrontend.gui.BadBrowserWindow && nags[b].isVisible()) {
                             nags[b].close();
+                            qx.core.Init.getApplication().checkWarningScreen();
                             break;
                         }
                     }
@@ -67,7 +68,7 @@ codes by NetquiK
                 // MOD FIX GLOBAL PHE for 22.3 PATCH
                 if (parseFloat(GameVersion) >= 22.3 && typeof webfrontend.phe != 'undefined') window.phe = webfrontend.phe, console.log("FIX: PHE GLOBALIZED for Game Version " + GameVersion);
                 else if (typeof phe != 'undefined') console.log("FIX: PHE ALREADY GLOBAL for Game Version " + GameVersion);
-                else  console.log("FIX FAIL: EXPECT ERRORS -> PHE NOT DEFINED");
+                else console.log("FIX FAIL: EXPECT ERRORS -> PHE NOT DEFINED");
             }
 
             function createCCTAWrapper() {
