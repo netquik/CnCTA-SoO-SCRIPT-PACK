@@ -1,12 +1,12 @@
 ﻿// ==UserScript==
 // @name        leoStats
-// @version     2022.03.13
+// @version     2022.09.24
 // @author      leo7044 (https://github.com/leo7044)
 // @homepage    https://cnc.indyserver.info/
 // @downloadURL https://cnc.indyserver.info/js/leostats.user.js
 // @updateURL   https://cnc.indyserver.info/js/leostats.user.js
 // @description leoStats und BaseScanner vereint
-// @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @require		https://code.jquery.com/jquery-3.3.1.min.js
 // @icon        https://cnc.indyserver.info/img/icon_32.png
 // @grant       none
@@ -27,8 +27,12 @@
         {
             function setButtons()
             {
+                if(typeof(phe) == 'undefined')
+                {
+                    phe = webfrontend.phe;
+                }2
                 var linkToRoot = "https://cnc.indyserver.info/";
-                var scriptVersionLocal = '2022.03.13';
+                var scriptVersionLocal = '2022.09.24';
                 qx.Class.define('leoStats',
                 {
                     type: 'singleton',
