@@ -6,7 +6,7 @@
 // @match           https://*.alliances.commandandconquer.com/*/index.aspx*
 // @grant           GM_updatingEnabled
 // @grant           unsafeWindow
-// @version         4.5.1
+// @version         4.5.2
 // @icon            https://shockr.dev/favicon.0012b310.png
 // @versionHash     77260e3
 // ==/UserScript==
@@ -3442,7 +3442,7 @@ function startSt() {
                         await ((_a = this.onStop) === null || _a === void 0 ? void 0 : _a.call(this));
                         // Destroy events
                         for (const event of this.events) {
-                            phe.cnc.Util.detachNetEvent(event.source, event.name, event.type, this, event.cb);
+                            webfrontend.phe.cnc.Util.detachNetEvent(event.source, event.name, event.type, this, event.cb);
                         }
                         // Destroy timers
                         for (const timer of this.timers) {
@@ -3491,7 +3491,7 @@ function startSt() {
                             type,
                             cb
                         });
-                        phe.cnc.Util.attachNetEvent(source, name, type, this, cb);
+                        webfrontend.phe.cnc.Util.attachNetEvent(source, name, type, this, cb);
                     }
                     get isStopping() {
                         return this.state == StPluginState.Stopped || this.state == StPluginState.Stopping;
