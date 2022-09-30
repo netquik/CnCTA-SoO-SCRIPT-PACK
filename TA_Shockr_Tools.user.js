@@ -6,7 +6,7 @@
 // @match           https://*.alliances.commandandconquer.com/*/index.aspx*
 // @grant           GM_updatingEnabled
 // @grant           unsafeWindow
-// @version         4.5.2
+// @version         4.5.3
 // @icon            https://shockr.dev/favicon.0012b310.png
 // @versionHash     77260e3
 // ==/UserScript==
@@ -316,8 +316,8 @@ function startSt() {
                 // MOD Regex Fix try by NetquiK
                 const client_patcher_1 = __webpack_require__(879);
                 exports.PatchCityUnits = new client_patcher_1.ClientLibPatch('ClientLib.Data.CityUnits');
-                exports.PatchCityUnits.addGetter('$OffenseUnits', 'HasUnitMdbId', /\([a-z] in ?\{[a-z]:this\.([A-Z]{6})/);
-                exports.PatchCityUnits.addGetter('$DefenseUnits', 'HasUnitMdbId', /\([a-z] in ?\{[a-z]:this\.[A-Z]{6}.*\([a-z] in ?\{[a-z]:this\.([A-Z]{6}))/);
+                exports.PatchCityUnits.addGetter('$OffenseUnits', 'HasUnitMdbId', /for ?\(.+[a-z]:this.([A-Z]{6}).+[a-z]:this.([A-Z]{6})/, 1);
+                exports.PatchCityUnits.addGetter('$DefenseUnits', 'HasUnitMdbId', /for ?\(.+[a-z]:this.([A-Z]{6}).+[a-z]:this.([A-Z]{6})/, 2);
                 exports.PatchWorldObjectNPCCamp = new client_patcher_1.ClientLibPatch('ClientLib.Data.WorldSector.WorldObjectNPCCamp');
                 exports.PatchWorldObjectNPCCamp.addGetter('$CampType', '$ctor', /this\.([A-Z]{6})=\(*[a-z]\>\>(22|0x16)\)?/);
                 exports.PatchWorldObjectNPCCamp.addGetter('$Id', '$ctor', /\&.*=-1[,;]\}?this\.([A-Z]{6})=\(/);
@@ -4557,6 +4557,7 @@ function startSt() {
                         const headers = {
                             ...configHeaders,
                             'content-type': 'application/json'
+                          
                         };
                         const res = await V2SdkConfig.fetch(targetUrl, {
                             method: 'post',
@@ -4763,7 +4764,8 @@ function startSt() {
                      * @param sourceFunctionName name of function to use as the source information
                      * @param re text to find inside of source function to find the correct 'KJNGHF'
                      */
-                    addGetter(key, sourceFunctionName, re) {
+                    addGetter(key, sourceFunctionName, re, m) {
+                        var mn = m ? m : 1;
                         const getter = new patch_getter_1.ClientLibPatchGetter(key, () => {
                             const currentData = this.baseObject.prototype[sourceFunctionName];
                             if (currentData == null) {
@@ -4773,7 +4775,8 @@ function startSt() {
                             if (!matches) {
                                 throw new Error('Failed to load patch, no matches');
                             }
-                            return matches[1];
+                            //console.log(key, currentData.toString(), re, matches[mn]);
+                            return matches[mn];
                         });
                         this.patches.push(getter);
                         return getter;
@@ -5116,13 +5119,13 @@ function startSt() {
                         const md = ClientLib.Data.MainData.GetInstance();
                         const worldId = md.get_Server().get_WorldId();
                         const player = md.get_Player().name;
-                        api_1.V2Sdk.call('install.track', {
+                        /* api_1.V2Sdk.call('install.track', {
                             installId,
                             worldId,
                             player,
                             version: config_1.Config.version,
                             hash: config_1.Config.hash
-                        });
+                        }); */
                     }
                     async onStop() {
                         await this.baseSender.flush();
