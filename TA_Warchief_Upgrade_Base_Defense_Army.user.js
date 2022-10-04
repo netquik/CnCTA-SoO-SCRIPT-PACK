@@ -2,7 +2,7 @@
 // @name            WarChiefs - Tiberium Alliances Upgrade Base/Defense/Army
 // @description     Upgrade your Base,Defense Army to a specific Level.
 // @author          Eistee
-// @version         22.10.05
+// @version         22.10.06
 // @contributor    NetquiK (https://github.com/netquik)
 // @translator     ES: Nefrontheone
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -342,7 +342,7 @@ codes by NetquiK
 							if (Pow === 0) this.resPower.exclude();
 							else this.resPower.show();
 
-							TibTime === 0 && CryTime === 0 && PowTime === 0 ? this.btnLevel.setEnabled(true) : this.btnLevel.setEnabled(false);
+							
 
 						} else {
 							this.resTiberium.setLabel("-");
