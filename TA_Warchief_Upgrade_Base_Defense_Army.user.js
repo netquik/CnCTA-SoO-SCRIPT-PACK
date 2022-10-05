@@ -2,7 +2,7 @@
 // @name            WarChiefs - Tiberium Alliances Upgrade Base/Defense/Army
 // @description     Upgrade your Base,Defense Army to a specific Level.
 // @author          Eistee
-// @version         22.10.06
+// @version         22.10.07
 // @contributor    NetquiK (https://github.com/netquik)
 // @translator     ES: Nefrontheone
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -22,6 +22,7 @@ codes by NetquiK
 ----------------
 - Recoded all for NOEVIL
 - Fix for no resource grow Infinity
+- Fix MaxLevelCap
 ----------------
 */
 (function () {
@@ -290,7 +291,7 @@ codes by NetquiK
 						var LowLevel = this.getLowLevel();
 						if (LowLevel > 0) {
 							this.txtLevel.setMinimum(LowLevel);
-							this.txtLevel.setMaximum(LowLevel + 50);
+							this.txtLevel.setMaximum(this.MaxLevel);
 							this.txtLevel.setValue(LowLevel);
 							this.txtLevel.setEnabled(true);
 							this.btnLevel.setEnabled(true);
@@ -455,6 +456,7 @@ codes by NetquiK
 					resChrystal: null,
 					resPower: null,
 					Selection: null,
+					MaxLevel: ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap(),
 					onAppear: function () {
 						phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this.onViewModeChanged);
 						phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "SelectionChange", ClientLib.Vis.SelectionChange, this, this.onSelectionChange);
@@ -498,7 +500,7 @@ codes by NetquiK
 									level = newSelection.get_BuildingLevel();
 									this.txtSelected.setValue(name + " (" + level + ")");
 									this.txtLevel.setMinimum(level + 1);
-									this.txtLevel.setMaximum(level + 51);
+									this.txtLevel.setMaximum(this.MaxLevel);
 									this.txtLevel.setValue(level + 1);
 									this.txtLevel.setEnabled(true);
 									this.btnLevel.setEnabled(true);
@@ -511,7 +513,7 @@ codes by NetquiK
 									level = newSelection.get_UnitLevel();
 									this.txtSelected.setValue(name + " (" + level + ")");
 									this.txtLevel.setMinimum(level + 1);
-									this.txtLevel.setMaximum(level + 51);
+									this.txtLevel.setMaximum(this.MaxLevel);
 									this.txtLevel.setValue(level + 1);
 									this.txtLevel.setEnabled(true);
 									this.btnLevel.setEnabled(true);
