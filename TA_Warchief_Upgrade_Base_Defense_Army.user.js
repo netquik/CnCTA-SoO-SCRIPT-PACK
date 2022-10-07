@@ -2,7 +2,7 @@
 // @name            WarChiefs - Tiberium Alliances Upgrade Base/Defense/Army
 // @description     Upgrade your Base,Defense Army to a specific Level.
 // @author          Eistee
-// @version         22.10.07
+// @version         22.10.08
 // @contributor    NetquiK (https://github.com/netquik)
 // @translator     ES: Nefrontheone
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -151,7 +151,7 @@ codes by NetquiK
 							alignY: "middle"
 						}));
 						level.add(this.txtLevel = new qx.ui.form.Spinner(1).set({
-							maximum: 150,
+							maximum: ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap(),
 							minimum: 1
 						}));
 						this.txtLevel.addListener("changeValue", this.onInput, this);
@@ -291,7 +291,7 @@ codes by NetquiK
 						var LowLevel = this.getLowLevel();
 						if (LowLevel > 0) {
 							this.txtLevel.setMinimum(LowLevel);
-							this.txtLevel.setMaximum(this.MaxLevel);
+							this.txtLevel.setMaximum(ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap());
 							this.txtLevel.setValue(LowLevel);
 							this.txtLevel.setEnabled(true);
 							this.btnLevel.setEnabled(true);
@@ -343,7 +343,7 @@ codes by NetquiK
 							if (Pow === 0) this.resPower.exclude();
 							else this.resPower.show();
 
-							
+
 
 						} else {
 							this.resTiberium.setLabel("-");
@@ -401,7 +401,7 @@ codes by NetquiK
 							alignY: "middle"
 						}));
 						level.add(this.txtLevel = new qx.ui.form.Spinner(1).set({
-							maximum: 150,
+							maximum: ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap(),
 							minimum: 1
 						}));
 						this.txtLevel.addListener("changeValue", this.onInput, this);
@@ -456,7 +456,6 @@ codes by NetquiK
 					resChrystal: null,
 					resPower: null,
 					Selection: null,
-					MaxLevel: ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap(),
 					onAppear: function () {
 						phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this.onViewModeChanged);
 						phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "SelectionChange", ClientLib.Vis.SelectionChange, this, this.onSelectionChange);
@@ -493,6 +492,7 @@ codes by NetquiK
 					onSelectionChange: function (oldSelection, newSelection) {
 						if (newSelection !== null) {
 							var name, level;
+							this.txtLevel.setMaximum(ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap());
 							switch (newSelection.get_VisObjectType()) {
 								case ClientLib.Vis.VisObject.EObjectType.CityBuildingType:
 									this.Selection = newSelection;
@@ -500,7 +500,6 @@ codes by NetquiK
 									level = newSelection.get_BuildingLevel();
 									this.txtSelected.setValue(name + " (" + level + ")");
 									this.txtLevel.setMinimum(level + 1);
-									this.txtLevel.setMaximum(this.MaxLevel);
 									this.txtLevel.setValue(level + 1);
 									this.txtLevel.setEnabled(true);
 									this.btnLevel.setEnabled(true);
@@ -513,7 +512,6 @@ codes by NetquiK
 									level = newSelection.get_UnitLevel();
 									this.txtSelected.setValue(name + " (" + level + ")");
 									this.txtLevel.setMinimum(level + 1);
-									this.txtLevel.setMaximum(this.MaxLevel);
 									this.txtLevel.setValue(level + 1);
 									this.txtLevel.setEnabled(true);
 									this.btnLevel.setEnabled(true);
