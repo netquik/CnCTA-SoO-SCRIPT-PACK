@@ -4,7 +4,7 @@
 // @include         http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include			http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @description		Autoupgrade deiner Basen, script based on FlunikTools - ServerPatch-FIX 2017
-// @version			1.2.5b
+// @version			1.2.7
 // @authors			many others and Chillchef
 // @grant			none
 // @icon			http://eaassets-a.akamaihd.net/cncalliancesweb/static/2.1/theme/cca-home-redux-theme/images/global/logo.png
@@ -21,6 +21,7 @@ codes by NetquiK
 - FIX POPUPS MODE
 - FIX BASENAMES
 - WORLDMAXLEVEL FIX
+- NOEVIL
 ----------------
 */
 
@@ -116,7 +117,7 @@ codes by NetquiK
                                 'Only upgrade buildings': ['', 'nur Gebaude upgraden', '', '', '', '', '', '', '', ''],
                                 'Only upgrade defense': ['', 'nur Verteidigung upgraden', '', '', '', '', '', '', '', ''],
                                 'Only upgrade offense': ['', 'nur Offensive upgraden', '', '', '', '', '', '', '', ''],
-                                'New = collector-heavy, Oold = power plant-heavy': ['', 'Neu = Sammler-lastig, Alt = Kraftwerks-lastig', '', '', '', '', '', '', '', '']
+                                'New = collector-hungry, Oold = power plant-hungry': ['', 'Neu = Sammler-lastig, Alt = Kraftwerks-lastig', '', '', '', '', '', '', '', '']
                             };
                             lang = function (text) {
                                 try {
@@ -2768,7 +2769,7 @@ codes by NetquiK
 
                                     }
                                 } catch (e) {
-                                    console.log("1.: Fehler in \"The Building Function(Flunik-Script)\" ('for (var nBuildings in buildings.d){...}')  " + _this.Zeitstempel());
+                                    console.log("1.: Fehler in \"The Building Fun(Flunik-Script)\" ('for (var nBuildings in buildings.d){...}')  " + _this.Zeitstempel());
                                     console.log("2.: Fehler: " + e.toString());
                                     _this.FehlerWindow.setLayout(new qx.ui.layout.VBox());
                                     _this.FehlerWindow.setWidth(500);
@@ -2984,7 +2985,7 @@ codes by NetquiK
                      var startPos = strFunction.indexOf(searchString) + searchString.length;
                      var fn_name = strFunction.slice(startPos, startPos + 6);
                      strFunction = "var $createHelper;return this." + fn_name + ";";
-                     var fn = Function('', strFunction);
+                     var fn = Evil('', strFunction);
                      ClientLib.Data.CityUnits.prototype.get_OffenseUnits = fn;
                      console.log("ClientLib.Data.CityUnits.prototype.get_OffenseUnits = function(){var $createHelper;return this." + fn_name + ";}");
 
@@ -2994,7 +2995,7 @@ codes by NetquiK
                      startPos = strFunction.indexOf(searchString) + searchString.length;
                      fn_name = strFunction.slice(startPos, startPos + 6);
                      strFunction = "var $createHelper;return this." + fn_name + ";";
-                     fn = Function('', strFunction);
+                     fn = Evil('', strFunction);
                      ClientLib.Data.CityUnits.prototype.get_DefenseUnits = fn;
                      console.log("ClientLib.Data.CityUnits.prototype.get_DefenseUnits = function(){var $createHelper;return this." + fn_name + ";}"); */
 
@@ -3015,7 +3016,7 @@ codes by NetquiK
 
     try {
         var FlunikScript = document.createElement("script");
-        FlunikScript.innerHTML = "(" + FlunikTools_main.toString() + ")();";
+        FlunikScript.textContent = "(" + FlunikTools_main.toString() + ")();";
         FlunikScript.type = "text/javascript";
         if (/commandandconquer\.com/i.test(document.domain)) {
             document.getElementsByTagName("head")[0].appendChild(FlunikScript);
