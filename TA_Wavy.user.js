@@ -1,14 +1,24 @@
 // ==UserScript==
 // @name           Tiberium Alliances Wavy
-// @version        0.5.8
+// @version        0.5.9
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
-// @contributor    NetquiK (https://github.com/netquik) Distance FIX | 22.3 FIX
+// @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @description    Displays details about forgotten attack wave zones.
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Wavy.user.js
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- Distance FIX
+- 22.3 Fix
+- Distance + Waves MOD
+----------------
+*/
+
 'use strict';
 
 (function () {
@@ -116,7 +126,7 @@
 								source.match(/^function \(([A-Za-z]+)(?:,[A-Za-z]+)?\)\{.+this\.([A-Za-z_]+)=\1;/)[2]; */
 							//MOD 2.3 (multiple)
 							var objectMemberName = source.match(/\|\|0[,;if(]+this\.([a-zA-Z_]+)/)[1];
-							
+
 							/**
 							 * @returns {ClientLib.Vis.Region.RegionObject}
 							 */
@@ -204,15 +214,15 @@
 					onRegionObjectStatusInfoAppear: function (event) {
 						var regionObjectStatusInfo = event.getTarget();
 						var visObject = regionObjectStatusInfo.getLayoutParent().getObject();
-						var worldObjectNPCBases = this.getWorldObjectsWithinRange(
-							visObject.get_RawX(),
+						var worldObject = this.getWorldObjectsWithinRange(visObject.get_RawX(),
 							visObject.get_RawY(),
 							Wavy.ForgottenAttackDistance,
 							[ClientLib.Data.WorldSector.ObjectType.NPCBase]
-						)[ClientLib.Data.WorldSector.ObjectType.NPCBase];
+						);
+						var worldObjectNPCBases = worldObject[ClientLib.Data.WorldSector.ObjectType.NPCBase];
 						var npcBaseLevels = this.getNPCBaseLevels(worldObjectNPCBases);
 
-						this.regionCityInfoCountLabel.setBaseCount(worldObjectNPCBases.length);
+						this.regionCityInfoCountLabel.setBaseCount(worldObjectNPCBases.length, worldObject.countw);
 
 						if (Object.keys(npcBaseLevels).length > 0) {
 							this.regionCityInfoLevelLabel.setValue(
@@ -237,19 +247,21 @@
 						var coords = ClientLib.Base.MathUtil.EncodeCoordId(x, y);
 
 						if (!(coords in this.regionCityMoveInfoCache)) {
-							var worldObjectNPCBases = this.getWorldObjectsWithinRange(x, y,
+							var worldObject = this.getWorldObjectsWithinRange(x, y,
 								Wavy.ForgottenAttackDistance,
 								[ClientLib.Data.WorldSector.ObjectType.NPCBase]
-							)[ClientLib.Data.WorldSector.ObjectType.NPCBase];
+							);
+							var worldObjectNPCBases = worldObject[ClientLib.Data.WorldSector.ObjectType.NPCBase];
 
 							this.regionCityMoveInfoCache[coords] = {
 								count: worldObjectNPCBases.length,
-								levels: this.getNPCBaseLevels(worldObjectNPCBases)
+								levels: this.getNPCBaseLevels(worldObjectNPCBases),
+								countw: worldObject['countw']
 							};
 						}
 
 						var cached = this.regionCityMoveInfoCache[coords];
-						this.regionCityMoveInfoCountLabel.setBaseCount(cached.count);
+						this.regionCityMoveInfoCountLabel.setBaseCount(cached.count, cached.countw);
 
 						if (Object.keys(cached.levels).length > 0) {
 							this.regionCityMoveInfoLevelLabel.setValue(
@@ -281,13 +293,16 @@
 					 */
 					getWorldObjectsWithinRange: function (x, y, maxDistance, worldObjectTypes) {
 						var world = ClientLib.Data.MainData.GetInstance().get_World();
-						var maxDistanceSquared = maxDistance * maxDistance;
+						//var maxDistanceSquared = maxDistance * maxDistance;
 						var maxDistanceFloored = Math.floor(maxDistance);
+						var maxDistanceCeiled = Math.ceil(maxDistance);
+						//var maxDistanceSquaredFG = maxDistanceFloored * maxDistanceFloored;
 
-						var minX = x - maxDistanceFloored;
-						var maxX = x + maxDistanceFloored;
-						var minY = y - maxDistanceFloored;
-						var maxY = y + maxDistanceFloored;
+						var minX = x - maxDistanceCeiled;
+						var maxX = x + maxDistanceCeiled;
+						var minY = y - maxDistanceCeiled;
+						var maxY = y + maxDistanceCeiled;
+						var countw = 0;
 						var objects = {};
 
 						for (var i = 0; i < worldObjectTypes.length; i++) {
@@ -296,9 +311,11 @@
 
 						for (var scanX = minX; scanX <= maxX; scanX++) {
 							for (var scanY = minY; scanY <= maxY; scanY++) {
-								var distanceSquared = (x - scanX) * (x - scanX) + (y - scanY) * (y - scanY);
+								var distX = Math.abs(x - scanX);
+								var distY = Math.abs(y - scanY);
+								var distanceSquared = Math.sqrt(distX * distX + distY * distY);
 
-								if (distanceSquared > maxDistanceSquared) {
+								if (distanceSquared >= maxDistance) {
 									continue;
 								}
 
@@ -306,10 +323,14 @@
 
 								if (worldObject !== null && worldObjectTypes.indexOf(worldObject.Type) !== -1) {
 									objects[worldObject.Type].push(worldObject);
+									if (distanceSquared <= maxDistanceFloored) {
+										countw++;
+									}
 								}
 							}
 						}
 
+						objects['countw'] = countw;
 						return objects;
 					},
 
@@ -392,9 +413,9 @@
 					/**
 					 * @param {Number} baseCount
 					 */
-					setBaseCount: function (baseCount) {
-						var waveCount = this.getNumberOfWaves(baseCount);
-						this.baseCountLabel.setValue(baseCount.toString());
+					setBaseCount: function (baseCount, wCount) {
+						var waveCount = this.getNumberOfWaves(wCount);
+						this.baseCountLabel.setValue(baseCount.toString() + ' (' + wCount.toString() + ')');
 						this.waveCountLabel.setValue(waveCount.toString() +
 							' wave' + (waveCount === 1 ? '' : 's')
 						);
