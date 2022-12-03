@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.7 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.5.2
+// @version     0.1.5.3
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option (see first comments for changelog)
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -49,6 +49,7 @@ codes by NetquiK
 - Fix+ for maxlevelworld upgrade in priority list
 - Fix selection under AllianceMarker for UpdateLoot
 - Fix for ChatWidgetButton
+- Fix for RepairTime with Many Bases
 ----------------
 */
 
@@ -563,7 +564,7 @@ codes by NetquiK
                                     if (MT_Preferences.Settings.ChatClose && qx.core.Init.getApplication().getChat().isVisible()) {
                                         qx.core.Init.getApplication().toggleChat(!1);
                                         qx.core.Init.getApplication().triggerDesktopResize();
-                                    } else if (qx.core.Init.getApplication().getChat().isHidden()){
+                                    } else if (qx.core.Init.getApplication().getChat().isHidden()) {
                                         setTimeout(function () {
                                             qx.core.Init.getApplication().toggleChat(!0);
                                         }, 1000);
@@ -1287,9 +1288,23 @@ codes by NetquiK
                                     });
                                     this.Window.setPadding(10);
                                     this.Window.setLayout(new qx.ui.layout.VBox(3));
+
                                     this.Widget = new qx.ui.container.Composite(new qx.ui.layout.Grid());
                                     this.Widget.setTextColor("white");
-                                    this.Window.add(this.Widget);
+                                    if (WindowName == 'RepairTime') {
+                                        var slideBar = new qx.ui.container.Scroll().set({
+                                            width: 730,
+                                            height: null,
+                                            maxHeight: qx.core.Init.getApplication().getMainOverlay().getHeight(),
+                                            scrollbarX: false,
+                                            allowShrinkX: false,
+                                        });
+                                        slideBar.add(this.Widget);
+                                        this.Window.add(slideBar);
+                                    } else {
+
+                                        this.Window.add(this.Widget);
+                                    }
                                 }
                                 if (this.Window.isVisible()) {
                                     this.Window.close();
