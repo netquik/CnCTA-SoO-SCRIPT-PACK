@@ -2,7 +2,7 @@
 // @name            WarChiefs - Tiberium Alliances Upgrade Base/Defense/Army
 // @description     Upgrade your Base,Defense Army to a specific Level.
 // @author          Eistee
-// @version         22.05.18
+// @version         22.10.08
 // @contributor    NetquiK (https://github.com/netquik)
 // @translator     ES: Nefrontheone
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -16,6 +16,15 @@
  *  thx to TheStriker for his API knowledge.
  *
  */
+
+/* 
+codes by NetquiK
+----------------
+- Recoded all for NOEVIL
+- Fix for no resource grow Infinity
+- Fix MaxLevelCap
+----------------
+*/
 (function () {
 	var injectFunction = function () {
 		function createClasses() {
@@ -142,7 +151,7 @@
 							alignY: "middle"
 						}));
 						level.add(this.txtLevel = new qx.ui.form.Spinner(1).set({
-							maximum: 150,
+							maximum: ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap(),
 							minimum: 1
 						}));
 						this.txtLevel.addListener("changeValue", this.onInput, this);
@@ -239,6 +248,7 @@
 						var Con = CurrentOwnCity.GetResourceGrowPerHour(type);
 						var Bonus = CurrentOwnCity.get_hasCooldown() ? 0 : CurrentOwnCity.GetResourceBonusGrowPerHour(type);
 						var POI = CurrentOwnCity.get_IsGhostMode() ? 0 : Alliance.GetPOIBonusFromResourceType(type);
+						// MOD Fix for no resource grow Infinity 1
 						return (need <= 0 ? 0 : need / (Con + Bonus + POI) * 3600);
 					},
 					getUpgradeCostsToLevel: function (newLevel) {
@@ -281,7 +291,7 @@
 						var LowLevel = this.getLowLevel();
 						if (LowLevel > 0) {
 							this.txtLevel.setMinimum(LowLevel);
-							this.txtLevel.setMaximum(LowLevel + 50);
+							this.txtLevel.setMaximum(ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap());
 							this.txtLevel.setValue(LowLevel);
 							this.txtLevel.setEnabled(true);
 							this.btnLevel.setEnabled(true);
@@ -318,18 +328,23 @@
 										break;
 								}
 							}
-							this.resTiberium.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Tib) + (TibTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(TibTime) : ""));
+							this.resTiberium.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Tib) + (isFinite(TibTime) && TibTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(TibTime) : isFinite(TibTime) ? "" : " NO GROW!"));
 							this.resTiberium.setToolTipText(phe.cnc.gui.util.Numbers.formatNumbers(Tib));
 							if (Tib === 0) this.resTiberium.exclude();
 							else this.resTiberium.show();
-							this.resChrystal.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Cry) + (CryTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(CryTime) : ""));
+
+							this.resChrystal.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Cry) + (isFinite(CryTime) && CryTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(CryTime) : isFinite(CryTime) ? "" : " NO GROW!"));
 							this.resChrystal.setToolTipText(phe.cnc.gui.util.Numbers.formatNumbers(Cry));
 							if (Cry === 0) this.resChrystal.exclude();
 							else this.resChrystal.show();
-							this.resPower.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Pow) + (PowTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(PowTime) : ""));
+
+							this.resPower.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Pow) + (isFinite(PowTime) && PowTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(PowTime) : isFinite(PowTime) ? "" : " NO GROW!"));
 							this.resPower.setToolTipText(phe.cnc.gui.util.Numbers.formatNumbers(Pow));
 							if (Pow === 0) this.resPower.exclude();
 							else this.resPower.show();
+
+
+
 						} else {
 							this.resTiberium.setLabel("-");
 							this.resTiberium.resetToolTipText();
@@ -386,7 +401,7 @@
 							alignY: "middle"
 						}));
 						level.add(this.txtLevel = new qx.ui.form.Spinner(1).set({
-							maximum: 150,
+							maximum: ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap(),
 							minimum: 1
 						}));
 						this.txtLevel.addListener("changeValue", this.onInput, this);
@@ -477,6 +492,7 @@
 					onSelectionChange: function (oldSelection, newSelection) {
 						if (newSelection !== null) {
 							var name, level;
+							this.txtLevel.setMaximum(ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap());
 							switch (newSelection.get_VisObjectType()) {
 								case ClientLib.Vis.VisObject.EObjectType.CityBuildingType:
 									this.Selection = newSelection;
@@ -484,7 +500,6 @@
 									level = newSelection.get_BuildingLevel();
 									this.txtSelected.setValue(name + " (" + level + ")");
 									this.txtLevel.setMinimum(level + 1);
-									this.txtLevel.setMaximum(level + 51);
 									this.txtLevel.setValue(level + 1);
 									this.txtLevel.setEnabled(true);
 									this.btnLevel.setEnabled(true);
@@ -497,7 +512,6 @@
 									level = newSelection.get_UnitLevel();
 									this.txtSelected.setValue(name + " (" + level + ")");
 									this.txtLevel.setMinimum(level + 1);
-									this.txtLevel.setMaximum(level + 51);
 									this.txtLevel.setValue(level + 1);
 									this.txtLevel.setEnabled(true);
 									this.btnLevel.setEnabled(true);
@@ -574,18 +588,21 @@
 										break;
 								}
 							}
-							this.resTiberium.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Tib) + (TibTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(TibTime) : ""));
+							this.resTiberium.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Tib) + (isFinite(TibTime) && TibTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(TibTime) : isFinite(TibTime) ? "" : " NO GROW!"));
 							this.resTiberium.setToolTipText(phe.cnc.gui.util.Numbers.formatNumbers(Tib));
 							if (Tib === 0) this.resTiberium.exclude();
 							else this.resTiberium.show();
-							this.resChrystal.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Cry) + (CryTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(CryTime) : ""));
+
+							this.resChrystal.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Cry) + (isFinite(CryTime) && CryTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(CryTime) : isFinite(CryTime) ? "" : " NO GROW!"));
 							this.resChrystal.setToolTipText(phe.cnc.gui.util.Numbers.formatNumbers(Cry));
 							if (Cry === 0) this.resChrystal.exclude();
 							else this.resChrystal.show();
-							this.resPower.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Pow) + (PowTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(PowTime) : ""));
+
+							this.resPower.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(Pow) + (isFinite(PowTime) && PowTime > 0 ? " @ " + phe.cnc.Util.getTimespanString(PowTime) : isFinite(PowTime) ? "" : " NO GROW!"));
 							this.resPower.setToolTipText(phe.cnc.gui.util.Numbers.formatNumbers(Pow));
 							if (Pow === 0) this.resPower.exclude();
 							else this.resPower.show();
+							TibTime === 0 && CryTime === 0 && PowTime === 0 ? this.btnLevel.setEnabled(true) : this.btnLevel.setEnabled(false);
 						} else {
 							this.resTiberium.setLabel("-");
 							this.resTiberium.resetToolTipText();
