@@ -4,7 +4,7 @@
 // @include         http*://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include			http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @description		Autoupgrade deiner Basen, script based on FlunikTools - ServerPatch-FIX 2017
-// @version			1.2.6
+// @version			1.2.7
 // @authors			many others and Chillchef
 // @grant			none
 // @icon			http://eaassets-a.akamaihd.net/cncalliancesweb/static/2.1/theme/cca-home-redux-theme/images/global/logo.png
@@ -22,6 +22,7 @@ codes by NetquiK
 - FIX BASENAMES
 - WORLDMAXLEVEL FIX
 - NOEVIL
+- LOCALE FIX
 ----------------
 */
 
@@ -117,7 +118,7 @@ codes by NetquiK
                                 'Only upgrade buildings': ['', 'nur Gebaude upgraden', '', '', '', '', '', '', '', ''],
                                 'Only upgrade defense': ['', 'nur Verteidigung upgraden', '', '', '', '', '', '', '', ''],
                                 'Only upgrade offense': ['', 'nur Offensive upgraden', '', '', '', '', '', '', '', ''],
-                                'New = collector-heavy, Oold = power plant-heavy': ['', 'Neu = Sammler-lastig, Alt = Kraftwerks-lastig', '', '', '', '', '', '', '', '']
+                                'New = collector-hungry, Oold = power plant-hungry': ['', 'Neu = Sammler-lastig, Alt = Kraftwerks-lastig', '', '', '', '', '', '', '', '']
                             };
                             lang = function (text) {
                                 try {
