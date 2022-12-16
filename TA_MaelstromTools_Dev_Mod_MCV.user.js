@@ -2,7 +2,7 @@
 // @name        MaelstromTools Dev (Modv1.7 for MCV)
 // @namespace   MaelstromTools
 // @description Just a set of statistics & summaries about repair time and base resources. Mainly for internal use, but you are free to test and comment it.
-// @version     0.1.5.2
+// @version     0.1.5.5
 // @author      Maelstrom, HuffyLuf, KRS_L,Krisan,DLwarez, NetquiK
 // @contributor    NetquiK (https://github.com/netquik) - Mod for MCV + Close Chat at start option (see first comments for changelog)
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
@@ -49,6 +49,8 @@ codes by NetquiK
 - Fix+ for maxlevelworld upgrade in priority list
 - Fix selection under AllianceMarker for UpdateLoot
 - Fix for ChatWidgetButton
+- Fix for Windows with Too Many Bases
+- Updated PHE
 ----------------
 */
 
@@ -318,7 +320,7 @@ codes by NetquiK
                                         var target = qx.core.Init.getApplication().getOptionsBar(); //getServerBar(); //qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_APPOINTMENTS);
                                         this.mainMenuWindow.placeToWidget(target, true);
                                     }
-                                    phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, function () {
+                                    webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, function () {
                                         MaelstromTools.Cache.getInstance().SelectedBaseForLoot = null;
                                     });
                                     webfrontend.gui.chat.ChatWidget.recvbufsize = MaelstromTools.LocalStorage.get(MaelstromTools.Preferences.CHATHISTORYLENGTH, 64);
@@ -563,7 +565,7 @@ codes by NetquiK
                                     if (MT_Preferences.Settings.ChatClose && qx.core.Init.getApplication().getChat().isVisible()) {
                                         qx.core.Init.getApplication().toggleChat(!1);
                                         qx.core.Init.getApplication().triggerDesktopResize();
-                                    } else if (qx.core.Init.getApplication().getChat().isHidden()){
+                                    } else if (qx.core.Init.getApplication().getChat().isHidden()) {
                                         setTimeout(function () {
                                             qx.core.Init.getApplication().toggleChat(!0);
                                         }, 1000);
@@ -1287,9 +1289,30 @@ codes by NetquiK
                                     });
                                     this.Window.setPadding(10);
                                     this.Window.setLayout(new qx.ui.layout.VBox(3));
+
                                     this.Widget = new qx.ui.container.Composite(new qx.ui.layout.Grid());
                                     this.Widget.setTextColor("white");
-                                    this.Window.add(this.Widget);
+                                    //MOD Windows Scrollbars
+                                    if (['RepairTime', 'ResourceOverview', 'BaseStatusOverview', 'Production'].includes(WindowName)) {
+                                        var scroll;
+                                        scroll = new qx.ui.container.Scroll().set({
+                                            maxHeight: qx.core.Init.getApplication().getMainOverlay().getHeight(),
+                                            maxWidth: qx.core.Init.getApplication().getMainOverlay().getWidth(),
+                                            width: null,
+                                            height: null,
+                                            allowShrinkX: false
+                                        });
+                                        if (WindowName == 'Production') {
+                                            scroll.setScrollbarY('off');
+                                        } else {
+                                            scroll.setScrollbarX('off');
+                                        }
+                                        scroll.add(this.Widget);
+                                        this.Window.add(scroll);
+                                    } else {
+
+                                        this.Window.add(this.Widget);
+                                    }
                                 }
                                 if (this.Window.isVisible()) {
                                     this.Window.close();
@@ -2351,7 +2374,7 @@ codes by NetquiK
                         },
                         FormatNumbersCompact: function (value) {
                             if (PerforceChangelist >= 387751) { //new
-                                return phe.cnc.gui.util.Numbers.formatNumbersCompact(value);
+                                return webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(value);
                             } else { //old
                                 return webfrontend.gui.Util.formatNumbersCompact(value);
                             }
@@ -2368,7 +2391,7 @@ codes by NetquiK
                             return t;
                         },
                         GetDateTimeString: function (value) {
-                            return phe.cnc.Util.getDateTimeString(value);
+                            return webfrontend.phe.cnc.Util.getDateTimeString(value);
                         },
                         FormatTimespan: function (value) {
                             return ClientLib.Vis.VisMain.FormatTimespan(value);
@@ -2838,7 +2861,7 @@ codes by NetquiK
                                     }
                                     if (buildingID in this.BuildingList) {
                                         if (PerforceChangelist >= 382917) { //new
-                                            ClientLib.Net.CommunicationManager.GetInstance().SendCommand("UpgradeBuilding", this.BuildingList[buildingID], phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.upgradeAllCompleted), null, true);
+                                            ClientLib.Net.CommunicationManager.GetInstance().SendCommand("UpgradeBuilding", this.BuildingList[buildingID], webfrontend.phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.upgradeAllCompleted), null, true);
                                         } else { //old
                                             ClientLib.Net.CommunicationManager.GetInstance().SendCommand("UpgradeBuilding", this.BuildingList[buildingID], webfrontend.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.upgradeAllCompleted), null, true);
                                         }
@@ -2880,7 +2903,7 @@ codes by NetquiK
                                     if (buildingID in this.BuildingList) {
                                         this.upgradeInProgress = true;
                                         if (PerforceChangelist >= 382917) { //new
-                                            ClientLib.Net.CommunicationManager.GetInstance().SendCommand("UpgradeBuilding", this.BuildingList[buildingID], phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.UpgradeCompleted), null, true);
+                                            ClientLib.Net.CommunicationManager.GetInstance().SendCommand("UpgradeBuilding", this.BuildingList[buildingID], webfrontend.phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.UpgradeCompleted), null, true);
                                         } else { //old
                                             ClientLib.Net.CommunicationManager.GetInstance().SendCommand("UpgradeBuilding", this.BuildingList[buildingID], webfrontend.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.UpgradeCompleted), null, true);
                                         }
@@ -2910,7 +2933,7 @@ codes by NetquiK
                         },
                         formatTiberiumAndPower: function (oValue) {
                             if (PerforceChangelist >= 387751) { //new
-                                return phe.cnc.gui.util.Numbers.formatNumbersCompact(oValue);
+                                return webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(oValue);
                             } else { //old
                                 return webfrontend.gui.Util.formatNumbersCompact(oValue);
                             }
