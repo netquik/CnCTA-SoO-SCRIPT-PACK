@@ -4,7 +4,7 @@
 // @description Display the number of forgotten bases in range of selected world object and paste it to chat message
 // @description im not the author of the code - this script is based on Paste Coords Button and Shockr's BaseScanner sripts
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.1.4
+// @version     1.1.5
 // @info        https://greasyfork.org/scripts/3343-c-c-ta-count-forgotten-bases-in-range
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Count_Forgotten_Bases_Range.user.js
 // @author      DrunphO --- Updated by NetquiK (new patchclient func|22.3)   
@@ -63,7 +63,7 @@
                     },
                     countSoloBases: function (x, y) {
                         var count = 0;
-                        var maxAttack = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance();;
+                        var maxAttack = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance();
                         var world = ClientLib.Data.MainData.GetInstance().get_World();
                         for (var scanY = y - 10; scanY <= y + 10; scanY++) {
                             for (var scanX = x - 10; scanX <= x + 10; scanX++) {
