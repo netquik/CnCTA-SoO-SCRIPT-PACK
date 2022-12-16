@@ -1,14 +1,21 @@
 // ==UserScript==
 // @name C&C: Tiberium Alliances - xTr1m's Base Overlay
-// @description Provides an overlay over the base of the gain/cost relationship of building upgrades by holding the Control key
+// @description Provides an overlay over the base of the gain/cost relationship of building upgrades by holding the CTRL or ATLGR key
 // @namespace      http*://*.alliances.commandandconquer.com/*
-// @include        http*://*.alliances.commandandconquer.com/*
-// @version 1.15
-// @author xTr1m/DLwarez
+// @match         https://*.alliances.commandandconquer.com/*/index.aspx*
+// @version 1.16
+// @author xTr1m/DLwarez, Fixed by NetquiK
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_xTrim_Base_Overlay_DR_4_3.user.js
 // @grant none
 // @source         https://github.com/xTr1m/BaseOverlay
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- Some GUI fixes
+----------------
+*/
 
 (function () {
 
@@ -29,7 +36,7 @@
 
                             // TODO: Determine if the player is watching his base and doesn't have build/sell/move mode enabled
 
-                            if (!!e.altKey && !xt.__windowOpened) {
+                            if (!!e.ctrlKey && !xt.__windowOpened) {
                                 switch (ClientLib.Vis.VisMain.GetInstance().get_Mode()) {
                                     case ClientLib.Vis.Mode.City:
                                         xt.__openWindow();
@@ -39,7 +46,7 @@
 
                         var onKeyUp = function (e) {
                             var xt = xTr1m_Base_Overlay.getInstance();
-                            if (!e.altKey && xt.__windowOpened) {
+                            if (!e.ctrlKey && xt.__windowOpened) {
                                 switch (ClientLib.Vis.VisMain.GetInstance().get_Mode()) {
                                     case ClientLib.Vis.Mode.City:
                                         xt.__closeWindow();
@@ -124,16 +131,16 @@
                         var hudEntities = [];
                         var maxRes = 0;
                         var minRes = Number.MAX_VALUE;
-                        var width = visCity.get_GridWidth() * zoomFactor;
-                        var height = visCity.get_GridHeight() * zoomFactor;
+                        var width = (visCity.get_GridWidth() * zoomFactor);
+                        var height = (visCity.get_GridHeight() * zoomFactor);
                         this.collectData(ownCity);
 
                         for (var ri in this.__buildings) {
                             var building = this.__buildings[ri];
                             var x = building.PosX * width;
                             var y = building.PosY * height;
-                            x -= visCity.get_MinXPosition();
-                            y -= visCity.get_MinYPosition();
+                            x -= visCity.get_MinXPosition() * zoomFactor;
+                            y -= visCity.get_MinYPosition() * zoomFactor;
 
                             maxRes = Math.max(maxRes, building.Ratio);
                             minRes = Math.min(minRes, building.Ratio);
@@ -161,7 +168,7 @@
                                 decorator: new qx.ui.decoration.Decorator(1, "solid", "#000000").set({
                                     backgroundColor: "#" + red + green + "0"
                                 }),
-                                opacity: 0.6,
+                                opacity: 0.55,
                                 width: width - 2,
                                 height: height - 2
                             });
@@ -179,8 +186,8 @@
                             overlay._add(label);
 
                             this.__background._add(overlay, {
-                                left: entity.X + 1,
-                                top: entity.Y + 1
+                                left: entity.X + 5 * zoomFactor,
+                                top: entity.Y + 10 * zoomFactor
                             });
                         }
 
