@@ -3,7 +3,7 @@
 // @description Creates a detailed map of bases and pois of the alliance and enemies.
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.5.3
+// @version     1.5.4
 // @grant none
 // @author 	    Fixed by NetquiK | UPDATED by XDAAST | Originally by zdoom and Bluepix
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_CD_PvP_Quick_Map.user.js
@@ -13,6 +13,8 @@
 codes by NetquiK
 ----------------
 - Fixed RadioButtonGroup => RadioGroup
+- Fix & Cleaning for No More Existing Alliances
+- Support for No Alliance
 ----------------
 */
 
@@ -88,6 +90,7 @@ codes by NetquiK
 				__allianceHasRelations: false,
 				__defaultAlliances: null,
 				__selectedAlliances: null,
+				__originalAlliances: null,
 				__data: null,
 				__totalProcesses: null,
 				__completedProcesses: 0,
@@ -145,26 +148,26 @@ codes by NetquiK
 				getData: function () {
 					if (this.__isLoading === true) return;
 					this.__isLoading = true;
-					var arr = (this.__selectedAlliances == null) ? this.__defaultAlliances : this.__selectedAlliances;
-
-					if (arr != null) {
+					var arr = (!this.__selectedAlliances || !this.__selectedAlliances.length) ? this.__defaultAlliances : this.__selectedAlliances;
+					this.__originalAlliances = arr;
+					if (arr != null && arr.length) {
 						this.__data = [];
 						this.__totalProcesses = arr.length;
 						for (var i = 0; i < arr.length; i++) {
-							this.__getAlliance(arr[i][0], arr[i][1], arr[i][3]);
+							this.__getAlliance(arr[i][0], arr[i][1], arr[i][3], i);
 						}
-					}
+
+					} else this.__onComplete();
 				},
 
-				__getAlliance: function (aid, type, color) {
+				__getAlliance: function (aid, type, color, index) {
 					try {
 						var alliance = {},
 							root = this,
 							factor = this.__factor;
+
 						alliance.id = aid;
 						alliance.players = {};
-						var totalProcesses = this.__totalProcesses;
-
 						var getBases = function (pid, pn, p, tp) {
 							ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand("GetPublicPlayerInfo", {
 									id: pid
@@ -184,9 +187,9 @@ codes by NetquiK
 											if ((p == tp - 1) && (b == totalBases - 1)) {
 												root.__completedProcesses++;
 												var loader = cdccta_map.container.getInstance().loader;
-												loader.setValue('Loading: ' + root.__completedProcesses + "/" + totalProcesses);
+												loader.setValue('Loading: ' + root.__completedProcesses + "/" + root.__totalProcesses);
 											}
-											if (root.__completedProcesses == totalProcesses) root.__onProcessComplete();
+											if (root.__completedProcesses == root.__totalProcesses) root.__onProcessComplete();
 										}
 										player.id = pid;
 										player.name = pn;
@@ -200,7 +203,12 @@ codes by NetquiK
 								id: aid
 							},
 							phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, function (context, data) {
-								if (data == null) return;
+								if (data.i == null) {
+									this.__totalProcesses--;
+									this.__selectedAlliances = this.__selectedAlliances.filter((v) => v[0] != alliance.id);
+									this.__totalProcesses == 0 && root.__onProcessComplete();
+									return;
+								}
 								if (data.opois != null) {
 									var pois = [];
 									data.opois.map(function (poi) {
@@ -225,24 +233,44 @@ codes by NetquiK
 									root.__data.push([alliance, type, color]);
 								}
 							}), null);
+
 					} catch (e) {
 						console.log(e.toString());
 					}
 				},
-
-				__onProcessComplete: function () {
-					console.log('process completed - alliances data has been generated', this.__data);
+				__clean: function () { // MOD new clean functions for not existing alliances
+					(this.__selectedAlliances && !this.__selectedAlliances.length) && (this.__selectedAlliances = this.__defaultAlliances);
+					this.getData();
+					if (this.__selectedAlliances && this.__selectedAlliances.length) {
+						(!localStorage.cdccta_map_settings) ? localStorage['cdccta_map_settings'] = JSON.stringify(this.__selectedAlliances): localStorage.cdccta_map_settings = JSON.stringify(this.__selectedAlliances);
+					}
+				},
+				__onComplete: function () {
 					this.__isLoading = false;
 					var win = cdccta_map.container.getInstance();
-					win.receivedData = this.__data;
+					win.receivedData = [];
 					win.__updateList();
 					win.drawCanvas();
 					win.loader.setValue('Completed');
-					this.__totalProcess = null;
-					this.__completedProcesses = 0;
-					setTimeout(function () {
-						win.loader.setValue('');
-					}, 3000);
+
+				},
+				__onProcessComplete: function () {
+					this.__isLoading = false;
+					if (this.__selectedAlliances && this.__selectedAlliances != this.__originalAlliances) {
+						this.__clean()
+					} else {
+						console.log('process completed - alliances data has been generated', this.__data);
+						var win = cdccta_map.container.getInstance();
+						win.receivedData = this.__data;
+						win.__updateList();
+						win.drawCanvas();
+						win.loader.setValue('Completed');
+						this.__totalProcess = null;
+						this.__completedProcesses = 0;
+						setTimeout(function () {
+							win.loader.setValue('');
+						}, 3000);
+					}
 				}
 
 			}
@@ -1160,24 +1188,26 @@ codes by NetquiK
 						"alliance": ["#75b7d9"],
 						"owner": ["#ffc48b"]
 					};
-					for (var i = 0; i < d.length; i++) {
-						var name = d[i][0].name,
-							type = d[i][1],
-							aid = d[i][0].id,
-							clr = d[i][2];
-						if ((dm == "all") || (dm == "selected")) {
-							var color = colors[type][clr];
-							var li = new qx.ui.form.ListItem(name, root.__createIcon(color, 10, 10), aid);
-							var tooltip = new qx.ui.tooltip.ToolTip(name + " - " + type, root.__createIcon(color, 15, 15));
-							li.setToolTip(tooltip);
-							this.allianceList.add(li);
-						} else {
-							if (type == "alliance") {
-								var li = new qx.ui.form.ListItem(name, null, aid);
+					if (d) {
+						for (var i = 0; i < d.length; i++) {
+							var name = d[i][0].name,
+								type = d[i][1],
+								aid = d[i][0].id,
+								clr = d[i][2];
+							if ((dm == "all") || (dm == "selected")) {
+								var color = colors[type][clr];
+								var li = new qx.ui.form.ListItem(name, root.__createIcon(color, 10, 10), aid);
 								var tooltip = new qx.ui.tooltip.ToolTip(name + " - " + type, root.__createIcon(color, 15, 15));
 								li.setToolTip(tooltip);
 								this.allianceList.add(li);
-								break;
+							} else {
+								if (type == "alliance") {
+									var li = new qx.ui.form.ListItem(name, null, aid);
+									var tooltip = new qx.ui.tooltip.ToolTip(name + " - " + type, root.__createIcon(color, 15, 15));
+									li.setToolTip(tooltip);
+									this.allianceList.add(li);
+									break;
+								}
 							}
 						}
 					}
@@ -1202,27 +1232,28 @@ codes by NetquiK
 					ctx.scale(n, n);
 
 					this.__createLayout();
-
-					for (var i = 0; i < b.length; i++) {
-						var name = b[i][0].name,
-							data = b[i][0],
-							type = b[i][1],
-							aid = b[i][0].id,
-							color = b[i][2];
-						if (((dmd == "alliance") || (dmd == "bases")) && (type == "alliance")) {
-							this.__createAlliance(name, data, type, 0);
-							break;
-						}
-						if (dmd == "all") {
-							if (selected && (aid == selected)) {
-								type = 'selected';
-								color = 0;
+					if (b) {
+						for (var i = 0; i < b.length; i++) {
+							var name = b[i][0].name,
+								data = b[i][0],
+								type = b[i][1],
+								aid = b[i][0].id,
+								color = b[i][2];
+							if (((dmd == "alliance") || (dmd == "bases")) && (type == "alliance")) {
+								this.__createAlliance(name, data, type, 0);
+								break;
 							}
-							this.__createAlliance(name, data, type, color);
-						}
-						if ((dmd == "selected") && selected && (aid == selected)) {
-							this.__createAlliance(name, data, type, color);
-							break;
+							if (dmd == "all") {
+								if (selected && (aid == selected)) {
+									type = 'selected';
+									color = 0;
+								}
+								this.__createAlliance(name, data, type, color);
+							}
+							if ((dmd == "selected") && selected && (aid == selected)) {
+								this.__createAlliance(name, data, type, color);
+								break;
+							}
 						}
 					}
 				},
@@ -1456,11 +1487,21 @@ codes by NetquiK
 						if (!e.getData()[0]) return;
 						var items = this.__items,
 							aid = e.getData()[0].getModel();
+						if (!items) {
+							addButton.setEnabled(true);
+							return;
+						}
 						(((items != null) && (items.indexOf(aid) > -1)) || (items.length > 8)) ? addButton.setEnabled(false): addButton.setEnabled(true);
 					}, this);
 
 					editList.addListener('changeSelection', function (e) {
-						(e.getData()[0]) ? removeButton.setEnabled(true): removeButton.setEnabled(false);
+						// (e.getData()[0]) ? removeButton.setEnabled(true): removeButton.setEnabled(false);
+						var selection = (editList.isSelectionEmpty()) ? null : editList.getSelection();
+						var ownAlliance = cdccta_map.getInstance().__allianceName;
+						if (selection == null || (selection.length == 1 && selection[0].getModel().name == ownAlliance)) removeButton.setEnabled(false);
+						else removeButton.setEnabled(true);
+
+
 					}, this);
 
 					addButton.addListener('execute', function () {
@@ -1569,6 +1610,7 @@ codes by NetquiK
 						list = this.editList,
 						root = this;
 					var alliancesList = (map.__selectedAlliances == null) ? map.__defaultAlliances : map.__selectedAlliances;
+					if (!alliancesList) return;
 					var colors = this.__colors;
 					list.removeAll();
 
@@ -1685,14 +1727,14 @@ codes by NetquiK
 					var original = (localStorage.cdccta_map_settings) ? JSON.parse(localStorage.cdccta_map_settings) : null;
 					var items = this.__items;
 					var changed = false;
-
+					if (!items) return;
 					if ((items != null) && (original != null) && (items.length != original.length)) changed = true;
 					if ((items != null) && (original != null) && (items.length == original.length)) {
 						original.map(function (x) {
 							if (items.indexOf(x[0]) < 0) changed = true;
 						});
 					}
-					((items.length > 0) && ((original === null) || changed)) ? this.saveButton.setEnabled(true): this.saveButton.setEnabled(false);
+					((original === null) || changed) ? this.saveButton.setEnabled(true): this.saveButton.setEnabled(false);
 				},
 
 				__checkDefaults: function () {
@@ -1714,11 +1756,14 @@ codes by NetquiK
 						current = (map.__selectedAlliances == null) ? map.__defaultAlliances : map.__selectedAlliances;
 					var items = this.__items,
 						changed = false;
-
+					if (!current || !items) {
+						this.applyButton.setEnabled(true);
+						return;
+					}
 					current.map(function (x) {
 						if (items.indexOf(x[0]) < 0) changed = true;
 					});
-					((items.length > 0) && ((items.length != current.length) || (changed == true))) ? this.applyButton.setEnabled(true): this.applyButton.setEnabled(false);
+					(items.length != current.length) || (changed == true) ? this.applyButton.setEnabled(true): this.applyButton.setEnabled(false);
 				}
 
 			}
