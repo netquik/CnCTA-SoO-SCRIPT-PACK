@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Tiberium Alliances Wavy
-// @version        0.6.1
+// @version        0.6.2
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
@@ -431,7 +431,7 @@ codes by NetquiK
 							waves = 1;
 						} else if (baseCount <= 31) {
 							waves = 2;
-						} else if (baseCountw <= 41) {
+						} else if (baseCount <= 41) {
 							waves = 3;
 						} else if (baseCount <= 51) {
 							waves = 4;
