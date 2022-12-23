@@ -4,7 +4,7 @@
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_infernal_wrapper.user.js
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version 1.51
+// @version 1.52
 // @author NetquiK (original code from infernal_me, KRS_L, krisan) - (https://github.com/netquik) (see first comment for changelog)
 // ==/UserScript==
 
@@ -13,7 +13,6 @@ codes by NetquiK
 ----------------
 - Recoded all for NOEVIL and removed iterations
 - 22.2 New Framework Update
-- 22.3 FIX
 - 22.3 FIX
 - !! FIX GLOBAL PHE for 22.3 PATCH !!
 - OPERA BROWSER FULL SUPPORTED (updated!)
@@ -66,7 +65,7 @@ codes by NetquiK
 
             function phefix() {
                 // MOD FIX GLOBAL PHE for 22.3 PATCH
-                if (parseFloat(GameVersion) >= 22.3 && typeof webfrontend.phe != 'undefined') window.phe = webfrontend.phe, console.log("FIX: PHE GLOBALIZED for Game Version " + GameVersion);
+                if (typeof webfrontend.phe != 'undefined') window.phe = webfrontend.phe, console.log("FIX: PHE GLOBALIZED for Game Version " + GameVersion);
                 else if (typeof phe != 'undefined') console.log("FIX: PHE ALREADY GLOBAL for Game Version " + GameVersion);
                 else console.log("FIX FAIL: EXPECT ERRORS -> PHE NOT DEFINED");
             }
