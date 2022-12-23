@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tiberium Alliances Info Sticker
 // @namespace    TAInfoSticker
-// @version      1.14
+// @version      1.15
 // @description  Based on Maelstrom Dev Tools. Modified MCV timer, repair time label, resource labels.
 // @match        https://*.alliances.commandandconquer.com/*/index.aspx*
 // @author       NetquiK (https://github.com/netquik) (see first comments for changelog) (original author unicode)
@@ -47,34 +47,34 @@ codes by NetquiK
                                 this.powIcon = "ui/common/icn_res_power.png";
                                 this.creditIcon = "ui/common/icn_res_dollar.png";
                                 this.repairIcon = "ui/icons/icn_repair_off_points.png";
-                                if (typeof phe.cnc.Util.attachNetEvent == 'undefined')
+                                if (typeof webfrontend.phe.cnc.Util.attachNetEvent == 'undefined')
                                     this.attachEvent = webfrontend.gui.Util.attachNetEvent;
                                 else
-                                    this.attachEvent = phe.cnc.Util.attachNetEvent;
+                                    this.attachEvent = webfrontend.phe.cnc.Util.attachNetEvent;
 
                                 this.runMainTimer();
                                 //MOD Fix for 21.3 reorder BaseNavigationBar
-                                if (parseFloat(GameVersion) >= 21.3) { // 21.3 Check
-                                    let barfix = this.getBaseListBar();
-                                    if (barfix.hasListener('drop')) {
-                                        barfix.addListener('dragstart', this.reorderfix, this);
-                                        barfix.addListener('drop', this.reorderend, this);
-                                    }
-                                    try {
-                                        var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
-                                        //MOD Fix for 22.2
-                                        let BarReorder = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.bars.BaseNavigationBar.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.bars.BaseNavigationBar);
-                                        //MOD 22.3 (multi)
-                                        var WgbBarReorderFunc = BarReorder.match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\((?:!0|true)\).*(?<=showToolTip)/)[1];
-                                        WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);?\}/)[1];
-                                        this.ButtonResetOrderMethod = WgbBarReorderFunc;
-                                        console.log('InfoSticker.initialize: ButtonResetOrderMethod = webfrontend.gui.bars.BaseNavigationBar.prototype.'+ this.ButtonResetOrderMethod);
-                                        this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
-                                        WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
-                                    } catch (e) {
-                                        console.log("InfoSticker.initialize: ", e.toString());
-                                    }
+                                //if (parseFloat(GameVersion) >= 21.3) { // 21.3 Check
+                                let barfix = this.getBaseListBar();
+                                if (barfix.hasListener('drop')) {
+                                    barfix.addListener('dragstart', this.reorderfix, this);
+                                    barfix.addListener('drop', this.reorderend, this);
                                 }
+                                try {
+                                    var WgbBar = webfrontend.gui.bars.BaseNavigationBar.prototype;
+                                    //MOD Fix for 22.2
+                                    let BarReorder = webfrontend.gui.bars.BaseNavigationBar.$$original.toString(); //GameVersion
+                                    //MOD 22.3 (multi)
+                                    var WgbBarReorderFunc = BarReorder.match(/(?=Button).*this.[_a-zA-Z]+.addListener\([_a-zA-Z]+,this.([_a-zA-Z]+),this.*setEnabled\((?:!0|true)\).*(?<=showToolTip)/)[1];
+                                    WgbBarReorderFunc = WgbBar[WgbBarReorderFunc].toString().match(/;this\.([_a-zA-Z]+)\(\);?\}/)[1];
+                                    this.ButtonResetOrderMethod = WgbBarReorderFunc;
+                                    console.log('InfoSticker.initialize: ButtonResetOrderMethod = webfrontend.gui.bars.BaseNavigationBar.prototype.' + this.ButtonResetOrderMethod);
+                                    this.OldButtonResetOrder = WgbBar[WgbBarReorderFunc];
+                                    WgbBar[WgbBarReorderFunc] = this.NewButtonResetOrder;
+                                } catch (e) {
+                                    console.log("InfoSticker.initialize: ", e.toString());
+                                }
+                                //}
                             } catch (e) {
                                 console.log("InfoSticker.initialize: ", e.toString());
                             }
