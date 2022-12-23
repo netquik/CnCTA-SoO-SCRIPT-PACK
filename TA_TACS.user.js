@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://*.alliances.commandandconquer.com/*/index.aspx*
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version        3.79
+// @version        3.80
 // @author         KRS_L | Contributions/Updates by WildKatana, CodeEcho, PythEch, Matthias Fuchs, Enceladus, TheLuminary, Panavia2, Da Xue, MrHIDEn, TheStriker, JDuarteDJ, null, g3gg0.de, Netquik
 // @contributor    NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @translator     TR: PythEch | DE: Matthias Fuchs, Leafy & sebb912 | PT: JDuarteDJ & Contosbarbudos | IT: Hellcco | NL: SkeeterPan | HU: Mancika | FR: Pyroa & NgXAlex | FI: jipx | RO: MoshicVargur | ES: Nefrontheone
@@ -32,6 +32,7 @@ codes by NetquiK
 - Fix FOR CP Calculation on PLAYERS
 - Patch for 22.3
 - Fix for getAttackUnits
+- PHE FIX
 ----------------
 */
 
@@ -535,7 +536,7 @@ codes by NetquiK
 
                             //MOD New Play Button Icon Selector
                             this.ReplayBar = this._Application.getReportReplayOverlay();
-                            var PBIS_S = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.reports.ReportReplayOverlay.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.reports.ReportReplayOverlay.constructor);
+                            var PBIS_S = webfrontend.gui.reports.ReportReplayOverlay.$$original.toString(); //GameVersion
                             var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this\.([_a-zA-Z]+)\.addListener\([a-z]/);
                             "object" == typeof this.ReplayBar[PBIS_M[1]] && "btn_play" == this.ReplayBar[PBIS_M[1]].objid && (this.PBIS = PBIS_M[1]);
                             "object" == typeof this.ReplayBar[PBIS_M[3]] && "btn_skip" == this.ReplayBar[PBIS_M[3]].objid && (this.PBIS_SK = PBIS_M[3]);
@@ -544,7 +545,7 @@ codes by NetquiK
                             "boolean" == typeof this.ReplayBar[PBIS_M[1]] && (this.PBIS_S = PBIS_M[1]);
                             "object" == typeof this.ReplayBar[PBIS_M[2]] && "lbl_speed" == this.ReplayBar[PBIS_M[2]].objid && (this.PBIS_L = PBIS_M[2]);
                             //MOD New Autoscroll Button Selector
-                            var ABS_S = parseFloat(GameVersion) >= 22.1 ? webfrontend.gui.PlayArea.PlayAreaHUD.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.PlayArea.PlayAreaHUD.constructor);
+                            var ABS_S = webfrontend.gui.PlayArea.PlayAreaHUD.$$original.toString();//GameVersion
                             var ABS_M = ABS_S.match(/COMBATAUTOSCROLL\),10\)==1;this\.([_a-zA-Z]+)=/);
                             "object" == typeof this._PlayAreaHUD[ABS_M[1]] && (this.ABS_B = ABS_M[1]);
 
@@ -606,7 +607,7 @@ codes by NetquiK
                             if (typeof $I[CombatMinY[1]] === "function") $I[CombatMinY[1]][CombatMinY[2]] = -178;
 
                             if (PerforceChangelist >= 472233) { // NOTE  20.2 patch RETRO
-                                this.COMBATEXTENDEDSETUP = phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
+                                this.COMBATEXTENDEDSETUP = webfrontend.phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
                                 if (this.COMBATEXTENDEDSETUP === false) {
                                     ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, true);
                                     this.ArmySetupAttackBar.showSetup(true);
@@ -652,10 +653,10 @@ codes by NetquiK
 
 
                             // Event Handlers
-                            phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateBattleFinished", ClientLib.API.OnSimulateBattleFinished, this, this.onSimulateBattleFinishedEvent);
-                            phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateCombatReport", ClientLib.API.OnSimulateCombatReport, this, this.OnSimulateCombatReportEvent);
-                            phe.cnc.Util.attachNetEvent(this._VisMain, "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this.viewChangeHandler);
-                            phe.cnc.Util.attachNetEvent(this._MainData.get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.ownCityChangeHandler);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateBattleFinished", ClientLib.API.OnSimulateBattleFinished, this, this.onSimulateBattleFinishedEvent);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.API.Battleground.GetInstance(), "OnSimulateCombatReport", ClientLib.API.OnSimulateCombatReport, this, this.OnSimulateCombatReportEvent);
+                            webfrontend.phe.cnc.Util.attachNetEvent(this._VisMain, "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this.viewChangeHandler);
+                            webfrontend.phe.cnc.Util.attachNetEvent(this._MainData.get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.ownCityChangeHandler);
                             // Setup Button
                             //MOD Original Style Buttons
                             this.buttons.simulate.back = new qx.ui.form.Button();
@@ -2625,7 +2626,7 @@ codes by NetquiK
                         obj.setValue(val.toFixed(2).toString());
                     },
                     updateLabel100time: function (obj, val, dir, time) {
-                        var s = val.toFixed(2).toString() + " @ " + phe.cnc.Util.getTimespanString(time);
+                        var s = val.toFixed(2).toString() + " @ " + webfrontend.phe.cnc.Util.getTimespanString(time);
                         this.setLabelColor(obj, val, dir);
                         obj.setValue(s);
                     },
@@ -2662,7 +2663,7 @@ codes by NetquiK
                         this.labels.supportLevel.setValue(lang('Support lvl ') + SLabel + ': ');
                         this.updateLabel100(this.labels.damage.structures.support, this.stats.damage.structures.support, -1);
                         // AVAILABLE RT
-                        this.labels.repair.available.setValue(phe.cnc.Util.getTimespanString(this.stats.repair.available));
+                        this.labels.repair.available.setValue(webfrontend.phe.cnc.Util.getTimespanString(this.stats.repair.available));
                         // AVAILABLE ATTACKS
                         this.labels.attacks.available.setValue('CP:' + this.stats.attacks.availableAttacksCP + ' / F:' + this.stats.attacks.availableAttacksAtFullStrength + '/ C:' + this.stats.attacks.availableAttacksWithCurrentRepairCharges);
                         // OVERALL
@@ -2835,7 +2836,7 @@ codes by NetquiK
                                         this.getAttackUnits();
                                         //if opened new city then reset disable buttons and calculate defense bonus
                                         if (this.targetCityId != null && this.targetCityId !== currentcity.get_Id()) {
-                                            this.labels.repair.available.setValue(phe.cnc.Util.getTimespanString(this.stats.repair.available));
+                                            this.labels.repair.available.setValue(webfrontend.phe.cnc.Util.getTimespanString(this.stats.repair.available));
                                             //this.labels.attacks.available.setValue('CP:' + Math.floor(this.stats.attacks.availableCP / this.stats.attacks.attackCost) + ' / F:' + Math.floor(this.stats.repair.available / this.stats.repair.max) + '/ C:-');
                                             this.labels.attacks.available.setValue('CP:' + this.stats.attacks.availableAttacksCP + ' / F:' + this.stats.attacks.availableAttacksAtFullStrength + '/ C:-');
                                             this.resetDisableButtons();
@@ -2845,7 +2846,7 @@ codes by NetquiK
                                                 /*var cityAllianceId = currentcity.get_OwnerAllianceId();
                                                 												ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand("GetPublicAllianceInfo", {
                                                 													id : cityAllianceId
-                                                												}, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.calculateDefenseBonus), null);*/
+                                                												}, webfrontend.phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.calculateDefenseBonus), null);*/
                                             }
                                         }
                                         if (cityFaction >= 4 && cityFaction <= 6) this.createLayoutPreview();
@@ -3059,7 +3060,7 @@ codes by NetquiK
                         var bA = ClientLib.Vis.VisMain.GetInstance();
                         var bG = bA.get_Battleground();
                         if (this.curPAVM != ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay || bG.get_LastFrameTime() == 0) {
-                            phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
+                            webfrontend.phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
                             this.ReplayBar.setEnabled(true)
                             this.SkippingSim = null;
                             if (this.ResetAutoscroll) {
@@ -3082,7 +3083,7 @@ codes by NetquiK
                             }, 1000);
                             this.ReplayBar.setEnabled(true)
                             this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().show();
-                            phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
+                            webfrontend.phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
                             this.SkippingSim = null;
                         }
                     },
@@ -3104,7 +3105,7 @@ codes by NetquiK
                                     } else {
                                         this.TopAttackerPos = null;
                                     }
-                                    phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
+                                    webfrontend.phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
                                     this.ResetAutoscroll = this._PlayArea.getPlayerAutoScrollPreference();
                                     this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().hide();
                                     this.ReplayBar.setEnabled(false);
@@ -3162,10 +3163,10 @@ codes by NetquiK
                             this.stats.resourcesummary.credits = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.Gold);
                             this.stats.resourcesummary.crystal = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.Crystal);
                             this.stats.resourcesummary.tiberium = data.GetAttackerTotalResourceReceived(ClientLib.Base.EResourceType.Tiberium);
-                            this.labels.resourcesummary.research.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.research));
-                            this.labels.resourcesummary.credits.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.credits));
-                            this.labels.resourcesummary.crystal.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.crystal));
-                            this.labels.resourcesummary.tiberium.setLabel(phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.tiberium));
+                            this.labels.resourcesummary.research.setLabel(webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.research));
+                            this.labels.resourcesummary.credits.setLabel(webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.credits));
+                            this.labels.resourcesummary.crystal.setLabel(webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.crystal));
+                            this.labels.resourcesummary.tiberium.setLabel(webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(this.stats.resourcesummary.tiberium));
                         } catch (e) {
                             console.log('OnSimulateCombatReportEvent()', e);
                         }
@@ -3648,7 +3649,7 @@ codes by NetquiK
                                 cityid: this.ownCityId,
                                 entityId: this.unitId,
                                 mode: 4
-                            }, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, window.TACS.getInstance().repairResult), this.buttonId, true);
+                            }, webfrontend.phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, window.TACS.getInstance().repairResult), this.buttonId, true);
                         } catch (e) {
                             console.log(e);
                         }
@@ -3725,7 +3726,7 @@ codes by NetquiK
                                             break;
                                     }
                                 }
-                                repairCharge = phe.cnc.Util.getTimespanString(_this._MainData.get_Time().GetTimeSpan(repairCharge));
+                                repairCharge = webfrontend.phe.cnc.Util.getTimespanString(_this._MainData.get_Time().GetTimeSpan(repairCharge));
                                 resourceCost = _this.formatNumberWithCommas(resourceCost);
                                 _this.repairButtons[i] = new qx.ui.form.Button("", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QERCx8kSr25tQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAABmJLR0QA/wD/AP+gvaeTAAAGVUlEQVQYGQXBeZCWdQEA4Of3e9/3O3aXD2EBAcFWQcyLQ3Qcwxs88koJxXQ0y7QcTRunsfJIM9HRmTxIKrzKP/IqybPySscZdQylVZTEVRLDDeQS2F2W3e97fz1PSCmBpYuuSXMXfhcAAAAAAAAAAAA8t+yPrrz6hgAhpWTJomvSmAmjvfDwYkM7NmorgmpOFsgCMRIBRQwgIIGglLRKBlsMNpMdQ0llxFgnnXuFotYw/9xLQrjrlmvS+PGjvPLoYmlgk5H1YGSFehFUY1CJCOSRPBADWRZlyAIlWmi26GuyY6i0dTDZ1Fcq62PM+9YVdrVqQk9PT7r1B8fJd220e0fU2RaMaYv23meioe19hrf1yXOqkWqklgdZJAtBNScfN47Jk2mMoH/AutWf6V7Zq3dHU++20q6i03VLX5HDYN9GezQyYzqC3Ttyp111hrf+vNL+h03VPrhB/0drFJG2IpIjD+SB/Q+ydm3p7mte9t7HyZ6juf+Zcwxs2CIZtLPZ9NmWTSB/4PpT1YugvcKIWrDH2Jr6lwMuvukd++K5dy/QMbiV/u1UI5VINTCiw66yw/xLnrILs9u59udfU5/YMLERfdEXjOgP2orggetPFaGWB/UiqBdRHNolTBvjriv2tRq/+vEzTJ/GyILROWNyxhV8ZYz3u3vtQobHnj/bAYfmQmTSgnkm7d7QVolqRQAR8kiRU2RUczbc/4RTF3Z56OZZlr641T9f28RhMxibMT5nj4zxNRu39oMW7lz0klXvtZzSda/7b3he18wutZw8AyLEEBQxquZBrcjUJd7pNue0CR5ZfJjvXL1c74ctDpzBpIK99mH9WHfdvgrAkr9tcfqlr1udOOP8Wfo/36DIgzwGEKESKSK1SFukvYIc73WbfXKn39w6y0nffMGX72HCfprvdzhh1mM+BuRoYG8su2+OsZOj/t7NMmQByCHPgyJSL4L2epTVMjoCHRn/+8DRl8/0k8+3O+L4Z3R3n+1nlz9pDeDIPfndsgWqExqMrrGmx+DL3QiyLAohgBxCpCiCLI9qBSqBeqAj0shornHer2caLktzZz7ujt/PseaK1+13cJubX76QbDVbevhgkP/uBCknKYlADkUMijyq50GlktGWUYs0MnbL2W0v1tZM3HuUM84ZcNNlr/vlQ8dq7FYjW4/1pBIlMZAFURRDFGMpIYcsCypZ0F7NqAbqkVE1xlXZcwobGuZ1PeRTPPb4sVav/ML8s17Ribd2fp9aovYR1UAWiVEWW2IW5CEYRoQYqWRUMnS2cex05pxE15F6u0vHjX/Ip4DNm7bb/EUCm3FC21Ib3g+0H0BEEciDPCOPhABEqISglmeKSsa8mR695xNHhbsdEpY4atZTPgMcPyM64dJj/PS+49QAaxInHLTM209uYv+DiYE8qGYUkTwEECHGKM9w+DSvLfvcdTeu0osvATBvevTb7qvxodnfmOSGm6cD6Md5Z/7DR68NcMQhRLIsk8dMzAKIkATNEJg21R9uedOJB1e89NYCx88oANz21PlYhfX42FnXLjCzE4AWzj36aQNbOpgzQ8yDmAUhRhChFZJUYuVHHvz3lZa8c7Gu6ckP7/g6gJFj2mltZXCYZh/ede9bF6gB4EvM73qAPfYV26pSIIYEIqTEYBkMr/hE+usLGO/1J7f70bynwVfb0DGB/2zjsxaftvj0Q6OnRA///XQRAB8Ps+LZlUyZJEbKBEQYKpOhZmn7LlKrIm3bYNG3XzSUuHD+7p7dfCVbVrBuJ71DrBti3TBvvGH6iaM98uTJJqIT+9aZOXeqgbVf2NlMmgkIPT096cGrDjWlMzels9A1OjPulNnCtAOFkDHUy4oPWLeeBAjIAhAiR86ic38pRSkN2tndbdVT3Xo2DevZ2HTRHcvlMJSNsrl/u1pRGsbWJ97WXv2XaiBmpESJsgRiJA9kIZC1eHQ5liubpR1DpQ19pc+3JVv6GM5Hg3D3bTemqZMb3vzLEiPCNqPaokY9qudEZDkpkRIEECQhEGKQA4iaqbSzybaB0pb+0tZWw+FnXmZEY4KQUrL49l+kqZMbXv3TPYrmVrUiquTkAhFQAgAiARAAJYaa7BwqDWa7Oeasy4kNJy+8KISUElh656I097SFAAAAAAAAAAAA4O1Xn3PO964M8H8RODTRLDM3YgAAAABJRU5ErkJggg%3D%3D");
                                 _this.repairButtons[i].set({
@@ -3793,11 +3794,11 @@ codes by NetquiK
                             var availableVehRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh);
                             var availableAirRT = ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeAir);
                             _this.stats.repair.available = ClientLib.Base.Resource.GetResourceCount(ownCity.get_RepairOffenseResources().get_RepairChargeOffense());
-                            _this.labels.repairinfos.available.setValue(phe.cnc.Util.getTimespanString(_this.stats.repair.available));
-                            _this.labels.repairinfos.infantry.setValue(phe.cnc.Util.getTimespanString(availableInfRT - _this.stats.repair.available));
-                            _this.labels.repairinfos.vehicle.setValue(phe.cnc.Util.getTimespanString(availableVehRT - _this.stats.repair.available));
-                            _this.labels.repairinfos.aircraft.setValue(phe.cnc.Util.getTimespanString(availableAirRT - _this.stats.repair.available));
-                            /*var unitGroupData = phe.cnc.gui.RepairUtil.getUnitGroupCityData(ownCity);
+                            _this.labels.repairinfos.available.setValue(webfrontend.phe.cnc.Util.getTimespanString(_this.stats.repair.available));
+                            _this.labels.repairinfos.infantry.setValue(webfrontend.phe.cnc.Util.getTimespanString(availableInfRT - _this.stats.repair.available));
+                            _this.labels.repairinfos.vehicle.setValue(webfrontend.phe.cnc.Util.getTimespanString(availableVehRT - _this.stats.repair.available));
+                            _this.labels.repairinfos.aircraft.setValue(webfrontend.phe.cnc.Util.getTimespanString(availableAirRT - _this.stats.repair.available));
+                            /*var unitGroupData = webfrontend.phe.cnc.gui.RepairUtil.getUnitGroupCityData(ownCity);
                             							if (unitGroupData[ClientLib.Data.EUnitGroup.Infantry].lowestUnitDmgRatio == 1) console.log("No damage to Infantry");
                             							if (unitGroupData[ClientLib.Data.EUnitGroup.Vehicle].lowestUnitDmgRatio == 1) console.log("No damage to Vehicles");
                             							if (unitGroupData[ClientLib.Data.EUnitGroup.Aircraft].lowestUnitDmgRatio == 1) console.log("No damage to Aircraft");*/
