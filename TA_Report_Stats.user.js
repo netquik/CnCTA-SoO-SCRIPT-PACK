@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Tiberium Alliances Report Stats
-// @version        0.5.5
+// @version        0.5.6
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    leo7044 (https://github.com/leo7044)
@@ -17,6 +17,7 @@ codes by NetquiK
 ----------------
 - 22.2 FIX
 - 22.3 ALL REGEXs FIX
+- PHE FIX
 ----------------
 */
 'use strict';
@@ -121,7 +122,7 @@ codes by NetquiK
 
 						if (typeof webfrontend.gui.info.BaseInfoWindow.prototype.onCellClick !== 'function') {
 							// MOD 22.2 FIX
-							source = (parseFloat(GameVersion) >= 22.2) ? Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor.$$original) : Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor);
+							source = Function.prototype.toString.call(webfrontend.gui.info.BaseInfoWindow.constructor.$$original);//GameVersion
 							var createOutgoingTabMethodName = source.match(/;[A-Za-z]+\.add\(this\.([A-Za-z_]+)\(\)\);this\.[A-Za-z_]+=new webfrontend\.gui\.widgets\.confirmationWidgets\.ProtectionConfirmationWidget/)[1];
 							source = webfrontend.gui.info.BaseInfoWindow.prototype[createOutgoingTabMethodName].toString();
 							var onCellClickMethodName = source.match(/([A-Za-z]+)\.set\(\{statusBarVisible:(?:false|!1),columnVisibilityButtonVisible:(?:false|!1)\}\)[;,]\1\.addListener\([A-Za-z]+,this\.([A-Za-z_]+),this\.[A-Za-z_]+\)/)[2];
@@ -311,7 +312,7 @@ codes by NetquiK
 							var reports = ClientLib.Data.MainData.GetInstance().get_Reports();
 
 							if (!wasLoading) {
-								phe.cnc.Util.attachNetEvent(reports, 'ReportDelivered', ClientLib.Data.Reports.ReportDelivered, this, this.onReportDelivered);
+								webfrontend.phe.cnc.Util.attachNetEvent(reports, 'ReportDelivered', ClientLib.Data.Reports.ReportDelivered, this, this.onReportDelivered);
 							}
 
 							for (var i = this.reportsLoading.length - 1; i >= 0; i--) {
@@ -361,7 +362,7 @@ codes by NetquiK
 					},
 
 					onAllReportsLoaded: function () {
-						phe.cnc.Util.detachNetEvent(ClientLib.Data.MainData.GetInstance().get_Reports(), 'ReportDelivered', ClientLib.Data.Reports.ReportDelivered, this, this.onReportDelivered);
+						webfrontend.phe.cnc.Util.detachNetEvent(ClientLib.Data.MainData.GetInstance().get_Reports(), 'ReportDelivered', ClientLib.Data.Reports.ReportDelivered, this, this.onReportDelivered);
 
 						var hasSelectedReports = this.reportsLoaded.length > 0;
 						var table = this.getCurrentBaseInfoTab().getChildren()[0];
@@ -469,25 +470,25 @@ codes by NetquiK
 								lootRow += ' <img width="17" height="17" src="' + ReportStats.ResourceTypes[resourceType] + '" style="vertical-align: text-bottom;"/>';
 
 								if (loot[resourceType] < 0) {
-									lootRow += '<span style="color: #d00;">' + phe.cnc.gui.util.Numbers.formatNumbersCompact(loot[resourceType]) + '</span>';
+									lootRow += '<span style="color: #d00;">' + webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(loot[resourceType]) + '</span>';
 								} else {
-									lootRow += phe.cnc.gui.util.Numbers.formatNumbersCompact(loot[resourceType]);
+									lootRow += webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(loot[resourceType]);
 									sumRes += loot[resourceType];
 								}
 							}
-							lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum: ' + phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes);
-							lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum/CP (max): ' + phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes / minCommandPointCosts);
-							lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum/CP (min): ' + phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes / maxCommandPointCosts);
+							lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum: ' + webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes);
+							lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum/CP (max): ' + webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes / minCommandPointCosts);
+							lootRow += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sum/CP (min): ' + webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(sumRes / maxCommandPointCosts);
 
 							table.getChildControl('statusbar').setValue(
 								attackerBaseIds.length + ' attacker' + (attackerBaseIds.length === 1 ? '' : 's') + ', ' +
 								defenderBaseIds.length + ' defender' + (defenderBaseIds.length === 1 ? '' : 's') + ', ' +
 								this.reportsLoaded.length + ' attack' + (this.reportsLoaded.length === 1 ? '' : 's') + ', ' +
-								phe.cnc.Util.getTimespanString(repairTimeCosts) + ' RT and ' + (minCommandPointCosts === maxCommandPointCosts ?
+								webfrontend.phe.cnc.Util.getTimespanString(repairTimeCosts) + ' RT and ' + (minCommandPointCosts === maxCommandPointCosts ?
 									minCommandPointCosts :
 									(minCommandPointCosts + '-' + maxCommandPointCosts)
 								) + ' CPs spent' + (this.reportsLoaded.length > 1 ?
-									' in ' + phe.cnc.Util.getTimespanString((lastAttack - firstAttack) / 1000) :
+									' in ' + webfrontend.phe.cnc.Util.getTimespanString((lastAttack - firstAttack) / 1000) :
 									''
 								) + '<br/>' + lootRow
 							);
