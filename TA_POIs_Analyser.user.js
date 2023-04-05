@@ -146,7 +146,7 @@ codes by NetquiK
 							scoreData = [],
 							bonusData = [],
 							tiers = [];
-						for (var i = 0; i < 50; i++) {
+						for (var i = 0; i < 55; i++) {
 							var previousScore = (i == 0) ? 0 : bonusData[i - 1][1];
 							var score = getNextScore(previousScore);
 							var bonus = getBonus(startRank, score, poiGlobalBonusFactor);
