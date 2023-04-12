@@ -1,7 +1,7 @@
 "use strict";
 // ==UserScript==
 // @name        CnCTA TargetWatcher Enhancer
-// @version	    2022.09.28
+// @version	    2023.04.12
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_TargetWatcher_Enhancer.user.js
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @autohor     bloofi (https://github.com/bloofi) || Updated by NetquiK [SoO] (https://github.com/netquik)
@@ -22,6 +22,7 @@
             3: 'rgba(200, 21, 21, 0.5)',
         };
         const init = () => {
+            console.log("TargetWatcher Enhancer Loaded");
             /*
             qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getChildren()[10]
             pavmNone = 0,
@@ -55,7 +56,7 @@
                                 left: 'unset',
                                 width: '35%',
                                 height: '60px',
-                                overflow: 'visible',
+                                overflow: 'visible'
                             });
                         };
                     }
@@ -110,7 +111,7 @@
                                         }
                                     }
                                     break;
-                                default:
+                                default:             
                                     labels.splice(0, labels.length);
                                     labels.push(value);
                                     break;
@@ -179,6 +180,9 @@
                 //         b.marker.setHeight(baseMarkerHeight);
                 //     });
             };
+            const onViewChanged = (oldMode, newMode) => {   
+                "undefined"==typeof divParent&&(divParent=qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getChildren()[10]);divParent&&([1,2,3,6].includes(qx.core.Init.getApplication().getPlayArea().getViewMode())&&divParent.isVisible()?divParent.exclude():divParent.show());
+            };
             const addMarker = (x, y, names, states) => {
                 const marker = new qx.ui.container.Composite(new qx.ui.layout.Atom()).set({
                     decorator: new qx.ui.decoration.Decorator().set({
@@ -223,6 +227,7 @@
             };
             webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance().get_Region(), 'ZoomFactorChange', ClientLib.Vis.ZoomFactorChange, this, resizeMarkers);
             webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance().get_Region(), 'PositionChange', ClientLib.Vis.PositionChange, this, repositionMarkers);
+            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, onViewChanged);
             updateMarkerSize();
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Map watchers
