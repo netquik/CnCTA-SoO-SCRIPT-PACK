@@ -1,7 +1,7 @@
 "use strict";
 // ==UserScript==
 // @name        CnCTA TargetWatcher Enhancer
-// @version	    2023.04.12
+// @version	    2023.04.17
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_TargetWatcher_Enhancer.user.js
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @autohor     bloofi (https://github.com/bloofi) || Updated by NetquiK [SoO] (https://github.com/netquik)
@@ -181,7 +181,8 @@
                 //     });
             };
             const onViewChanged = (oldMode, newMode) => {   
-                "undefined"==typeof divParent&&(divParent=qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getChildren()[10]);divParent&&([1,2,3,6].includes(qx.core.Init.getApplication().getPlayArea().getViewMode())&&divParent.isVisible()?divParent.exclude():divParent.show());
+                var vMode = qx.core.Init.getApplication().getPlayArea().getViewMode();
+                "undefined"==typeof divParent&&(divParent=qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.OVL_PLAYAREA).getChildren()[10]);divParent&&(([1,2,3].includes(vMode)||(vMode==6&&oldMode==3))?divParent.exclude():!divParent.isVisible()&&divParent.show());
             };
             const addMarker = (x, y, names, states) => {
                 const marker = new qx.ui.container.Composite(new qx.ui.layout.Atom()).set({
