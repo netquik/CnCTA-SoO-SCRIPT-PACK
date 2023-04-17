@@ -4,7 +4,7 @@
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @version     2.1.0
-// @contributor NetquiK (https://github.com/netquik), Florin Ioan Farcas (see first comment for changelog)
+// @contributor NetquiK (https://github.com/netquik), ffi82 (see first comment for changelog)
 // @grant none
 // @author zdoom
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_POIs_Analyser.user.js
@@ -17,7 +17,7 @@ codes by NetquiK
 - Deep Fix for AllianceOverlay Tabs
 - NOEVIL
 - 22.3 FIX
-- Fixed/updated the number of tiers (Florin Ioan Farcas)
+- Fixed/updated the number of tiers (by ffi82)
 ----------------
 */
 
@@ -147,7 +147,7 @@ codes by NetquiK
 							scoreData = [],
 							bonusData = [],
 							tiers = [];
-						for (var i = 0; i < 55; i++) { //tiers fix by Florin Ioan Farcas
+						for (var i = 0; i < 55; i++) { //tiers fix by ffi82
 							var previousScore = (i == 0) ? 0 : bonusData[i - 1][1];
 							var score = getNextScore(previousScore);
 							var bonus = getBonus(startRank, score, poiGlobalBonusFactor);
