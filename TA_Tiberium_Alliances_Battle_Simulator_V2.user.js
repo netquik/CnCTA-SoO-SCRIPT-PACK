@@ -2,7 +2,7 @@
 // @name            Tiberium Alliances Battle Simulator V2
 // @description     Allows you to simulate combat before actually attacking.
 // @author          Eistee & TheStriker & VisiG & Lobotommi & XDaast
-// @version         22.07.20
+// @version         23.05.31
 // @contributor     zbluebugz (https://github.com/zbluebugz) changed cncopt.com code block to cnctaopt.com code block
 // @contributor     NetquiK (https://github.com/netquik) (see first comment for changelog)
 // @namespace       https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
@@ -30,6 +30,8 @@ codes by NetquiK
 - New Fixes for simulation + ReplayBar + Date hidden
 - New SkipSimulation Function
 - Patch for 22.3
+- PHE FIX
+- Add native formation saver button
 ----------------
 */
 
@@ -126,6 +128,7 @@ codes by NetquiK
                             Building: "FactionUI/icons/icon_arsnl_def_building.png"
                         },
                         Offense: {
+                            SaveLoad: "FactionUI/icons/icon_load_save.png",
                             Infantry: "FactionUI/icons/icon_arsnl_off_squad.png",
                             Vehicle: "FactionUI/icons/icon_arsnl_off_vehicle.png",
                             Aircraft: "FactionUI/icons/icon_arsnl_off_plane.png",
@@ -157,6 +160,7 @@ codes by NetquiK
                         // SkipVictory Button graphic by Netquik
                         VictoryPop: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAMAAACelLz8AAAAA3NCSVQICAjb4U/gAAACClBMVEVfBgCuejziQyyPTyZ4LhTXpFTMZjPBlktiFwfgul//JibQcD2haDOHPx7WVjNdCgHPolPowWS6iURwIw71LieYXC3OiEbbtFx+ORnRlEyLRyJmAACocTfYr1rTYTdtGQrvyWnrOCplDgSZZjOyfj/WrVjPdj/UnVF5PBmTVCjht1/TqValbja9kEfdTS/Hn09mCgPLnlDVVjNzJhDtx2dqFAiFPx1tHQuNTCTQazuWXCuGQh9mDwXjvGDz0GzNfkKfbjRmAAC1g0F7MhZjCQLNdD7cr1rbr1l9NhiqdDnYp1Z2KBHEl0yCPRzdTTHQpVSjajTxzGretl1oFAeTUiiMSiJqFgnju2CJRiFsGgq9jUbBkkmbXCyPTiTQi0jJnE5wHAzXsFlmDARiCALsyWjasVvlvmGvfD7VqVftOCp9MRdyJA9nEgbPdD7iuV/atVyPSyS2hEKmbDaRUCZsFgjcUDKEQR50JRDbqVbSp1VmDgXPiEjXplbqw2WpcznZr1i/kEjNoVDHmUybXi70LijdTDFkCQLhuV+vejzTYTjrOirVnVHlu2DVq1bcsVvJnU+7i0VkCgN8MxdsHAqrdTqZXi2jaDLtyWbbsVrdtFx6LhXPpVKLSCLbr1puGAqzgD9mCgRvIA2JQh5mEgbPfkLbsVjZqVZ2KRLzzWpqGQloDQXPdj6nbzZ1JhG/XJyLAAAArnRSTlP///////////////////////////////////8A//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8Kf6MJAAAACXBIWXMAAAsSAAALEgHS3X78AAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAAZZJREFUKJFjkMYJGAhIMYABQgzCAwnM49Ustgg1W7sKIpMwh8czYFEJSIqhIEPQVjxVWyUrGSRjGpNhEmgiwAvWWLSi1M9Pr7WPJxhk2qT4ai4ukfAQsFRzbSkXEFQ3zALyJk61ZeLiUquE6HKOlwRJyamGJkszZE9YxsXVosW4EOwMpWZORaBUSxpPDkOyRaocUJV2qAtYKnlSfxxIW02hMcPK9PAWLi43J2EGiL9yZLSAfC7XxjJ+idn2QE2ymlVQLydba1sCpZiCrDiUw4Fme0UtZ4AFlPl8d5CJcxk1dNW5uPy0pirBw9DFQpYPKCXG7pAIdIR6NAsDXIpBWAiomssoXx+oW5Gz2QYp5CeKtgM92pJi6wr0uo8HA5IUg3OTGFAbq50il2J4QBhKfAXrpAHdz93NxWVv6JuMIpVs5g80q6uUq2VmXSRaLEem54Hcz6XmH9GGJpUcKysHkupLX4ieNhiyhSqAMp2yzBMxkk1SsbaJgonWlHIGDClpeakAzzWa3gbSmFLSScGmplVt0tik0AAA+3Zy/SYJ5fgAAAAASUVORK5CYII=",
                         VictoryPop2: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAMAAACelLz8AAAAA3NCSVQICAjb4U/gAAACkVBMVEUzAADStraGbkVsHAy2nI3UICD7xcNHIxSyfj9zXDHbyrdZAAD2zsZ7RCCnf3/tx2fzsrJ9VVE+Dw3GeHJ3LyDMZjNmMzPo2cm2SkrArIdJAACNdk3MZjNiEwf16tLUqFbguF9tRz2lGRmZXi3CpqZRMRjz48+NXTHWv7s8CAixn3KnbzaQFRX/Jiajj2TWnpPf0sLIrahmAADLt6SsmHXi1LRkUClEExNXNRmeiWFAAAB2KBHHkYJ3VUSIHx+KQzTt4M2lOCS6jEdaGAqAUCdPJR/5x8TNu51gRiWKYl+YcDvrIyNRAABmDARpPDmihkTm18eJa1eNUz98aDhoEhJeAAB0RETx2crTurjcycDXxr6MSiLjj4+9HBz47dO9mU6KXl49EBA0CQZnMReZZjNsIw9TMB5pEgdmMzNJBAB4LhRKGxmYa1FYDAQ+AAD/w8PPb2/QrZidf0FPLhiCRSDSwqKRelhBBADayb/i0sXx2sqKcDm7pJHz58+RIiJRBADaqFfv0sY8CgN8NCaTVCiLRyJ6TEzs38umhIGqdDnSu7mvmXxfBAA8FgtJCAS2hkPCsolyQUGRUCb779JqFAhVJSRWOBt7Wy1pGAyjajT369NkDwW4nJXv5c72JSXYrVk/DQ2OYWHz0cf4y8RBEBBaBAD16NGBWlQ+EwhOAABeMRdFAADbxr/v38rey8F9MRdFBACtlnrj18ZNAwBWAwB+RSFBCAjJsap3WT6LIxltKBSFPx1mAADv487GpqZUAABBEw/3srJpGAjvyWnj0sKmhoJWMRhNGxtMIhJZJCRmAADTv7r679Xo2sqNeUvTqVZZHAyKYWG6mlE5CghUNCB5MRg+AwDv18aqdT1lEAjgzsIQtHt1AAAA23RSTlP//////////////////////////////////////////////////////////////////wD///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8hz8AoAAAACXBIWXMAAAsSAAALEgHS3X78AAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAAhlJREFUKJFjMMIJGIA4NDQUTXT//lCwVKhm9rWlPUAAk+jJFBLaDJZavXxdYPHW6N3WvhAZ5lU7uIxPHAJKcV++VRs3ITj+PMd6sD5ZC8szZ85IJ/cwGOV5Bpzh4dEXcZyfkg6U2XLCZG1+Pptp8VKGleYRlXE8+fkH7dSdsnqMVibVzFqcn19Va7uaIa8tYs1ctXwgCKou6VkptL29FqhplvicawwrkxK6Kme5AaXYtKY1Td13a9mi/PxFtSwHfBiMQvP81sxdC9JW260YoXE2jo2NbVl370qwv8pduWaxAaXC567riqytAmrSO5YLDY3MtNJwoNTiWZWnQWYfZJq+qwciZdTj7CEJMnHZ2QoHtfyYZn/l2dAwNDLy5TWzAUqt3RuwbNHBEC+QL2BSS1eUgdy/SG7usvx84WCX2bCQN+LWFKwEeZTtTBzQzrXu7JkwKZ8kvog1e0Hurz3jlu8WF2AotBoitXLBvogIjQCgfwpygMZWzY2MiJhqFWrEEGp1EigTERFZGy6hs9P+IJucuAaQG8bAzeAjFgEGGlznlLznxdYV1q4D8xPy4FIdV4pEdXV1WTk3akCkrBhC8/jALM0L/Q1AKdH4Y34g/j5Nbgaj/QuALDEGbt9J8vyH+RU6U8uPAy0XkwK50GrivuN5wBTE3DqzU7sFmEKkFvDxMYSCQ36bphQ4tfmmT5kCTjo+SZo+sIDCCgA7QOw3tEIRUgAAAABJRU5ErkJggg=="
+                        
 
                     }
                 });
@@ -2210,11 +2214,11 @@ codes by NetquiK
                             }
                         },
                         onAdd: function () {
-                            phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onUiTick, this);
-                            phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onUiTick, this);
+                            webfrontend.phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onUiTick, this);
+                            webfrontend.phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onUiTick, this);
                         },
                         onUiTick: function () {
-                            phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onUiTick, this);
+                            webfrontend.phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onUiTick, this);
                             this.fireEvent("addSimulation");
                         }
                     },
@@ -2296,7 +2300,7 @@ codes by NetquiK
                                             u: armyUnits,
                                             s: 0
                                         }
-                                    }, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, function (a, b) {
+                                    }, webfrontend.phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, function (a, b) {
                                         this.__TimerStart = Date.now();
                                         this._updateTime();
                                         this.fireDataEvent("OnSimulateBattleFinished", b);
@@ -2356,9 +2360,9 @@ codes by NetquiK
                     construct: function () {
                         try {
                             this.base(arguments);
-                            phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.__CurrentOwnCityChange);
-                            phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentChange", ClientLib.Data.CurrentCityChange, this, this.__CurrentCityChange);
-                            phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this.__ViewModeChange);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.__CurrentOwnCityChange);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentChange", ClientLib.Data.CurrentCityChange, this, this.__CurrentCityChange);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this.__ViewModeChange);
                             if (ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity() !== null) this.__CurrentOwnCityChange(0, ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity().get_Id());
                             if (ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity() !== null) this.__CurrentCityChange(0, ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity().get_Id());
                             this.patchSetEnabled();
@@ -2377,25 +2381,25 @@ codes by NetquiK
                         CityPreArmyUnits: null,
                         __Timeout: null,
                         __CurrentOwnCityChange: function (oldId, newId) {
-                            if (this.CurrentOwnCity !== null && this.CurrentCity !== null && this.CityPreArmyUnits !== null) phe.cnc.Util.detachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
+                            if (this.CurrentOwnCity !== null && this.CurrentCity !== null && this.CityPreArmyUnits !== null) webfrontend.phe.cnc.Util.detachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
                             var CurrentOwnCity = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(newId);
                             if (CurrentOwnCity !== null && CurrentOwnCity.IsOwnBase()) {
                                 this.CurrentOwnCity = CurrentOwnCity;
                                 if (this.CurrentCity !== null && ClientLib.Vis.VisMain.GetInstance().get_Mode() === ClientLib.Vis.Mode.CombatSetup) {
                                     this.CityPreArmyUnits = CurrentOwnCity.get_CityArmyFormationsManager().GetUpdatedFormationByTargetBaseId(this.CurrentCity.get_Id());
-                                    phe.cnc.Util.attachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
+                                    webfrontend.phe.cnc.Util.attachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
                                     this.__CityPreArmyUnitsChanged();
                                 }
                             }
                         },
                         __CurrentCityChange: function (oldId, newId) {
-                            if (this.CurrentOwnCity !== null && this.CurrentCity !== null && this.CityPreArmyUnits !== null) phe.cnc.Util.detachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
+                            if (this.CurrentOwnCity !== null && this.CurrentCity !== null && this.CityPreArmyUnits !== null) webfrontend.phe.cnc.Util.detachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
                             var CurrentCity = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(newId);
                             if (CurrentCity !== null && !CurrentCity.IsOwnBase()) {
                                 this.CurrentCity = CurrentCity;
                                 if (this.CurrentOwnCity !== null && ClientLib.Vis.VisMain.GetInstance().get_Mode() === ClientLib.Vis.Mode.CombatSetup) {
                                     this.CityPreArmyUnits = this.CurrentOwnCity.get_CityArmyFormationsManager().GetUpdatedFormationByTargetBaseId(CurrentCity.get_Id());
-                                    phe.cnc.Util.attachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
+                                    webfrontend.phe.cnc.Util.attachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
                                     this.__CityPreArmyUnitsChanged();
                                 }
                             }
@@ -2403,10 +2407,10 @@ codes by NetquiK
                         __ViewModeChange: function (oldMode, newMode) {
                             if (newMode == ClientLib.Vis.Mode.CombatSetup && this.CurrentCity !== null && this.CurrentOwnCity !== null) {
                                 this.CityPreArmyUnits = this.CurrentOwnCity.get_CityArmyFormationsManager().GetUpdatedFormationByTargetBaseId(this.CurrentCity.get_Id());
-                                phe.cnc.Util.attachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
+                                webfrontend.phe.cnc.Util.attachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
                                 this.__CityPreArmyUnitsChanged();
                             } else if (oldMode == ClientLib.Vis.Mode.CombatSetup && this.CityPreArmyUnits !== null) {
-                                phe.cnc.Util.detachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
+                                webfrontend.phe.cnc.Util.detachNetEvent(this.CityPreArmyUnits, "ArmyChanged", ClientLib.Data.CityPreArmyUnitsChanged, this, this.__CityPreArmyUnitsChanged);
                                 this.CityPreArmyUnits = null;
                             }
                         },
@@ -2509,11 +2513,27 @@ codes by NetquiK
                                 for (var i in this.ArmySetupAttackBar) {
                                     if (typeof this.ArmySetupAttackBar[i] == "object" && this.ArmySetupAttackBar[i] != null) {
                                         if (this.ArmySetupAttackBar[i].objid == "btn_disable") {
-                                            console.log(this.ArmySetupAttackBar[i].objid);
+                                            //console.log(this.ArmySetupAttackBar[i].objid);
                                             var nativeSimBarDisableButton = this.ArmySetupAttackBar[i];
                                         }
                                         if (this.ArmySetupAttackBar[i].objid == "cnt_controls" || this.ArmySetupAttackBar[i].objid == "btn_toggle") {
                                             this.ArmySetupAttackBar[i].setVisibility("excluded");
+                                        }
+                                        //MOD enable native save formation function
+                                        if (this.ArmySetupAttackBar[i].objid == "btn_saveload") {
+                                            console.log("SAVELOAD BTN = "+i);
+                                            //var regex = new RegExp( i + '\\.addListener\\(.,this\\.([A-Za-z_]+)');
+                                            //this.SaveLoadF = webfrontend.gui.bars.ArmySetupAttackBar.$$original.toString().match(regex)[1];
+                                            this.SaveLoad = this.ArmySetupAttackBar[i];
+                                            this.SaveLoad.set({
+                                                toolTipText: "Save/Load Formation [NUM ,]",
+                                                width: 44,
+                                                height: 44,
+                                                allowGrowX: false,
+                                                allowGrowY: false,
+                                                padding: [0, -2],
+                                                marginRight: 6
+                                            });
                                         }
                                     }
                                 }
@@ -2553,7 +2573,7 @@ codes by NetquiK
 
 
                             if (PerforceChangelist >= 472233) { // NOTE  20.1 patch
-                                this.COMBATEXTENDEDSETUP = phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
+                                this.COMBATEXTENDEDSETUP = webfrontend.phe.cnc.Util.getConfigBoolean(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP);
                                 if (this.COMBATEXTENDEDSETUP === false) {
                                     ClientLib.Config.Main.GetInstance().SetConfig(ClientLib.Config.Main.CONFIG_COMBATEXTENDEDSETUP, true);
                                     this.ArmySetupAttackBar.showSetup(true);
@@ -2785,6 +2805,8 @@ codes by NetquiK
                                 this._updateBtnSimulation();
                             }, this);
                             WDG_COMBATSWAPVIEW.getLayoutParent().addAfter(this.btnSimulation, WDG_COMBATSWAPVIEW);
+                            //MOD adding native formation saver button
+                            WDG_COMBATSWAPVIEW.getLayoutParent().addAfter(TABS.GUI.ArmySetupAttackBar.getInstance().SaveLoad, this.btnSimulation);
                             //Move Box
                             this.boxMove = new TABS.GUI.MovableBox(new qx.ui.layout.Grid()).set({
                                 decorator: "pane-light-plain",
@@ -2853,7 +2875,7 @@ codes by NetquiK
                                 row: 4,
                                 column: 1
                             });
-                            this.boxMove.add(this.newButton(TABS.RES.IMG.Offense.ResetFormLine, this.tr(""), this.onClick_btnBlank, null, null), {
+                            this.boxMove.add(this.newButton(TABS.RES.IMG.Offense.SaveLoad, this.tr("Save/Load Formation [NUM ,]"), this.onClick_SaveLoad, null, null), {
                                 row: 4,
                                 column: 2
                             });
@@ -2889,7 +2911,7 @@ codes by NetquiK
                             this.boxMove.getChildren()[12].setIcon(TABS.SETTINGS.get("skipVictoryPopup", false) ? TABS.RES.IMG.VictoryPop2 : TABS.RES.IMG.VictoryPop);
                             this.skip_VictoryPopup();
                             //DS-MOD-END
-                            phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this._onViewChanged);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this._onViewChanged);
                             this._onViewChanged(ClientLib.Vis.Mode.CombatSetup, null);
                         } catch (e) {
                             console.group("Tiberium Alliances Battle Simulator V2");
@@ -2905,7 +2927,7 @@ codes by NetquiK
                         btnStats: null,
                         boxMove: null,
                         onHotKeyPress: function (key) {
-                            if (!phe.cnc.Util.isEventTargetInputField(key)) {
+                            if (!webfrontend.phe.cnc.Util.isEventTargetInputField(key)) {
                                 var formation = TABS.UTIL.Formation.Get();
                                 switch (key.getNativeEvent().keyCode) {
                                     case 96:
@@ -2972,6 +2994,8 @@ codes by NetquiK
                                         break;
                                     case 110:
                                         // NUM ,
+                                        this.onClick_SaveLoad();
+                                        break;
                                         break;
                                     case 111:
                                         // NUM /
@@ -3152,6 +3176,13 @@ codes by NetquiK
                                 console.log(e);
                             }
                         },
+                        onClick_SaveLoad: function (e) {
+                            try {
+                                TABS.GUI.ArmySetupAttackBar.getInstance().SaveLoad.execute();
+                            } catch (e) {
+                                console.log(e);
+                            }
+                        },
                         onClick_btnBlank: function (e) {
                             try {} catch (e) {
                                 console.log(e);
@@ -3202,7 +3233,7 @@ codes by NetquiK
                             //MOD New Play Button Icon Selector
                             this._PlayAreaHUD = this.qxApp.getPlayArea().getHUD();
                             this._playAreaChildren = this.qxApp.getPlayArea().getChildren();
-                            var PBIS_S = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.reports.ReportReplayOverlay.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.reports.ReportReplayOverlay.constructor);
+                            var PBIS_S = webfrontend.gui.reports.ReportReplayOverlay.$$original.toString(); //GameVersion
                             var PBIS_M = PBIS_S.match(/this\.[_a-zA-Z]+,this\);this.+this\.([_a-zA-Z]+)\.addListener\([a-z],this\.([_a-zA-Z]+),this\);this.+this\.[_a-zA-Z]+,this\);this\.([_a-zA-Z]+)\.addListener\([a-z]/);
                             "object" == typeof this.ReportReplayOverlay[PBIS_M[1]] && "btn_play" == this.ReportReplayOverlay[PBIS_M[1]].objid && (this.PBIS = PBIS_M[1]);
                             "object" == typeof this.ReportReplayOverlay[PBIS_M[3]] && "btn_skip" == this.ReportReplayOverlay[PBIS_M[3]].objid && (this.PBIS_SK = PBIS_M[3]);
@@ -3211,7 +3242,7 @@ codes by NetquiK
                             "boolean" == typeof this.ReportReplayOverlay[PBIS_M[1]] && (this.PBIS_S = PBIS_M[1]);
                             "object" == typeof this.ReportReplayOverlay[PBIS_M[2]] && "lbl_speed" == this.ReportReplayOverlay[PBIS_M[2]].objid && (this.PBIS_L = PBIS_M[2]);
                             //MOD New Autoscroll Button Selector
-                            var ABS_S = parseFloat(GameVersion) >= 22.1 ? webfrontend.gui.PlayArea.PlayAreaHUD.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.PlayArea.PlayAreaHUD.constructor);
+                            var ABS_S = webfrontend.gui.PlayArea.PlayAreaHUD.$$original.toString(); //GameVersion
                             var ABS_M = ABS_S.match(/COMBATAUTOSCROLL\),10\)==1;this\.([_a-zA-Z]+)=/);
                             "object" == typeof this._PlayAreaHUD[ABS_M[1]] && (this.ABS_B = ABS_M[1]);
                             //MOD Original Style Buttons
@@ -3299,7 +3330,7 @@ codes by NetquiK
                                         } else {
                                             this.TopAttackerPos = null;
                                         }
-                                        phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
+                                        webfrontend.phe.cnc.base.Timer.getInstance().addListener("uiTick", this.onTick_btnSkip, this);
                                         this.ResetAutoscroll = pA.getPlayerAutoScrollPreference();
                                         this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().hide();
                                         this.ReportReplayOverlay.setEnabled(false);
@@ -3329,7 +3360,7 @@ codes by NetquiK
                             var bG = bA.get_Battleground();
                             var pA = this.qxApp.getPlayArea();
                             if (pA.getViewMode() != ClientLib.Data.PlayerAreaViewMode.pavmCombatReplay || bG.get_LastFrameTime() == 0) {
-                                phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
+                                webfrontend.phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
                                 this.ReportReplayOverlay.setEnabled(true);
                                 this.SkippingSim = null;
                                 if (this.ResetAutoscroll) {
@@ -3359,7 +3390,7 @@ codes by NetquiK
                                 }, 1000);
                                 this.ReportReplayOverlay.setEnabled(true)
                                 this._PlayAreaHUD[this.ABS_B].getLayoutParent().getLayoutParent().show();
-                                phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
+                                webfrontend.phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.onTick_btnSkip, this);
                                 this.SkippingSim = null;
                             }
                         }
@@ -3642,7 +3673,7 @@ codes by NetquiK
                             if (TABS.SETTINGS.get("GUI.Window.Stats.Repair.visible", true) === false) this.GUI.Repair.exclude();
                             if (TABS.SETTINGS.get("GUI.Window.Stats.Loot.visible", true) === false) this.GUI.Loot.exclude();
                             this.simViews = [];
-                            phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this._onViewChanged);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Vis.VisMain.GetInstance(), "ViewModeChange", ClientLib.Vis.ViewModeChange, this, this._onViewChanged);
                         } catch (e) {
                             console.group("Tiberium Alliances Battle Simulator V2");
                             console.error("Error setting up TABS.GUI.Window.Stats constructor", e);
@@ -3660,19 +3691,19 @@ codes by NetquiK
                         simViews: null,
                         StatsChanged: false,
                         onAppear: function () {
-                            phe.cnc.base.Timer.getInstance().addListener("uiTick", this.__onTick, this);
+                            webfrontend.phe.cnc.base.Timer.getInstance().addListener("uiTick", this.__onTick, this);
                             TABS.CACHE.getInstance().addListener("addSimulation", this.__updateStats, this);
                             TABS.PreArmyUnits.getInstance().addListener("OnCityPreArmyUnitsChanged", this.__updateStats, this);
-                            phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.__CurrentCityChange);
-                            phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentChange", ClientLib.Data.CurrentCityChange, this, this.__CurrentCityChange);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.__CurrentCityChange);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentChange", ClientLib.Data.CurrentCityChange, this, this.__CurrentCityChange);
                             this.__updateStats();
                         },
                         onClose: function () {
-                            phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.__onTick, this);
+                            webfrontend.phe.cnc.base.Timer.getInstance().removeListener("uiTick", this.__onTick, this);
                             TABS.CACHE.getInstance().removeListener("addSimulation", this.__updateStats, this);
                             TABS.PreArmyUnits.getInstance().removeListener("OnCityPreArmyUnitsChanged", this.__updateStats, this);
-                            phe.cnc.Util.detachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.__CurrentCityChange);
-                            phe.cnc.Util.detachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentChange", ClientLib.Data.CurrentCityChange, this, this.__CurrentCityChange);
+                            webfrontend.phe.cnc.Util.detachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentOwnChange", ClientLib.Data.CurrentOwnCityChange, this, this.__CurrentCityChange);
+                            webfrontend.phe.cnc.Util.detachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentChange", ClientLib.Data.CurrentCityChange, this, this.__CurrentCityChange);
                             for (var i in this.simViews) {
                                 this.simViews[i].resetStats();
                                 this.simViews[i].__onTick();
@@ -4272,7 +4303,7 @@ codes by NetquiK
                             }
                         },
                         __updateBattleDuration: function (label, e) {
-                            label.setValue(e.getData() > 0 ? phe.cnc.Util.getTimespanString(e.getData() / 1000) : "-:--");
+                            label.setValue(e.getData() > 0 ? webfrontend.phe.cnc.Util.getTimespanString(e.getData() / 1000) : "-:--");
                         },
                         __updateBattleOwnCity: function () {
                             if (typeof this.Cache["result"] !== "undefined" && typeof this.Cache.result["ownid"] !== "undefined") {
@@ -4320,7 +4351,7 @@ codes by NetquiK
                                 if (ownCity !== null) {
                                     var RepairCharge = Math.min(
                                         ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf), ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh), ownCity.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeAir));
-                                    this.Label.Repair.Storage.setValue(phe.cnc.Util.getTimespanString(ClientLib.Data.MainData.GetInstance().get_Time().GetTimeSpan(RepairCharge)));
+                                    this.Label.Repair.Storage.setValue(webfrontend.phe.cnc.Util.getTimespanString(ClientLib.Data.MainData.GetInstance().get_Time().GetTimeSpan(RepairCharge)));
                                 } else this.Label.Repair.Storage.resetValue();
                             } else this.Label.Repair.Storage.resetValue();
                             if (this.StatsChanged) {
@@ -4476,7 +4507,7 @@ codes by NetquiK
                                 res = 0;
                                 res = this.Resource.getCrystal();
                                 return {
-                                    text: phe.cnc.gui.util.Numbers.formatNumbersCompact(res),
+                                    text: webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(res),
                                     color: this.getColorFromPercent(1)
                                 };
                             } else {
@@ -4497,7 +4528,7 @@ codes by NetquiK
                                             break;
                                     }
                                     return {
-                                        text: phe.cnc.Util.getTimespanString(res),
+                                        text: webfrontend.phe.cnc.Util.getTimespanString(res),
                                         color: this.getColorFromPercent(1 - (this.HealthPoints.getEnd() / this.HealthPoints.getMax()))
                                     };
                                 }
@@ -4532,7 +4563,7 @@ codes by NetquiK
                                         break;
                                 }
                                 return {
-                                    text: phe.cnc.gui.util.Numbers.formatNumbersCompact(res),
+                                    text: webfrontend.phe.cnc.gui.util.Numbers.formatNumbersCompact(res),
                                     color: this.getColorFromPercent(1 - (res / loot))
                                 };
                             }
