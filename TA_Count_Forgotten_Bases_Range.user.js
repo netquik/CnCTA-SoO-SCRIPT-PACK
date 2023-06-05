@@ -63,7 +63,7 @@
                     },
                     countSoloBases: function (x, y) {
                         var count = 0;
-                        var maxAttack = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance();;
+                        var maxAttack = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance();
                         var world = ClientLib.Data.MainData.GetInstance().get_World();
                         for (var scanY = y - 10; scanY <= y + 10; scanY++) {
                             for (var scanX = x - 10; scanX <= x + 10; scanX++) {
