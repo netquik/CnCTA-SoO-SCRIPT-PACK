@@ -1,6 +1,6 @@
 ﻿// ==UserScript==
 // @name        leoStats
-// @version     2022.09.24
+// @version     2023.10.29
 // @author      leo7044 (https://github.com/leo7044)
 // @homepage    https://cnc.indyserver.info/
 // @downloadURL https://cnc.indyserver.info/js/leostats.user.js
@@ -20,6 +20,8 @@
 // Ansonsten bleibt mir nur zu sagen: Viel Spaß!
 
 /* Developer: leo7044 (https://github.com/leo7044) */
+// https://jscompress.com/
+// https://javascriptcompressor.com/
 (function () {
     var leoStatsMain = function ()
     {
@@ -27,12 +29,8 @@
         {
             function setButtons()
             {
-                if(typeof(phe) == 'undefined')
-                {
-                    phe = webfrontend.phe;
-                }2
                 var linkToRoot = "https://cnc.indyserver.info/";
-                var scriptVersionLocal = '2022.09.24';
+                var scriptVersionLocal = '2023.10.29';
                 qx.Class.define('leoStats',
                 {
                     type: 'singleton',
@@ -46,6 +44,7 @@
                         initialize: function()
                         {
                             this.sendChatInfoStatus = true;
+                            this.maxPlayerLvl = ClientLib.Data.MainData.GetInstance().get_Server().get_PlayerUpgradeCap();
                             this.ObjectData = {};
                             this.ObjectDataNotSend = {};
                             this.linkBase = '';
@@ -456,7 +455,7 @@
                             var HeadLinePoiDataPoiLevel = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             HeadLinePoiDataPoiLevel.add(new qx.ui.basic.Label('<big><u><b>POI-Level</b></u></big>').set({rich: true}));
                             HeadLinePoiDataPoiLevel.add(new qx.ui.basic.Label('').set({rich: true}));
-                            var HeadLinePoiDataPoiLevelScroll = new qx.ui.container.Scroll().set({width: 165, height: 560});
+                            var HeadLinePoiDataPoiLevelScroll = new qx.ui.container.Scroll().set({width: 175, height: 560});
                             var TablePoiDataPoiLevel = new qx.ui.container.Composite(new qx.ui.layout.HBox(10).set({alignX: "center"}));
                             var TextPoiLevel = new qx.ui.container.Composite(new qx.ui.layout.VBox(1).set({alignX: "center"}));
                             TextPoiLevel.add(new qx.ui.basic.Label('<b>Level</b>').set({rich: true}));
@@ -756,8 +755,22 @@
                                 for (var key in ObjectBuildings)
                                 {
                                     TextUpgradeBuildingName.add(new qx.ui.basic.Label(key).set({rich: true, alignX: 'left'}));
-                                    TextUpgradeBuildingTiberium.add(new qx.ui.basic.Label(ObjectBuildings[key][0].toLocaleString()).set({rich: true, alignX: 'right'}));
-                                    TextUpgradeBuildingPower.add(new qx.ui.basic.Label(ObjectBuildings[key][1].toLocaleString()).set({rich: true, alignX: 'right'}));
+                                    if (ObjectBuildings[key][0] > 0)
+                                    {
+                                        TextUpgradeBuildingTiberium.add(new qx.ui.basic.Label(ObjectBuildings[key][0].toLocaleString()).set({rich: true, alignX: 'right'}));
+                                    }
+                                    else
+                                    {
+                                        TextUpgradeBuildingTiberium.add(new qx.ui.basic.Label('n.a.').set({rich: true, alignX: 'right'}));
+                                    }
+                                    if (ObjectBuildings[key][1] > 0)
+                                    {
+                                        TextUpgradeBuildingPower.add(new qx.ui.basic.Label(ObjectBuildings[key][1].toLocaleString()).set({rich: true, alignX: 'right'}));
+                                    }
+                                    else
+                                    {
+                                        TextUpgradeBuildingPower.add(new qx.ui.basic.Label('n.a.').set({rich: true, alignX: 'right'}));
+                                    }
                                 }
                             }, this);
                             for (var i in this.ObjectData.bases)
@@ -1352,12 +1365,24 @@
                             if (levelBuilding <= 11)
                             {
                                 valueTiberium = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[_BaseId].get_Buildings().d[_BuildingId].get_TechGameData_Obj().r[levelBuilding + 1].rr[0].c;
-                                valuePower = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[_BaseId].get_Buildings().d[_BuildingId].get_TechGameData_Obj().r[levelBuilding + 1].rr[1].c;
+                                if (ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[_BaseId].get_Buildings().d[_BuildingId].get_TechGameData_Obj().r[levelBuilding + 1].rr[1] != undefined)
+                                {
+                                    valuePower = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[_BaseId].get_Buildings().d[_BuildingId].get_TechGameData_Obj().r[levelBuilding + 1].rr[1].c;
+                                }
+                                else
+                                {
+                                    valuePower = 0;
+                                }
                             }
-                            else
+                            else if (levelBuilding < this.maxPlayerLvl)
                             {
                                 valueTiberium = parseInt(ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[_BaseId].get_Buildings().d[_BuildingId].get_TechGameData_Obj().r[12].rr[0].c * Math.pow(upgradeFactor, levelBuilding + 1 - 12));
                                 valuePower = parseInt(ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d[_BaseId].get_Buildings().d[_BuildingId].get_TechGameData_Obj().r[12].rr[1].c * Math.pow(upgradeFactor, levelBuilding + 1 - 12));
+                            }
+                            else
+                            {
+                                valueTiberium = 0;
+                                valuePower = 0;
                             }
                             return [valueTiberium, valuePower];
                         },
@@ -2086,6 +2111,11 @@
                                     // Player
                                     var AccountId = ClientLib.Data.MainData.GetInstance().get_Player().get_AccountId();
                                     var PlayerName = ClientLib.Data.MainData.GetInstance().get_Player().get_Name();
+				    var InstanceId = '';
+                                    if (PlayerName == 'leo7044' || PlayerName == 'leo7O44')
+                                    {
+                                        var InstanceId = ClientLib.Net.CommunicationManager.GetInstance().get_InstanceId();
+                                    }
                                     var PlayerScorePoints = ClientLib.Data.MainData.GetInstance().get_Player().get_ScorePoints();
                                     var PlayerRank = ClientLib.Data.MainData.GetInstance().get_Player().get_OverallRank();
                                     var PlayerEventRank = ClientLib.Data.MainData.GetInstance().get_Player().get_EventRank();
@@ -2236,6 +2266,7 @@
                                     // Player
                                     this.ObjectData.player.AccountId = AccountId;
                                     this.ObjectData.player.PlayerName = PlayerName;
+				    this.ObjectData.player.InstanceId = InstanceId;
                                     this.ObjectData.player.PlayerScorePoints = PlayerScorePoints;
                                     this.ObjectData.player.CountBases = CountBases;
                                     this.ObjectData.player.CountSup = CountSup;
@@ -2280,12 +2311,12 @@
                                     }
                                     ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand("GetPublicPlayerInfo", {
                                         id : PlayerId
-                                    }, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.getPublicPlayerInfo), null);
+                                    }, webfrontend.phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.getPublicPlayerInfo), null);
                                     if (AllianceId > 0)
                                     {
                                         ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand("GetPublicAllianceInfo", {
                                             id : AllianceId
-                                        }, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.getPublicAllianceInfo), null);
+                                        }, webfrontend.phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.getPublicAllianceInfo), null);
                                     }
                                     // Anfrage absenden
                                     this.sendDataFromInGame();
@@ -2361,7 +2392,7 @@
                                 take: 1000, // ersetzen durch ReportCount nicht erforderlich, da bei weniger Berichten auch nur weniger abgeholt werden
                                 sort: 1,
                                 ascending: false
-                            }, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.getReportHeaderAll), null);
+                            }, webfrontend.phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, this.getReportHeaderAll), null);
                         },
                         getReportHeaderAll: function(_context, _data)
                         {
@@ -2388,7 +2419,7 @@
                             {
                                 ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand("GetReportData", {
                                     playerReportId: _curReportId
-                                }, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, _self, _self.getReportData), null);
+                                }, webfrontend.phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, _self, _self.getReportData), null);
                             }, _curReportCount * 1000, this));
                         },
                         getReportData: function(_context, _data)
@@ -2634,7 +2665,7 @@
                         {
                             this.initializeDefaultValues();
                             var _self = this;
-                            phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentChange", ClientLib.Data.CurrentCityChange, this, _self.scanClickedBase);
+                            webfrontend.phe.cnc.Util.attachNetEvent(ClientLib.Data.MainData.GetInstance().get_Cities(), "CurrentChange", ClientLib.Data.CurrentCityChange, this, _self.scanClickedBase);
                         },
                         scanClickedBase: function(_oldId, _newId)
                         {
