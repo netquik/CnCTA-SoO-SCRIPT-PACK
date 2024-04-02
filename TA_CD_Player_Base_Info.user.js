@@ -3,9 +3,22 @@
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description Provides basic offense and defense information regarding the player bases around you. It also displays your own bases repair time.
-// @version     3.10
+// @version     3.20
 // @author      XDaast
+// @contributor NetquiK (https://github.com/netquik) - (see first comments for changelog)
+// @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_CD_Player_Base_Info.user.js
+// @downloadURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_CD_Player_Base_Info.user.js
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- Marker Fix
+----------------
+*/
+
+
+
 (function () {
 	var EnemyInfo_mainFunction = function () {
 
@@ -13,7 +26,11 @@
 			webfrontend.gui.region.RegionCityStatusInfoEnemy.prototype.onCitiesChange_EnemyInfo = webfrontend.gui.region.RegionCityStatusInfoEnemy.prototype.onCitiesChange;
 			webfrontend.gui.region.RegionCityStatusInfoEnemy.prototype.onCitiesChange = function () {
 				var widget = webfrontend.gui.region.RegionCityStatusInfoEnemy.getInstance();
-				var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Vis.VisMain.GetInstance().get_SelectedObject().get_Id());
+
+				//var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Vis.VisMain.GetInstance().get_SelectedObject().get_Id());
+				//Marker fix by NetquiK
+				var selection = ClientLib.Vis.VisMain.GetInstance().get_SelectedObject();
+				var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Data.MainData.GetInstance().get_World().GetObjectFromPosition(selection.get_RawX(), selection.get_RawY()).getID());
 				if (!widget.hasOwnProperty("offLevel")) {
 
 					var offWidget = new qx.ui.container.Composite(new qx.ui.layout.Grid(5, 0));
@@ -71,7 +88,7 @@
 	};
 	var EnemyInfoScript = document.createElement("script");
 	var txt = EnemyInfo_mainFunction.toString();
-	EnemyInfoScript.textContent= "(" + txt + ")();";
+	EnemyInfoScript.textContent = "(" + txt + ")();";
 	EnemyInfoScript.type = "text/javascript";
 	document.getElementsByTagName("head")[0].appendChild(EnemyInfoScript);
 })();
@@ -106,7 +123,10 @@
 			webfrontend.gui.region.RegionCityStatusInfoAlliance.prototype.onCitiesChange_AllianceInfo = webfrontend.gui.region.RegionCityStatusInfoAlliance.prototype.onCitiesChange;
 			webfrontend.gui.region.RegionCityStatusInfoAlliance.prototype.onCitiesChange = function () {
 				var widget = webfrontend.gui.region.RegionCityStatusInfoAlliance.getInstance();
-				var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Vis.VisMain.GetInstance().get_SelectedObject().get_Id());
+				//var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Vis.VisMain.GetInstance().get_SelectedObject().get_Id());
+				//Marker fix by NetquiK
+				var selection = ClientLib.Vis.VisMain.GetInstance().get_SelectedObject();
+				var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Data.MainData.GetInstance().get_World().GetObjectFromPosition(selection.get_RawX(), selection.get_RawY()).getID());
 				/*
 				var rt =  Math.min(city.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf),
                                     city.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh),
@@ -203,7 +223,10 @@
 			webfrontend.gui.region.RegionCityStatusInfoOwn.prototype.onCitiesChange_OwnInfo = webfrontend.gui.region.RegionCityStatusInfoOwn.prototype.onCitiesChange;
 			webfrontend.gui.region.RegionCityStatusInfoOwn.prototype.onCitiesChange = function () {
 				var widget = webfrontend.gui.region.RegionCityStatusInfoOwn.getInstance();
-				var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Vis.VisMain.GetInstance().get_SelectedObject().get_Id());
+				//var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Vis.VisMain.GetInstance().get_SelectedObject().get_Id());
+				//Marker fix by NetquiK
+				var selection = ClientLib.Vis.VisMain.GetInstance().get_SelectedObject();
+				var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Data.MainData.GetInstance().get_World().GetObjectFromPosition(selection.get_RawX(), selection.get_RawY()).getID());
 				var rt = Math.min(city.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf),
 					city.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeVeh),
 					city.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeAir));
