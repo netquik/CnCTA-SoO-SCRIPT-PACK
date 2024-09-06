@@ -2,7 +2,7 @@
 // @name            C&C: Tiberium Alliances Map
 // @description     Shows you the region map
 // @author          Eistee
-// @version         22.05.04
+// @version         24.02.25
 // @namespace       http*://*.alliances.commandandconquer.com/*
 // @include         http*://*.alliances.commandandconquer.com/*
 // @icon            http://s3.amazonaws.com/uso_ss/icon/176516/large.png
@@ -23,6 +23,11 @@
   contributors:
   KSX https://userscripts.org/scripts/show/149093
   777lexa777 https://userscripts.org/scripts/show/149350
+
+
+  Bugfix for CnCTA SoO 
+  edited by Profuter (2024.02.25)
+
 */
 (function () {
     var TAMap_mainFunction = function () {
@@ -99,7 +104,7 @@
                             width: 500
                         },
                         settingsWndBounds: {
-                            height: 646,
+                            height: 686,
                             top: 48,
                             left: 615,
                             width: 524
@@ -110,7 +115,8 @@
                             showSectionFrame: true,
                             showBorderLine1: false,
                             showBorderLine2: false,
-                            fadeMap: true
+                            fadeMap: true,
+                            reload: true
                         },
                         settingsPanel: {
                             playerColor: "#7F0", // type = 1
@@ -120,6 +126,8 @@
                             poiColor: "orange", // type = 4, POIType != 0
                             tunnelColor: "forestgreen", // type = 4, POIType = 0
                             enemyBaseColor: "red",
+                            maxPoiLevel: 99,
+                            minPoiLevel: 0,
                             allianceTerrainColor: "rgba(255,255,255,0.5)",
                             ownBaseColor: "rgba(0,255,0,0.5)",
                             highlightColor: "rgba(200,255,200,1)",
@@ -178,12 +186,12 @@
                     },
 
                     init_menuButton: function () {
-                        this.buttonMap = new qx.ui.menu.Button("Map");
+                        this.buttonMap = new qx.ui.menu.Button("Show POI Map");
                         this.buttonMap.addListener("click", this.toggleMap, this);
                         var submenu = new qx.ui.menu.Menu();
                         submenu.add(this.buttonMap);
                         var bntScript = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_MENU).getScriptsButton();
-                        bntScript.Add("Map", null, submenu);
+                        bntScript.Add("POI Map", null, submenu);
                     },
 
                     init_mapBox: function () {
@@ -268,8 +276,6 @@
 
                             /* Select box for POI Type */
                             selectBox = new qx.ui.form.SelectBox();
-
-                            var currentSelection = this.visOptions.poi || -2;
                             var makePoiItem = function (model, name) {
                                 var item = new qx.ui.form.ListItem(name, null, model);
                                 selectBox.add(item);
@@ -277,6 +283,8 @@
                                     selectBox.setSelection([item]);
                                 }
                             }
+
+                            var currentSelection = this.visOptions.poi || -2;
 
                             FPOI = ClientLib.Data.WorldSector.WorldObjectPointOfInterest.EPOIType;
                             makePoiItem(-2, "<< All >>");
@@ -288,7 +296,7 @@
                             makePoiItem(FPOI.Vehicle, "Uranium VEH");
                             makePoiItem(FPOI.Air, "Aircraft");
                             makePoiItem(FPOI.Defense, "Resonator DEF");
-                            //makePoiItem(FPOI.TunnelExit,"Tunnel Exit");
+                            makePoiItem(FPOI.TunnelExit, "Tunnel Exit");
 
                             /* ClientLib.Base.EPOIType is not consistent with ClientLib.Data.WorldSector.WorldObjectPointOfInterest.EPOIType
                             makePoiItem(ClientLib.Base.EPOIType.AirBonus, "Aircraft GNT (Off Air)");
@@ -305,6 +313,7 @@
                                     if (e != null && e.getData() && e.getData().length > 0) {
                                         console.log("POI selected " + e.getData()[0].getModel());
                                         _this.visOptions.poi = e.getData()[0].getModel(); // POI ID or -2 for all
+
                                         this.saveOptions();
                                         this.updateMap();
                                     }
@@ -400,62 +409,107 @@
                                 row: 2,
                                 column: 1
                             });
-                            this.makeLbl("Alliance POIs:", 3, 0);
                             /* Checkbox for alliance POIs */
+                            this.makeLbl("Alliance POIs:", 3, 0);
                             this.makeCheckbox("showAlliancePois", 3, 1);
                             if (this.visOptions.selectedAllianceId == -1) {
                                 this.swObj.chkBoxFields.showAlliancePois.setEnabled(false);
                             }
-                            this.makeLbl("Own Cities:", 4, 0);
                             /* Checkbox for own bases */
+                            this.makeLbl("Own Cities:", 4, 0);
                             this.makeCheckbox("showOwnCities", 4, 1);
-                            this.makeLbl("Viewport Frame:", 5, 0);
                             /* Checkbox for showSectionFrame */
+                            this.makeLbl("Viewport Frame:", 5, 0);
                             this.makeCheckbox("showSectionFrame", 5, 1);
 
+                            this.makeLbl("Min POI level:", 6, 0);
+                            this.makeTxt("minPoiLevel", 6, 1);
+
+                            var refreshIcon2 = new qx.ui.form.Button("\u2713");
+                            refreshIcon2.set({
+                                appearance: "button-text-small",
+                                toolTipText: 'Apply min and max POI level and color styles',
+                            });
+                            refreshIcon2.addListener("click", function () {
+
+                                this.saveOptions();
+                                this.updateMap();
+
+                            }, this);
+                            this.settingsWnd.add(refreshIcon2, {
+                                row: 6,
+                                column: 2,
+                            });
+
+
+                            this.makeLbl("Max POI level:", 7, 0);
+                            this.makeTxt("maxPoiLevel", 7, 1);
+
+
+                            var btnResLev = new qx.ui.form.Button("\u2613");
+                            btnResLev.set({
+                                appearance: "button-text-small",
+                                toolTipText: 'Reset min and max POI level',
+                            });
+                            btnResLev.addListener("click", function () {
+                                this.swObj.settingFields.minPoiLevel.setValue('0');
+                                this.swObj.settingFields.maxPoiLevel.setValue('99');
+                                this.saveOptions();
+                                this.updateMap();
+
+                            }, this);
+                            this.settingsWnd.add(btnResLev, {
+                                row: 7,
+                                column: 2,
+                            });
+
+
+
                             bt = new qx.ui.basic.Label("- Colors -").set({
-                                value: '<a href="http://www.w3schools.com/html/html_colornames.asp" style="font-size:16px;font-weight:bold;color:orange" target="_blank">- Colors -</a>',
+                                value: '<a href="https://www.w3schools.com/tags/ref_colornames.asp" style="font-size:16px;font-weight:bold;color:orange" target="_blank">- Colors -</a>',
                                 rich: true,
                                 selectable: true
                             });
                             this.settingsWnd.add(bt, {
-                                row: 6,
+                                row: 8,
                                 column: 1,
                             });
                             // bt.addListener("click", function() { window.open("http://www.w3schools.com/html/html_colornames.asp") });
 
 
-                            this.makeLbl("Alliance Terrain:", 7, 0);
-                            this.makeTxt("allianceTerrainColor", 7, 1);
 
-                            this.makeLbl("Forg. Base:", 8, 0);
-                            this.makeTxt("baseColor", 8, 1);
 
-                            this.makeLbl("Camp:", 9, 0);
-                            this.makeTxt("campColor", 9, 1);
+                            this.makeLbl("Alliance Terrain:", 9, 0);
+                            this.makeTxt("allianceTerrainColor", 9, 1);
 
-                            this.makeLbl("Player:", 10, 0);
-                            this.makeTxt("playerColor", 10, 1);
+                            this.makeLbl("Forg. Base:", 10, 0);
+                            this.makeTxt("baseColor", 10, 1);
 
-                            this.makeLbl("Enemy:", 11, 0);
-                            this.makeTxt("enemyBaseColor", 11, 1);
+                            this.makeLbl("Camp:", 11, 0);
+                            this.makeTxt("campColor", 11, 1);
+
+                            this.makeLbl("Player:", 12, 0);
+                            this.makeTxt("playerColor", 12, 1);
+
+                            this.makeLbl("Enemy:", 13, 0);
+                            this.makeTxt("enemyBaseColor", 13, 1);
                             //this.swObj.settingFields.enemyBaseColor.setEnabled(false);
 
-                            this.makeLbl("Outpost:", 12, 0);
-                            this.makeTxt("outpostColor", 12, 1);
+                            this.makeLbl("Outpost:", 14, 0);
+                            this.makeTxt("outpostColor", 14, 1);
 
-                            this.makeLbl("POI:", 13, 0);
-                            this.makeTxt("poiColor", 13, 1);
+                            this.makeLbl("POI:", 15, 0);
+                            this.makeTxt("poiColor", 15, 1);
 
-                            this.makeLbl("Tunnel:", 14, 0);
-                            this.makeTxt("tunnelColor", 14, 1);
+                            this.makeLbl("Tunnel:", 16, 0);
+                            this.makeTxt("tunnelColor", 16, 1);
 
-                            this.makeLbl("Own Base:", 15, 0);
-                            this.makeTxt("ownBaseColor", 15, 1);
+                            this.makeLbl("Own Base:", 17, 0);
+                            this.makeTxt("ownBaseColor", 17, 1);
                             //this.swObj.settingFields.ownBaseColor.setEnabled(false);
 
-                            this.makeLbl("Highlight:", 16, 0);
-                            this.makeTxt("highlightColor", 16, 1);
+                            this.makeLbl("Highlight:", 18, 0);
+                            this.makeTxt("highlightColor", 18, 1);
                             //this.swObj.settingFields.highlightColor.setEnabled(false);
 
                             /* Line Options */
@@ -464,8 +518,8 @@
                             this.makeLbl("- Line -", 0, 3);
 
 
-                            this.makeLbl("Show Line", 1, 3);
                             /* Checkbox for showBorderLine1 */
+                            this.makeLbl("Show Line", 1, 3);
                             this.makeCheckbox("showBorderLine1", 1, 4);
 
                             this.makeLbl("Line Start:", 2, 3);
@@ -479,8 +533,8 @@
                             this.makeLbl("Line 1 Color:", 4, 3);
                             this.makeTxt("line1color", 4, 4);
 
-                            this.makeLbl("Show Line 2", 5, 3);
                             /* Checkbox for showBorderLine2 */
+                            this.makeLbl("Show Line 2", 5, 3);
                             this.makeCheckbox("showBorderLine2", 5, 4);
 
                             this.makeLbl("Line Start:", 6, 3);
@@ -888,6 +942,8 @@
                         var hilitePois = [];
                         var sectors = this.getSectors(w);
 
+                        // console.log('alliance', alliance)
+                        // console.log('this.swObj', this.swObj)
 
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -896,9 +952,12 @@
                         // 1 3 2 4 0
                         // ClientLib.Data.MainData.GetInstance().get_Alliance().GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeEnemy).l
                          */
-                        this.relations.enemies = md.get_Alliance().GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeEnemy, true).l;
-                        this.relations.allies = md.get_Alliance().GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeAlly, true).l;
-                        this.relations.nap = md.get_Alliance().GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeNAP, true).l;
+                        // this.relations.enemies = md.get_Alliance().GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeEnemy, true).l;
+                        // this.relations.allies = md.get_Alliance().GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeAlly, true).l;
+                        // this.relations.nap = md.get_Alliance().GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeNAP, true).l;
+                        this.relations.enemies = alliance.GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeEnemy, true).l;
+                        this.relations.allies = alliance.GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeAlly, true).l;
+                        this.relations.nap = alliance.GetAllianceRelationshipsByType(webfrontend.gui.alliance.DiplomacyPage.ERelationTypeNAP, true).l;
 
                         this.relations.enemiesById = this.makeHash(this.relations.enemies, "OtherAllianceId");
                         //console.log(this.relations.enemiesById);
@@ -909,6 +968,8 @@
                         this.relations.enemies[i].OtherAllianceName;
                         this.relations.enemies[i].OtherAllianceId;
                         } */
+
+
 
                         if (!this.swObj.obfAllianceId)
                             this.swObj.obfAllianceId = this.getMemberNameByType(alliance, "number", 0);
@@ -998,46 +1059,87 @@
                                                 wObj.YQTUPE: 123
                                                 wObj.HIFKIQ: "Alliance Name"
                                                 wObj.LSVKAD: {} -->
+
+
+                                                newData 25-02-2024 year
+                                                EWONBG: 30
+                                                KXYLAQ: -1
+                                                PIFBZL: 3707
+                                                RMMPVP: 0
+                                                SequenceId: 3497
+                                                Type: 4
+                                                UXLHPW: 0
+                                                worldId: 38338858
+                                                __proto__: $I.SGECSH
+
+                                                
                                                  */
 
                                                 //console.log("POI/Tunnel ("+cx+":"+cy+" POIType:"+wObj[this.getNameByIdx(wObj,3)]+"):\n"+this.dump(wObj,"wObj",1,true));
 
                                                 if (!this.obfPOIType) {
-                                                    this.obfPOIType = this.getNameByIdx(wObj, 3);
+                                                    this.obfPOIType = this.getNameByIdx(wObj, 4);
+                                                    // console.warn(wObj, 'this.obfPOIType', this.obfPOIType, this.getNameByIdx(wObj, 3))
+                                                    // console.dir(wObj)
+
                                                 }
                                                 if (!this.obfWorldObjectPointOfInterestAllianceName) {
                                                     this.obfWorldObjectPointOfInterestAllianceName = this.getMemberNameByType(wObj, "string", 0);
                                                 }
                                                 if (!this.obfWorldObjPOIAllyId) {
-                                                    this.obfWorldObjPOIAllyId = this.getNameByIdx(wObj, 5);
+                                                    this.obfWorldObjPOIAllyId = this.getNameByIdx(wObj, 2);
                                                 }
+                                                if (!this.obfWorldObjPOILevel) {
+                                                    this.obfWorldObjPOILevel = this.getNameByIdx(wObj, 3);
+                                                }
+                                                var minPoiLvl = this.visOptions.settingsPanel.minPoiLevel || 0;
+                                                var maxPoiLvl = this.visOptions.settingsPanel.maxPoiLevel || 99;
+                                                var poiBetweenMinMax = (wObj[this.obfWorldObjPOILevel] >= minPoiLvl && wObj[this.obfWorldObjPOILevel] <= maxPoiLvl)
 
                                                 if (wObj[this.obfPOIType] == 0) {
                                                     // Tunnel
                                                     ctx.fillStyle = this.visOptions.settingsPanel.tunnelColor;
+
+                                                    if (this.visOptions.poi == 0) {
+                                                        // Selected POI = << All >>
+                                                        if (poiBetweenMinMax) {
+                                                            hilitePois.push([cx, cy]);
+                                                            // console.log(`вывожу все от ${minPoiLvl} до ${maxPoiLvl} `, this.visOptions.poi, wObj[this.obfPOIType], wObj)
+                                                        }
+
+                                                    }
+
                                                 } else {
                                                     // POI
                                                     ctx.fillStyle = this.visOptions.settingsPanel.poiColor;
 
-                                                    // if not checked
+                                                    // if not checked                                                        
+                                                    // console.warn(wObj, 'this.obfWorldObjPOIAllyId', this.obfWorldObjPOIAllyId, 'this.visOptions.selectedAllianceId', this.visOptions.selectedAllianceId, this.visOptions)
+
                                                     if (!this.visOptions.chk.showAlliancePois) {
                                                         if (this.visOptions.poi == -2) {
                                                             // Selected POI = << All >>
-                                                            hilitePois.push([cx, cy]);
+                                                            if (poiBetweenMinMax) {
+                                                                hilitePois.push([cx, cy]);
+                                                                // console.log(`вывожу все от ${minPoiLvl} до ${maxPoiLvl} `, this.visOptions.poi, wObj[this.obfPOIType], wObj)
+                                                            }
+
                                                         } else if (this.visOptions.poi && this.visOptions.poi == wObj[this.obfPOIType]) {
                                                             // for some reasons, the constants in ClientLib are off by 1 [offset corrected]
-                                                            hilitePois.push([cx, cy]);
+                                                            // console.log('вывожу', this.visOptions.poi, wObj[this.obfPOIType])
+                                                            if (poiBetweenMinMax) { hilitePois.push([cx, cy]); }
                                                         }
                                                         // if checked & current POI is from selected Alliance
                                                     } else if (wObj[this.obfWorldObjPOIAllyId] == this.visOptions.selectedAllianceId) {
+
                                                         // if a poi type is selected & current POI is selected type
                                                         if (this.visOptions.poi >= 0 && this.visOptions.poi == wObj[this.obfPOIType]) {
                                                             // Selected Alliance POI
-                                                            hilitePois.push([cx, cy]);
+                                                            if (poiBetweenMinMax) { hilitePois.push([cx, cy]); }
                                                             //if show all POIs selected
                                                         } else if (this.visOptions.poi == -2) {
                                                             // Selected POI = << All >>
-                                                            hilitePois.push([cx, cy]);
+                                                            if (poiBetweenMinMax) { hilitePois.push([cx, cy]); }
                                                         } else {
                                                             console.log("perhaps visOptions.poi is empty?!");
                                                         }
@@ -1055,22 +1157,22 @@
                                         // 0 1 2 3 4 5
                                         // Own, Alliance, Neutral, Enemy, SpawnZone, Restricted */
                                         switch (terr) {
-                                            case 0 /* ClientLib.Data.ETerritoryType.Own */ : {
+                                            case 0 /* ClientLib.Data.ETerritoryType.Own */: {
                                                 ctx.fillStyle = this.visOptions.settingsPanel.ownBaseColor;
                                                 ctx.fillRect(cx * zf, cy * zf, zf, zf);
                                                 break;
                                             }
-                                            case 1 /* ClientLib.Data.ETerritoryType.Alliance */ : {
+                                            case 1 /* ClientLib.Data.ETerritoryType.Alliance */: {
                                                 ctx.fillStyle = this.visOptions.settingsPanel.allianceTerrainColor;
                                                 ctx.fillRect(cx * zf, cy * zf, zf, zf);
                                                 break;
                                             }
-                                            case 2 /* ClientLib.Data.ETerritoryType.Neutral */ : {
+                                            case 2 /* ClientLib.Data.ETerritoryType.Neutral */: {
                                                 ctx.fillStyle = "rgba(128,128,128,0.1)";
                                                 ctx.fillRect(cx * zf, cy * zf, zf, zf);
                                                 break;
                                             }
-                                            case 3 /* ClientLib.Data.ETerritoryType.Enemy */ : {
+                                            case 3 /* ClientLib.Data.ETerritoryType.Enemy */: {
                                                 if (w.GetOwner(cx, cy) != 1610612736) { // lol
                                                     ctx.fillStyle = "rgba(255,128,0,0.1)";
                                                     ctx.fillRect(cx * zf, cy * zf, zf, zf);
@@ -1164,7 +1266,7 @@
                                 ctx.arc(x + zf / 2, y + zf / 2, zf * 20, 0 * Math.PI, 2 * Math.PI);
                                 ctx.stroke();
 
-                                ctx.strokeStyle = "rgba(128,128,128,0.2)";
+                                ctx.strokeStyle = "rgba(128,128,128,0.5)";
                                 ctx.beginPath();
                                 ctx.arc(x + zf / 2, y + zf / 2, zf * 40, 0 * Math.PI, 2 * Math.PI);
                                 ctx.stroke();
@@ -1284,9 +1386,11 @@
                                             var propnames = [];
                                             for (p in maybeAlliance)
                                                 propnames.push(p);
+
                                             var stringpropcount = 0;
                                             var stringpropname = null;
-                                            if (propnames.length == 13) {
+
+                                            if (propnames.length == 12) {
                                                 for (k = 0; k < propnames.length; k++) {
                                                     if (typeof (maybeAlliance[propnames[k]]) == "string") {
                                                         stringpropname = propnames[k];
@@ -1551,8 +1655,8 @@
                             switch (valueType) {
                                 case "function":
                                     return;
-                                    // try{var fr=obj();}catch(ex){var  fr=ex;}
-                                    // s+= "" + path +": "+ "{function} returns: "+fr + "\n";return;
+                                // try{var fr=obj();}catch(ex){var  fr=ex;}
+                                // s+= "" + path +": "+ "{function} returns: "+fr + "\n";return;
                                 case "object":
                                     s += "" + path + ": {} -->" /*+ propValue.toString().substr(0,20)*/ +
                                         "\n";
