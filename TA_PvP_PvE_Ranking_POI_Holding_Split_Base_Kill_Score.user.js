@@ -5,8 +5,8 @@
 // @namespace      pvp_rank_mod
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @contributor    NetquiK (https://github.com/netquik) (Fix for scrollbarY)
-// @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_Report_Stats.user.js
-// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_Report_Stats.user.js
+// @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_PvP_PvE_Ranking_POI_Holding_Split_Base_Kill_Score.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_PvP_PvE_Ranking_POI_Holding_Split_Base_Kill_Score.user.js
 // @grant          none
 // @version        1.7.4.1
 // ==/UserScript==
