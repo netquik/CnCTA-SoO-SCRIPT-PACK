@@ -4,8 +4,11 @@
 // @description    Shows PvP/PvE Ranking of the players alliance in the PlayerWindow, also adds POIs the Player holds and splits pve/pvp score. 
 // @namespace      pvp_rank_mod
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
+// @contributor    NetquiK (https://github.com/netquik) (Fix for scrollbarY)
+// @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_PvP_PvE_Ranking_POI_Holding_Split_Base_Kill_Score.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_PvP_PvE_Ranking_POI_Holding_Split_Base_Kill_Score.user.js
 // @grant          none
-// @version        1.7.4
+// @version        1.7.4.2
 // ==/UserScript==
 
 (function () {
@@ -355,6 +358,9 @@
                         break;
                     }
                 }
+                // Fix scrollBarY for many POIs by Netquik
+                atableModel.setData(rowData2);
+                atableModel.sortByColumn(0, true);
 
                 // Add player with its PvP/PvE score.
                 rowData.push([memberName, pvp, pve]);
@@ -417,8 +423,8 @@
                         }, phe.cnc.Util.createEventDelegate(ClientLib.Net.CommandResult, this, onPlayerInfoReceived), null);
                     }
                 }
-                atableModel.setData(rowData2);
-                atableModel.sortByColumn(0, true);
+                //atableModel.setData(rowData2);
+                //atableModel.sortByColumn(0, true);
             } catch (e) {
                 console.log("onAllianceInfoReceived: ", e);
             }
@@ -503,6 +509,8 @@
                     }
                     tableModel.setData(rowData1);
                     tableModel.sortByColumn(0, true);
+
+                    
                 }
             } catch (e) {
                 console.log("onPlayerAllianceIdReceived: ", e);
