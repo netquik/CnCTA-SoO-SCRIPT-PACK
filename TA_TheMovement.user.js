@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Tiberium Alliances The Movement
-// @version        1.0.7
+// @version        1.0.8.1
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
@@ -8,7 +8,7 @@
 // @contributor    Netquik (19.3||19.4||20.3||22.2||22.3 FIX) + !!NOEVIL!!
 // @description    Strategical territory simulator
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TheMovement.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_TheMovement.user.js
 // ==/UserScript==
 'use strict';
 (function () {
@@ -1048,7 +1048,7 @@
                     //MOD New way to find moveInfoOnMouseUpMethodName by NetquiK (Patch for 22.2)
                     /* this.moveInfoOnMouseUpMethodName = Function.prototype.toString.call(webfrontend.gui.region.RegionCityMoveInfo.constructor).match(/attachNetEvent\(this\.[A-Za-z0-9_]+,[A-Za-z]+,ClientLib\.Vis\.MouseTool\.OnMouseUp,this,this\.([A-Za-z0-9_]+)\);/)[1]; */
                     this.moveInfoOnMouseUpMethodName = null;
-                    let MoveInfo = parseFloat(GameVersion) >= 22.2 ? webfrontend.gui.region.RegionCityMoveInfo.$$original.toString() : Function.prototype.toString.call(webfrontend.gui.region.RegionCityMoveInfo.constructor);
+                    let MoveInfo = webfrontend.gui.region.RegionCityMoveInfo.$$original.toString(); //GameVersion
                     this.moveInfoOnMouseUpMethodName = MoveInfo.match(/attachNetEvent\(this\.[A-Za-z0-9_]+,[A-Za-z]+,ClientLib\.Vis\.MouseTool\.OnMouseUp,this,this\.([A-Za-z0-9_]+)\);/)[1];
 
                     //Alternative way by NetquiK
@@ -1116,19 +1116,19 @@
                             cities.set_CurrentOwnCityId(regionCity.get_Id());
                         }
                         var mouseTool = ClientLib.Vis.VisMain.GetInstance().GetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase);
-                        phe.cnc.Util.attachNetEvent(mouseTool, 'OnDeactivate', ClientLib.Vis.MouseTool.OnDeactivate, this, this.__onDeactivateMoveBaseTool);
+                        webfrontend.phe.cnc.Util.attachNetEvent(mouseTool, 'OnDeactivate', ClientLib.Vis.MouseTool.OnDeactivate, this, this.__onDeactivateMoveBaseTool);
                         var cityMoveInfo = webfrontend.gui.region.RegionCityMoveInfo.getInstance();
-                        phe.cnc.Util.detachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, cityMoveInfo, cityMoveInfo[this.moveInfoOnMouseUpMethodName]);
-                        phe.cnc.Util.attachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, this, this.__onMouseUp);
+                        webfrontend.phe.cnc.Util.detachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, cityMoveInfo, cityMoveInfo[this.moveInfoOnMouseUpMethodName]);
+                        webfrontend.phe.cnc.Util.attachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, this, this.__onMouseUp);
                         cityMoveInfo.setCity(regionCity);
                         ClientLib.Vis.VisMain.GetInstance().SetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase, cities.get_CurrentOwnCityId());
                     },
                     __onDeactivateMoveBaseTool: function () {
                         var mouseTool = ClientLib.Vis.VisMain.GetInstance().GetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase);
-                        phe.cnc.Util.detachNetEvent(mouseTool, 'OnDeactivate', ClientLib.Vis.MouseTool.OnDeactivate, this, this.__onDeactivateMoveBaseTool);
+                        webfrontend.phe.cnc.Util.detachNetEvent(mouseTool, 'OnDeactivate', ClientLib.Vis.MouseTool.OnDeactivate, this, this.__onDeactivateMoveBaseTool);
                         var cityMoveInfo = webfrontend.gui.region.RegionCityMoveInfo.getInstance();
-                        phe.cnc.Util.detachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, this, this.__onMouseUp);
-                        phe.cnc.Util.attachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, cityMoveInfo, cityMoveInfo[this.moveInfoOnMouseUpMethodName]);
+                        webfrontend.phe.cnc.Util.detachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, this, this.__onMouseUp);
+                        webfrontend.phe.cnc.Util.attachNetEvent(mouseTool, 'OnMouseUp', ClientLib.Vis.MouseTool.OnMouseUp, cityMoveInfo, cityMoveInfo[this.moveInfoOnMouseUpMethodName]);
                         if (this.originalOwnCityId !== null) {
                             ClientLib.Data.MainData.GetInstance().get_Cities().set_CurrentOwnCityId(this.originalOwnCityId);
                             this.originalOwnCityId = null;
@@ -1312,12 +1312,13 @@
                 statics: {
                     RelationshipColors: {}
                 },
+                //Colors Mod by Netquik
                 defer: function (statics) {
-                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.None] = '#ff4500';
+                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.None] = '#fb7a4b';
                     statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Friend] = '#00cc00';
                     statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.NAP] = '#f5f5dc';
-                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Foe] = '#960018';
-                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Neutral] = '#ff4500';
+                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Foe] = '#fb607a';
+                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Neutral] = '#fb7a4b';
                 },
                 members: {
                     relationshipColors: null,
@@ -1360,6 +1361,22 @@
                                 return a.label.localeCompare(b.label);
                             }));
                         }
+
+                        //Following commented code is for testing colors
+                        /*  alliances.push({
+                             label: 'Test Friend',
+                             color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Friend],
+                             data: 0
+                         }, {
+                             label: 'Test NAP',
+                             color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.NAP],
+                             data: 0
+                         }, {
+                             label: 'Test Foe',
+                             color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Foe],
+                             data: 0
+                         }); */
+
                         return alliances;
                     },
                     /**
