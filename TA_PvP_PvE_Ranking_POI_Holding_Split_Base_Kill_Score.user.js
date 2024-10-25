@@ -4,11 +4,11 @@
 // @description    Shows PvP/PvE Ranking of the players alliance in the PlayerWindow, also adds POIs the Player holds and splits pve/pvp score. 
 // @namespace      pvp_rank_mod
 // @include         https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
-// @contributor    NetquiK (https://github.com/netquik) (Fix for scrollbarY)
+// @contributor    NetquiK (https://github.com/netquik) (Fix for scrollbarY - Coords and PlayerInfo Mod)
 // @downloadURL    https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_PvP_PvE_Ranking_POI_Holding_Split_Base_Kill_Score.user.js
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_PvP_PvE_Ranking_POI_Holding_Split_Base_Kill_Score.user.js
 // @grant          none
-// @version        1.7.4.1
+// @version        1.7.4.3
 // ==/UserScript==
 
 (function () {
@@ -81,7 +81,7 @@
                 dataTable.setColumns(["Name", "PvP", "PvE"], ["name", "pve", "pvp"]);
                 dataTable.setColFormat(0, "<div style=\"cursor:pointer;color:" + webfrontend.gui.util.BBCode.clrLink + "\">", "</div>");
                 var pvpTable = new webfrontend.gui.widgets.CustomTable(dataTable);
-                pvpTable.addListener("eventType", playerInfo, this);
+                pvpTable.addListener(eventType, InfoCenter, this);
                 var columnModel = pvpTable.getTableColumnModel();
                 columnModel.setColumnWidth(0, 200);
                 columnModel.setColumnWidth(1, 80);
@@ -116,7 +116,7 @@
                 tableModel.setColumns([tr("POI Type"), tr("Level"), tr("Score"), tr("Coordinates"), tr("Base Name")], ["t", "l", "s", "c", "basen"]);
                 tableModel.setColFormat(3, "<div style=\"cursor:pointer;color:" + webfrontend.gui.util.BBCode.clrLink + "\">", "</div>");
                 var poiTable = new webfrontend.gui.widgets.CustomTable(tableModel);
-                //poiTable.addListener("eventType", centerCoords, this);
+                poiTable.addListener(eventType, InfoCenter, this);
                 var columnModel = poiTable.getTableColumnModel();
                 columnModel.setColumnWidth(0, 190);
                 columnModel.setColumnWidth(1, 45);
@@ -155,7 +155,7 @@
                 atableModel.setColFormat(3, "<div style=\"cursor:pointer;color:" + webfrontend.gui.util.BBCode.clrLink + "\">", "</div>");
                 atableModel.setColFormat(4, "<div style=\"cursor:pointer;color:" + webfrontend.gui.util.BBCode.clrLink + "\">", "</div>");
                 var apoiTable = new webfrontend.gui.widgets.CustomTable(atableModel);
-                apoiTable.addListener("eventType", centerCoords, this);
+                apoiTable.addListener(eventType, InfoCenter, this);
                 var columnModel = apoiTable.getTableColumnModel();
                 columnModel.setColumnWidth(0, 190);
                 columnModel.setColumnWidth(1, 45);
@@ -190,8 +190,7 @@
                 levelData.setColumns(["Name", "Lvl", "DL", "OL", "SW", "CY", "DF"], ["Bname", "Blv", "Dlv", "Olv", "Slv", "Cylev", "Dflev"]);
                 levelData.setColFormat(0, "<div style=\"cursor:pointer;color:" + webfrontend.gui.util.BBCode.clrLink + "\">", "</div>");
                 var levelTable = new webfrontend.gui.widgets.CustomTable(levelData);
-                levelTable.addListener("eventType", centerCoords, this);
-
+                //levelTable.addListener(eventType, centerCoords, this);
                 var columnlModel = levelTable.getTableColumnModel();
                 columnlModel.setColumnWidth(0, 180);
                 columnlModel.setColumnWidth(1, 70);
@@ -251,25 +250,48 @@
             }
         }
 
-        function playerInfo(e) {
+        // New Function to manage centering on coords and switch player - by Netquik
+        function InfoCenter(e) {
             try {
-                var pname = dataTable.getRowData(e.getRow())[0];
-                if (e.getColumn() == 0) {
-                    webfrontend.gui.util.BBCode.openPlayerProfile(pname);
+                var tview = tabView.getSelection()[0].$$user_label,
+                    col = e.getColumn(),
+                    playname = playerName.getValue();
+                if ([0, 3, 4].includes(col) && ['POI', 'Ranking', 'Alliance POIs'].includes(tview)) {
+                    var pname = null,
+                        poiCoord = null,
+                        model = atableModel;
+                    0 != col && 4 != col || "POI" == tview ? 3 == col && ("POI" == tview && (model = tableModel), poiCoord = model.getRowData(e.getRow())[3].split(":")) : ("Ranking" == tview && (model = dataTable), pname = model.getRowData(e.getRow())[col]);
+                    pname ? (webfrontend.gui.util.BBCode.openPlayerProfile(pname), pname != playname && tabView.resetSelection()) : poiCoord && webfrontend.gui.UtilView.centerCoordinatesOnRegionViewWindow(Number(poiCoord[0]), Number(poiCoord[1]));
                 }
             } catch (e) {
                 console.log("PlayerName: ", e);
             }
         }
 
-        function centerCoords(e) {
-            try {
-                var poiCoord = tableModel.getRowData(e.getRow())[3].split(":");
-                if (e.getColumn() == 3) webfrontend.gui.UtilView.centerCoordinatesOnRegionViewWindow(Number(poiCoord[0]), Number(poiCoord[1]));
-            } catch (e) {
-                console.log("centerCoords: ", e);
-            }
-        }
+        /*         function playerInfo(e) {
+                    try {
+                        var pname = dataTable.getRowData(e.getRow())[0];
+                        if (e.getColumn() == 0 || e.getColumn() == 4) {
+                            webfrontend.gui.util.BBCode.openPlayerProfile(pname);
+                        }
+                    } catch (e) {
+                        console.log("PlayerName: ", e);
+                    }
+                }
+
+                function centerCoords(e) {
+                    try {
+                        if (e.getColumn() == 3) {
+                            var poiCoord = atableModel.getRowData(e.getRow())[3].split(":");
+                            webfrontend.gui.UtilView.centerCoordinatesOnRegionViewWindow(Number(poiCoord[0]), Number(poiCoord[1]));
+                        } else if (e.getColumn() == 4) {
+                            var pname = atableModel.getRowData(e.getRow())[4];
+                            webfrontend.gui.util.BBCode.openPlayerProfile(pname);
+                        }
+                    } catch (e) {
+                        console.log("centerCoords: ", e);
+                    }
+                } */
 
         function baseinfos(e) {
             try {
@@ -509,8 +531,6 @@
                     }
                     tableModel.setData(rowData1);
                     tableModel.sortByColumn(0, true);
-
-                    
                 }
             } catch (e) {
                 console.log("onPlayerAllianceIdReceived: ", e);
