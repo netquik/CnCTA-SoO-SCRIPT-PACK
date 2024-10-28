@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name           Tiberium Alliances The Movement
-// @version        1.0.8.1
+// @version        1.0.8.2
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    Xdaast (19.4 FIX)
-// @contributor    Netquik (19.3||19.4||20.3||22.2||22.3 FIX) + !!NOEVIL!!
+// @contributor    Netquik (19.3||19.4||20.3||22.2||22.3 FIX) + !!NOEVIL!! + PlanRuinFor Colors/NotConfirmed
 // @description    Strategical territory simulator
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
 // @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_TheMovement.user.js
@@ -202,7 +202,8 @@
                             this.__clearMenu(twoStepMenu);
                             for (var i = 0; i < options.length; i++) {
                                 var option = options[i];
-                                var menuButton = new qx.ui.menu.Button(option.label).set({
+                                // Mod for pending ralationships (option.tag) by Netquik
+                                var menuButton = new qx.ui.menu.Button(option.label + option.tag).set({
                                     marginLeft: -12,
                                     textColor: option.color
                                 });
@@ -1316,9 +1317,10 @@
                 defer: function (statics) {
                     statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.None] = '#fb7a4b';
                     statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Friend] = '#00cc00';
-                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.NAP] = '#f5f5dc';
+                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.NAP] = '#31eddd';
                     statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Foe] = '#fb607a';
                     statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Neutral] = '#fb7a4b';
+                    statics.Relationships = ['None', 'Friend', 'NAP', 'Foe', 'Neutral'];
                 },
                 members: {
                     relationshipColors: null,
@@ -1346,20 +1348,25 @@
                         var alliances = [{
                             label: 'No alliance',
                             color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.None],
-                            data: 0
+                            data: 0,
+                            tag: ''
                         }];
+                        // Mod for pending ralationships by Netquik
                         if (ownAlliance.get_Exists() && ownAlliance.get_Relationships() !== null) {
-                            alliances = alliances.concat(ownAlliance.get_Relationships().filter(function (relationship) {
-                                return relationship.IsConfirmed;
-                            }, this).map(function (relationship) {
-                                return {
-                                    label: relationship.OtherAllianceName,
-                                    color: this.constructor.RelationshipColors[relationship.Relationship],
-                                    data: relationship.OtherAllianceId
-                                };
-                            }, this).sort(function (a, b) {
-                                return a.label.localeCompare(b.label);
-                            }));
+                            alliances = alliances.concat(ownAlliance.get_Relationships().
+                                /* filter(function (relationship) {
+                                                                return relationship.IsConfirmed;
+                                                            }, this). */
+                                map(function (relationship) {
+                                    return {
+                                        label: relationship.OtherAllianceName,
+                                        color: relationship.IsConfirmed ? this.constructor.RelationshipColors[relationship.Relationship] : '#f5f5dc',
+                                        data: relationship.OtherAllianceId,
+                                        tag: relationship.IsConfirmed ? '' : ' (Pending ' + this.constructor.Relationships[relationship.Relationship] + ')'
+                                    };
+                                }, this).sort(function (a, b) {
+                                    return a.label.localeCompare(b.label);
+                                }));
                         }
 
                         //Following commented code is for testing colors
