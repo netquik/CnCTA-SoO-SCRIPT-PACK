@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Tiberium Alliances The Movement
-// @version        1.0.8.2
+// @version        1.0.8.3
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
@@ -192,6 +192,7 @@
                      * @param {qx.event.type.Event} event
                      */
                     __onClickActionButton: function (event) {
+                        var manager = qx.theme.manager.Font.getInstance();
                         var id = event.getTarget().getUserData('actionId');
                         var action = this.actions[id];
                         var regionObject = webfrontend.gui.region.RegionCityMenu.getInstance()[this.selectedObjectMemberName];
@@ -202,11 +203,15 @@
                             this.__clearMenu(twoStepMenu);
                             for (var i = 0; i < options.length; i++) {
                                 var option = options[i];
-                                // Mod for pending ralationships (option.tag) by Netquik
+                                // Mod for pending relationships (option.tag) and font styling by Netquik
                                 var menuButton = new qx.ui.menu.Button(option.label + option.tag).set({
                                     marginLeft: -12,
-                                    textColor: option.color
+                                    textColor: option.color,
+                                    font: 'font_size_15_bold'
                                 });
+                                var newFont = manager.resolve(menuButton.getFont()).clone();
+                                newFont.setTextShadow("0px 0px 6px #000");
+                                menuButton.setFont(newFont);
                                 menuButton.setUserData('actionId', id);
                                 menuButton.setUserData('optionData', option.data);
                                 menuButton.addListener('execute', this.__onClickTwoStepMenuButton, this);
@@ -1370,19 +1375,22 @@
                         }
 
                         //Following commented code is for testing colors
-                        /*  alliances.push({
-                             label: 'Test Friend',
-                             color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Friend],
-                             data: 0
-                         }, {
-                             label: 'Test NAP',
-                             color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.NAP],
-                             data: 0
-                         }, {
-                             label: 'Test Foe',
-                             color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Foe],
-                             data: 0
-                         }); */
+                        /* alliances.push({
+                            label: 'Test Friend',
+                            color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Friend],
+                            data: 0,
+                            tag: ''
+                        }, {
+                            label: 'Test NAP',
+                            color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.NAP],
+                            data: 0,
+                            tag: ''
+                        }, {
+                            label: 'Test Foe',
+                            color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Foe],
+                            data: 0,
+                            tag: ''
+                        }); */
 
                         return alliances;
                     },
