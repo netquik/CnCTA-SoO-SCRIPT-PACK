@@ -1,12 +1,23 @@
 // ==UserScript==
-// @name            Shockr - Tiberium Alliances Tools - reMod 1.4
+// @name            Shockr Tools Basescanner Mailversion - reMod 1.4
 // @author          EHz
 // @description     Tools to work with Tiberium alliances - mod by EHz - remod by Netquik
-// @contributor     Netquik (https://github.com/netquik) New Layout Filtering reMod 1.4
+// @contributor     Netquik (https://github.com/netquik) reMod 1.4
 // @include         http*://*.alliances.commandandconquer.com/*/index.aspx*
-// @version         2.7.2.30
-// @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Shockr_Tools_Basescanner_Mailversion_reMod.user.js
+// @version         2.9.1
+// @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_Shockr_Tools_Basescanner_Mailversion_reMod.user.js
 // ==/UserScript==
+
+/* 
+codes by NetquiK
+----------------
+- New Layout Filtering reMod 1.4
+- FIX WorldSector RE by NetquiK + patch if not already by other scanners
+- NOEVIL
+- New WorldCity Wrappers
+- FIX for 25.1
+----------------
+*/
 (function () {
     /* globals qx, ClientLib */
     var setupShockrTools = function () {
@@ -39,26 +50,6 @@
                     return window.setTimeout(waitFunc, 1000);
                 }
                 return callback();
-            },
-            _g: function (k, r, q, m) {
-                var p = [];
-                var o = k.toString();
-                var n = o.replace(/\s/gim, '');
-                p = n.match(r);
-                var l;
-                for (l = 1; l < (m + 1); l++) {
-                    if (p !== null && p[l].length === 6) {
-                        console.debug(q, l, p[l]);
-                    } else {
-                        if (p !== null && p[l].length > 0) {
-                            console.warn(q, l, p[l]);
-                        } else {
-                            console.error('Error - ', q, l, 'not found');
-                            console.warn(q, n);
-                        }
-                    }
-                }
-                return p;
             }
         };
         window.ST = ST;
@@ -152,10 +143,10 @@
                             continue;
                         }
                         // Object isnt a NPC Base/Camp/Outpost
-                        if (object.Type !== ClientLib.Data.WorldSector.ObjectType.NPCBase && object.Type !== ClientLib.Data.WorldSector.ObjectType.NPCCamp) {
+                        if (![2, 3].includes(object.Type)) {
                             continue;
                         }
-                        if (typeof object.getCampType === 'function' && object.getCampType() === ClientLib.Data.Reports.ENPCCampType.Destroyed) {
+                        if (typeof object.get_CampType === 'function' && object.get_CampType() === ClientLib.Data.Reports.ENPCCampType.Destroyed) {
                             continue;
                         }
                         // Cached
@@ -168,7 +159,7 @@
                         var scanBase = {
                             x: scanX,
                             y: scanY,
-                            level: object.getLevel(),
+                            level: object.get_BaseLevel(),
                             id: object.getID(),
                             distance: distance,
                             selectedBaseID: base.get_Id(),
@@ -292,9 +283,12 @@
                     var mail = ClientLib.Data.Mail.prototype;
                     var dt = new Date();
                     var ts = (dt.getTime() - dt.getMilliseconds()) / 1000;
-                    var body = "<cnc><cncs>" + PlayerName + "</cncs><cncd>" + ts + "</cncd><cnct>" + BaseScanner._msg.join('\n') + "</cnct></cnc>";
+                    //MOD Fix No result msg
+                    if (BaseScanner._msg.length == 0) BaseScanner._msg.push('[b]No Interesting Layouts Around![/b]');
+                    var body = "<cnc><cncs>" + PlayerName + "</cncs><cncd>" + ts + "</cncd><cnct>"  + BaseScanner._msg.join('\n') + "</cnct></cnc>";
+
                     console.log(PlayerName, AllianzName, 'scanning results', body);
-                    mail.SendMail(PlayerName, '', 'scanning results', body);
+                    mail.SendMail(PlayerName, '', 'Mail BaseScanner Scan Results', body);
                 } catch (e) {
                     console.error(e);
                 }
@@ -586,89 +580,35 @@
         };
 
         var PatchClientLib = {
-            _g: function (k, r, q, m) {
-                //console.log('DEBUG: ' + 'function _g');
-                var p = [];
-                var o = k.toString();
-                var n = o.replace(/\s/gim, '');
-                p = n.match(r);
-                var l;
-                for (l = 1; l < (m + 1); l++) {
-                    if (p !== null && p[l].length === 6) {
-                        console.debug(q, l, p[l]);
-                    } else {
-                        if (p !== null && p[l].length > 0) {
-                            console.warn(q, l, p[l]);
-                        } else {
-                            console.error('Error - ', q, l, 'not found');
-                            console.warn(q, n);
-                        }
-                    }
-                }
-                return p;
-            },
             patch: function () {
                 //console.log('DEBUG: ' + 'function patch');
                 if (BaseScanner._patched) {
                     return;
                 }
-                var t = ClientLib.Data.WorldSector.WorldObjectCity.prototype;
-                var re = /this\.(.{6})=\(?\(?g>>8\)?\&.*d\+=f;this\.(.{6})=\(/;
-                var y = PatchClientLib._g(t.$ctor, re, ClientLib.Data.WorldSector.WorldObjectCity, 2);
-                if (y !== null && y[1].length === 6) {
-                    t.getLevel = function () {
-                        return this[y[1]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectCity.Level undefined');
-                }
-                if (y !== null && y[2].length === 6) {
-                    t.getID = function () {
-                        return this[y[2]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectCity.ID undefined');
-                }
-                t = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
-                re = /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/;
-                var x = PatchClientLib._g(t.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCBase', 2);
-                if (x !== null && x[1].length === 6) {
-                    t.getLevel = function () {
-                        return this[x[1]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined');
-                }
-                if (x !== null && x[2].length === 6) {
-                    t.getID = function () {
-                        return this[x[2]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.ID undefined');
-                }
-                t = ClientLib.Data.WorldSector.WorldObjectNPCCamp.prototype;
-                re = /100\){0,1};this\.(.{6})=Math.floor.*this\.(.{6})=\(*g\>\>(22|0x16)\)*\&.*=-1;\}this\.(.{6})=\(/;
-                var w = PatchClientLib._g(t.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCCamp', 4);
-                if (w !== null && w[1].length === 6) {
-                    t.getLevel = function () {
-                        return this[w[1]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.Level undefined');
-                }
-                if (w !== null && w[2].length === 6) {
-                    t.getCampType = function () {
-                        return this[w[2]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.CampType undefined');
-                }
-                if (w !== null && w[4].length === 6) {
-                    t.getID = function () {
-                        return this[w[4]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCCamp.ID undefined');
+                // MOD FIX WorldSector WRAPPER by NetquiK + patch if not already by other scanners
+                try {
+                    var RE = /return this\.[A-Z]{6}\.([A-Z]{6})/;
+                    var objs = ['City', 'NPCBase', 'NPCCamp'];
+                    objs.forEach(obj => {
+                        var o = ClientLib.Data.WorldSector['WorldObject' + obj].prototype;
+                        var g = ClientLib.Vis.Region['Region' + obj].prototype;
+                        var b = (typeof o.get_BaseLevel != 'function') ? g.get_BaseLevel.toString().match(RE)[1] : null;
+                        var d = (typeof o.getID != 'function') ? g.get_Id.toString().match(RE)[1] : null;
+                        if (obj == 'NPCCamp') {
+                            var t = (typeof o.get_CampType != 'function') ? g.get_CampType.toString().match(RE)[1] : null;
+                        }
+                        if (b) o.get_BaseLevel = function () {
+                            return this[b];
+                        }, console.log('WorldObject' + obj + ' get_BaseLevel = ' + b);
+                        if (d) o.getID = function () {
+                            return this[d];
+                        }, console.log('WorldObject' + obj + ' getID = ' + d);
+                        if (t) o.get_CampType = function () {
+                            return this[t];
+                        }, console.log('WorldObject' + obj + ' get_CampType = ' + t);
+                    })
+                } catch (e) {
+                    console.debug("Shockr_Tools_Basescanner_Mailversion WRAPPERS error: ", e);
                 }
                 BaseScanner._patched = true;
             }
@@ -690,10 +630,12 @@
                         BaseScanner._button = this.buttonScan;
                         this.buttonScan.addListener('click', this.scan, this);
                         var mainBar = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_MENU);
-                        var childs = mainBar.getChildren()[1].getChildren();
+                        // Fix for 25.1
+                        var menu_children = (mainBar.getChildren().length > 1) ? mainBar.getChildren()[1] : mainBar.getChildren()[0];
+                        var childs = menu_children.getChildren();
                         var childCount = childs.length;
                         console.log('shockr childs count: ' + childCount);
-                        var Barsize = 0;
+                        //var Barsize = 0;
                         for (var z = childCount - 1; z >= 0; z--) {
                             if (typeof childs[z].setAppearance === "function") {
                                 if (childs[z].getAppearance() == "button-bar-right") {
@@ -702,18 +644,18 @@
                             }
                         }
 
-                        mainBar.getChildren()[1].add(this.buttonScan);
-                        childs = mainBar.getChildren()[1].getChildren();
+                        menu_children.add(this.buttonScan);
+                        /* childs = menu_children.getChildren();
                         for (var i in childs) {
                             if (typeof childs[i].setAppearance === "function" && childs[i].isVisible()) {
                                 Barsize += childs[i].getWidth();
                             }
-                        }
-                        mainBar.getChildren()[1].setMarginLeft(4);
-                        mainBar.getChildren()[0].setScale(true);
+                        } */
+                        //menu_children.setMarginLeft(4);
+                        //mainBar.getChildren()[0].setScale(true);
                         mainBar.setMarginLeft(-50);
                         //ScriptsButton = mainBar.getScriptsButton().isVisible() ? 1 : 0;
-                        mainBar.getChildren()[0].setWidth(Barsize + 10);
+                        //mainBar.getChildren()[0].setWidth(Barsize + 10);
                         //mainBar.getChildren()[1].setWidth(Barsize+94);
                         console.log('Scan Button added');
                     },
@@ -731,6 +673,7 @@
         };
         ST.util.waitForLoad(function () {
             console.log('ST: Starting module [BaseScanner]');
+            PatchClientLib.patch();
             makeButton();
         });
     };
@@ -777,16 +720,13 @@
                         }
 
                         // Object isnt a NPC Base/Camp/Outpost
-                        if (object.Type !== ClientLib.Data.WorldSector.ObjectType.NPCBase) {
+                        if (![2, 3].includes(object.Type))  {
                             continue;
                         }
-                        if (typeof object.getCampType === 'function' && object.getCampType() === ClientLib.Data.Reports.ENPCCampType.Destroyed) {
+                        if (typeof object.get_CampType === 'function' && object.get_CampType() === ClientLib.Data.Reports.ENPCCampType.Destroyed) {
                             continue;
                         }
-                        if (typeof object.getLevel !== 'function') {
-                            BaseCounter._patchClientLib();
-                        }
-                        var level = object.getLevel();
+                        var level = object.get_BaseLevel();
                         levelCount[level] = (levelCount[level] || 0) + 1;
                         count++;
                     }
@@ -885,18 +825,6 @@
                         }
                     };
                 }
-            },
-            _patchClientLib: function () {
-                var proto = ClientLib.Data.WorldSector.WorldObjectNPCBase.prototype;
-                var re = /100\){0,1};this\.(.{6})=Math.floor.*d\+=f;this\.(.{6})=\(/;
-                var x = ST.util._g(proto.$ctor, re, 'ClientLib.Data.WorldSector.WorldObjectNPCBase', 2);
-                if (x !== null && x[1].length === 6) {
-                    proto.getLevel = function () {
-                        return this[x[1]];
-                    };
-                } else {
-                    console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined');
-                }
             }
         };
         ST.util.waitForLoad(function () {
@@ -923,7 +851,7 @@
     }
     if (window.location.pathname !== ('/login/auth')) {
         var script = document.createElement('script');
-        script.innerHTML = innerHTML(ST_MODULES);
+        script.textContent = innerHTML(ST_MODULES);
         script.type = 'text/javascript';
         document.getElementsByTagName('head')[0].appendChild(script);
     }
