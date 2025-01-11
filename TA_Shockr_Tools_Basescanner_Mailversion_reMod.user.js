@@ -4,7 +4,7 @@
 // @description     Tools to work with Tiberium alliances - mod by EHz - remod by Netquik
 // @contributor     Netquik (https://github.com/netquik) reMod 1.4
 // @include         http*://*.alliances.commandandconquer.com/*/index.aspx*
-// @version         2.9.1
+// @version         2.9.2
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_Shockr_Tools_Basescanner_Mailversion_reMod.user.js
 // ==/UserScript==
 
@@ -635,7 +635,7 @@ codes by NetquiK
                         var childs = menu_children.getChildren();
                         var childCount = childs.length;
                         console.log('shockr childs count: ' + childCount);
-                        //var Barsize = 0;
+                        var Barsize = 0;
                         for (var z = childCount - 1; z >= 0; z--) {
                             if (typeof childs[z].setAppearance === "function") {
                                 if (childs[z].getAppearance() == "button-bar-right") {
@@ -645,18 +645,18 @@ codes by NetquiK
                         }
 
                         menu_children.add(this.buttonScan);
-                        /* childs = menu_children.getChildren();
+                         childs = menu_children.getChildren();
                         for (var i in childs) {
                             if (typeof childs[i].setAppearance === "function" && childs[i].isVisible()) {
                                 Barsize += childs[i].getWidth();
                             }
-                        } */
-                        //menu_children.setMarginLeft(4);
-                        //mainBar.getChildren()[0].setScale(true);
-                        mainBar.setMarginLeft(-50);
+                        } 
+                        if (mainBar.getChildren().length > 1) menu_children.setMarginLeft(4),
+                        mainBar.getChildren()[0].setScale(true),
+                        mainBar.getChildren()[0].setWidth(Barsize + 10);
                         //ScriptsButton = mainBar.getScriptsButton().isVisible() ? 1 : 0;
-                        //mainBar.getChildren()[0].setWidth(Barsize + 10);
                         //mainBar.getChildren()[1].setWidth(Barsize+94);
+                        mainBar.setMarginLeft(-50);
                         console.log('Scan Button added');
                     },
                     scan: function () {
