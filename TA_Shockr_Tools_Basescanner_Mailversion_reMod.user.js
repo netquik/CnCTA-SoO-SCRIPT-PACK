@@ -4,7 +4,7 @@
 // @description     Tools to work with Tiberium alliances - mod by EHz - remod by Netquik
 // @contributor     Netquik (https://github.com/netquik) reMod 1.4
 // @include         http*://*.alliances.commandandconquer.com/*/index.aspx*
-// @version         2.9
+// @version         2.9.2
 // @updateURL       https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Shockr_Tools_Basescanner_Mailversion_reMod.user.js
 // ==/UserScript==
 
@@ -15,6 +15,7 @@ codes by NetquiK
 - FIX WorldSector RE by NetquiK + patch if not already by other scanners
 - NOEVIL
 - New WorldCity Wrappers
+- FIX for 25.1
 ----------------
 */
 (function () {
@@ -629,7 +630,9 @@ codes by NetquiK
                         BaseScanner._button = this.buttonScan;
                         this.buttonScan.addListener('click', this.scan, this);
                         var mainBar = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_MENU);
-                        var childs = mainBar.getChildren()[1].getChildren();
+                        // Fix for 25.1
+                        var menu_children = (mainBar.getChildren().length > 1) ? mainBar.getChildren()[1] : mainBar.getChildren()[0];
+                        var childs = menu_children.getChildren();
                         var childCount = childs.length;
                         console.log('shockr childs count: ' + childCount);
                         var Barsize = 0;
@@ -641,19 +644,19 @@ codes by NetquiK
                             }
                         }
 
-                        mainBar.getChildren()[1].add(this.buttonScan);
-                        childs = mainBar.getChildren()[1].getChildren();
+                        menu_children.add(this.buttonScan);
+                         childs = menu_children.getChildren();
                         for (var i in childs) {
                             if (typeof childs[i].setAppearance === "function" && childs[i].isVisible()) {
                                 Barsize += childs[i].getWidth();
                             }
-                        }
-                        mainBar.getChildren()[1].setMarginLeft(4);
-                        mainBar.getChildren()[0].setScale(true);
-                        mainBar.setMarginLeft(-50);
-                        //ScriptsButton = mainBar.getScriptsButton().isVisible() ? 1 : 0;
+                        } 
+                        if (mainBar.getChildren().length > 1) menu_children.setMarginLeft(4),
+                        mainBar.getChildren()[0].setScale(true),
                         mainBar.getChildren()[0].setWidth(Barsize + 10);
+                        //ScriptsButton = mainBar.getScriptsButton().isVisible() ? 1 : 0;
                         //mainBar.getChildren()[1].setWidth(Barsize+94);
+                        mainBar.setMarginLeft(-50);
                         console.log('Scan Button added');
                     },
                     scan: function () {
