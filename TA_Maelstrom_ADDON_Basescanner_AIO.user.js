@@ -2,11 +2,12 @@
 // @name        Maelstrom ADDON Basescanner AIO
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description Maelstrom ADDON Basescanner All in One (Infected Camps + Growth Rate + New Layout Info)
-// @version     1.9.4
+// @version     1.9.5
 // @author      BlinDManX + chertosha + Netquik
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
 // @contributor Netquik (https://github.com/netquik)
+// @contributor kad (https://github.com/kad)
 // @grant       none
 // @copyright   2012+, Claus Neumann
 // @license     CC BY-NC-ND 3.0 - http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -34,12 +35,13 @@ codes by NetquiK
 - Fix for clear cache
 - Fix FOR CP Calculation on PLAYERS
 - Fix No Alliance or no Diplomacy
+- Fix (Tib+Cry+Cre)/CP calculation on switching bases
 ----------------
 */
 
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.4 AIO";
+        window.__msbs_version = "1.9.5 AIO";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -936,7 +938,11 @@ codes by NetquiK
                                                     if (c5 <= parseInt(object.get_BaseLevel(), 10)) {
                                                         var d = this.FL(object.getID(), 0);
                                                         //MOD Fix needcp when cached city by Netquik
-                                                        null != d && d[13] !== needcp && (d[13] = needcp);
+                                                        if (null != d && d[13] !== needcp) {
+                                                            d[13] = needcp;
+                                                            //MOD Fix (Tib+Cry+Cre)/CP calculation on switching bases
+                                                            d[16] = d[15] / d[13];
+                                                        }
                                                         var e = this.FL(object.getID(), 1);
                                                         if (e != null) {
                                                             this.ZM[object.getID()] = e;
