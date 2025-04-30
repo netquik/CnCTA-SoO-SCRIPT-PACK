@@ -33,7 +33,7 @@ codes by NetquiK
             Hidden: 3
         };
         var onlineStateColor = {};
-        onlineStateColor[OnlineState.Online] = "#00FF00";
+        onlineStateColor[OnlineState.Online] = "#B700FF";
         onlineStateColor[OnlineState.Away] = "#FFFF00";
         onlineStateColor[OnlineState.Offline] = "#FF0000";
         onlineStateColor[OnlineState.Hidden] = "#C2C2C2";
