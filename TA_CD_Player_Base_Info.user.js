@@ -3,7 +3,7 @@
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @include     https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @description Provides basic offense and defense information regarding the player bases around you. It also displays your own bases repair time.
-// @version     3.20
+// @version     3.21
 // @author      XDaast
 // @contributor NetquiK (https://github.com/netquik) - (see first comments for changelog)
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_CD_Player_Base_Info.user.js
@@ -13,7 +13,7 @@
 /* 
 codes by NetquiK
 ----------------
-- Marker Fix
+- Marker Fix 2
 ----------------
 */
 
@@ -29,7 +29,14 @@ codes by NetquiK
 
 				//var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Vis.VisMain.GetInstance().get_SelectedObject().get_Id());
 				//Marker fix by NetquiK
+				var g = ClientLib.Vis.Region['RegionCity'].prototype;
+				var RE = /return this\.[A-Z]{6}\.([A-Z]{6})/;
 				var selection = ClientLib.Vis.VisMain.GetInstance().get_SelectedObject();
+				var city = ClientLib.Data.MainData.GetInstance().get_World().GetObjectFromPosition(selection.get_RawX(), selection.get_RawY());
+				var d = (typeof city.getID != 'function') ? g.get_Id.toString().match(RE)[1] : null;
+				if (d) city.getID = function () {
+					return this[d];
+				}
 				var city = ClientLib.Data.MainData.GetInstance().get_Cities().GetCity(ClientLib.Data.MainData.GetInstance().get_World().GetObjectFromPosition(selection.get_RawX(), selection.get_RawY()).getID());
 				if (!widget.hasOwnProperty("offLevel")) {
 
