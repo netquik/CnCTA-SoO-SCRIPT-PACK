@@ -3,12 +3,13 @@
 // @description Maelstrom ADDON Basescanner
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_Maelstrom_ADDON_Basescanner_Basic.user.js
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
-// @version     1.9.2
+// @version     1.9.5
 // @author      BlinDManX
 // @contributor leo7044 (https://github.com/leo7044)
 // @contributor AlkalyneD4 Patch 19.3 fix
 // @contributor nefrontheone ES Translation
 // @contributor Netquik (https://github.com/netquik)
+// @contributor kad (https://github.com/kad)
 // @grant       none
 // @copyright   2012+, Claus Neumann
 // @license     CC BY-NC-ND 3.0 - http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -28,11 +29,14 @@ codes by NetquiK
 - Not add Allies or Own Bases
 - Fix for clear cache
 - Fix FOR CP Calculation on PLAYERS
+- Fix No Alliance or no Diplomacy
+- Fix (Tib+Cry+Cre)/CP calculation on switching bases
 ----------------
 */
+
 (function () {
     var MaelstromTools_Basescanner = function () {
-        window.__msbs_version = "1.9.2";
+        window.__msbs_version = "1.9.5";
 
         function createMaelstromTools_Basescanner() {
             // MOD new rowrender for new rule out
@@ -764,7 +768,11 @@ codes by NetquiK
                                                     if (c5 <= parseInt(object.get_BaseLevel(), 10)) {
                                                         var d = this.FL(object.getID(), 0);
                                                         //MOD Fix needcp when cached city by Netquik
-                                                        null != d && d[13] !== needcp && (d[13] = needcp);
+                                                        if (null != d && d[13] !== needcp) {
+                                                            d[13] = needcp;
+                                                            //MOD Fix (Tib+Cry+Cre)/CP calculation on switching bases
+                                                            d[16] = d[15] / d[13];
+                                                        }
                                                         var e = this.FL(object.getID(), 1);
                                                         if (e != null) {
                                                             this.ZM[object.getID()] = e;
@@ -878,7 +886,9 @@ codes by NetquiK
                                     //console.log("ncity", ncity);
                                     if (ncity != null && ncity.get_Version() > 0) {
                                         // MOD remove if Ally
-                                        if (ncity.get_OwnerAllianceId() == 0 || (ncity.get_OwnerAllianceId() != playerbase.get_AllianceId()) && !Object.values(ClientLib.Data.MainData.GetInstance().get_Alliance().get_Relationships()).some(e => e.OtherAllianceId == ncity.get_OwnerAllianceId() && [1, 2].includes(e.Relationship))) {
+                                        // MOD FIX No Alliance or no Diplomacy
+                                        var relationships = ClientLib.Data.MainData.GetInstance().get_Alliance().get_Relationships();
+                                        if (!ncity.get_OwnerAllianceId() || !playerbase.get_AllianceId() || (ncity.get_OwnerAllianceId() != playerbase.get_AllianceId()) && (!relationships || !Object.values(relationships).some(e => e.OtherAllianceId == ncity.get_OwnerAllianceId() && [1, 2].includes(e.Relationship)))) {
                                             if (!ncity.get_IsGhostMode()) {
                                                 //if(ncity.get_Name() != null)
                                                 //console.log("ncity.get_Name ", ncity.get_Name() , ncity.get_CityBuildingsData().get_Buildings());
