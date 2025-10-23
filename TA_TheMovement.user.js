@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name           Tiberium Alliances The Movement
-// @version        1.0.8
+// @version        1.0.8.3
 // @namespace      https://openuserjs.org/users/petui
 // @license        GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // @author         petui
 // @contributor    Xdaast (19.4 FIX)
-// @contributor    Netquik (19.3||19.4||20.3||22.2||22.3 FIX) + !!NOEVIL!!
+// @contributor    Netquik (19.3||19.4||20.3||22.2||22.3 FIX) + !!NOEVIL!! + PlanRuinFor Colors/NotConfirmed
 // @description    Strategical territory simulator
 // @match          https://*.alliances.commandandconquer.com/*/index.aspx*
-// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_TheMovement.user.js
+// @updateURL      https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/Testing/TA_TheMovement.user.js
 // ==/UserScript==
 'use strict';
 (function () {
@@ -192,6 +192,7 @@
                      * @param {qx.event.type.Event} event
                      */
                     __onClickActionButton: function (event) {
+                        var manager = qx.theme.manager.Font.getInstance();
                         var id = event.getTarget().getUserData('actionId');
                         var action = this.actions[id];
                         var regionObject = webfrontend.gui.region.RegionCityMenu.getInstance()[this.selectedObjectMemberName];
@@ -202,10 +203,15 @@
                             this.__clearMenu(twoStepMenu);
                             for (var i = 0; i < options.length; i++) {
                                 var option = options[i];
-                                var menuButton = new qx.ui.menu.Button(option.label).set({
+                                // Mod for pending relationships (option.tag) and font styling by Netquik
+                                var menuButton = new qx.ui.menu.Button(option.label + option.tag).set({
                                     marginLeft: -12,
-                                    textColor: option.color
+                                    textColor: option.color,
+                                    font: 'font_size_15_bold'
                                 });
+                                var newFont = manager.resolve(menuButton.getFont()).clone();
+                                newFont.setTextShadow("0px 0px 6px #000");
+                                menuButton.setFont(newFont);
                                 menuButton.setUserData('actionId', id);
                                 menuButton.setUserData('optionData', option.data);
                                 menuButton.addListener('execute', this.__onClickTwoStepMenuButton, this);
@@ -1312,12 +1318,14 @@
                 statics: {
                     RelationshipColors: {}
                 },
+                //Colors Mod by Netquik
                 defer: function (statics) {
-                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.None] = '#ff4500';
+                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.None] = '#fb7a4b';
                     statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Friend] = '#00cc00';
-                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.NAP] = '#f5f5dc';
-                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Foe] = '#960018';
-                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Neutral] = '#ff4500';
+                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.NAP] = '#31eddd';
+                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Foe] = '#fb607a';
+                    statics.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Neutral] = '#fb7a4b';
+                    statics.Relationships = ['None', 'Friend', 'NAP', 'Foe', 'Neutral'];
                 },
                 members: {
                     relationshipColors: null,
@@ -1345,21 +1353,45 @@
                         var alliances = [{
                             label: 'No alliance',
                             color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.None],
-                            data: 0
+                            data: 0,
+                            tag: ''
                         }];
+                        // Mod for pending ralationships by Netquik
                         if (ownAlliance.get_Exists() && ownAlliance.get_Relationships() !== null) {
-                            alliances = alliances.concat(ownAlliance.get_Relationships().filter(function (relationship) {
-                                return relationship.IsConfirmed;
-                            }, this).map(function (relationship) {
-                                return {
-                                    label: relationship.OtherAllianceName,
-                                    color: this.constructor.RelationshipColors[relationship.Relationship],
-                                    data: relationship.OtherAllianceId
-                                };
-                            }, this).sort(function (a, b) {
-                                return a.label.localeCompare(b.label);
-                            }));
+                            alliances = alliances.concat(ownAlliance.get_Relationships().
+                                /* filter(function (relationship) {
+                                                                return relationship.IsConfirmed;
+                                                            }, this). */
+                                map(function (relationship) {
+                                    return {
+                                        label: relationship.OtherAllianceName,
+                                        color: relationship.IsConfirmed ? this.constructor.RelationshipColors[relationship.Relationship] : '#f5f5dc',
+                                        data: relationship.OtherAllianceId,
+                                        tag: relationship.IsConfirmed ? '' : ' (Pending ' + this.constructor.Relationships[relationship.Relationship] + ')'
+                                    };
+                                }, this).sort(function (a, b) {
+                                    return a.label.localeCompare(b.label);
+                                }));
                         }
+
+                        //Following commented code is for testing colors
+                        /* alliances.push({
+                            label: 'Test Friend',
+                            color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Friend],
+                            data: 0,
+                            tag: ''
+                        }, {
+                            label: 'Test NAP',
+                            color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.NAP],
+                            data: 0,
+                            tag: ''
+                        }, {
+                            label: 'Test Foe',
+                            color: this.constructor.RelationshipColors[ClientLib.Data.EAllianceDiplomacyStatus.Foe],
+                            data: 0,
+                            tag: ''
+                        }); */
+
                         return alliances;
                     },
                     /**
