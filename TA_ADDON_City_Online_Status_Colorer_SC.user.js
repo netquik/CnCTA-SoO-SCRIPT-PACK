@@ -3,10 +3,10 @@
 // @namespace   https://cncapp*.alliances.commandandconquer.com/*/index.aspx*
 // @match       https://*.alliances.commandandconquer.com/*/index.aspx*
 // @description change the color of cities according to online state of the player
-// @version     0.7.5
+// @version     0.7.6
 // @author      White X Dragon / Debitosphere / NetquiK
 // @author      Der_Flake
-// @contributor NetquiK (https://github.com/netquik) - (see first comments for changelog)
+// @contributor NetquiK (https://github.com/netquik) - (see first comments for changelog), Ch-ats
 // @updateURL   https://raw.githubusercontent.com/netquik/CnCTA-SoO-SCRIPT-PACK/master/TA_ADDON_City_Online_Status_Colorer_SC.user.js
 // ==/UserScript==
 
@@ -18,12 +18,13 @@ codes by NetquiK
 - RECODED
 - Compatibility with PlayerTag Script
 - Fix 22.3
+- Changed Online Color by Ch-ats
 ----------------
 */
 (function () {
     function OnlineStatusCityColor_Main() {
         var localStorageKey = "CCTA_MaelstromTools_CC_OnlineStateColorer";
-        var version = '0.7';
+        var version = '0.7.6';
         var injectionMode = 'NOEVIL';
         console.log("Maelstrom_CityOnlineStateColorer " + version + " loaded, Serverversion " + injectionMode);
         var OnlineState = {
